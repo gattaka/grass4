@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fontFamilies>
+
+   <fontFamily name="Inconsolata">
+       <normal><![CDATA[fonts/Inconsolata.ttf]]></normal>
+       <pdfEncoding><![CDATA[Cp1250]]></pdfEncoding>
+       <pdfEmbedded><![CDATA[false]]></pdfEmbedded>
+   </fontFamily>
+
+
+</fontFamilies>
