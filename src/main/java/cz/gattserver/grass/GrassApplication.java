@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Import;
 
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"cz.gattserver.grass", "cz.gattserver.web"})
 @Import({ BaseConfig.class })
 public class GrassApplication {
 
