@@ -55,13 +55,13 @@ public abstract class GrassPage extends Div implements PageConfigurator {
 
 	@Override
 	public void configurePage(InitialPageSettings settings) {
-		settings.addFavIcon("icon", "img/favicon.png", "16px");
+		settings.addFavIcon("icon", "VAADIN/img/favicon.png", "16px");
 	}
 
 	public void init() {
 		createPageElements(this);
 		setId("main-div");
-		UI.getCurrent().getPage().addJavaScript("context://js/jquery.js");
+		UI.getCurrent().getPage().addJavaScript("context://VAADIN/js/jquery.js");
 	}
 
 	protected abstract void createPageElements(Div div);

@@ -4,6 +4,10 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JsModule;
+import com.vaadin.flow.theme.Theme;
+import com.vaadin.flow.theme.lumo.Lumo;
 import cz.gattserver.web.common.server.URLIdentifierUtils;
 import cz.gattserver.web.common.ui.HtmlSpan;
 import org.apache.commons.lang3.StringUtils;
@@ -36,6 +40,9 @@ import cz.gattserver.grass.ui.util.UIUtils;
 
 @Route("")
 @RouteAlias("home")
+@JsModule("custom.js")
+@Theme(value = Lumo.class)
+@CssImport("styles.css")
 @PageTitle("Gattserver")
 public class HomePage extends OneColumnPage {
 
