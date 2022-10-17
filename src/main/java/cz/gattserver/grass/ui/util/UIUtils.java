@@ -24,9 +24,10 @@ import com.vaadin.flow.server.WebBrowser;
 
 import cz.gattserver.grass.ui.js.JScriptItem;
 import cz.gattserver.grass.ui.pages.factories.template.PageFactory;
-import cz.gattserver.web.common.ui.dialog.ErrorDialog;
-import cz.gattserver.web.common.ui.dialog.InfoDialog;
-import cz.gattserver.web.common.ui.dialog.WarnDialog;
+import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
+import cz.gattserver.web.common.ui.dialogs.InfoDialog;
+import cz.gattserver.web.common.ui.dialogs.WarnDialog;
+import cz.gattserver.web.common.ui.dialogs.InfoDialog;
 
 public class UIUtils {
 

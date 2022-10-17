@@ -24,7 +24,7 @@ import cz.gattserver.grass.ui.components.button.GridButton;
 import cz.gattserver.grass.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.ui.util.UIUtils;
 import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialog.WebDialog;
+import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 

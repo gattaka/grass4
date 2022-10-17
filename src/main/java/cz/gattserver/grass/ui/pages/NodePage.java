@@ -5,7 +5,7 @@ import java.util.List;
 
 import cz.gattserver.web.common.server.URLIdentifierUtils;
 import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialog.WebDialog;
+import cz.gattserver.web.common.ui.dialogs.WebDialog;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 

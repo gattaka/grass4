@@ -35,7 +35,7 @@ import cz.gattserver.web.common.ui.Strong;
 import cz.gattserver.web.common.ui.Breakline;
 import cz.gattserver.web.common.ui.HtmlSpan;
 import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialog.WarnDialog;
+import cz.gattserver.web.common.ui.dialogs.WarnDialog;
 
 public abstract class ContentViewerPage extends TwoColumnPage {
 

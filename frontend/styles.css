@@ -233,7 +233,7 @@ vaadin-horizontal-layout.menu {
 
 #top-holder {
 	position: relative;
-	background: url(img/headPattern.png);
+	background: url(VAADIN/img/headPattern.png);
 	background-repeat: repeat-x;
 }
 

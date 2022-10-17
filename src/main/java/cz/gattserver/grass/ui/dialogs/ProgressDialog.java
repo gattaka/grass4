@@ -12,7 +12,7 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.server.Command;
 
 import cz.gattserver.grass.ui.components.BaseProgressBar;
-import cz.gattserver.web.common.ui.dialog.WebDialog;
+import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 public class ProgressDialog extends WebDialog {
 

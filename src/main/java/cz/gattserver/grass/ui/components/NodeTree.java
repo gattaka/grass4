@@ -29,8 +29,8 @@ import cz.gattserver.grass.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.ui.util.UIUtils;
 import cz.gattserver.web.common.spring.SpringContextHelper;
 import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialog.ConfirmDialog;
-import cz.gattserver.web.common.ui.dialog.WebDialog;
+import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
+import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 public class NodeTree extends VerticalLayout {
 
