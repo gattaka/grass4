@@ -3,12 +3,10 @@ package cz.gattserver.grass.util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import javax.annotation.PostConstruct;
 import javax.persistence.Entity;
 import javax.persistence.EntityManager;
-import javax.persistence.Table;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,7 +14,7 @@ import java.util.stream.Collectors;
  * https://objectpartners.com/2021/07/14/resetting-database-between-spring-integration-tests/
  */
 @Service
-public class TestDbService {
+public class TestDBService {
 
     @Autowired
     private EntityManager entityManager;
