@@ -19,22 +19,13 @@ public class TestDBService {
     @Autowired
     private EntityManager entityManager;
 
-    private List<String> tableNames;
-
-    @PostConstruct
-    void afterPropertiesSet() {
-        tableNames = entityManager.getMetamodel().getEntities().stream()
-                .map(entityType -> entityType.getJavaType().getAnnotation(Entity.class))
-                .map(this::convertToTableName)
-                .collect(Collectors.toUnmodifiableList());
-    }
-
     @Transactional
     public void resetDatabase() {
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate();
 
-        for (String tableName : tableNames)
-            entityManager.createNativeQuery("TRUNCATE TABLE " + tableName).executeUpdate();
+        List<Object[]> results = entityManager.createNativeQuery("show tables").getResultList();
+        for (Object[] result : results)
+            entityManager.createNativeQuery("TRUNCATE TABLE " + result[0]).executeUpdate();
 
         entityManager.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate();
     }
