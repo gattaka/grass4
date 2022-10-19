@@ -4,15 +4,25 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import cz.gattserver.grass.mock.MockConfiguration;
 import cz.gattserver.grass.services.ConfigurationService;
+import cz.gattserver.grass.util.TestDbService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(classes = GrassApplication.class)
+@SpringBootTest
 public class ConfigurationServiceTest {
 
     @Autowired
+    private TestDbService testDbService;
+
+    @Autowired
     private ConfigurationService configurationService;
+
+    @AfterEach
+    void afterEach() {
+        testDbService.resetDatabase();
+    }
 
     @Test
     public void testSaveConfiguration() {

@@ -11,7 +11,7 @@ import javax.persistence.Id;
  * @author Gattaka
  * 
  */
-@Entity
+@Entity(name = "CONFIGURATIONITEM")
 public class ConfigurationItem {
 
 	@Id
