@@ -1,5 +1,9 @@
 package cz.gattserver.grass;
 
+import cz.gattserver.grass.core.services.MailService;
+import cz.gattserver.grass.core.services.VersionInfoService;
+import cz.gattserver.grass.core.services.impl.MailServiceImpl;
+import cz.gattserver.grass.core.services.impl.VersionInfoServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
@@ -8,11 +12,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-
-import cz.gattserver.grass.services.MailService;
-import cz.gattserver.grass.services.VersionInfoService;
-import cz.gattserver.grass.services.impl.MailServiceImpl;
-import cz.gattserver.grass.services.impl.VersionInfoServiceImpl;
 
 /*
  * https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/context/annotation/Configuration.html
