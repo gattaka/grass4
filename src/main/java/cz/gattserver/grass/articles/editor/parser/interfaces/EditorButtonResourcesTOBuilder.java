@@ -121,7 +121,7 @@ public class EditorButtonResourcesTOBuilder {
 
 	public EditorButtonResourcesTOBuilder setImageAsThemeResource(String imagePath) {
 		this.imageResource = new StreamResource("icon",
-				() -> getClass().getResourceAsStream("/META-INF/resources/frontend/articles/" + imagePath));
+				() -> getClass().getResourceAsStream("/static/VAADIN/articles/" + imagePath));
 		return this;
 	}
 

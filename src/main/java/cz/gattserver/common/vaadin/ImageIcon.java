@@ -110,7 +110,7 @@ public enum ImageIcon {
 	}
 	
 	public StreamResource createResource() {
-		String name = "icons/" + image;
+		String name = "VAADIN/icons/" + image;
 		return new StreamResource(image, () -> ImageIcon.class.getResourceAsStream(name));
 	}
 }
