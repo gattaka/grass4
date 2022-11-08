@@ -77,7 +77,7 @@ public class ArticlesViewerPage extends ContentViewerPage implements HasUrlParam
 			// obejít problém se závislosí pluginů na úložišti theme apod. a
 			// přitom umožnit aby se CSS odkazovali na externí zdroje
 			if (!css.toLowerCase().startsWith("http://") || !css.toLowerCase().startsWith("https://"))
-				css = getContextPath() + "/frontend/" + css;
+				css = getContextPath() + "/VAADIN/" + css;
 			loadCSS(css);
 		}
 

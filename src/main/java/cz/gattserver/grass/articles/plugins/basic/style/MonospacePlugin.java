@@ -4,12 +4,14 @@ import cz.gattserver.grass.articles.editor.parser.Parser;
 import cz.gattserver.grass.articles.editor.parser.elements.Element;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTOBuilder;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 /**
  * @author gatt
  */
+@Component
 public class MonospacePlugin extends AbstractStylePlugin {
 
 	public static final String TAG = "MONSPC";

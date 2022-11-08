@@ -4,6 +4,7 @@ import cz.gattserver.grass.articles.editor.parser.Parser;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTOBuilder;
 import cz.gattserver.grass.articles.plugins.Plugin;
+import org.springframework.stereotype.Component;
 
 /**
  * @author gatt

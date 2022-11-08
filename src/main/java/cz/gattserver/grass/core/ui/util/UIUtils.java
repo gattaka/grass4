@@ -207,7 +207,7 @@ public class UIUtils {
 		// přitom umožnit aby se JS odkazovali na externí zdroje
 		if (!js.isPlain()) {
 			if (!chunk.toLowerCase().startsWith("http://") && !chunk.toLowerCase().startsWith("https://")) {
-				chunk = "\"" + getContextPath() + "/frontend/" + chunk + "\"";
+				chunk = "\"" + getContextPath() + "/VAADIN/" + chunk + "\"";
 			} else {
 				chunk = "\"" + chunk + "\"";
 			}
