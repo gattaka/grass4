@@ -15,7 +15,7 @@ import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.web.common.server.URLIdentifierUtils;
+import cz.gattserver.common.server.URLIdentifierUtils;
 
 @Route("tag")
 public class TagPage extends OneColumnPage implements HasUrlParameter<String>, HasDynamicTitle {

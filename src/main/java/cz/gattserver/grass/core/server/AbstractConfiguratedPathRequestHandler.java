@@ -2,7 +2,7 @@ package cz.gattserver.grass.core.server;
 
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 
 public abstract class AbstractConfiguratedPathRequestHandler extends AbstractGrassRequestHandler {
 

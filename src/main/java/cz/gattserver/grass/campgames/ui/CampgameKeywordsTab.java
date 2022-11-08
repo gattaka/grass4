@@ -15,7 +15,7 @@ import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
 import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
 

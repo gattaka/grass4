@@ -5,7 +5,7 @@ import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.dom.Element;
 
-import cz.gattserver.web.common.ui.Strong;
+import cz.gattserver.common.vaadin.Strong;
 
 /**
  * https://vaadin.com/forum/thread/17632449/new-table-like-component

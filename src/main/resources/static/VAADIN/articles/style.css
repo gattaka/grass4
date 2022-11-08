@@ -1,0 +1,53 @@
+.article-content ul, .article-content ol {
+	padding-inline-start: 25px;
+	margin: 0;
+}
+
+.articles-h1 {
+	font-size: 15pt;
+	margin-bottom: 10px !important;
+	border-bottom: 1px #BBB solid;
+}
+
+.articles-h2 {
+	font-size: 13pt;
+	margin-bottom: 10px;
+	border-bottom: 1px #BBB solid;
+	margin-left: 5px;
+}
+
+.articles-h3 {
+	font-size: 11pt;
+	padding-bottom: 4px;
+	margin-bottom: 10px;
+	border-bottom: 1px #BBB solid;
+	margin-left: 10px;
+}
+
+.articles-h4 {
+	font-size: 11pt;
+	padding-bottom: 4px;
+	margin-bottom: 10px;
+	margin-left: 10px;
+} 
+
+a.articles-h-id {
+    font-size: 85%;
+}
+
+.level1, .level2, .level3, .level4 {
+	font: 12px Helvetica, Arial, "lucida grande", tahoma, verdana, arial, sans-serif;
+	line-height: 18px;
+}
+
+.level2 {
+	margin-left: 5px;
+}
+
+.level3 {
+	margin-left: 10px;
+}
+
+.level4 {
+	margin-left: 10px;
+}

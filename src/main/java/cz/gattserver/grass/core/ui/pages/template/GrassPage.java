@@ -15,7 +15,7 @@ import com.vaadin.flow.theme.Theme;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.web.common.ui.exception.ApplicationErrorHandler;
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.js.JScriptItem;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.UIUtils;

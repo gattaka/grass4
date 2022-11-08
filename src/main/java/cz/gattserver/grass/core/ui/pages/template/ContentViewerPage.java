@@ -29,10 +29,10 @@ import com.vaadin.flow.component.html.Span;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.server.URLIdentifierUtils;
-import cz.gattserver.web.common.ui.Strong;
-import cz.gattserver.web.common.ui.Breakline;
-import cz.gattserver.web.common.ui.HtmlSpan;
+import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.vaadin.Strong;
+import cz.gattserver.common.vaadin.Breakline;
+import cz.gattserver.common.vaadin.HtmlSpan;
 import cz.gattserver.web.common.ui.ImageIcon;
 import cz.gattserver.web.common.ui.dialogs.WarnDialog;
 

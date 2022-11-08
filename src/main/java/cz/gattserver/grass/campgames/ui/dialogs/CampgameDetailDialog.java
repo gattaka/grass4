@@ -37,9 +37,9 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 
-import cz.gattserver.web.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.HtmlDiv;
-import cz.gattserver.web.common.ui.LinkButton;
+import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.vaadin.HtmlDiv;
+import cz.gattserver.common.vaadin.LinkButton;
 
 public class CampgameDetailDialog extends Dialog {
 

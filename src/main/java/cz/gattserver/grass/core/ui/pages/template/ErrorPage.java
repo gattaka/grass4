@@ -1,7 +1,7 @@
 package cz.gattserver.grass.core.ui.pages.template;
 
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.web.common.exception.SystemException;
+import cz.gattserver.common.exception.SystemException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,0 +1,30 @@
+#drinks-div {
+	border: 1px solid rgb(219, 222, 228);
+	padding: 10px;
+	background: white;
+	display: inline-flex;
+	width: 100%;
+	box-sizing: border-box;
+	height: 100%;
+}
+
+#drinks-image-div {
+	margin-right: 15px;
+}
+
+#drinks-properties-div div {
+	margin-right: 20px;
+	margin-bottom: 12px;
+	display: inline-block;
+}
+
+@media only screen and (max-width: 800px) {
+	#drinks-div {
+		display: block;
+	}
+	#drinks-image-div {
+		text-align: center;
+		margin-right: 0;
+		margin-bottom: 10px;
+	}
+}

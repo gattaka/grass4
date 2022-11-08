@@ -9,7 +9,7 @@ import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 
 @WebServlet(urlPatterns = "/" + CampgamesConfiguration.CAMPGAMES_PATH + "/*")
 public class CampgamesRequestHandler extends AbstractConfiguratedPathRequestHandler {

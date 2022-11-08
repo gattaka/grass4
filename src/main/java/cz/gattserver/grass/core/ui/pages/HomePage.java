@@ -14,8 +14,8 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.ContentsLazyGrid;
-import cz.gattserver.web.common.server.URLIdentifierUtils;
-import cz.gattserver.web.common.ui.HtmlSpan;
+import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.vaadin.HtmlSpan;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 

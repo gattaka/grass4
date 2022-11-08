@@ -3,7 +3,7 @@ package cz.gattserver.grass.core.ui.util;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.html.Div;
 
-import cz.gattserver.web.common.ui.Strong;
+import cz.gattserver.common.vaadin.Strong;
 
 /**
  * https://divtable.com/generator/

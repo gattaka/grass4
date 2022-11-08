@@ -27,7 +27,7 @@ import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.web.common.ui.ImageIcon;
 import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
 import cz.gattserver.web.common.ui.dialogs.WebDialog;

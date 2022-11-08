@@ -7,7 +7,7 @@ import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.ui.components.NodeTree;
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 public abstract class ContentMoveDialog extends WebDialog {

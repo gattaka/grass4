@@ -26,12 +26,12 @@ import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.server.URLIdentifierUtils;
-import cz.gattserver.web.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.Breakline;
-import cz.gattserver.web.common.ui.HtmlDiv;
+import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.vaadin.Breakline;
+import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.Strong;
+import cz.gattserver.common.vaadin.Strong;
 
 import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
@@ -63,7 +63,7 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
 	public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
 		this.parameter = parameter;
 		init();
-		loadCSS(getContextPath() + "/frontend/books/style.css");
+		loadCSS(getContextPath() + "/VAADIN/books/style.css");
 	}
 
 	@Override

@@ -14,7 +14,7 @@ import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.web.common.ui.dialogs.EditWebDialog;
 import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
 

@@ -9,7 +9,7 @@ import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
-import cz.gattserver.web.common.server.URLIdentifierUtils;
+import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.web.common.ui.ImageIcon;
 import cz.gattserver.web.common.ui.dialogs.WebDialog;
 import org.apache.commons.lang3.StringUtils;

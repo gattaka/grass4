@@ -1,0 +1,16 @@
+.articles-basic-img {
+	max-width: 100%;
+}
+
+.articles-basic-monospaced {
+	font-family: monospace;
+	font-weight: normal;
+	background: rgba(255, 255, 255, 0.34);
+	border-color: rgba(68, 68, 68, 0.38);
+	border-style: dashed;
+	border-width: 1px;
+	padding: 1px 4px 2px 4px;
+	line-height: 24px;
+	-moz-border-radius: 2px;
+	border-radius: 4px;
+}

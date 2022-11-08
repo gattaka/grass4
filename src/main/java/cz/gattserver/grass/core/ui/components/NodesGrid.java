@@ -10,9 +10,9 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
-import cz.gattserver.web.common.server.URLIdentifierUtils;
+import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.MenuPage;
 import cz.gattserver.grass.core.ui.util.GridUtils;

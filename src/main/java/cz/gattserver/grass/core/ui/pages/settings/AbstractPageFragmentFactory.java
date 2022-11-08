@@ -2,7 +2,7 @@ package cz.gattserver.grass.core.ui.pages.settings;
 
 import com.vaadin.flow.component.html.Div;
 
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.spring.SpringContextHelper;
 
 public abstract class AbstractPageFragmentFactory {
 

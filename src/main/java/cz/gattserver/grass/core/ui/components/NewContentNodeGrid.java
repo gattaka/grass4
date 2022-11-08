@@ -15,8 +15,8 @@ import cz.gattserver.grass.core.modules.register.ModuleRegister;
 import cz.gattserver.grass.core.ui.pages.template.MenuPage;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.server.URLIdentifierUtils;
-import cz.gattserver.web.common.spring.SpringContextHelper;
+import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.spring.SpringContextHelper;
 
 public class NewContentNodeGrid extends Grid<ContentModule> {
 
