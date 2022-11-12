@@ -31,7 +31,7 @@ public class CombinedFaviconObtainStrategyTest extends StrategyTest {
 
 			FaviconObtainStrategy strategy = new CombinedFaviconObtainStrategy();
 			String link = strategy.obtainFaviconURL("http://localhost:1929/dummy/site", "mycontextroot");
-			assertEquals("mycontextroot/frontend/favlink/default.ico", link);
+			assertEquals("mycontextroot/VAADIN/articles/favlink/default.ico", link);
 		}
 	}
 
