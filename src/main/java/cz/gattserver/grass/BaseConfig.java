@@ -5,6 +5,7 @@ import cz.gattserver.grass.core.services.VersionInfoService;
 import cz.gattserver.grass.core.services.impl.MailServiceImpl;
 import cz.gattserver.grass.core.services.impl.VersionInfoServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
@@ -24,6 +25,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
 @EnableAsync
 @EnableScheduling
+@ServletComponentScan
 @PropertySource({ "classpath:properties/mail.properties", "classpath:version.properties"})
 @Import({ DatabaseConfig.class, EncoderConfig.class, SecurityConfig.class, WebSecurityConfig.class, RestConfig.class })
 public class BaseConfig {
