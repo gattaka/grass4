@@ -6,14 +6,14 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
+import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
-import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 import java.util.List;
 

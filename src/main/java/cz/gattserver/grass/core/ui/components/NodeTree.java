@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.NodeService;
 import org.apache.commons.lang3.StringUtils;
@@ -28,9 +30,7 @@ import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
-import cz.gattserver.web.common.ui.dialogs.WebDialog;
+import cz.gattserver.common.vaadin.ImageIcon;
 
 public class NodeTree extends VerticalLayout {
 

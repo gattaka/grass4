@@ -3,7 +3,6 @@ package cz.gattserver.common.exception;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.ErrorEvent;
 import com.vaadin.flow.server.ErrorHandler;
-import cz.gattserver.web.common.ui.exception.ExceptionDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

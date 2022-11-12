@@ -3,6 +3,8 @@ package cz.gattserver.grass.campgames.ui;
 import java.util.Arrays;
 import java.util.Set;
 
+import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.CampgamesRole;
 import cz.gattserver.grass.campgames.interfaces.CampgameFilterTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameOverviewTO;
@@ -34,8 +36,6 @@ import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
 
 public class CampgamesTab extends Div {
 

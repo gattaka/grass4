@@ -6,6 +6,8 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 
+import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.CampgamesRole;
 import cz.gattserver.grass.campgames.interfaces.CampgameKeywordTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
@@ -16,8 +18,6 @@ import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
-import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
 
 public class CampgameKeywordsTab extends Div {
 

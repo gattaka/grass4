@@ -3,6 +3,8 @@ package cz.gattserver.grass.core.ui.pages;
 import java.util.ArrayList;
 import java.util.List;
 
+import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
@@ -10,8 +12,6 @@ import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.common.server.URLIdentifierUtils;
-import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialogs.WebDialog;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 

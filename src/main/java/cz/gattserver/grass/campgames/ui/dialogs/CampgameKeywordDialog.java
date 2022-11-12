@@ -7,13 +7,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 
+import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
+import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.interfaces.CampgameKeywordTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.dialogs.EditWebDialog;
-import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
 
 public abstract class CampgameKeywordDialog extends EditWebDialog {
 

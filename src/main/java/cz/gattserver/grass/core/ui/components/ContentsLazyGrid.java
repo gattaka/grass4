@@ -22,7 +22,7 @@ import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.ImageIcon;
+import cz.gattserver.common.vaadin.ImageIcon;
 
 public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 

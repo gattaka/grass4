@@ -4,8 +4,8 @@ package cz.gattserver.grass.modules;
 import com.vaadin.flow.server.StreamResource;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.web.common.ui.ImageIcon;
 import org.springframework.stereotype.Component;
+import cz.gattserver.common.vaadin.ImageIcon;
 
 import javax.annotation.Resource;
 

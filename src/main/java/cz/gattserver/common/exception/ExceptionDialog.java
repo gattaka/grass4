@@ -1,7 +1,7 @@
 package cz.gattserver.common.exception;
 
-import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialogs.MessageDialog;
+import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.common.vaadin.dialogs.MessageDialog;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class ExceptionDialog extends MessageDialog {

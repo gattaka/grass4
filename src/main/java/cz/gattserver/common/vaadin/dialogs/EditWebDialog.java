@@ -1,7 +1,6 @@
 package cz.gattserver.common.vaadin.dialogs;
 
 import com.vaadin.flow.component.UI;
-import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 public class EditWebDialog extends WebDialog {
 

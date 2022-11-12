@@ -2,6 +2,7 @@ package cz.gattserver.grass.core.ui.dialogs;
 
 import java.text.DecimalFormat;
 
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.ui.components.BaseProgressBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,8 +12,6 @@ import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.server.Command;
-
-import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 public class ProgressDialog extends WebDialog {
 

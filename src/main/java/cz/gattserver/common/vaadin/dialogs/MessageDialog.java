@@ -7,7 +7,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.server.StreamResource;
-import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 public class MessageDialog extends WebDialog {
 

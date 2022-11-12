@@ -4,8 +4,7 @@ import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
-
-import cz.gattserver.web.common.ui.ImageIcon;
+import cz.gattserver.common.vaadin.ImageIcon;
 
 public class CloseButton extends ImageButton {
 

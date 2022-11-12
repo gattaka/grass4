@@ -11,7 +11,7 @@ import com.vaadin.flow.data.renderer.IconRenderer;
 
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.common.server.URLIdentifierUtils;
-import cz.gattserver.web.common.ui.ImageIcon;
+import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.MenuPage;

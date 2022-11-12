@@ -3,6 +3,7 @@ package cz.gattserver.grass.core.ui.pages.settings.factories;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
 import cz.gattserver.grass.core.security.Role;
@@ -23,8 +24,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialogs.WebDialog;
+import cz.gattserver.common.vaadin.ImageIcon;
 
 public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 

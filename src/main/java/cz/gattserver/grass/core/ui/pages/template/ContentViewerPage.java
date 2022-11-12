@@ -6,6 +6,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 
+import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
@@ -33,8 +35,6 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.HtmlSpan;
-import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialogs.WarnDialog;
 
 public abstract class ContentViewerPage extends TwoColumnPage {
 

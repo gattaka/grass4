@@ -22,11 +22,11 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.WebBrowser;
 
+import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
+import cz.gattserver.common.vaadin.dialogs.InfoDialog;
+import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.ui.js.JScriptItem;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
-import cz.gattserver.web.common.ui.dialogs.InfoDialog;
-import cz.gattserver.web.common.ui.dialogs.WarnDialog;
 
 public class UIUtils {
 

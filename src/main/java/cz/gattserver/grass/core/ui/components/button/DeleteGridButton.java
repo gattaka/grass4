@@ -4,9 +4,9 @@ import java.util.Set;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Image;
+import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 
-import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
 
 public class DeleteGridButton<T> extends GridButton<T> {
 

@@ -10,6 +10,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.server.StreamResource;
+import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.drinks.facades.DrinksFacade;
 import cz.gattserver.grass.drinks.model.interfaces.DrinkOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.DrinkTO;
@@ -22,9 +23,8 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.HtmlDiv;
-import cz.gattserver.web.common.ui.ImageIcon;
 import cz.gattserver.common.vaadin.Strong;
-import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
+import cz.gattserver.common.vaadin.ImageIcon;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;

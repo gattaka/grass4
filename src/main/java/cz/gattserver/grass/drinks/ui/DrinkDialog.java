@@ -11,6 +11,8 @@ import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.server.StreamResource;
+import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
+import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.drinks.model.interfaces.DrinkTO;
 import cz.gattserver.grass.drinks.util.ImageUtils;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
@@ -18,8 +20,6 @@ import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.ui.dialogs.EditWebDialog;
-import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

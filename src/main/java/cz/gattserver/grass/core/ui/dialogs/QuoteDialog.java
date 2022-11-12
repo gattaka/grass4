@@ -4,9 +4,9 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 
+import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.interfaces.QuoteTO;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
-import cz.gattserver.web.common.ui.dialogs.EditWebDialog;
 
 public class QuoteDialog extends EditWebDialog {
 

@@ -2,16 +2,14 @@ package cz.gattserver.grass.articles.plugins.favlink.strategies;
 
 import cz.gattserver.grass.articles.plugins.favlink.FaviconCache;
 import cz.gattserver.grass.articles.plugins.favlink.test.StrategyTest;
-import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 public class CachedFaviconObtainStrategyTest extends StrategyTest {
 
 	@Test

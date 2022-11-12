@@ -3,6 +3,8 @@ package cz.gattserver.grass.campgames.ui.dialogs;
 import java.io.IOException;
 import java.util.List;
 
+import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.CampgamesConfiguration;
 import cz.gattserver.grass.campgames.interfaces.CampgameFileTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
@@ -16,8 +18,6 @@ import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.GridLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
-import cz.gattserver.web.common.ui.dialogs.ErrorDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

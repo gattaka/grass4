@@ -3,12 +3,12 @@ package cz.gattserver.grass.core.ui.dialogs;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.ui.components.NodeTree;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.web.common.ui.dialogs.WebDialog;
 
 public abstract class ContentMoveDialog extends WebDialog {
 

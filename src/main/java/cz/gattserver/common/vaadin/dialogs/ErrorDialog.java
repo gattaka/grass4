@@ -1,7 +1,7 @@
 package cz.gattserver.common.vaadin.dialogs;
 
-import cz.gattserver.web.common.ui.ImageIcon;
-import cz.gattserver.web.common.ui.dialogs.MessageDialog;
+
+import cz.gattserver.common.vaadin.ImageIcon;
 
 public class ErrorDialog extends MessageDialog {
 

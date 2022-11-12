@@ -1,11 +1,10 @@
 package cz.gattserver.grass.articles.plugins.favlink.server;
 
 import cz.gattserver.grass.articles.plugins.favlink.config.FavlinkConfiguration;
-import cz.gattserver.grass3.mock.MockFileSystemService;
-import cz.gattserver.grass3.services.ConfigurationService;
-import cz.gattserver.grass3.test.AbstractContextAwareTest;
-import org.junit.Before;
-import org.junit.Test;
+import cz.gattserver.grass.core.mock.MockFileSystemService;
+import cz.gattserver.grass.core.services.ConfigurationService;
+import cz.gattserver.grass.core.util.DBCleanTest;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
@@ -13,10 +12,10 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class FavlinkImageRequestHandlerTest extends AbstractContextAwareTest {
+public class FavlinkImageRequestHandlerTest extends DBCleanTest {
 
 	@Autowired
 	private MockFileSystemService fileSystemService;
@@ -24,7 +23,7 @@ public class FavlinkImageRequestHandlerTest extends AbstractContextAwareTest {
 	@Autowired
 	private ConfigurationService configurationService;
 
-	@Before
+	@BeforeEach
 	public void init() {
 		fileSystemService.init();
 	}

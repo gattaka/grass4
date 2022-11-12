@@ -8,7 +8,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 
-import cz.gattserver.web.common.Identifiable;
+import cz.gattserver.common.Identifiable;
 import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.DetailGridButton;

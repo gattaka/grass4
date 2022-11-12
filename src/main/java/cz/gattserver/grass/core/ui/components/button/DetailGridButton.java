@@ -2,8 +2,8 @@ package cz.gattserver.grass.core.ui.components.button;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Image;
+import cz.gattserver.common.vaadin.ImageIcon;
 
-import cz.gattserver.web.common.ui.ImageIcon;
 
 public class DetailGridButton<T> extends GridButton<T> {
 

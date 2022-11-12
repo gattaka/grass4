@@ -13,6 +13,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.StreamResource;
+import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.books.facades.BooksFacade;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
@@ -30,7 +31,6 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.HtmlDiv;
-import cz.gattserver.web.common.ui.ImageIcon;
 import cz.gattserver.common.vaadin.Strong;
 
 import java.io.ByteArrayInputStream;

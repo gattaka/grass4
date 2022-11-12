@@ -1,11 +1,11 @@
 package cz.gattserver.grass.articles.plugins.favlink.test;
 
 import cz.gattserver.grass.articles.plugins.favlink.config.FavlinkConfiguration;
-import cz.gattserver.grass3.mock.MockFileSystemService;
-import cz.gattserver.grass3.services.ConfigurationService;
-import cz.gattserver.grass3.test.AbstractContextAwareTest;
-import org.junit.After;
-import org.junit.Before;
+import cz.gattserver.grass.core.mock.MockFileSystemService;
+import cz.gattserver.grass.core.services.ConfigurationService;
+import cz.gattserver.grass.core.util.DBCleanTest;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.mockserver.integration.ClientAndServer;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,7 +16,7 @@ import java.nio.file.Path;
 
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 
-public abstract class StrategyTest extends AbstractContextAwareTest {
+public abstract class StrategyTest extends DBCleanTest {
 
 	@Autowired
 	protected MockFileSystemService fileSystemService;
@@ -26,13 +26,13 @@ public abstract class StrategyTest extends AbstractContextAwareTest {
 
 	protected ClientAndServer mockServer;
 
-	@Before
+	@BeforeEach
 	public void init() {
 		fileSystemService.init();
 		mockServer = startClientAndServer(1929);
 	}
 
-	@After
+	@AfterEach
 	public void stopProxy() {
 		mockServer.stop();
 	}

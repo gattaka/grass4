@@ -3,7 +3,6 @@ package cz.gattserver.grass.articles.plugins.favlink.strategies;
 import cz.gattserver.grass.articles.plugins.favlink.FaviconCache;
 import cz.gattserver.grass.articles.plugins.favlink.test.StrategyTest;
 import org.apache.commons.io.IOUtils;
-import org.junit.Test;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.HttpResponse;
@@ -13,8 +12,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.*;
-
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 public class AddressFaviconObtainStrategyTest extends StrategyTest {
 
 	@Test

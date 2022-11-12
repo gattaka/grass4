@@ -7,6 +7,8 @@ import com.vaadin.flow.router.BeforeEvent;
 import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
+import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.exception.GrassPageException;
@@ -20,8 +22,6 @@ import cz.gattserver.grass.core.ui.pages.template.ContentViewerPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.HtmlDiv;
-import cz.gattserver.web.common.ui.dialogs.ConfirmDialog;
-import cz.gattserver.web.common.ui.dialogs.WarnDialog;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
