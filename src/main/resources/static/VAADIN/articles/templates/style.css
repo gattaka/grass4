@@ -1,0 +1,7 @@
+.articles-dictionary-entry {
+	display: table;
+}
+
+.articles-dictionary-entry div {
+	display: table-cell;
+}
