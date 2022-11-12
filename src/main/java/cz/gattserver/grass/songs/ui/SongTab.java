@@ -205,7 +205,7 @@ public class SongTab extends Div {
 			protected void indicateProgress() {
 			}
 		});
-		return exportsService.createPDFReport(jrDataSource, new HashMap<String, Object>(), "song", ExportType.PRINT);
+		return exportsService.createPDFReport(jrDataSource, new HashMap<String, Object>(), "/static/VAADIN/songs/song", ExportType.PRINT);
 	}
 
 	public void showDetail(SongTO choosenSong) {

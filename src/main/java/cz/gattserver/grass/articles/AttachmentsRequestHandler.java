@@ -8,6 +8,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 
@@ -19,12 +20,8 @@ public class AttachmentsRequestHandler extends AbstractConfiguratedPathRequestHa
 	@Autowired
 	private ArticleService articleService;
 
-	public AttachmentsRequestHandler() {
-		SpringContextHelper.inject(this);
-	}
-
 	@Override
-	protected Path getPath(String fileName) throws FileNotFoundException {
+	protected Path getPath(String fileName, HttpServletRequest request) throws FileNotFoundException {
 		if (!fileName.matches("/[0-9]+/[^/]+"))
 			throw new GrassPageException(400);
 		String[] chunks = fileName.split("/");

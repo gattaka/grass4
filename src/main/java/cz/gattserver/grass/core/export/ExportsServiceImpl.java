@@ -21,35 +21,32 @@ import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 @Service
 public class ExportsServiceImpl implements ExportsService {
 
-	@Override
-	public Path createPDFReport(JRDataSource jrDataSource, Map<String, Object> params, String reportFileName,
-			ExportType type) {
-		try {
-			String path = "/jasper/";
-			InputStream jasperReportStream = Thread.currentThread().getContextClassLoader()
-					.getResourceAsStream(path + reportFileName + ".jasper");
-			params.put("SUBREPORT_DIR", path);
+    @Override
+    public Path createPDFReport(JRDataSource jrDataSource, Map<String, Object> params, String reportFileName,
+                                ExportType type) {
+        try {
+            InputStream jasperReportStream = getClass().getResourceAsStream(reportFileName + ".jasper");
 
-			Path tmpPath = Files.createTempFile("grass-jasper-", "pdf");
-			OutputStream fileOutputStream = Files.newOutputStream(tmpPath);
+            Path tmpPath = Files.createTempFile("grass-jasper-", ".pdf");
+            OutputStream fileOutputStream = Files.newOutputStream(tmpPath);
 
-			JasperReportsContext jasperReportsContext = DefaultJasperReportsContext.getInstance();
-			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
-			JasperPrint jasperPrint = jasperFillManager.fill(jasperReportStream, params, jrDataSource);
+            JasperReportsContext jasperReportsContext = DefaultJasperReportsContext.getInstance();
+            JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
+            JasperPrint jasperPrint = jasperFillManager.fill(jasperReportStream, params, jrDataSource);
 
-			JRPdfExporter exporter = new JRPdfExporter();
-			exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-			exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, fileOutputStream);
-			if (ExportType.PRINT == type)
-				exporter.setParameter(JRPdfExporterParameter.PDF_JAVASCRIPT, "this.print();");
+            JRPdfExporter exporter = new JRPdfExporter();
+            exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+            exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, fileOutputStream);
+            if (ExportType.PRINT == type)
+                exporter.setParameter(JRPdfExporterParameter.PDF_JAVASCRIPT, "this.print();");
 
-			exporter.exportReport();
-			fileOutputStream.close();
+            exporter.exportReport();
+            fileOutputStream.close();
 
-			return tmpPath;
-		} catch (Exception e) {
-			throw new GrassException("Export se nezdařil", e);
-		}
-	}
+            return tmpPath;
+        } catch (Exception e) {
+            throw new GrassException("Export se nezdařil", e);
+        }
+    }
 
 }

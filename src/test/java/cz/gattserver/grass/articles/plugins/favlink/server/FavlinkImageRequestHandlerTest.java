@@ -13,6 +13,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
+
+import javax.servlet.http.HttpServletRequest;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FavlinkImageRequestHandlerTest extends DBCleanTest {
@@ -46,7 +49,7 @@ public class FavlinkImageRequestHandlerTest extends DBCleanTest {
 		Path testFile = Files.createFile(outputDir.resolve("testFile"));
 		Files.write(testFile, new byte[] { 1, 1, 1 });
 
-		Path file = new FavlinkImageRequestHandler().getPath("testFile");
+		Path file = new FavlinkImageRequestHandler().getPath("testFile", null);
 		assertTrue(Files.exists(file));
 		assertEquals(3L, Files.size(file));
 		assertEquals("testFile", file.getFileName().toString());
