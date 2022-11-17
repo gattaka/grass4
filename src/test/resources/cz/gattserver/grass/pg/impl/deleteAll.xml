@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+
+	<!-- Zpracování probíhá v obráceném pořadí, takže závislosti se musí psát 
+		odspoda tak, že nahoře jsou nejvíce závislé tabulky -->
+
+	<CONFIGURATIONITEM />
+	<QUOTE />
+	<USER_ACCOUNTS />
+	<USER_ACCOUNTS_ROLES />
+	<NODE />
+	<CONTENTNODE />
+	<CONTENT_TAG />
+	<CONTENTNODE_CONTENT_TAG />
+	<USER_ACCOUNTS_CONTENTNODE />
+	
+	<PHOTOGALLERY />
+
+</dataset>

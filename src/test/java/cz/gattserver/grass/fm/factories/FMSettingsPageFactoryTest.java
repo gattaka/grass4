@@ -2,8 +2,8 @@ package cz.gattserver.grass.fm.factories;
 
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.util.DBCleanTest;
-import cz.gattserver.grass.fm.test.MockSecurityService;
 import cz.gattserver.grass.fm.web.factories.FMSettingsPageFactory;
+import cz.gattserver.grass.test.MockSecurityService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;

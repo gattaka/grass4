@@ -26,7 +26,7 @@ import cz.gattserver.grass.core.model.domain.User;
 import cz.gattserver.grass.core.model.repositories.UserRepository;
 
 @Transactional
-@Service
+@Service("securityServiceImpl")
 public class SecurityServiceImpl implements SecurityService {
 
 	@Autowired
