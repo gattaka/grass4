@@ -4,7 +4,6 @@ import cz.gattserver.grass.articles.config.ArticlesConfiguration;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;
-import cz.gattserver.common.spring.SpringContextHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.servlet.annotation.WebServlet;

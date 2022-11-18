@@ -27,7 +27,7 @@ public class ZIPUtils {
 	/**
 	 * List the contents of the specified zip file
 	 * 
-	 * @param filename
+	 * @param zipFileSystem
 	 */
 	public static List<Path> list(FileSystem zipFileSystem) throws IOException {
 		final List<Path> result = new ArrayList<>();
