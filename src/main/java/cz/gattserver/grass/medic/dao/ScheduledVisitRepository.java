@@ -1,0 +1,14 @@
+package cz.gattserver.grass.medic.dao;
+
+import java.util.List;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import cz.gattserver.grass.medic.domain.ScheduledVisit;
+
+public interface ScheduledVisitRepository extends
+		JpaRepository<ScheduledVisit, Long> {
+
+	public List<ScheduledVisit> findByPlanned(boolean planned);
+
+}
