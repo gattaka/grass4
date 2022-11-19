@@ -15,7 +15,7 @@ import cz.gattserver.grass.recipes.model.dto.RecipeDTO;
 import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 
 @Controller
-@RequestMapping("/recipes")
+@RequestMapping("/ws/recipes")
 public class RecipesResource {
 
 	@Autowired

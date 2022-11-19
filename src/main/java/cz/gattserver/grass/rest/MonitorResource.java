@@ -26,7 +26,7 @@ import cz.gattserver.grass.monitor.processor.item.SystemUptimeMonitorItemTO;
 import cz.gattserver.grass.monitor.services.MonitorService;
 
 @Controller
-@RequestMapping("/system-monitor")
+@RequestMapping("/ws/system-monitor")
 public class MonitorResource {
 
 	private static Logger logger = LoggerFactory.getLogger(MonitorResource.class);

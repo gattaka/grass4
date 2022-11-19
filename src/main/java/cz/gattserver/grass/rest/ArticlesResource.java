@@ -27,7 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Controller
-@RequestMapping("/articles")
+@RequestMapping("/ws/articles")
 public class ArticlesResource {
 
 	private static Logger logger = LoggerFactory.getLogger(ArticlesResource.class);

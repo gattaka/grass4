@@ -12,7 +12,7 @@ import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.print3d.ui.STLViewer;
+import cz.gattserver.common.stlviewer.STLViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

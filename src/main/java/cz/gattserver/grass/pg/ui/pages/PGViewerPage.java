@@ -95,7 +95,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 
 	public PGViewerPage() {
 		pageURLBase = getPageURL(photogalleryViewerPageFactory);
-		loadCSS(getContextPath() + "/frontend/pg/style.css");
+		loadCSS(getContextPath() + "/VAADIN/pg/style.css");
 	}
 
 	@Override

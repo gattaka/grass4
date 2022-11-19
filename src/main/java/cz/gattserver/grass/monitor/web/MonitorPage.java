@@ -93,7 +93,7 @@ public class MonitorPage extends OneColumnPage {
 	public MonitorPage() {
 		if (!SpringContextHelper.getBean(MonitorSection.class).isVisibleForRoles(getUser().getRoles()))
 			throw new GrassPageException(403);
-		loadCSS(getContextPath() + "/frontend/monitor/style.css");
+		loadCSS(getContextPath() + "/VAADIN/monitor/style.css");
 		init();
 	}
 
@@ -128,7 +128,7 @@ public class MonitorPage extends OneColumnPage {
 		partLayout.setMargin(false);
 		partLayout.setPadding(false);
 		partLayout.setSpacing(false);
-		Image loadingImg = new Image("img/gattload_mini.gif", "loading...");
+		Image loadingImg = new Image("VAADIN/img/gattload_mini.gif", "loading...");
 		loadingImg.getStyle().set("margin", "5px");
 		partLayout.add(loadingImg);
 		layout.add(partLayout);

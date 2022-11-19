@@ -1,4 +1,4 @@
-package cz.gattserver.grass.print3d.ui;
+package cz.gattserver.common.stlviewer;
 
 import java.util.UUID;
 
@@ -15,7 +15,7 @@ public class STLViewer extends Div {
 
 	private static final long serialVersionUID = 641505669346830262L;
 
-	private static final String JS_PATH = "print3d/stl_viewer/";
+	private static final String JS_PATH = "stl_viewer/";
 	private static final String STL_VIEWER_INSTANCE_JS_VAR = "$.stlViewerInstance";
 
 	private boolean stlViewerInitialized = false;

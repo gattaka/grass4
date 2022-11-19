@@ -32,7 +32,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Controller
-@RequestMapping("/pg")
+@RequestMapping("/ws/pg")
 public class PGResource {
 
 	private static Logger logger = LoggerFactory.getLogger(PGResource.class);

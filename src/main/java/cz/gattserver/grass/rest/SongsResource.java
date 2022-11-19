@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 
 @Controller
-@RequestMapping("/songs")
+@RequestMapping("/ws/songs")
 public class SongsResource {
 
 	@Autowired

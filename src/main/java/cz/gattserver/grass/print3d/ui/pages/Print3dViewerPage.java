@@ -42,7 +42,7 @@ import cz.gattserver.grass.print3d.interfaces.Print3dPayloadTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
 import cz.gattserver.grass.print3d.service.Print3dService;
-import cz.gattserver.grass.print3d.ui.STLViewer;
+import cz.gattserver.common.stlviewer.STLViewer;
 import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

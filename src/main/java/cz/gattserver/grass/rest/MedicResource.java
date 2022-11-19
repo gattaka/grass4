@@ -13,7 +13,7 @@ import cz.gattserver.grass.medic.facade.MedicFacade;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
 @Controller
-@RequestMapping("/medic")
+@RequestMapping("/ws/medic")
 public class MedicResource {
 
 	private static Logger logger = LoggerFactory.getLogger(MedicResource.class);
