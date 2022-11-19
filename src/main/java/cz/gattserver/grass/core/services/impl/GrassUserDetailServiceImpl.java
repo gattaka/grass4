@@ -14,10 +14,6 @@ public class GrassUserDetailServiceImpl implements UserDetailsService {
 	@Autowired
 	private UserService userService;
 
-	public GrassUserDetailServiceImpl() {
-		System.out.println("DEBUG GrassUserDetailServiceImpl constructor");
-	}
-
 	public UserDetails loadUserByUsername(String username) {
 		final UserInfoTO user = userService.getUser(username);
 		if (user == null)
