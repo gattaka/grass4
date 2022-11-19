@@ -12,6 +12,7 @@ import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;
 import cz.gattserver.grass.hw.service.HWService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 
 @WebServlet(urlPatterns = "/" + HWConfiguration.HW_PATH + "/*")
@@ -22,8 +23,10 @@ public class HWRequestHandler extends AbstractConfiguratedPathRequestHandler {
 	@Autowired
 	private HWService hwService;
 
-	public HWRequestHandler() {
+	@Override
+	public void init() {
 		SpringContextHelper.inject(this);
+		super.init();
 	}
 
 	@Override
