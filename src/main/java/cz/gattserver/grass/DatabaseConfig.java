@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  * https://docs.spring.io/spring/docs/4.2.x/spring-framework-reference/html/transaction.html
  * https://stackoverflow.com/questions/47635650/spring-data-jpa-how-to-programmatically-set-jparepository-base-packages
  */
-@PropertySource("classpath:properties/db.properties")
 @EnableTransactionManagement
 public class DatabaseConfig {
 

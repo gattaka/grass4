@@ -26,7 +26,7 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 @EnableAsync
 @EnableScheduling
 @ServletComponentScan
-@PropertySource({ "classpath:properties/mail.properties", "classpath:version.properties"})
+@PropertySource({ "classpath:version.properties"})
 @Import({ DatabaseConfig.class, EncoderConfig.class, SecurityConfig.class, WebSecurityConfig.class })
 public class BaseConfig {
 
