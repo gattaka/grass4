@@ -43,3 +43,6 @@ build/
 /webpack.config.js
 /webpack.generated.js
 /favlink/
+/src/main/resources/mail.properties
+/src/main/resources/db.properties
+application.properties
