@@ -45,4 +45,4 @@ build/
 /favlink/
 /src/main/resources/mail.properties
 /src/main/resources/db.properties
-application.properties
+/src/main/resources/application.properties
