@@ -4,14 +4,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 import com.vaadin.flow.server.StreamResource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
 
 /**
  * Builder pro immutable {@link EditorButtonResourcesTO}
  *
  * @author Hynek
- *
  */
 public class EditorButtonResourcesTOBuilder {
+
+	private Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	private String tag;
 	private String tagFamily;
@@ -21,20 +26,14 @@ public class EditorButtonResourcesTOBuilder {
 	private StreamResource imageResource;
 
 	/**
-	 * @param tag
-	 *            název tagu, použitý v tagové značce
-	 * @param tagFamily
-	 *            rodina tagů, do které bude ve výběru začleněn
-	 * @param description
-	 *            nápis na vkládacím prvku v editoru (popisek tlačítka)
-	 * @param prefix
-	 *            počáteční tag + (nepovinné) nějaké věci, které se mají vložit
-	 *            před označený text
-	 * @param suffix
-	 *            koncový tag + (nepovinné) nějaké věci, které se mají vložit za
-	 *            označený text
-	 * @param imageResource
-	 *            resource ikony pluginu
+	 * @param tag           název tagu, použitý v tagové značce
+	 * @param tagFamily     rodina tagů, do které bude ve výběru začleněn
+	 * @param description   nápis na vkládacím prvku v editoru (popisek tlačítka)
+	 * @param prefix        počáteční tag + (nepovinné) nějaké věci, které se mají vložit
+	 *                      před označený text
+	 * @param suffix        koncový tag + (nepovinné) nějaké věci, které se mají vložit za
+	 *                      označený text
+	 * @param imageResource resource ikony pluginu
 	 */
 	public EditorButtonResourcesTOBuilder(String tag, String tagFamily, String description, String prefix,
 										  String suffix, StreamResource imageResource) {
@@ -51,10 +50,8 @@ public class EditorButtonResourcesTOBuilder {
 	 * popisek, tak počteční a koncový tag. Z logiky věci vyplývá, že zadávaný
 	 * parametr je pouze název elementu/tagu bez hranatých závorek nebo lomítek
 	 *
-	 * @param tag
-	 *            název tagu, použitý v tagové značce
-	 * @param tagFamily
-	 *            rodina tagů, do které bude ve výběru začleněn
+	 * @param tag       název tagu, použitý v tagové značce
+	 * @param tagFamily rodina tagů, do které bude ve výběru začleněn
 	 */
 	public EditorButtonResourcesTOBuilder(String tag, String tagFamily) {
 		this.tag = tag;
@@ -110,8 +107,7 @@ public class EditorButtonResourcesTOBuilder {
 	/**
 	 * Nastaví zdroj obrázku
 	 *
-	 * @param imageResource
-	 *            zdroj
+	 * @param imageResource zdroj
 	 * @return <code>this</code> pro řetězení
 	 */
 	public EditorButtonResourcesTOBuilder setImageResource(StreamResource imageResource) {
@@ -121,7 +117,13 @@ public class EditorButtonResourcesTOBuilder {
 
 	public EditorButtonResourcesTOBuilder setImageAsThemeResource(String imagePath) {
 		this.imageResource = new StreamResource("icon",
-				() -> getClass().getResourceAsStream("/static/VAADIN/articles/" + imagePath));
+				() -> {
+					String path = "/static/VAADIN/articles/" + imagePath;
+					InputStream st = getClass().getResourceAsStream(path);
+					if (st == null)
+						logger.error("Resource with path '" + path + "' not found!");
+					return st;
+				});
 		return this;
 	}
 

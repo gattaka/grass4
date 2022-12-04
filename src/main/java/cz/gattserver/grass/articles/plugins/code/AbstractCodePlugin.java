@@ -40,7 +40,7 @@ public abstract class AbstractCodePlugin implements Plugin {
 		EditorButtonResourcesTOBuilder builder = new EditorButtonResourcesTOBuilder(tag, "Code highlight")
 				.setDescription(description);
 		if (StringUtils.isNotBlank(image))
-			builder.setImageAsThemeResource("/code/img/" + image);
+			builder.setImageAsThemeResource("code/img/" + image);
 		return builder.build();
 	}
 }
