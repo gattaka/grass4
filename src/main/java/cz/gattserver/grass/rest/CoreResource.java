@@ -1,4 +1,4 @@
-package cz.gattserver.grass.core.rest;
+package cz.gattserver.grass.rest;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/core")
+@RequestMapping("/ws/core")
 public class CoreResource {
 
 	@Autowired
