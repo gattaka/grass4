@@ -7,6 +7,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
@@ -27,6 +28,7 @@ public abstract class SongDialog extends EditWebDialog {
 	}
 
 	public SongDialog(final SongTO originalTO) {
+		SpringContextHelper.inject(this);
 		setWidth("600px");
 
 		SongTO formTO = new SongTO();
