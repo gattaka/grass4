@@ -78,6 +78,12 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
 				UIUtils.showError(err);
 			}
 		});
+		upload.addFailedListener(e -> {
+			logger.error(e.getFileName() + " upload failed ", e.getReason());
+		});
+		upload.addFileRejectedListener(e -> {
+			logger.error(e.getErrorMessage());
+		});
 
 		if (originalTO == null || originalTO.getImage() == null)
 			placeUpload();

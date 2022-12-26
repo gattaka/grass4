@@ -42,13 +42,6 @@ public class BaseConfig {
 	@Value("${version}")
 	private String version;
 
-	@Bean(name = "multipartResolver")
-	public CommonsMultipartResolver multipartResolver() {
-		CommonsMultipartResolver resolver = new CommonsMultipartResolver();
-		resolver.setMaxUploadSize(20848820);
-		return resolver;
-	}
-
 	@Bean(name = "taskExecutor")
 	public ThreadPoolTaskExecutor taskExecutor() {
 		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
