@@ -255,6 +255,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     @Override
     protected void createCenterElements(Div customlayout) {
         articleNameField = new TextField();
+        articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
+
         FetchItemsCallback<String> fetchItemsCallback = (filter, offset, limit) -> contentTagFacade
                 .findByFilter(filter, offset, limit).stream();
         SerializableFunction<String, Integer> serializableFunction = filter -> contentTagFacade.countByFilter(filter);
@@ -440,8 +442,9 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     }
 
     private Button createSaveAndCloseButton() {
-        Button saveAndCloseButton = new ImageButton("Uložit a zavřít", ImageIcon.SAVE_16_ICON, event -> {
-            articleTextArea.blur();
+        Button saveAndCloseButton = new ImageButton("Uložit a zavřít", ImageIcon.SAVE_16_ICON);
+        saveAndCloseButton.addClickListener(event -> {
+            // aby se provedl blur na ostatních elementech a poslaly se hodnoty
             if (!isFormValid())
                 return;
             if (saveOrUpdateArticle()) {
