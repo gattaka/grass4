@@ -4,49 +4,58 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Map;
 
 import cz.gattserver.grass.core.exception.GrassException;
+import net.sf.jasperreports.engine.*;
+import net.sf.jasperreports.repo.RepositoryService;
 import org.springframework.stereotype.Service;
 
-import net.sf.jasperreports.engine.DefaultJasperReportsContext;
-import net.sf.jasperreports.engine.JRDataSource;
-import net.sf.jasperreports.engine.JRExporterParameter;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReportsContext;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 
 @Service
 public class ExportsServiceImpl implements ExportsService {
 
-    @Override
-    public Path createPDFReport(JRDataSource jrDataSource, Map<String, Object> params, String reportFileName,
-                                ExportType type) {
-        try {
-            InputStream jasperReportStream = getClass().getResourceAsStream(reportFileName + ".jasper");
+	@Override
+	public Path createPDFReport(JRDataSource jrDataSource, Map<String, Object> params, String reportFileName,
+								ExportType type) {
+		try {
 
-            Path tmpPath = Files.createTempFile("grass-jasper-", ".pdf");
-            OutputStream fileOutputStream = Files.newOutputStream(tmpPath);
+			Path tmpPath = Files.createTempFile("grass-jasper-", ".pdf");
+			OutputStream fileOutputStream = Files.newOutputStream(tmpPath);
 
-            JasperReportsContext jasperReportsContext = DefaultJasperReportsContext.getInstance();
-            JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
-            JasperPrint jasperPrint = jasperFillManager.fill(jasperReportStream, params, jrDataSource);
+			String path = "static/VAADIN/jasper/";
+			InputStream jasperReportStream = getClass().getClassLoader().getResourceAsStream(path + reportFileName + ".jasper");
 
-            JRPdfExporter exporter = new JRPdfExporter();
-            exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-            exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, fileOutputStream);
-            if (ExportType.PRINT == type)
-                exporter.setParameter(JRPdfExporterParameter.PDF_JAVASCRIPT, "this.print();");
+			params.put("SUBREPORT_DIR", path);
 
-            exporter.exportReport();
-            fileOutputStream.close();
+			SimpleJasperReportsContext jasperReportsContext = new SimpleJasperReportsContext();
 
-            return tmpPath;
-        } catch (Exception e) {
-            throw new GrassException("Export se nezdařil", e);
-        }
-    }
+			// https://stackoverflow.com/questions/1771679/difference-between-threads-context-class-loader-and-normal-classloader
+			// Protože Jasper používá Thread.currentThread().getContextClassLoader(), což nefunguje pod spring boot s
+			// embedded Tomcat, je potřeba to přepsat fungujícím getClass().getClassLoader()
+			CustomJasperRepositoryService repositoryService =
+					new CustomJasperRepositoryService(DefaultJasperReportsContext.getInstance());
+			jasperReportsContext.setExtensions(RepositoryService.class, Arrays.asList(repositoryService));
+
+			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
+			JasperPrint jasperPrint = jasperFillManager.fill(jasperReportStream, params, jrDataSource);
+
+			JRPdfExporter exporter = new JRPdfExporter();
+			exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
+			exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, fileOutputStream);
+			if (ExportType.PRINT == type)
+				exporter.setParameter(JRPdfExporterParameter.PDF_JAVASCRIPT, "this.print();");
+
+			exporter.exportReport();
+			fileOutputStream.close();
+
+			return tmpPath;
+		} catch (Exception e) {
+			throw new GrassException("Export se nezdařil", e);
+		}
+	}
 
 }

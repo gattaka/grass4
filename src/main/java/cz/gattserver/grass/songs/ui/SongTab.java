@@ -139,8 +139,16 @@ public class SongTab extends Div {
 		btnLayout.add(deleteButton);
 		deleteButton.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-		ImageButton printButton2 = new ImageButton("Tisk", ImageIcon.PRINT_16_ICON, e -> {
-			Path path = createReportPath(choosenSong);
+		ImageButton printButton = new ImageButton("Tisk", ImageIcon.PRINT_16_ICON, e -> {
+			Path path = createReportPath(choosenSong, false);
+			String uuid = UUID.randomUUID().toString();
+			VaadinSession.getCurrent().getSession().setAttribute(ExportRequestHandler.ATTR_PREFIX + uuid, path);
+			UI.getCurrent().getPage().open(UIUtils.getPageURL("export/" + uuid));
+		});
+		btnLayout.add(printButton);
+
+		ImageButton printButton2 = new ImageButton("Tisk (dva sloupce)", ImageIcon.PRINT_16_ICON, e -> {
+			Path path = createReportPath(choosenSong, true);
 			String uuid = UUID.randomUUID().toString();
 			VaadinSession.getCurrent().getSession().setAttribute(ExportRequestHandler.ATTR_PREFIX + uuid, path);
 			UI.getCurrent().getPage().open(UIUtils.getPageURL("export/" + uuid));
@@ -191,21 +199,27 @@ public class SongTab extends Div {
 		add(callbackDiv);
 	}
 
-	private Path createReportPath(SongTO choosenSong) {
+	private Path createReportPath(SongTO choosenSong, boolean twoColumn) {
+		SongTO s = new SongTO(choosenSong.getName(), choosenSong.getAuthor(), choosenSong.getYear(),
+				choosenSong.getText().replaceAll("<br/>", "\n"), choosenSong.getId(),
+				choosenSong.getPublicated(), choosenSong.getEmbedded());
 		JRDataSource jrDataSource = new JasperExportDataSource<SongTO>(new PagedDataSource<SongTO>(1, 1) {
 			@Override
 			protected List<SongTO> getData(int page, int size) {
-				SongTO s = new SongTO(choosenSong.getName(), choosenSong.getAuthor(), choosenSong.getYear(),
-						choosenSong.getText().replaceAll("<br/>", "\n"), choosenSong.getId(),
-						choosenSong.getPublicated(), choosenSong.getEmbedded());
-				return Arrays.asList(new SongTO[] { s });
+				return Arrays.asList(new SongTO[]{s});
 			}
 
 			@Override
 			protected void indicateProgress() {
 			}
 		});
-		return exportsService.createPDFReport(jrDataSource, new HashMap<String, Object>(), "/static/VAADIN/songs/song", ExportType.PRINT);
+		HashMap<String, Object> params = new HashMap<String, Object>();
+		params.put("CONTENT", s.getText());
+		params.put("YEAR", s.getYear());
+		params.put("NAME", s.getName());
+		params.put("AUTHOR", s.getAuthor());
+		String template = twoColumn ? "song-two-col" : "song-one-col";
+		return exportsService.createPDFReport(jrDataSource, params, "/songs/" + template, ExportType.PRINT);
 	}
 
 	public void showDetail(SongTO choosenSong) {
@@ -252,7 +266,8 @@ public class SongTab extends Div {
 				embeddedLabel.setVisible(true);
 				String val = "<iframe width=\"100%\" height=\"300\" src=\"https://www.youtube.com/embed/"
 						+ choosenSong.getEmbedded()
-						+ "\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture\" allowfullscreen></iframe>";
+						+ "\" frameborder=\"0\" allow=\"accelerometer; autoplay; clipboard-write; encrypted-media; " +
+						"gyroscope; picture-in-picture\" allowfullscreen></iframe>";
 				embeddedLabel.setValue(val);
 			} else {
 				embeddedLabel.setVisible(false);
