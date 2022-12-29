@@ -21,6 +21,7 @@ public class UsedInChooser extends Div {
 	private static final long serialVersionUID = -5660237108485881386L;
 
 	public UsedInChooser(HWItemTO originalTO, Consumer<HWItemOverviewTO> onSelect) {
+		onSelect.accept(originalTO.getUsedIn());
 		Div usedInLabel = new Div(new Text("Je součástí"));
 		usedInLabel.getStyle().set("color", "var(--lumo-secondary-text-color)").set("font-weight", "500")
 				.set("font-size", "var(--lumo-font-size-s)").set("padding-top", "var(--lumo-space-m)");

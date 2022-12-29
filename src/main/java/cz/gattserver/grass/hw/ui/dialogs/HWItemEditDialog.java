@@ -34,15 +34,17 @@ import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.UsedInChooser;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class HWItemEditDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
 
-	private transient HWService hwService;
+	@Autowired
+	private HWService hwService;
 
 	public HWItemEditDialog(Long originalId) {
-		init(originalId == null ? null : getHWService().getHWItem(originalId));
+		init(originalId == null ? null : hwService.getHWItem(originalId));
 	}
 
 	public HWItemEditDialog() {
@@ -53,18 +55,13 @@ public abstract class HWItemEditDialog extends EditWebDialog {
 		init(originalDTO);
 	}
 
-	private HWService getHWService() {
-		if (hwService == null)
-			hwService = SpringContextHelper.getBean(HWService.class);
-		return hwService;
-	}
-
 	/**
 	 * @param originalTO
 	 *            opravuji údaje existující položky, nebo vytvářím novou (
 	 *            {@code null}) ?
 	 */
 	private void init(HWItemTO originalTO) {
+		SpringContextHelper.inject(this);
 		setWidth("900px");
 
 		HWItemTO formDTO = new HWItemTO();
@@ -148,7 +145,7 @@ public abstract class HWItemEditDialog extends EditWebDialog {
 		descriptionArea.setHeight("300px");
 
 		Map<String, HWItemTypeTO> tokens = new HashMap<>();
-		getHWService().getAllHWTypes().forEach(to -> tokens.put(to.getName(), to));
+		hwService.getAllHWTypes().forEach(to -> tokens.put(to.getName(), to));
 
 		TokenField keywords = new TokenField(tokens.keySet());
 		keywords.setAllowNewItems(true);
@@ -165,7 +162,7 @@ public abstract class HWItemEditDialog extends EditWebDialog {
 				writeDTO.setUsedIn(binder.getBean().getUsedIn());
 				writeDTO.setUsedInName(binder.getBean().getUsedInName());
 				writeDTO.setTypes(keywords.getValues());
-				writeDTO.setId(getHWService().saveHWItem(writeDTO));
+				writeDTO.setId(hwService.saveHWItem(writeDTO));
 				onSuccess(writeDTO);
 				close();
 			} catch (Exception ve) {
