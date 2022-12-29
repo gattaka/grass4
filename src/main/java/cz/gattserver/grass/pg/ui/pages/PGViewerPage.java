@@ -334,14 +334,18 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 						.set("margin-top", "10px");
 
 				// Miniatura/Náhled
-				Image embedded = new Image(new StreamResource(item.getName(), () -> {
+				// Název souboru sice nemusí odpovídat, ale měl by pasovat typem -- takže pokud mám SVG a z něj náhled
+				// jako PNG soubor, je potřeba předat, že jde už o PNG soubor (nikoliv ten původní SVG) jinak se
+				// browser bude snažit číst to PNG jako SVG a nic se nezobrazí
+				String fileName = item.getFile().getFileName().toString();
+				Image embedded = new Image(new StreamResource(fileName, () -> {
 					try {
 						return Files.newInputStream(item.getFile());
 					} catch (IOException e) {
 						e.printStackTrace();
 						return null;
 					}
-				}), item.getName());
+				}), fileName);
 				itemLayout.add(embedded);
 
 				itemLayout.add(new Breakline());
@@ -449,13 +453,14 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 	}
 
 	private void addPagingButton(HorizontalLayout layout, String caption,
-			ComponentEventListener<ClickEvent<Button>> clickListener, boolean primary) {
+								 ComponentEventListener<ClickEvent<Button>> clickListener, boolean primary) {
 		addPagingButton(layout, caption, clickListener, primary, false, false);
 	}
 
 	private void addPagingButton(HorizontalLayout layout, String caption,
-			ComponentEventListener<ClickEvent<Button>> clickListener, boolean primary, boolean autoLeftMargin,
-			boolean autoRightMargin) {
+								 ComponentEventListener<ClickEvent<Button>> clickListener, boolean primary,
+								 boolean autoLeftMargin,
+								 boolean autoRightMargin) {
 		Button btn = new Button(caption, clickListener);
 		btn.addThemeVariants(ButtonVariant.LUMO_SMALL);
 		if (primary)
@@ -534,6 +539,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 	@Override
 	protected void onEditOperation() {
 		UIUtils.redirect(getPageURL(photogalleryEditorPageFactory, DefaultContentOperations.EDIT.toString(),
-				URLIdentifierUtils.createURLIdentifier(photogallery.getId(), photogallery.getContentNode().getName())));
+				URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
+						photogallery.getContentNode().getName())));
 	}
 }

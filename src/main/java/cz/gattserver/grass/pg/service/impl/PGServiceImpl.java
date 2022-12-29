@@ -709,7 +709,13 @@ public class PGServiceImpl implements PGService {
 					itemTO.setName(fileName.substring(0, fileName.length() - 4));
 				} else {
 					itemTO.setType(PhotogalleryItemType.IMAGE);
-					itemTO.setName(fileName);
+					if (fileName.toLowerCase().endsWith(".svg.png")) {
+						// u SVG je potřeba useknout příponu preview obrázku
+						// '.png', aby zůstala původní video přípona
+						itemTO.setName(fileName.substring(0, fileName.length() - 4));
+					} else {
+						itemTO.setName(fileName);
+					}
 				}
 				itemTO.setFile(file);
 				list.add(itemTO);
