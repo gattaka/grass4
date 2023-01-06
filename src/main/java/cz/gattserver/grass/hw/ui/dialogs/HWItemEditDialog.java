@@ -56,9 +56,8 @@ public abstract class HWItemEditDialog extends EditWebDialog {
 	}
 
 	/**
-	 * @param originalTO
-	 *            opravuji údaje existující položky, nebo vytvářím novou (
-	 *            {@code null}) ?
+	 * @param originalTO opravuji údaje existující položky, nebo vytvářím novou (
+	 *                   {@code null}) ?
 	 */
 	private void init(HWItemTO originalTO) {
 		SpringContextHelper.inject(this);
@@ -70,6 +69,10 @@ public abstract class HWItemEditDialog extends EditWebDialog {
 		formDTO.setWarrantyYears(0);
 		formDTO.setState(HWItemState.NEW);
 		formDTO.setPurchaseDate(LocalDate.now());
+		if (originalTO != null) {
+			formDTO.setUsedIn(originalTO.getUsedIn());
+			formDTO.setUsedInName(originalTO.getUsedInName());
+		}
 
 		Binder<HWItemTO> binder = new Binder<>(HWItemTO.class);
 		binder.setBean(formDTO);
