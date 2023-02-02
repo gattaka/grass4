@@ -40,6 +40,7 @@ import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
+import cz.gattserver.grass.core.ui.pages.template.ErrorPage;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
@@ -71,7 +72,7 @@ import java.util.UUID;
 
 @Route("fm")
 @PageTitle("Správce souborů")
-public class FMPage extends OneColumnPage implements HasUrlParameter<String> {
+public class FMPage extends OneColumnPage implements HasUrlParameter<String>, BeforeEnterObserver  {
 
 	private static final long serialVersionUID = -5884444775720831930L;
 
@@ -126,12 +127,9 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String> {
 	@Override
 	public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
 		this.parameter = parameter;
-		init();
 	}
 
 	public FMPage() {
-		if (!SpringContextHelper.getBean(FMSection.class).isVisibleForRoles(getUser().getRoles()))
-			throw new GrassPageException(403);
 		selectFormatter = new CZAmountFormatter("Vybrán %d soubor", "Vybrány %d soubory", "Vybráno %d souborů");
 		listFormatter = new CZAmountFormatter("Zobrazen %d soubor", "Zobrazeny %d soubory", "Zobrazeno %d souborů");
 	}
@@ -249,7 +247,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String> {
 		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		layout.add(grid);
 
-		grid.addColumn(new IconRenderer<FMItemTO>(to -> {
+		grid.addColumn(new IconRenderer<>(to -> {
 			Image img = new Image(to.isDirectory() ? ImageIcon.FOLDER_16_ICON.createResource()
 					: ImageIcon.DOCUMENT_16_ICON.createResource(), "");
 			img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
@@ -289,7 +287,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String> {
 				to -> new LinkButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
 				.setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-		grid.addColumn(new ComponentRenderer<Button, FMItemTO>(to -> {
+		grid.addColumn(new ComponentRenderer<>(to -> {
 			String link = explorer.getDownloadLink(urlBase, to.getName());
 			Button button = new LinkButton("QR", e -> {
 				WebDialog ww = new WebDialog();
@@ -311,7 +309,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String> {
 			return button;
 		})).setHeader("QR").setTextAlign(ColumnTextAlign.CENTER).setWidth("45px").setFlexGrow(0);
 
-		grid.addColumn(new LocalDateTimeRenderer<>(FMItemTO::getLastModified, "d.MM.yyyy HH:mm")).setHeader("Upraveno")
+		grid.addColumn(new LocalDateTimeRenderer<>(FMItemTO::getLastModified, "d.M.yyyy HH:mm")).setHeader("Upraveno")
 				.setAutoWidth(true).setTextAlign(ColumnTextAlign.END).setSortProperty("lastModified");
 
 		grid.addSelectionListener(e -> {
@@ -528,4 +526,12 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String> {
 		history.pushState(null, currentURL.substring(1));
 	}
 
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		if (!SpringContextHelper.getBean(FMSection.class).isVisibleForRoles(getUser().getRoles())) {
+			throw new GrassPageException(403);
+		} else {
+			init();
+		}
+	}
 }

@@ -7,9 +7,9 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import com.vaadin.flow.server.DefaultErrorHandler;
 import com.vaadin.flow.server.InitialPageSettings;
 import com.vaadin.flow.server.PageConfigurator;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 
 import cz.gattserver.common.exception.ApplicationErrorHandler;
@@ -31,7 +31,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
  * @author Hynek
  *
  */
-public abstract class GrassPage extends Div implements PageConfigurator {
+public abstract class GrassPage extends Div implements PageConfigurator  {
 
 	private static final long serialVersionUID = 7952966362953000385L;
 
@@ -43,10 +43,7 @@ public abstract class GrassPage extends Div implements PageConfigurator {
 	 */
 	public GrassPage() {
 		SpringContextHelper.inject(this);
-		if (UI.getCurrent().getSession().getErrorHandler() == null
-				|| UI.getCurrent().getSession().getErrorHandler() instanceof DefaultErrorHandler)
-			UI.getCurrent().getSession().setErrorHandler(new ApplicationErrorHandler());
-
+		VaadinSession.getCurrent().setErrorHandler(new ApplicationErrorHandler());
 	}
 
 	protected boolean isMobileDevice() {

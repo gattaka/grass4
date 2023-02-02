@@ -12,6 +12,7 @@ public class ApplicationErrorHandler implements ErrorHandler {
 
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationErrorHandler.class);
 
+	@Override
 	public void error(ErrorEvent event) {
 		error(event.getThrowable());
 	}
