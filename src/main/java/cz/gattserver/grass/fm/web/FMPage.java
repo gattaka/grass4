@@ -60,15 +60,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Route("fm")
 @PageTitle("Správce souborů")
@@ -136,18 +134,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 
 	@Override
 	protected void createColumnContent(Div layout) {
-
-		VaadinRequest vaadinRequest = VaadinRequest.getCurrent();
-		VaadinServletRequest vaadinServletRequest = (VaadinServletRequest) vaadinRequest;
-
-		// např. /web/fm/Android
-		String requestURI = ((VaadinServletRequest) vaadinRequest).getRequestURI();
-
-		// např. http://localhost:8180/web/fm/Android
-		String fullURL = vaadinServletRequest.getRequestURL().toString();
-
-		// např. http://localhost:8180
-		urlBase = fullURL.substring(0, fullURL.length() - requestURI.length());
+		urlBase = UIUtils.getURLBase();
 
 		statusLabel = new Div();
 		statusLabel.getStyle().set("border", "1px solid hsl(220, 14%, 88%)").set("padding", "4px 10px")
@@ -167,7 +154,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 			// úspěch - pokračujeme
 			History history = UI.getCurrent().getPage().getHistory();
 			history.setHistoryStateChangeHandler(e -> {
-				String url = urlBase + UIUtils.getContextPath() + "/" + e.getLocation().getPath();
+				String url = urlBase + "/" + e.getLocation().getPath();
 				if (FileProcessState.SUCCESS
 						.equals(explorer.goToDirByURL(UIUtils.getContextPath(), fmPageFactory.getPageName(), url))) {
 					refreshView();
@@ -457,13 +444,13 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 	}
 
 	private void handleDownloadAction(FMItemTO item) {
-		UI.getCurrent().getPage().open(getDownloadLink(item));
+		handleDownloadAction(Set.of(item));
 	}
 
 	private void handleDownloadAction(Set<FMItemTO> items) {
 		FMItemTO item = items.iterator().next();
 		if (items.size() == 1 && !item.isDirectory()) {
-			handleDownloadAction(item);
+			UI.getCurrent().getPage().open(getDownloadLink(item));
 		} else {
 			logger.info("zipFMthread: {}", Thread.currentThread().getId());
 			progressIndicatorWindow = new ProgressDialog();

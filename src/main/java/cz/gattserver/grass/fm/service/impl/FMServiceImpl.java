@@ -102,6 +102,7 @@ public class FMServiceImpl implements FMService {
 	public void deleteZipFile(Path zipFile) {
 		try {
 			Files.delete(zipFile);
+			logger.info("zipFile " + zipFile.getFileName() + " deleted");
 		} catch (IOException e) {
 			logger.error("Nezdařilo se smazat ZIP soubor {}", zipFile.getFileName().toString());
 		}

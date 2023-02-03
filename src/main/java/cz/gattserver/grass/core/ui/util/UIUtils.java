@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.util;
 
+import java.net.*;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -19,16 +20,26 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.server.VaadinRequest;
+import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.WebBrowser;
 
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.common.vaadin.dialogs.InfoDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.ui.js.JScriptItem;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.env.Environment;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class UIUtils {
+
+	private static final Logger logger = LoggerFactory.getLogger(UIUtils.class);
 
 	public static final String SPACING_CSS_VAR = "var(--lumo-space-m)";
 	public static final String BUTTON_SIZE_CSS_VAR = "var(--lumo-button-size)";
@@ -92,7 +103,8 @@ public class UIUtils {
 	 * Přidá filtrovací pole do záhlaví gridu
 	 */
 	public static TextField addHeaderTextField(HeaderCell cell,
-			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
+											   HasValue.ValueChangeListener<?
+													   super ComponentValueChangeEvent<TextField, String>> listener) {
 		TextField field = UIUtils.asSmall(new TextField());
 		field.setWidthFull();
 		field.addValueChangeListener(listener);
@@ -105,8 +117,9 @@ public class UIUtils {
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
 	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, Class<T> enumType,
-			ItemLabelGenerator<T> itemLabelGenerator,
-			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+																	ItemLabelGenerator<T> itemLabelGenerator,
+																	HasValue.ValueChangeListener<?
+																			super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		return addHeaderComboBox(cell, enumType.getEnumConstants(), itemLabelGenerator, listener);
 	}
 
@@ -114,8 +127,9 @@ public class UIUtils {
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
 	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, T[] values,
-			ItemLabelGenerator<T> itemLabelGenerator,
-			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+																	ItemLabelGenerator<T> itemLabelGenerator,
+																	HasValue.ValueChangeListener<?
+																			super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		return addHeaderComboBox(cell, Arrays.asList(values), itemLabelGenerator, listener);
 	}
 
@@ -123,8 +137,9 @@ public class UIUtils {
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
 	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, Collection<T> values,
-			ItemLabelGenerator<T> itemLabelGenerator,
-			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+																	ItemLabelGenerator<T> itemLabelGenerator,
+																	HasValue.ValueChangeListener<?
+																			super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		ComboBox<T> combo = UIUtils.asSmall(new ComboBox<>(null, values));
 		combo.setWidthFull();
 		combo.setRequired(false);
@@ -174,9 +189,8 @@ public class UIUtils {
 	 * Nahraje více JS skriptů, synchronně za sebou (mohou se tedy navzájem na
 	 * sebe odkazovat a bude zaručeno, že 1. skript bude celý nahrán před 2.
 	 * skriptem, který využívá jeho funkcí)
-	 * 
-	 * @param scripts
-	 *            skripty, které budou nahrány
+	 *
+	 * @param scripts skripty, které budou nahrány
 	 */
 	public static PendingJavaScriptResult loadJS(JScriptItem... scripts) {
 		return loadJS(Arrays.asList(scripts));
@@ -186,9 +200,8 @@ public class UIUtils {
 	 * Nahraje více JS skriptů, synchronně za sebou (mohou se tedy navzájem na
 	 * sebe odkazovat a bude zaručeno, že 1. skript bude celý nahrán před 2.
 	 * skriptem, který využívá jeho funkcí)
-	 * 
-	 * @param scripts
-	 *            skripty, které budou nahrány
+	 *
+	 * @param scripts skripty, které budou nahrány
 	 */
 	public static PendingJavaScriptResult loadJS(List<JScriptItem> scripts) {
 		StringBuilder builder = new StringBuilder();
@@ -222,16 +235,66 @@ public class UIUtils {
 
 	/**
 	 * Nahraje CSS
-	 * 
-	 * @param link
-	 *            odkaz k css souboru - relativní, absolutní (http://...)
+	 *
+	 * @param link odkaz k css souboru - relativní, absolutní (http://...)
 	 */
 	public static void loadCSS(String link) {
 		StringBuilder loadStylesheet = new StringBuilder();
 		loadStylesheet.append("var head=document.getElementsByTagName('head')[0];")
 				.append("var link=document.createElement('link');").append("link.type='text/css';")
-				.append("link.rel='stylesheet';").append("link.href='" + link + "';").append("head.appendChild(link);");
+				.append("link.rel='stylesheet';").append("link.href='" + link + "';").append("head.appendChild(link)" +
+						";");
 		UI.getCurrent().getPage().executeJs(loadStylesheet.toString());
+	}
+
+	private static String getClientIp(HttpServletRequest request) {
+		String remoteAddr = request.getHeader("X-FORWARDED-FOR");
+		if (StringUtils.isBlank(remoteAddr))
+			remoteAddr = request.getRemoteAddr();
+		return remoteAddr;
+	}
+
+	public static HttpServletRequest getHttpServletRequest() {
+		VaadinRequest vaadinRequest = VaadinRequest.getCurrent();
+		VaadinServletRequest vaadinServletRequest = (VaadinServletRequest) vaadinRequest;
+		HttpServletRequest httpServletRequest = vaadinServletRequest.getHttpServletRequest();
+		return httpServletRequest;
+	}
+
+	public static String getIPAddress() {
+		String ipAddress = getClientIp(getHttpServletRequest());
+		return ipAddress;
+	}
+
+	public static String getURLBase() {
+		HttpServletRequest httpServletRequest = getHttpServletRequest();
+
+		// Příklad:
+		// aplikace běží na adrese http://-server-:8180/web
+		// request je na http://-server-:8180/web/fm/Android
+		// pak:
+		// vrátí /web/fm/Android
+		String requestURI = httpServletRequest.getRequestURI();
+
+		// vrátí /fm/Android
+		String pathInfo = httpServletRequest.getPathInfo();
+
+		// vrátí /web
+		String contextPath = httpServletRequest.getContextPath();
+
+		// vrátí http://-server-:8180/web/fm/Android
+		String fullURL = httpServletRequest.getRequestURL().toString();
+
+		// např. http://-server-:8180
+		//String urlBase = fullURL.substring(0, fullURL.length() - pathInfo.length());
+
+		// Tady je ale problém, protože pokud aplikace běží na -server- za reverse proxy,
+		// pak se místo http://-server-:8180 může vrátit např. lokální http://127.0.0.1:60111
+		// Ve výsledku je tedy nejlepší
+
+		String urlBase = SpringContextHelper.getBean(Environment.class).getProperty("grass.address");
+
+		return urlBase + contextPath;
 	}
 
 	public static String getContextPath() {
