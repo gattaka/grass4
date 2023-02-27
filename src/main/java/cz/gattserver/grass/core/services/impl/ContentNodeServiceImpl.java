@@ -45,7 +45,8 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 	private ContentNodeRepository contentNodeRepository;
 
 	@Override
-	public long save(String contentModuleId, long contentId, String name, Collection<String> tags, boolean publicated,
+	public long save(
+			String contentModuleId, long contentId, String name, Collection<String> tags, boolean publicated,
 			long nodeId, long authorId, boolean draft, LocalDateTime date, Long draftSourceId) {
 		Validate.notNull(contentModuleId, "'contentModuleId' nesmí být null");
 		Validate.notNull(name, "'name' nesmí být null");
@@ -96,7 +97,8 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 	}
 
 	@Override
-	public void modify(long contentNodeId, String name, Collection<String> tags, boolean publicated,
+	public void modify(
+			long contentNodeId, String name, Collection<String> tags, boolean publicated,
 			LocalDateTime creationDate) {
 		Validate.notNull(name, "'name' nesmí být null");
 		ContentNode contentNode = contentNodeRepository.findById(contentNodeId).orElse(null);
@@ -122,8 +124,7 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 		contentTagService.saveTags(null, contentNodeId);
 
 		// vymaž content node
-		ContentNode contentNode = contentNodeRepository.findById(contentNodeId).orElse(null);
-		contentNodeRepository.delete(contentNode);
+		contentNodeRepository.findById(contentNodeId).ifPresent(contentNodeRepository::delete);
 	}
 
 	@Override
@@ -145,26 +146,25 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 	 * Nedávné obsahy
 	 */
 
-	private QueryResults<ContentNodeOverviewTO> innerByUserAccess(int offset, int limit, String sortProperty) {
-		UserInfoTO user = securityService.getCurrentUser();
-		return contentNodeRepository.findByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(), user.isAdmin(),
-				offset, limit, sortProperty);
-	}
-
 	@Override
 	public int getCount() {
-		int count = (int) innerByUserAccess(1, 1, "creationDate").getTotal();
-		return count;
+		UserInfoTO user = securityService.getCurrentUser();
+		return (int) contentNodeRepository.countByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(),
+				user.isAdmin());
 	}
 
 	@Override
 	public List<ContentNodeOverviewTO> getRecentAdded(int offset, int limit) {
-		return innerByUserAccess(offset, limit, "creationDate").getResults();
+		UserInfoTO user = securityService.getCurrentUser();
+		return contentNodeRepository.findByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(), user.isAdmin(),
+				offset, limit, "creationDate");
 	}
 
 	@Override
 	public List<ContentNodeOverviewTO> getRecentModified(int offset, int limit) {
-		return innerByUserAccess(offset, limit, "lastModificationDate").getResults();
+		UserInfoTO user = securityService.getCurrentUser();
+		return contentNodeRepository.findByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(), user.isAdmin(),
+				offset, limit, "lastModificationDate");
 	}
 
 	/**
@@ -190,7 +190,9 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 	 * Dle oblíbených uživatele
 	 */
 
-	private QueryResults<ContentNodeOverviewTO> innerByUserFavouritesAndUserAccess(long userId, int offset, int limit) {
+	private QueryResults<ContentNodeOverviewTO> innerByUserFavouritesAndUserAccess(
+			long userId, int offset,
+			int limit) {
 		UserInfoTO user = securityService.getCurrentUser();
 		return contentNodeRepository.findByUserFavouritesAndUserAccess(userId, user.getId(), user.isAdmin(), offset,
 				limit);
@@ -210,21 +212,17 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 	 * Dle filtru
 	 */
 
-	private QueryResults<ContentNodeOverviewTO> innerByFilterAndUserAccess(ContentNodeFilterTO filter, int offset,
-			int limit) {
-		UserInfoTO user = securityService.getCurrentUser();
-		return contentNodeRepository.findByFilterAndUserAccess(filter, user.getId(), user.isAdmin(), offset, limit,
-				null);
-	}
-
 	@Override
 	public int getCountByFilter(ContentNodeFilterTO filter) {
-		return (int) innerByFilterAndUserAccess(filter, 1, 1).getTotal();
+		UserInfoTO user = securityService.getCurrentUser();
+		return (int) contentNodeRepository.countByFilterAndUserAccess(filter, user.getId(), user.isAdmin());
 	}
 
 	@Override
 	public List<ContentNodeOverviewTO> getByFilter(ContentNodeFilterTO filter, int offset, int limit) {
-		return innerByFilterAndUserAccess(filter, offset, limit).getResults();
+		UserInfoTO user = securityService.getCurrentUser();
+		return contentNodeRepository.findByFilterAndUserAccess(filter, user.getId(), user.isAdmin(), offset, limit,
+				null);
 	}
 
 }

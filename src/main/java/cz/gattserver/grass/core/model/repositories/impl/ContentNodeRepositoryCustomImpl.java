@@ -1,6 +1,6 @@
 package cz.gattserver.grass.core.model.repositories.impl;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -60,8 +60,9 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 	}
 
 	@Override
-	public QueryResults<ContentNodeOverviewTO> findByTagAndUserAccess(Long tagId, Long userId, boolean admin,
-																	  int offset, int limit) {
+	public QueryResults<ContentNodeOverviewTO> findByTagAndUserAccess(
+			Long tagId, Long userId, boolean admin,
+			int offset, int limit) {
 		JPAQuery<ContentNode> query = new JPAQuery<>(entityManager);
 		QContentNode c = QContentNode.contentNode;
 		QNode n = QNode.node;
@@ -73,13 +74,14 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 				.select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id,
 						c.creationDate,
 						c.lastModificationDate, c.publicated, u.name, u.id, c.id))
-				.orderBy(new OrderSpecifier<LocalDateTime>(Order.DESC, c.creationDate)).fetchResults();
+				.orderBy(new OrderSpecifier<>(Order.DESC, c.creationDate)).fetchResults();
 	}
 
 	@Override
-	public QueryResults<ContentNodeOverviewTO> findByUserFavouritesAndUserAccess(Long favouritesUserId, Long userId,
-																				 boolean admin, int offset,
-																				 int limit) {
+	public QueryResults<ContentNodeOverviewTO> findByUserFavouritesAndUserAccess(
+			Long favouritesUserId, Long userId,
+			boolean admin, int offset,
+			int limit) {
 		JPAQuery<ContentNode> query = new JPAQuery<>(entityManager);
 		QContentNode c = QContentNode.contentNode;
 		QNode n = QNode.node;
@@ -91,28 +93,52 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 				.select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id,
 						c.creationDate,
 						c.lastModificationDate, c.publicated, u.name, u.id, c.id))
-				.orderBy(new OrderSpecifier<LocalDateTime>(Order.DESC, c.creationDate)).fetchResults();
+				.orderBy(new OrderSpecifier<>(Order.DESC, c.creationDate)).fetchResults();
 	}
 
-	@Override
-	public QueryResults<ContentNodeOverviewTO> findByFilterAndUserAccess(ContentNodeFilterTO filter, Long userId,
-																		 boolean admin, int offset, int limit,
-																		 String sortProperty) {
-		JPAQuery<ContentNode> query = new JPAQuery<>(entityManager);
+	/*
+	 * ByFilterAndUserAccess
+	 */
+
+	private JPAQuery<ContentNodeOverviewTO> queryByFilterAndUserAccess(
+			ContentNodeFilterTO filter, Long userId,
+			boolean admin) {
+		JPAQuery<ContentNodeOverviewTO> query = new JPAQuery<>(entityManager);
 		QContentNode c = QContentNode.contentNode;
 		QNode n = QNode.node;
 		QUser u = QUser.user;
 		QContentTag t = QContentTag.contentTag;
-		QuerydslUtil.applyPagination(offset, limit, query);
-		query = query.from(c).innerJoin(c.parent, n).innerJoin(c.author, u).innerJoin(c.contentTags, t)
+		return query.from(c).innerJoin(c.parent, n).innerJoin(c.author, u).innerJoin(c.contentTags, t)
 				.where(createBasicNodePredicate(filter, userId, admin));
+	}
+
+	@Override
+	public long countByFilterAndUserAccess(
+			ContentNodeFilterTO filter, Long userId,
+			boolean admin) {
+		JPAQuery<ContentNodeOverviewTO> query = queryByFilterAndUserAccess(filter, userId, admin);
+		return query.distinct().stream().count();
+	}
+
+	@Override
+	public List<ContentNodeOverviewTO> findByFilterAndUserAccess(
+			ContentNodeFilterTO filter, Long userId,
+			boolean admin, int offset, int limit,
+			String sortProperty) {
+		QContentNode c = QContentNode.contentNode;
+		QNode n = QNode.node;
+		QUser u = QUser.user;
+		JPAQuery<ContentNodeOverviewTO> query = queryByFilterAndUserAccess(filter, userId, admin);
+		QuerydslUtil.applyPagination(offset, limit, query);
 		if (sortProperty != null) {
 			query = query.orderBy(QuerydslUtil.transformOrder(false, sortProperty));
 		} else {
-			query = query.orderBy(new OrderSpecifier<LocalDateTime>(Order.DESC, c.creationDate));
+			query = query.orderBy(new OrderSpecifier<>(Order.DESC, c.creationDate));
 		}
 		return query.select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id,
-				c.creationDate, c.lastModificationDate, c.publicated, u.name, u.id, c.id)).fetchResults();
+						c.creationDate, c.lastModificationDate, c.publicated, u.name, u.id, c.id))
+				.groupBy(c.contentReaderId, c.contentId, c.name, n.name, n.id,
+						c.creationDate, c.lastModificationDate, c.publicated, u.name, u.id, c.id).fetch();
 	}
 
 }
