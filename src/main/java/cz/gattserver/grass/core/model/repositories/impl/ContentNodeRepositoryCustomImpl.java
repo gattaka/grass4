@@ -37,6 +37,7 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 		QContentNode c = QContentNode.contentNode;
 		QNode n = QNode.node;
 		QUser u = QUser.user;
+		QContentTag t = QContentTag.contentTag;
 
 		BooleanBuilder builder = new BooleanBuilder();
 		builder.and(ExpressionUtils.anyOf(c.draft.isFalse(), c.draft.isNull()));
@@ -48,9 +49,10 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 		}
 		if (filter.getParentNodeId() != null)
 			builder.and(n.id.eq(filter.getParentNodeId()));
-		if (StringUtils.isNotBlank(filter.getName()))
-			builder.and(
-					c.name.toLowerCase().like(QuerydslUtil.transformSimpleLikeFilter(filter.getName()).toLowerCase()));
+		if (StringUtils.isNotBlank(filter.getName())) {
+			String filterName = QuerydslUtil.transformSimpleLikeFilter(filter.getName()).toLowerCase();
+			builder.andAnyOf(c.name.toLowerCase().like(filterName), t.name.toLowerCase().like(filterName));
+		}
 		if (StringUtils.isNotBlank(filter.getContentReaderID()))
 			builder.and(c.contentReaderId.eq(filter.getContentReaderID()));
 
@@ -59,7 +61,7 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 
 	@Override
 	public QueryResults<ContentNodeOverviewTO> findByTagAndUserAccess(Long tagId, Long userId, boolean admin,
-                                                                      int offset, int limit) {
+																	  int offset, int limit) {
 		JPAQuery<ContentNode> query = new JPAQuery<>(entityManager);
 		QContentNode c = QContentNode.contentNode;
 		QNode n = QNode.node;
@@ -68,14 +70,16 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 		query.offset(offset).limit(limit);
 		return query.from(t).innerJoin(t.contentNodes, c).innerJoin(c.parent, n).innerJoin(c.author, u)
 				.where(createBasicNodePredicate(new ContentNodeFilterTO(), userId, admin), t.id.eq(tagId))
-				.select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
+				.select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id,
+						c.creationDate,
 						c.lastModificationDate, c.publicated, u.name, u.id, c.id))
 				.orderBy(new OrderSpecifier<LocalDateTime>(Order.DESC, c.creationDate)).fetchResults();
 	}
 
 	@Override
 	public QueryResults<ContentNodeOverviewTO> findByUserFavouritesAndUserAccess(Long favouritesUserId, Long userId,
-			boolean admin, int offset, int limit) {
+																				 boolean admin, int offset,
+																				 int limit) {
 		JPAQuery<ContentNode> query = new JPAQuery<>(entityManager);
 		QContentNode c = QContentNode.contentNode;
 		QNode n = QNode.node;
@@ -84,20 +88,23 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 		QuerydslUtil.applyPagination(offset, limit, query);
 		return query.from(uf).innerJoin(uf.favourites, c).innerJoin(c.parent, n).innerJoin(c.author, u)
 				.where(createBasicNodePredicate(new ContentNodeFilterTO(), userId, admin), uf.id.eq(favouritesUserId))
-				.select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
+				.select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id,
+						c.creationDate,
 						c.lastModificationDate, c.publicated, u.name, u.id, c.id))
 				.orderBy(new OrderSpecifier<LocalDateTime>(Order.DESC, c.creationDate)).fetchResults();
 	}
 
 	@Override
 	public QueryResults<ContentNodeOverviewTO> findByFilterAndUserAccess(ContentNodeFilterTO filter, Long userId,
-			boolean admin, int offset, int limit, String sortProperty) {
+																		 boolean admin, int offset, int limit,
+																		 String sortProperty) {
 		JPAQuery<ContentNode> query = new JPAQuery<>(entityManager);
 		QContentNode c = QContentNode.contentNode;
 		QNode n = QNode.node;
 		QUser u = QUser.user;
+		QContentTag t = QContentTag.contentTag;
 		QuerydslUtil.applyPagination(offset, limit, query);
-		query = query.from(c).innerJoin(c.parent, n).innerJoin(c.author, u)
+		query = query.from(c).innerJoin(c.parent, n).innerJoin(c.author, u).innerJoin(c.contentTags, t)
 				.where(createBasicNodePredicate(filter, userId, admin));
 		if (sortProperty != null) {
 			query = query.orderBy(QuerydslUtil.transformOrder(false, sortProperty));

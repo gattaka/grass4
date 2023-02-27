@@ -51,7 +51,7 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 		String creationDateBind = "customCreationDate";
 		String lastModificationDateBind = "customLastModificationDate";
 
-		addColumn(new IconRenderer<ContentNodeOverviewTO>(c -> {
+		addColumn(new IconRenderer<>(c -> {
 			ContentModule contentService = serviceHolder.getContentModulesByName(c.getContentReaderID());
 			Image img = new Image(contentService == null ? ImageIcon.WARNING_16_ICON.createResource()
 					: contentService.getContentIcon(), "");
@@ -60,16 +60,16 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 		}, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
 				.setKey(iconBind);
 
-		addColumn(new ComponentRenderer<Anchor, ContentNodeOverviewTO>(contentNode -> {
+		addColumn(new ComponentRenderer<>(contentNode -> {
 			ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.getContentReaderID());
 			String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory)
 					: UIUtils.getPageURL(contentService.getContentViewerPageFactory(),
-							URLIdentifierUtils.createURLIdentifier(contentNode.getContentID(), contentNode.getName()));
+					URLIdentifierUtils.createURLIdentifier(contentNode.getContentID(), contentNode.getName()));
 			return new Anchor(url, contentNode.getName());
 		})).setFlexGrow(2).setHeader("Název").setId(nameBind);
 
 		if (showPubLock) {
-			addColumn(new IconRenderer<ContentNodeOverviewTO>(c -> {
+			addColumn(new IconRenderer<>(c -> {
 				if (c.isPublicated()) {
 					return new Span();
 				} else {
@@ -80,7 +80,7 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 			}, c -> "")).setFlexGrow(0).setWidth("26px").setHeader("").setKey(lockIconBind);
 		}
 
-		addColumn(new ComponentRenderer<Anchor, ContentNodeOverviewTO>(contentNode -> {
+		addColumn(new ComponentRenderer<>(contentNode -> {
 			String url = UIUtils.getPageURL(nodePageFactory, URLIdentifierUtils
 					.createURLIdentifier(contentNode.getParentNodeId(), contentNode.getParentNodeName())) + "'>"
 					+ contentNode.getParentNodeName();
