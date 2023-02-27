@@ -26,11 +26,11 @@ public class LanguageDialog extends WebDialog {
 	private void init(LanguageTO to, SaveAction saveAction) {
 		LanguageTO targetTO = to == null ? new LanguageTO() : to;
 
-		setWidth("400px");
 
 		Binder<LanguageTO> binder = new Binder<>();
 
 		TextField nameField = new TextField();
+		nameField.setWidth("400px");
 		binder.forField(nameField).asRequired().bind(LanguageTO::getName, LanguageTO::setName);
 		addComponent(nameField);
 

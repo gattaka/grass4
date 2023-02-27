@@ -70,7 +70,8 @@ public class LanguageFacadeImpl implements LanguageFacade {
 	}
 
 	@Override
-	public List<LanguageItemTO> getLanguageItems(LanguageItemTO filterTO, int offset, int limit,
+	public List<LanguageItemTO> getLanguageItems(
+			LanguageItemTO filterTO, int offset, int limit,
 			List<QuerySortOrder> sortOrder) {
 		List<LanguageItem> items = itemRepository.findAllByLanguageSortByName(filterTO, offset, limit,
 				QuerydslUtil.transformOrdering(sortOrder, s -> s));
@@ -95,7 +96,8 @@ public class LanguageFacadeImpl implements LanguageFacade {
 	}
 
 	@Override
-	public List<LanguageItemTO> getLanguageItemsForTest(long languageId, double minRating, double maxRatingExclusive,
+	public List<LanguageItemTO> getLanguageItemsForTest(
+			long languageId, double minRating, double maxRatingExclusive,
 			int maxCount, ItemType type) {
 		List<Long> ids;
 		if (type != null)
@@ -145,7 +147,9 @@ public class LanguageFacadeImpl implements LanguageFacade {
 
 	@Override
 	public Float getSuccessRateOfLanguageAndType(ItemType type, Long langId) {
-		return ((float) itemRepository.findSuccessRateSumByLanguageAndType(type, langId))
+		Integer sum = itemRepository.findSuccessRateSumByLanguageAndType(type, langId);
+		if (sum == null) return Float.valueOf(0f);
+		return ((float) sum)
 				/ itemRepository.countByLanguageAndType(type, langId);
 	}
 

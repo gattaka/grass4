@@ -15,6 +15,8 @@ public class RandomSourceServiceImpl implements RandomSourceService {
 
 	@Override
 	public int getRandomInt(int range) {
+		if (range == 0)
+			return 0;
 		return new Random().nextInt(range);
 	}
 

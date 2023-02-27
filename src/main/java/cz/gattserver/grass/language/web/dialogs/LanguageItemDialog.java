@@ -2,8 +2,10 @@ package cz.gattserver.grass.language.web.dialogs;
 
 import java.util.Arrays;
 
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
+import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyButton;
@@ -43,6 +45,8 @@ public class LanguageItemDialog extends EditWebDialog {
 	}
 
 	public LanguageItemDialog(final LanguageItemTO to, SaveAction action, Long langId, ItemType asType) {
+		SpringContextHelper.inject(this);
+
 		setWidth("600px");
 
 		if (asType == null)
