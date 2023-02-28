@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.pages.template;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -113,7 +114,7 @@ public abstract class MenuPage extends GrassPage {
 		bottom.setId("bottom");
 		bottomHolder.add(bottom);
 
-		bottom.add(new Span("Powered by GRASS " + versionInfoService.getProjectVersion() + " © 2012-2021 Hynek Uhlíř"));
+		bottom.add(new Span("Powered by GRASS " + versionInfoService.getProjectVersion() + " © 2012-" + LocalDate.now().getYear() + " Hynek Uhlíř"));
 
 		Div bottomShadow = new Div();
 		bottomShadow.setId("bottom-shadow");
@@ -185,17 +186,15 @@ public abstract class MenuPage extends GrassPage {
 
 	/**
 	 * Získá hlášky
-	 * 
-	 * @param layout
-	 *            layout, do kterého bude vytvořen obsah
+	 *
+	 * @param layout layout, do kterého bude vytvořen obsah
 	 */
 	protected abstract void createQuotes(Div layout);
 
 	/**
 	 * Získá obsah
-	 * 
-	 * @param layout
-	 *            layout, do kterého bude vytvořen obsah
+	 *
+	 * @param layout layout, do kterého bude vytvořen obsah
 	 */
 	protected abstract void createCenterElements(Div layout);
 
