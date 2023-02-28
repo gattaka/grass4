@@ -108,7 +108,7 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 		QNode n = QNode.node;
 		QUser u = QUser.user;
 		QContentTag t = QContentTag.contentTag;
-		return query.from(c).innerJoin(c.parent, n).innerJoin(c.author, u).innerJoin(c.contentTags, t)
+		return query.from(c).innerJoin(c.parent, n).innerJoin(c.author, u).leftJoin(c.contentTags, t)
 				.where(createBasicNodePredicate(filter, userId, admin));
 	}
 
