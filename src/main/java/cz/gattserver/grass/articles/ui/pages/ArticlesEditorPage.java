@@ -444,7 +444,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     private Button createSaveAndCloseButton() {
         Button saveAndCloseButton = new ImageButton("Uložit a zavřít", ImageIcon.SAVE_16_ICON);
         saveAndCloseButton.addClickListener(event -> {
-            // aby se provedl blur na ostatních elementech a poslaly se hodnoty
             if (!isFormValid())
                 return;
             if (saveOrUpdateArticle()) {

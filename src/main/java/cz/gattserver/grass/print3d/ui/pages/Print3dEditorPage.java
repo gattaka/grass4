@@ -15,6 +15,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.StreamResource;
@@ -123,6 +124,7 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 		keywords = new TokenField(fetchItemsCallback, serializableFunction);
 
 		nameField = new TextField();
+		nameField.setValueChangeMode(ValueChangeMode.EAGER);
 		publicatedCheckBox = new Checkbox();
 
 		// operace ?
