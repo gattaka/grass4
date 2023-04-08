@@ -15,6 +15,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.StreamResource;
@@ -128,6 +129,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		photogalleryKeywords = new TokenField(fetchItemsCallback, serializableFunction);
 
 		photogalleryNameField = new TextField();
+		photogalleryNameField.setValueChangeMode(ValueChangeMode.EAGER);
 		photogalleryDateField = new DatePicker();
 		publicatedCheckBox = new Checkbox();
 		reprocessSlideshowAndMiniCheckBox = new Checkbox();
