@@ -1,4 +1,4 @@
-package cz.gattserver.grass.hw.ui.pages;
+package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.IOException;
 
@@ -12,6 +12,7 @@ import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.common.stlviewer.STLViewer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,7 @@ import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -31,20 +33,22 @@ import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 
-public class HWDetailsDocsTab extends Div {
+public class HWDetailsPrint3dTab extends Div {
 
 	private static final long serialVersionUID = 8602793883158440889L;
 
-	private static final Logger logger = LoggerFactory.getLogger(HWDetailsDocsTab.class);
+	private static final Logger logger = LoggerFactory.getLogger(HWDetailsPrint3dTab.class);
 
 	private transient HWService hwService;
 	private transient SecurityService securityFacade;
 
 	private HWItemTO hwItem;
 	private HWItemDetailsDialog hwItemDetailDialog;
-	private Grid<HWItemFileTO> docsGrid;
+	private Grid<HWItemFileTO> print3dGrid;
 
-	public HWDetailsDocsTab(HWItemTO hwItem, HWItemDetailsDialog hwItemDetailDialog) {
+	private STLViewer stlViewer;
+
+	public HWDetailsPrint3dTab(HWItemTO hwItem, HWItemDetailsDialog hwItemDetailDialog) {
 		SpringContextHelper.inject(this);
 		this.hwItem = hwItem;
 		this.hwItemDetailDialog = hwItemDetailDialog;
@@ -63,28 +67,43 @@ public class HWDetailsDocsTab extends Div {
 		return securityFacade.getCurrentUser();
 	}
 
-	private void populateDocsGrid() {
-		docsGrid.setItems(getHWService().getHWItemDocumentsFiles(hwItem.getId()));
-		docsGrid.getDataProvider().refreshAll();
+	private void populatePrint3dGrid() {
+		print3dGrid.setItems(getHWService().getHWItemPrint3dFiles(hwItem.getId()));
+		print3dGrid.getDataProvider().refreshAll();
 	}
 
-	private void downloadDocument(HWItemFileTO item) {
-		UI.getCurrent().getPage().executeJs("window.open('" + UIUtils.getContextPath() + "/" + HWConfiguration.HW_PATH
-				+ "/" + hwItem.getId() + "/doc/" + item.getName() + "', '_blank');");
+	private String getFileURL(HWItemFileTO item) {
+		return UIUtils.getContextPath() + "/" + HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/print3d/"
+				+ item.getName();
+	}
+
+	private void downloadPrint3d(HWItemFileTO item) {
+		UI.getCurrent().getPage().executeJs("window.open('" + getFileURL(item) + "', '_blank');");
 	}
 
 	private void init() {
-		docsGrid = new Grid<>();
-		docsGrid.setWidthFull();
-		UIUtils.applyGrassDefaultStyle(docsGrid);
-		docsGrid.addColumn(new TextRenderer<HWItemFileTO>(HWItemFileTO::getName)).setHeader("Název");
-		docsGrid.addColumn(new LocalDateTimeRenderer<HWItemFileTO>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
+		print3dGrid = new Grid<>();
+		print3dGrid.setSizeFull();
+		UIUtils.applyGrassDefaultStyle(print3dGrid);
+		print3dGrid.addColumn(new TextRenderer<HWItemFileTO>(HWItemFileTO::getName)).setHeader("Název");
+		print3dGrid.addColumn(new LocalDateTimeRenderer<HWItemFileTO>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
 				.setKey("datum").setHeader("Datum");
-		docsGrid.addColumn(new TextRenderer<HWItemFileTO>(HWItemFileTO::getSize)).setHeader("Velikost")
+		print3dGrid.addColumn(new TextRenderer<HWItemFileTO>(HWItemFileTO::getSize)).setHeader("Velikost")
 				.setTextAlign(ColumnTextAlign.END);
-		add(docsGrid);
 
-		populateDocsGrid();
+		stlViewer = new STLViewer(null);
+		stlViewer.getStyle().set("border", "1px solid #d1d1d1").set("box-sizing", "border-box").set("background",
+				"#fefefe");
+		stlViewer.setHeightFull();
+		stlViewer.setWidth("400px");
+
+		HorizontalLayout layout = new HorizontalLayout(print3dGrid, stlViewer);
+		layout.setPadding(false);
+		layout.setSpacing(true);
+		layout.setHeight("400px");
+		add(layout);
+
+		populatePrint3dGrid();
 
 		if (getUser().isAdmin()) {
 			GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
@@ -92,10 +111,10 @@ public class HWDetailsDocsTab extends Div {
 			upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 			upload.addSucceededListener(event -> {
 				try {
-					getHWService().saveDocumentsFile(buffer.getInputStream(event.getFileName()), event.getFileName(),
+					getHWService().savePrint3dFile(buffer.getInputStream(event.getFileName()), event.getFileName(),
 							hwItem.getId());
 					// refresh listu
-					populateDocsGrid();
+					populatePrint3dGrid();
 					hwItemDetailDialog.refreshTabLabels();
 				} catch (IOException e) {
 					String msg = "Nezdařilo se uložit soubor";
@@ -106,16 +125,23 @@ public class HWDetailsDocsTab extends Div {
 			add(upload);
 		}
 
-		docsGrid.addItemClickListener(e -> {
+		print3dGrid.addItemClickListener(e -> {
 			if (e.getClickCount() > 1)
-				downloadDocument(e.getItem());
+				downloadPrint3d(e.getItem());
+		});
+
+		print3dGrid.addSelectionListener(item -> {
+			if (!item.getFirstSelectedItem().isPresent())
+				return;
+			HWItemFileTO to = item.getFirstSelectedItem().get();
+			stlViewer.show(getFileURL(to));
 		});
 
 		OperationsLayout operationsLayout = new OperationsLayout(e -> hwItemDetailDialog.close());
 		add(operationsLayout);
 
 		GridButton<HWItemFileTO> downloadBtn = new GridButton<>("Stáhnout",
-				set -> downloadDocument(set.iterator().next()), docsGrid);
+				set -> downloadPrint3d(set.iterator().next()), print3dGrid);
 		downloadBtn.setEnableResolver(set -> set.size() == 1);
 		downloadBtn.setIcon(new Image(ImageIcon.DOWN_16_ICON.createResource(), "Stáhnout"));
 		operationsLayout.add(downloadBtn);
@@ -123,10 +149,10 @@ public class HWDetailsDocsTab extends Div {
 		if (getUser().isAdmin()) {
 			Button deleteBtn = new DeleteGridButton<>("Smazat záznam", items -> {
 				HWItemFileTO item = items.iterator().next();
-				getHWService().deleteHWItemDocumentsFile(hwItem.getId(), item.getName());
-				populateDocsGrid();
+				getHWService().deleteHWItemPrint3dFile(hwItem.getId(), item.getName());
+				populatePrint3dGrid();
 				hwItemDetailDialog.refreshTabLabels();
-			}, docsGrid);
+			}, print3dGrid);
 			operationsLayout.add(deleteBtn);
 		}
 	}

@@ -22,6 +22,8 @@ import java.util.stream.Stream;
 import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
+import cz.gattserver.grass.pg.util.PGUtils;
+import net.coobird.thumbnailator.Thumbnails;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,6 +142,15 @@ public class HWServiceImpl implements HWService {
 		return file;
 	}
 
+	private Path getHWItemImagesMiniPath(Long id) throws IOException {
+		HWConfiguration configuration = loadConfiguration();
+		Path hwPath = getHWPath(id);
+		Path file = hwPath.resolve(configuration.getImagesMiniDir());
+		if (!Files.exists(file))
+			fileSystemService.createDirectoriesWithPerms(file);
+		return file;
+	}
+
 	private HWItemFileTO mapPathToItem(Path path) {
 		HWItemFileTO to = new HWItemFileTO().setName(path.getFileName().toString());
 		try {
@@ -162,20 +173,30 @@ public class HWServiceImpl implements HWService {
 
 	@Override
 	public void saveImagesFile(InputStream in, String fileName, HWItemTO item) throws IOException {
-		Path imagesPath;
-		imagesPath = getHWItemImagesPath(item.getId());
+		Path imagesPath = getHWItemImagesPath(item.getId());
 		Path imagePath = imagesPath.resolve(fileName);
 		if (!imagePath.normalize().startsWith(imagesPath))
 			throw new IllegalArgumentException(ILLEGAL_PATH_IMGS_ERR);
 		Files.copy(in, imagePath, StandardCopyOption.REPLACE_EXISTING);
 		fileSystemService.grantPermissions(imagePath);
+
+		Path imagesMiniPath = getHWItemImagesMiniPath(item.getId());
+		Path imageMiniPath = imagesMiniPath.resolve(fileName);
+
+		String imageName = imageMiniPath.getFileName().toString();
+		try {
+			PGUtils.resizeImage(imagePath, imageMiniPath);
+			logger.info("Náhled obrázku {} byl úspěšně uložen", imageName);
+		} catch (Exception e) {
+			logger.error("Vytváření náhledu obrázku {} se nezdařilo", imageName, e);
+		}
 	}
 
 	@Override
 	public List<HWItemFileTO> getHWItemImagesFiles(Long id) {
 		Path imagesPath;
 		try {
-			imagesPath = getHWItemImagesPath(id);
+			imagesPath = getHWItemImagesMiniPath(id);
 			List<HWItemFileTO> list = new ArrayList<>();
 			try (Stream<Path> stream = Files.list(imagesPath)) {
 				stream.forEach(p -> list.add(mapPathToItem(p)));
@@ -223,14 +244,19 @@ public class HWServiceImpl implements HWService {
 	}
 
 	@Override
-	public boolean deleteHWItemImagesFile(Long id, String name) {
-		Path images;
+	public boolean deleteHWItemImagesFile(Long id, String fileName) {
 		try {
-			images = getHWItemImagesPath(id);
-			Path image = images.resolve(name);
+			Path images = getHWItemImagesPath(id);
+			Path image = images.resolve(fileName);
 			if (!image.normalize().startsWith(images))
 				throw new IllegalArgumentException(ILLEGAL_PATH_IMGS_ERR);
-			return Files.deleteIfExists(image);
+			Files.deleteIfExists(image);
+
+			Path imagesMiniPath = getHWItemImagesMiniPath(id);
+			Path imageMiniPath = imagesMiniPath.resolve(fileName);
+			Files.deleteIfExists(imageMiniPath);
+
+			return true;
 		} catch (IOException e) {
 			throw new GrassException("Nezdařilo se smazat grafickou přílohu HW položky.", e);
 		}

@@ -10,6 +10,8 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.hw.HWSection;
+import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
+import cz.gattserver.grass.hw.ui.tabs.HWTypesTab;
 
 @Route("hw")
 @PageTitle("Evidence HW")

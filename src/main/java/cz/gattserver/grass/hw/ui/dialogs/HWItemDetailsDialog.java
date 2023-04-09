@@ -10,12 +10,12 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
-import cz.gattserver.grass.hw.ui.pages.HWDetailsDocsTab;
-import cz.gattserver.grass.hw.ui.pages.HWDetailsInfoTab;
-import cz.gattserver.grass.hw.ui.pages.HWDetailsPhotosTab;
-import cz.gattserver.grass.hw.ui.pages.HWDetailsPrint3dTab;
-import cz.gattserver.grass.hw.ui.pages.HWDetailsServiceNotesTab;
-import cz.gattserver.grass.hw.ui.pages.HWItemsTab;
+import cz.gattserver.grass.hw.ui.tabs.HWDetailsDocsTab;
+import cz.gattserver.grass.hw.ui.tabs.HWDetailsInfoTab;
+import cz.gattserver.grass.hw.ui.tabs.HWDetailsPhotosTab;
+import cz.gattserver.grass.hw.ui.tabs.HWDetailsPrint3dTab;
+import cz.gattserver.grass.hw.ui.tabs.HWDetailsServiceNotesTab;
+import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
 
 public class HWItemDetailsDialog extends Dialog {
 

@@ -1,4 +1,4 @@
-package cz.gattserver.grass.hw.ui.pages;
+package cz.gattserver.grass.hw.ui.tabs;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.ImageIcon;

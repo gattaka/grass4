@@ -30,6 +30,11 @@ public class HWConfiguration extends AbstractConfiguration {
 	private String imagesDir = "images";
 
 	/**
+	 * Adresář pro ukládání miniatur obrázků
+	 */
+	private String imagesMiniDir = "mini";
+
+	/**
 	 * Adresář pro ukládání dokumentace
 	 */
 	private String documentsDir = "documents";
@@ -116,4 +121,11 @@ public class HWConfiguration extends AbstractConfiguration {
 		this.print3dDir = print3dDir;
 	}
 
+	public String getImagesMiniDir() {
+		return imagesMiniDir;
+	}
+
+	public void setImagesMiniDir(String imagesMiniDir) {
+		this.imagesMiniDir = imagesMiniDir;
+	}
 }

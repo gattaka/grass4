@@ -1,4 +1,4 @@
-package cz.gattserver.grass.hw.ui.pages;
+package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.IOException;
 import java.io.InputStream;
