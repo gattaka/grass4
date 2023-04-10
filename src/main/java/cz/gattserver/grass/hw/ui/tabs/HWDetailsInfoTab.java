@@ -219,7 +219,8 @@ public class HWDetailsInfoTab extends Div {
 		}, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
 		grid.addColumn(
-				new ComponentRenderer<Button, HWItemOverviewTO>(c -> new LinkButton(createShortName(c.getName()), e -> {
+				new ComponentRenderer<Button, HWItemOverviewTO>(c -> new LinkButton(createShortName(c.getName()),
+						e -> {
 					hwItemDetailDialog.close();
 					HWItemTO detailTO = hwService.getHWItem(c.getId());
 					new HWItemDetailsDialog(itemsTab, detailTO.getId()).open();
@@ -264,7 +265,8 @@ public class HWDetailsInfoTab extends Div {
 			operationsLayout.add(fixBtn);
 
 			final Button deleteBtn = new DeleteButton(e -> new ConfirmDialog(
-					"Opravdu smazat '" + hwItem.getName() + "' (budou smazány i servisní záznamy a údaje u součástí) ?",
+					"Opravdu smazat '" + hwItem.getName() + "' (budou smazány i servisní záznamy a údaje u součástí)" +
+							" ?",
 					ev -> {
 						try {
 							hwService.deleteHWItem(hwItem.getId());
@@ -288,7 +290,7 @@ public class HWDetailsInfoTab extends Div {
 	 */
 	private boolean tryCreateHWImage(final HWItemTO hwItem) {
 		InputStream iconIs;
-		iconIs = hwService.getHWItemIconFileInputStream(hwItem.getId());
+		iconIs = hwService.getHWItemIconMiniFileInputStream(hwItem.getId());
 		if (iconIs == null)
 			return false;
 
@@ -334,19 +336,10 @@ public class HWDetailsInfoTab extends Div {
 		upload.setUploadButton(uploadButton);
 		Span dropLabel = new Span("Drop");
 		upload.setDropLabel(dropLabel);
-		upload.setMaxFileSize(2000000);
 		upload.setAcceptedFileTypes("image/jpg", "image/jpeg", "image/png");
 		upload.addSucceededListener(e -> {
-			try {
-				// vytvoř miniaturu
-				OutputStream bos = hwService.createHWItemIconOutputStream(e.getFileName(), hwItem.getId());
-				IOUtils.copy(buffer.getInputStream(), bos);
-				tryCreateHWImage(hwItem);
-			} catch (IOException ex) {
-				String err = "Nezdařilo se nahrát obrázek nápoje";
-				logger.error(err, ex);
-				UIUtils.showError(err);
-			}
+			hwService.createHWItemIcon(buffer.getInputStream(), e.getFileName(), hwItem.getId());
+			tryCreateHWImage(hwItem);
 		});
 		hwImageLayout.removeAll();
 		hwImageLayout.getStyle().set("border", "1px solid lightgray");

@@ -81,12 +81,12 @@ public class HWItemsGrid extends Div {
 
 			@ClientCallable
 			private void imgShowCallback(Long id, double x, double y) {
+				InputStream iconIs = hwService.getHWItemIconMiniFileInputStream(id);
+				if (iconIs == null)
+					return;
 				iconDiv.setVisible(true);
 				iconDiv.removeAll();
 				String name = "hw-item-" + id;
-				InputStream iconIs = hwService.getHWItemIconFileInputStream(id);
-				if (iconIs == null)
-					return;
 				Image img = new Image(new StreamResource(name, () -> iconIs), name);
 				iconDiv.add(img);
 				iconDiv.getStyle().set("left", (15 + x) + "px").set("top", y + "px");

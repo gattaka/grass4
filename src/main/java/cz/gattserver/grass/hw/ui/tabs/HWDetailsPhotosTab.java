@@ -98,7 +98,7 @@ public class HWDetailsPhotosTab extends Div {
 		containerDiv.add(gridLayout);
 
 		int counter = 0;
-		for (HWItemFileTO item : getHWService().getHWItemImagesFiles(hwItem.getId())) {
+		for (HWItemFileTO item : getHWService().getHWItemImagesMiniFiles(hwItem.getId())) {
 			if (counter == 0)
 				gridLayout.newRow();
 			counter = (counter + 1) % 5;
@@ -111,9 +111,9 @@ public class HWDetailsPhotosTab extends Div {
 
 			Image img = new Image(
 					new StreamResource(item.getName(),
-							() -> getHWService().getHWItemImagesFileInputStream(hwItem.getId(), item.getName())),
+							() -> getHWService().getHWItemImagesMiniFileInputStream(hwItem.getId(), item.getName())),
 					item.getName());
-			img.addClassName("thumbnail-200");
+			img.addClassName("thumbnail-150");
 			itemDiv.add(img);
 
 			Div buttonLayout = new Div();

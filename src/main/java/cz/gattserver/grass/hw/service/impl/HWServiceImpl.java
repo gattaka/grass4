@@ -2,7 +2,6 @@ package cz.gattserver.grass.hw.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,7 +22,7 @@ import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.pg.util.PGUtils;
-import net.coobird.thumbnailator.Thumbnails;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,6 +55,8 @@ import cz.gattserver.grass.hw.service.HWService;
 public class HWServiceImpl implements HWService {
 
 	private static final Logger logger = LoggerFactory.getLogger(HWServiceImpl.class);
+
+	private static final int MINIATURE_SIZE = 200;
 
 	private static final String ILLEGAL_PATH_IMGS_ERR = "Podtečení adresáře grafických příloh";
 	private static final String ILLEGAL_PATH_DOCS_ERR = "Podtečení adresáře dokumentací";
@@ -91,15 +92,12 @@ public class HWServiceImpl implements HWService {
 
 	/**
 	 * Získá {@link Path} dle jména adresáře HW položky
-	 * 
-	 * @param id
-	 *            id HW položky
+	 *
+	 * @param id id HW položky
 	 * @return {@link Path} adresář galerie
-	 * @throws IllegalStateException
-	 *             pokud neexistuje kořenový adresář HW -- chyba nastavení
-	 *             modulu HW
-	 * @throws IllegalArgumentException
-	 *             pokud předaný adresář podtéká kořen modulu HW
+	 * @throws IllegalStateException    pokud neexistuje kořenový adresář HW -- chyba nastavení
+	 *                                  modulu HW
+	 * @throws IllegalArgumentException pokud předaný adresář podtéká kořen modulu HW
 	 */
 	private Path getHWPath(Long id) {
 		Validate.notNull(id, "ID HW položky nesmí být null");
@@ -167,6 +165,10 @@ public class HWServiceImpl implements HWService {
 		return to;
 	}
 
+	private void createMiniature(Path imagePath, Path imageMiniPath) throws IOException {
+		PGUtils.resizeImage(imagePath, imageMiniPath, MINIATURE_SIZE, MINIATURE_SIZE);
+	}
+
 	/*
 	 * Images
 	 */
@@ -185,7 +187,7 @@ public class HWServiceImpl implements HWService {
 
 		String imageName = imageMiniPath.getFileName().toString();
 		try {
-			PGUtils.resizeImage(imagePath, imageMiniPath);
+			createMiniature(imagePath, imageMiniPath);
 			logger.info("Náhled obrázku {} byl úspěšně uložen", imageName);
 		} catch (Exception e) {
 			logger.error("Vytváření náhledu obrázku {} se nezdařilo", imageName, e);
@@ -193,7 +195,7 @@ public class HWServiceImpl implements HWService {
 	}
 
 	@Override
-	public List<HWItemFileTO> getHWItemImagesFiles(Long id) {
+	public List<HWItemFileTO> getHWItemImagesMiniFiles(Long id) {
 		Path imagesPath;
 		try {
 			imagesPath = getHWItemImagesMiniPath(id);
@@ -208,10 +210,10 @@ public class HWServiceImpl implements HWService {
 	}
 
 	@Override
-	public long getHWItemImagesFilesCount(Long id) {
+	public long getHWItemImagesMiniFilesCount(Long id) {
 		Path imagesPath;
 		try {
-			imagesPath = getHWItemImagesPath(id);
+			imagesPath = getHWItemImagesMiniPath(id);
 			try (Stream<Path> stream = Files.list(imagesPath)) {
 				return stream.count();
 			}
@@ -222,9 +224,8 @@ public class HWServiceImpl implements HWService {
 
 	@Override
 	public Path getHWItemImagesFilePath(Long id, String name) {
-		Path images;
 		try {
-			images = getHWItemImagesPath(id);
+			Path images = getHWItemImagesPath(id);
 			Path image = images.resolve(name);
 			if (!image.normalize().startsWith(images))
 				throw new IllegalArgumentException(ILLEGAL_PATH_IMGS_ERR);
@@ -235,9 +236,13 @@ public class HWServiceImpl implements HWService {
 	}
 
 	@Override
-	public InputStream getHWItemImagesFileInputStream(Long id, String name) {
+	public InputStream getHWItemImagesMiniFileInputStream(Long id, String name) {
 		try {
-			return Files.newInputStream(getHWItemImagesFilePath(id, name));
+			Path images = getHWItemImagesMiniPath(id);
+			Path image = images.resolve(name);
+			if (!image.normalize().startsWith(images))
+				throw new IllegalArgumentException(ILLEGAL_PATH_IMGS_ERR);
+			return Files.newInputStream(image);
 		} catch (IOException e) {
 			throw new GrassException("Nezdařilo se získat grafickou přílohu HW položky.", e);
 		}
@@ -259,6 +264,51 @@ public class HWServiceImpl implements HWService {
 			return true;
 		} catch (IOException e) {
 			throw new GrassException("Nezdařilo se smazat grafickou přílohu HW položky.", e);
+		}
+	}
+
+	@Override
+	public void processMiniatures() {
+		List<Long> ids = hwItemRepository.findAllIds();
+		for (Long id : ids) {
+			// icon
+			try {
+				Path iconPath = getHWItemIconFile(id);
+				if (iconPath != null) {
+					Path iconMiniPath = iconPath.getParent().resolve(iconPath.getFileName().toString().replace("icon",
+							"icon_mini"));
+					createMiniature(iconPath, iconMiniPath);
+				}
+			} catch (Exception e) {
+				throw new GrassException("Nezdařilo se vytvořit miniaturu ikony HW položky " + id + ".",
+						e);
+			}
+			// images
+			try {
+				Path imagesPath = getHWItemImagesPath(id);
+				if (imagesPath != null) {
+					Path imagesMiniPath = getHWItemImagesMiniPath(id);
+					try (Stream<Path> s = Files.walk(imagesPath)) {
+						s.forEach(p -> {
+							if (Files.isDirectory(p))
+								return;
+							String imageName = p.getFileName().toString();
+							Path imageMiniPath = imagesMiniPath.resolve(imageName);
+							try {
+								createMiniature(p, imageMiniPath);
+							} catch (Exception e) {
+								throw new GrassException("Nezdařilo se vytvořit miniaturu grafické přílohu " + imageName +
+										" HW položky " + id + ".",
+										e);
+							}
+						});
+					}
+				}
+			} catch (Exception e) {
+				throw new GrassException("Nezdařilo se vytvořit miniatury grafických přílohu HW položky " + id +
+						".",
+						e);
+			}
 		}
 	}
 
@@ -425,35 +475,61 @@ public class HWServiceImpl implements HWService {
 	 */
 
 	@Override
-	public OutputStream createHWItemIconOutputStream(String filename, Long id) {
-		String[] parts = filename.split("\\.");
+	public void createHWItemIcon(InputStream inputStream, String fileName, Long id) {
+		String[] parts = fileName.split("\\.");
 		String extension = parts.length >= 1 ? parts[parts.length - 1] : "";
 
 		Path hwItemDir;
 		try {
 			hwItemDir = getHWPath(id);
-			Path file = hwItemDir.resolve("icon." + extension);
-			return Files.newOutputStream(file);
+			Path imagePath = hwItemDir.resolve("icon." + extension);
+			IOUtils.copy(inputStream, Files.newOutputStream(imagePath));
+
+			Path imageMiniPath = hwItemDir.resolve("icon_mini." + extension);
+			createMiniature(imagePath, imageMiniPath);
 		} catch (IOException e) {
 			throw new GrassException("Nezdařila se příprava pro uložení ikony HW položky.", e);
 		}
 	}
 
-	@Override
-	public Path getHWItemIconFile(Long id) throws IOException {
+	private Path getHWItemIconFile(Long id, boolean mini) throws IOException {
 		Path hwPath = getHWPath(id);
 		if (!Files.exists(hwPath))
 			return null;
 		try (Stream<Path> stream = Files.list(hwPath)) {
-			return stream.filter(p -> p.getFileName().toString().matches("icon\\.[^\\.]*")).findFirst().orElse(null);
+			String regex = "icon";
+			if (mini)
+				regex += "_mini";
+			regex += "\\.[^\\.]*";
+			String finalRegex = regex;
+			return stream.filter(p -> p.getFileName().toString().matches(finalRegex)).findFirst().orElse(null);
 		}
 	}
 
 	@Override
+	public Path getHWItemIconFile(Long id) throws IOException {
+		return getHWItemIconFile(id, false);
+	}
+
+	@Override
+	public Path getHWItemIconMiniFile(Long id) throws IOException {
+		return getHWItemIconFile(id, true);
+	}
+
+	@Override
 	public InputStream getHWItemIconFileInputStream(Long id) {
-		Path path;
 		try {
-			path = getHWItemIconFile(id);
+			Path path = getHWItemIconFile(id);
+			return path != null ? Files.newInputStream(path) : null;
+		} catch (IOException e) {
+			throw new GrassException("Nezdařilo se získat ikonu HW položky.", e);
+		}
+	}
+
+	@Override
+	public InputStream getHWItemIconMiniFileInputStream(Long id) {
+		try {
+			Path path = getHWItemIconMiniFile(id);
 			return path != null ? Files.newInputStream(path) : null;
 		} catch (IOException e) {
 			throw new GrassException("Nezdařilo se získat ikonu HW položky.", e);
@@ -462,14 +538,17 @@ public class HWServiceImpl implements HWService {
 
 	@Override
 	public boolean deleteHWItemIconFile(Long id) {
-		Path image;
 		try {
-			image = getHWItemIconFile(id);
+			Path image = getHWItemIconFile(id);
 			if (image != null)
 				return Files.deleteIfExists(image);
+
+			Path imageMini = getHWItemIconMiniFile(id);
+			if (imageMini != null)
+				return Files.deleteIfExists(imageMini);
 			return false;
 		} catch (IOException e) {
-			throw new GrassException("Nezdařilo se smazat ikonu HW položky.", e);
+			throw new GrassException("Nezdařilo se smazat miniaturu ikonu HW položky.", e);
 		}
 	}
 
@@ -536,7 +615,7 @@ public class HWServiceImpl implements HWService {
 			Path origPath = getHWPath(origId);
 			if (Files.exists(origPath)) {
 				Path copyPath = getHWPath(copyId);
-				Files.walkFileTree(origPath, new SimpleFileVisitor<Path>() {
+				Files.walkFileTree(origPath, new SimpleFileVisitor<>() {
 					@Override
 					public FileVisitResult preVisitDirectory(final Path dir, final BasicFileAttributes attrs)
 							throws IOException {
@@ -678,13 +757,10 @@ public class HWServiceImpl implements HWService {
 	/**
 	 * Vygeneruje {@link HWServiceNote} o přidání/odebrání HW, uloží a přidá k
 	 * cílovému HW
-	 * 
-	 * @param triggerItem
-	 *            HW který je přidán/odebrán
-	 * @param triggerNote
-	 *            {@link HWServiceNote}, který událost spustil
-	 * @param added
-	 *            {@code true} pokud byl HW přidán
+	 *
+	 * @param triggerItem HW který je přidán/odebrán
+	 * @param triggerNote {@link HWServiceNote}, který událost spustil
+	 * @param added       {@code true} pokud byl HW přidán
 	 */
 	private void saveHWPartMoveServiceNote(HWItem triggerItem, HWServiceNote triggerNote, boolean added) {
 		HWItem targetItem = hwItemRepository.findById(triggerItem.getUsedIn().getId()).orElse(null);
@@ -692,7 +768,9 @@ public class HWServiceImpl implements HWService {
 		removeNote.setDate(triggerNote.getDate());
 
 		StringBuilder builder = new StringBuilder();
-		builder.append(added ? "Byl přidán:" : "Byl odebrán:").append("\n").append(triggerItem.getName()).append("\n\n")
+		builder.append(added ? "Byl přidán:" : "Byl odebrán:").append("\n").append(triggerItem.getName()).append(
+						"\n" +
+								"\n")
 				.append("Důvod:").append("\n").append(triggerNote.getDescription());
 		removeNote.setDescription(builder.toString());
 		removeNote.setState(targetItem.getState());

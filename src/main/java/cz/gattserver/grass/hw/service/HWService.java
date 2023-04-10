@@ -2,7 +2,6 @@ package cz.gattserver.grass.hw.service;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
@@ -25,19 +24,21 @@ public interface HWService {
 
 	void saveImagesFile(InputStream in, String fileName, HWItemTO item) throws IOException;
 
-	List<HWItemFileTO> getHWItemImagesFiles(Long id);
+	List<HWItemFileTO> getHWItemImagesMiniFiles(Long id);
 
-	long getHWItemImagesFilesCount(Long id);
+	long getHWItemImagesMiniFilesCount(Long id);
 
 	Path getHWItemImagesFilePath(Long id, String name);
 
-	InputStream getHWItemImagesFileInputStream(Long id, String name);
+	InputStream getHWItemImagesMiniFileInputStream(Long id, String name);
 
 	boolean deleteHWItemImagesFile(Long id, String name);
 
 	/*
 	 * 3D files
 	 */
+
+	void processMiniatures();
 
 	void savePrint3dFile(InputStream in, String fileName, Long id) throws IOException;
 
@@ -71,11 +72,15 @@ public interface HWService {
 	 * Icons
 	 */
 
-	OutputStream createHWItemIconOutputStream(String filename, Long id);
+	void createHWItemIcon(InputStream inputStream, String fileName, Long id);
 
 	Path getHWItemIconFile(Long id) throws IOException;
 
+	Path getHWItemIconMiniFile(Long id) throws IOException;
+
 	InputStream getHWItemIconFileInputStream(Long id);
+
+	InputStream getHWItemIconMiniFileInputStream(Long id);
 
 	boolean deleteHWItemIconFile(Long id);
 
@@ -85,7 +90,7 @@ public interface HWService {
 
 	/**
 	 * Uloží nebo aktualizuje typ hw položky
-	 * 
+	 *
 	 * @param hwItemTypeTO
 	 *            to položky
 	 * @return id uložené položky
@@ -108,7 +113,7 @@ public interface HWService {
 
 	/**
 	 * Vytvoří kopii základu položky (mimo záznamů a součástí)
-	 * 
+	 *
 	 * @param itemId
 	 *            id předmětu, který má být vyloučen z přehledu
 	 */
@@ -132,7 +137,7 @@ public interface HWService {
 
 	/**
 	 * Získá všechny předměty, kromě předmětu jehož id je předáno jako parametr
-	 * 
+	 *
 	 * @param itemId
 	 *            id předmětu, který má být vyloučen z přehledu
 	 * @return HW předměty
@@ -150,5 +155,4 @@ public interface HWService {
 	void modifyServiceNote(HWServiceNoteTO serviceNoteDTO);
 
 	void deleteServiceNote(HWServiceNoteTO serviceNoteDTO, Long id);
-
 }

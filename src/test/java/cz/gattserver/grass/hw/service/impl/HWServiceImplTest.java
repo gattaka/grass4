@@ -92,7 +92,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwService.saveImagesFile(this.getClass().getResourceAsStream("large.jpg"), "testImage1.jpg", itemTO);
 		hwService.saveImagesFile(this.getClass().getResourceAsStream("large.jpg"), "testImage2.jpg", itemTO);
 
-		List<HWItemFileTO> files = hwService.getHWItemImagesFiles(itemTO.getId());
+		List<HWItemFileTO> files = hwService.getHWItemImagesMiniFiles(itemTO.getId());
 		assertEquals(2, files.size());
 		assertEquals("testImage1.jpg", files.get(0).getName());
 		assertEquals("testImage2.jpg", files.get(1).getName());
@@ -106,7 +106,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO.setId(123456L);
 		hwService.saveImagesFile(this.getClass().getResourceAsStream("large.jpg"), "testImage.jpg", itemTO);
 
-		InputStream is = hwService.getHWItemImagesFileInputStream(itemTO.getId(), "testImage.jpg");
+		InputStream is = hwService.getHWItemImagesMiniFileInputStream(itemTO.getId(), "testImage.jpg");
 		assertTrue(ImageComparator.isEqualAsFiles(this.getClass().getResourceAsStream("large.jpg"), is));
 	}
 
@@ -206,8 +206,7 @@ public class HWServiceImplTest extends DBCleanTest {
 
 		HWItemTO itemTO = new HWItemTO();
 		itemTO.setId(123456L);
-		OutputStream os = hwService.createHWItemIconOutputStream("testIcon.jpg", itemTO.getId());
-		IOUtils.copy(this.getClass().getResourceAsStream("large.jpg"), os);
+		hwService.createHWItemIcon(this.getClass().getResourceAsStream("large.jpg"), "testIcon.jpg", itemTO.getId());
 
 		HWConfiguration conf = new HWConfiguration();
 		configurationService.loadConfiguration(conf);
@@ -223,8 +222,8 @@ public class HWServiceImplTest extends DBCleanTest {
 
 		HWItemTO itemTO = new HWItemTO();
 		itemTO.setId(123456L);
-		OutputStream os = hwService.createHWItemIconOutputStream("testIcon.jpg", itemTO.getId());
-		IOUtils.copy(this.getClass().getResourceAsStream("large.jpg"), os);
+		hwService.createHWItemIcon(this.getClass().getResourceAsStream("large.jpg"), "testIcon.jpg",
+				itemTO.getId());
 
 		InputStream is = hwService.getHWItemIconFileInputStream(itemTO.getId());
 		assertTrue(ImageComparator.isEqualAsFiles(this.getClass().getResourceAsStream("large.jpg"), is));
@@ -237,8 +236,7 @@ public class HWServiceImplTest extends DBCleanTest {
 
 		HWItemTO itemTO = new HWItemTO();
 		itemTO.setId(123456L);
-		OutputStream os = hwService.createHWItemIconOutputStream("testIcon.jpg", itemTO.getId());
-		IOUtils.copy(this.getClass().getResourceAsStream("large.jpg"), os);
+		hwService.createHWItemIcon(this.getClass().getResourceAsStream("large.jpg"), "testIcon.jpg", itemTO.getId());
 
 		HWConfiguration conf = new HWConfiguration();
 		configurationService.loadConfiguration(conf);
@@ -347,7 +345,7 @@ public class HWServiceImplTest extends DBCleanTest {
 	@Test
 	public void testHWItemOperations() throws IOException {
 		prepareFS(fileSystemService.getFileSystem());
-		
+
 		HWItemTO itemTO = new HWItemTO();
 		itemTO.setName("test Name");
 		itemTO.setDescription("test description");

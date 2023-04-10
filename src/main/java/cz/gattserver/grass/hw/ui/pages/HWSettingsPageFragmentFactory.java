@@ -3,12 +3,20 @@ package cz.gattserver.grass.hw.ui.pages;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
+import java.util.UUID;
 
+import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.grass.articles.ui.pages.settings.ArticlesSettingsPageFragmentFactory;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
+import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.core.ui.components.button.SaveButton;
+import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.service.HWService;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
@@ -27,6 +35,9 @@ public class HWSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
 	@Autowired
 	private FileSystemService fileSystemService;
+
+	@Autowired
+	private HWService hwService;
 
 	@Override
 	public void createFragment(Div layout) {
@@ -58,11 +69,18 @@ public class HWSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
 		// Save tlačítko
 		Button saveButton = new SaveButton(e -> {
-			configuration.setRootDir((String) outputPathField.getValue());
+			configuration.setRootDir(outputPathField.getValue());
 			storeConfiguration(configuration);
 		});
 		binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
 		buttonLayout.add(saveButton);
+
+		// Přegenerování miniatur tlačítko
+		layout.add(new H2("Přegenerování miniatur"));
+
+		ImageButton reprocessButton = new ImageButton("Přegenerovat miniatury", ImageIcon.GEAR2_16_ICON,
+				e -> hwService.processMiniatures());
+		layout.add(reprocessButton);
 	}
 
 	private HWConfiguration loadConfiguration() {

@@ -57,20 +57,20 @@ public class HWItemsTab extends Div {
 		}
 
 		// Zobrazení detailů položky HW
-		Button detailsBtn = new GridButton<HWItemOverviewTO>("Detail",
+		Button detailsBtn = new GridButton<>("Detail",
 				set -> openDetailWindow(set.iterator().next().getId()), itemsGrid.getGrid());
 		detailsBtn.setIcon(new Image(ImageIcon.CLIPBOARD_16_ICON.createResource(), "image"));
 		buttonLayout.add(detailsBtn);
 
 		if (securityFacade.getCurrentUser().isAdmin()) {
 			// Oprava údajů existující položky HW
-			Button fixBtn = new GridButton<HWItemOverviewTO>("Upravit", set -> openItemWindow(set.iterator().next()),
+			Button fixBtn = new GridButton<>("Upravit", set -> openItemWindow(set.iterator().next()),
 					itemsGrid.getGrid());
 			fixBtn.setIcon(new Image(ImageIcon.QUICKEDIT_16_ICON.createResource(), "image"));
 			buttonLayout.add(fixBtn);
 
 			// Smazání položky HW
-			Button deleteBtn = new DeleteGridButton<HWItemOverviewTO>("Smazat", set -> {
+			Button deleteBtn = new DeleteGridButton<>("Smazat", set -> {
 				HWItemOverviewTO item = set.iterator().next();
 				deleteItem(item);
 			}, itemsGrid.getGrid());

@@ -42,7 +42,7 @@ public class HWItemDetailsDialog extends Dialog {
 		this.hwItemId = hwItemId;
 		this.hwItem = getHWService().getHWItem(hwItemId);
 
-		setWidth("1080px");
+		setWidth("1120px");
 
 		Div nameDiv = new Div(new Text(hwItem.getName()));
 		nameDiv.getStyle().set("font-size", "15px").set("margin-bottom", "var(--lumo-space-m)")
@@ -108,7 +108,7 @@ public class HWItemDetailsDialog extends Dialog {
 	}
 
 	private String createPhotosTabLabel() {
-		return "Fotografie (" + getHWService().getHWItemImagesFilesCount(hwItemId) + ")";
+		return "Fotografie (" + getHWService().getHWItemImagesMiniFilesCount(hwItemId) + ")";
 	}
 
 	private String createPrint3dTabLabel() {
