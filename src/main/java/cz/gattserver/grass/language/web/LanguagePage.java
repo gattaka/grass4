@@ -138,9 +138,6 @@ public class LanguagePage extends OneColumnPage {
 			langs.addAll(languageFacade.getLanguages());
 			grid.getDataProvider().refreshAll();
 		}).open(), grid));
-
-		if (!langs.isEmpty())
-			grid.select(langs.get(0));
 	}
 
 	private void createCrosswordTab(Long langId) {
