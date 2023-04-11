@@ -107,7 +107,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwService.saveImagesFile(this.getClass().getResourceAsStream("large.jpg"), "testImage.jpg", itemTO);
 
 		InputStream is = hwService.getHWItemImagesMiniFileInputStream(itemTO.getId(), "testImage.jpg");
-		assertTrue(ImageComparator.isEqualAsFiles(this.getClass().getResourceAsStream("large.jpg"), is));
+		assertTrue(ImageComparator.isEqualAsFiles(this.getClass().getResourceAsStream("mini.jpg"), is));
 	}
 
 	@Test
