@@ -5,6 +5,7 @@ import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
+import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
@@ -35,7 +36,8 @@ public class RecipesPage extends OneColumnPage {
 	@Autowired
 	private SecurityService securityService;
 
-	private transient RecipesService recipesService;
+	@Autowired
+	private RecipesService recipesService;
 
 	private Grid<RecipeOverviewTO> grid;
 	private H2 nameLabel;
@@ -51,7 +53,7 @@ public class RecipesPage extends OneColumnPage {
 	private void showDetail(RecipeDTO choosenRecipe) {
 		nameLabel.setVisible(true);
 		nameLabel.setText(choosenRecipe.getName());
-		String value = getRecipesService().eolToBreakline(choosenRecipe.getDescription());
+		String value = recipesService.eolToBreakline(choosenRecipe.getDescription());
 		contentLabel.setValue(value);
 		this.choosenRecipe = choosenRecipe;
 	}
@@ -74,7 +76,7 @@ public class RecipesPage extends OneColumnPage {
 		Column<RecipeOverviewTO> nazevColumn = grid.addColumn(RecipeOverviewTO::getName).setHeader("Název");
 
 		grid.addSelectionListener((e) -> e.getFirstSelectedItem()
-				.ifPresent((v) -> showDetail(getRecipesService().getRecipeById(v.getId()))));
+				.ifPresent((v) -> showDetail(recipesService.getRecipeById(v.getId()))));
 
 		HeaderRow filteringHeader = grid.appendHeaderRow();
 
@@ -109,7 +111,7 @@ public class RecipesPage extends OneColumnPage {
 
 				@Override
 				protected void onSave(String name, String desc, Long id) {
-					id = getRecipesService().saveRecipe(name, desc);
+					id = recipesService.saveRecipe(name, desc);
 					RecipeDTO to = new RecipeDTO(id, name, desc);
 					showDetail(to);
 					populate();
@@ -117,31 +119,31 @@ public class RecipesPage extends OneColumnPage {
 			}.open();
 		}));
 
-		btnLayout.add(new ModifyGridButton<RecipeOverviewTO>("Upravit", event -> {
+		btnLayout.add(new ModifyGridButton<>("Upravit", event -> {
 			new RecipeDialog(choosenRecipe) {
 				private static final long serialVersionUID = 5264621441522056786L;
 
 				@Override
 				protected void onSave(String name, String desc, Long id) {
-					getRecipesService().saveRecipe(name, desc, id);
+					recipesService.saveRecipe(name, desc, id);
 					RecipeDTO to = new RecipeDTO(id, name, desc);
 					showDetail(to);
 					populate();
 				}
 			}.open();
 		}, grid));
-	}
 
-	private RecipesService getRecipesService() {
-		if (recipesService == null)
-			recipesService = SpringContextHelper.getBean(RecipesService.class);
-		return recipesService;
+		btnLayout.add(new DeleteGridButton<>("Odstranit", event -> {
+			for (RecipeOverviewTO e : event)
+				recipesService.deleteRecipe(e.getId());
+			populate();
+		}, grid));
 	}
 
 	private void populate() {
-		FetchCallback<RecipeOverviewTO, Void> fetchCallback = q -> getRecipesService()
+		FetchCallback<RecipeOverviewTO, Void> fetchCallback = q -> recipesService
 				.getRecipes(filterTO.getName(), q.getOffset(), q.getLimit()).stream();
-		CountCallback<RecipeOverviewTO, Void> countCallback = q -> getRecipesService()
+		CountCallback<RecipeOverviewTO, Void> countCallback = q -> recipesService
 				.getRecipesCount(filterTO.getName());
 		grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
 	}

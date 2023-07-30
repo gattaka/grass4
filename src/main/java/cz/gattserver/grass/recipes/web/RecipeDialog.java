@@ -1,5 +1,6 @@
 package cz.gattserver.grass.recipes.web;
 
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public abstract class RecipeDialog extends EditWebDialog {
 	protected abstract void onSave(String name, String desc, Long id);
 
 	public RecipeDialog(final RecipeDTO to) {
+		SpringContextHelper.inject(this);
 		setWidth("600px");
 
 		final TextField name = new TextField("Název");

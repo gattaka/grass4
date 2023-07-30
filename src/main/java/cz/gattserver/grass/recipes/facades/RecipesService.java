@@ -12,37 +12,42 @@ public interface RecipesService {
 	 *
 	 * @param filter název receptu (s *)
 	 */
-	public int getRecipesCount(String filter);
+	int getRecipesCount(String filter);
 
 	/**
 	 * Získá všechny recepty
 	 *
 	 * @param filter filtr
 	 * @param offset stránkování
-	 * @param limit limit
+	 * @param limit  limit
 	 */
-	public List<RecipeOverviewTO> getRecipes(String filter, int offset, int limit);
+	List<RecipeOverviewTO> getRecipes(String filter, int offset, int limit);
 
 	/**
 	 * Získá recept dle id
 	 */
-	public RecipeDTO getRecipeById(Long id);
+	RecipeDTO getRecipeById(Long id);
 
 	/**
 	 * Založí/uprav nový recept
 	 */
-	public Long saveRecipe(String name, String desc, Long id);
+	Long saveRecipe(String name, String desc, Long id);
 
-	public Long saveRecipe(String name, String desc);
+	Long saveRecipe(String name, String desc);
+
+	/**
+	 * Odstraní recept
+	 */
+	void deleteRecipe(Long id);
 
 	/**
 	 * Převede každý "< br/ >" nebo "< br >" v textu na EOL znak
 	 */
-	public String breaklineToEol(String text);
+	String breaklineToEol(String text);
 
 	/**
 	 * Převede každý EOL znak v textu na "< br/ >"
 	 */
-	public String eolToBreakline(String text);
+	String eolToBreakline(String text);
 
 }
