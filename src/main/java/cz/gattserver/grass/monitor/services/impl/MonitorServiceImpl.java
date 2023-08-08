@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.FileStore;
@@ -17,9 +16,11 @@ import java.util.List;
 import java.util.Map;
 
 import cz.gattserver.grass.core.services.ConfigurationService;
+import cz.gattserver.grass.monitor.processor.item.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,26 +28,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import cz.gattserver.grass.monitor.config.MonitorConfiguration;
-import cz.gattserver.grass.monitor.processor.Console;
-import cz.gattserver.grass.monitor.processor.ConsoleOutputTO;
-import cz.gattserver.grass.monitor.processor.item.DiskStatusMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.DiskStatusPartItemTO;
-import cz.gattserver.grass.monitor.processor.item.JVMMemoryMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.JVMPIDMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.JVMThreadsMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.JVMUptimeMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.BackupStatusMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.BackupStatusPartItemTO;
-import cz.gattserver.grass.monitor.processor.item.MonitorState;
-import cz.gattserver.grass.monitor.processor.item.SMARTMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.SMARTPartItemTO;
-import cz.gattserver.grass.monitor.processor.item.ServersMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.ServersPartItemTO;
-import cz.gattserver.grass.monitor.processor.item.ServicesMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.ServicesPartItemTO;
-import cz.gattserver.grass.monitor.processor.item.SystemMemoryMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.SystemSwapMonitorItemTO;
-import cz.gattserver.grass.monitor.processor.item.SystemUptimeMonitorItemTO;
 import cz.gattserver.grass.monitor.services.MonitorService;
 
 @Transactional
@@ -56,6 +37,36 @@ public class MonitorServiceImpl implements MonitorService {
 	private static final Logger logger = LoggerFactory.getLogger(MonitorServiceImpl.class);
 
 	private static final int HTTP_TEST_TIMEOUT = 5000;
+
+	@Value("${monitor.address}")
+	private String monitorAddress;
+
+	@Value("${uptime.ws}")
+	private String uptimeWs;
+
+	@Value("${disk.mounts.ws}")
+	private String diskMountsWs;
+
+	@Value("${last.backup.ws}")
+	private String lastBackupWs;
+
+	@Value("${services.status.ws}")
+	private String servicesStatusWs;
+
+	@Value("${swap.status.ws}")
+	private String swapStatusWs;
+
+	@Value("${jmap.list.ws}")
+	private String jmapListWs;
+
+	@Value("${memory.status.ws}")
+	private String memoryStatusWs;
+
+	@Value("${smart.status.ws}")
+	private String smartStatusWs;
+
+	@Value("${backup.disk.mount.ws}")
+	private String backupDiskMountWs;
 
 	@Autowired
 	private ConfigurationService configurationService;
@@ -72,34 +83,24 @@ public class MonitorServiceImpl implements MonitorService {
 		configurationService.saveConfiguration(configuration);
 	}
 
-	private ConsoleOutputTO runScript(String script, String... param) {
-		String scriptsDir = getConfiguration().getScriptsDir();
-		List<String> items = new ArrayList<>();
-		items.add(scriptsDir + "/" + script + ".sh");
-		for (String p : param)
-			items.add(p);
-		return Console.executeCommand(items);
-	}
-
 	@Override
 	public SystemUptimeMonitorItemTO getSystemUptime() {
-		ConsoleOutputTO to = Console.executeCommand("uptime");
 		SystemUptimeMonitorItemTO uptimeTO = new SystemUptimeMonitorItemTO();
-		uptimeTO.setMonitorState(to.isSuccess() ? MonitorState.SUCCESS : MonitorState.UNAVAILABLE);
-		uptimeTO.setValue(to.getOutput());
+		testResponseCode(uptimeTO, monitorAddress + uptimeWs);
 		return uptimeTO;
 	}
 
 	@Override
 	public SystemMemoryMonitorItemTO getSystemMemoryStatus() {
-		// #!/bin/bash
-		// free | grep 'Mem' | grep -o [0-9]*
-		ConsoleOutputTO to = runScript("getMemoryStatus");
 		SystemMemoryMonitorItemTO itemTO = new SystemMemoryMonitorItemTO();
+		testResponseCode(itemTO, monitorAddress + memoryStatusWs);
 
-		String[] values = to.getOutput().split("\n");
+		if (!itemTO.isSuccess())
+			return itemTO;
+
+		String[] values = itemTO.getStateDetails().split("\n");
 		if (values.length != 6) {
-			itemTO.setMonitorState(MonitorState.UNAVAILABLE);
+			itemTO.setMonitorState(MonitorState.ERROR);
 			return itemTO;
 		} else {
 			try {
@@ -111,7 +112,8 @@ public class MonitorServiceImpl implements MonitorService {
 				itemTO.setBuffCache(Long.parseLong(values[4]) * 1000);
 				itemTO.setAvailable(Long.parseLong(values[5]) * 1000);
 			} catch (NumberFormatException e) {
-				itemTO.setMonitorState(MonitorState.UNAVAILABLE);
+				itemTO.setMonitorState(MonitorState.ERROR);
+				itemTO.setStateDetails(e.getMessage());
 				return itemTO;
 			}
 		}
@@ -122,14 +124,15 @@ public class MonitorServiceImpl implements MonitorService {
 
 	@Override
 	public SystemSwapMonitorItemTO getSystemSwapStatus() {
-		// #!/bin/bash
-		// free | grep 'Swap' | grep -o [0-9]*
-		ConsoleOutputTO to = runScript("getSwapStatus");
 		SystemSwapMonitorItemTO itemTO = new SystemSwapMonitorItemTO();
+		testResponseCode(itemTO, monitorAddress + swapStatusWs);
 
-		String[] values = to.getOutput().split("\n");
+		if (!itemTO.isSuccess())
+			return itemTO;
+
+		String[] values = itemTO.getStateDetails().split("\n");
 		if (values.length != 3) {
-			itemTO.setMonitorState(MonitorState.UNAVAILABLE);
+			itemTO.setMonitorState(MonitorState.ERROR);
 			return itemTO;
 		} else {
 			try {
@@ -139,7 +142,8 @@ public class MonitorServiceImpl implements MonitorService {
 				itemTO.setFree(Long.parseLong(values[2]) * 1000);
 			} catch (NumberFormatException e) {
 				logger.error("Zpracování výstupu z getSystemSwapStatus se nezdařilo", e);
-				itemTO.setMonitorState(MonitorState.UNAVAILABLE);
+				itemTO.setMonitorState(MonitorState.ERROR);
+				itemTO.setStateDetails(e.getMessage());
 				return itemTO;
 			}
 		}
@@ -151,40 +155,21 @@ public class MonitorServiceImpl implements MonitorService {
 	@Override
 	public BackupStatusPartItemTO getBackupStatus() {
 		BackupStatusPartItemTO mainItemTO = new BackupStatusPartItemTO();
+		testResponseCode(mainItemTO, monitorAddress + backupDiskMountWs);
 
-		// #!/bin/bash
-		//
-		// disk=$( df -h | grep backup )
-		//
-		// if [ -z "$disk" ]
-		// then echo "false"
-		// else echo "true"
-		// fi
-		ConsoleOutputTO to = runScript("isBackupDiskMounted");
-		mainItemTO.setValue(to.getOutput());
-		if (to.isSuccess()) {
-			mainItemTO
-					.setMonitorState(Boolean.parseBoolean(to.getOutput()) ? MonitorState.SUCCESS : MonitorState.ERROR);
-		} else {
-			mainItemTO.setMonitorState(MonitorState.UNAVAILABLE);
-		}
+		if (!mainItemTO.isSuccess())
+			return mainItemTO;
 
-		// #!/bin/bash
-		// echo -n "SRV "
-		// tail -n 1 /mnt/backup/srv-backup.log
-		// echo -n "SYS "
-		// tail -n 1 /mnt/backup/srv-systemctl-backup.log
-		// echo -n "FTP "
-		// tail -n 1 /mnt/backup/ftp-backup.log
-		to = runScript("getLastTimeOfBackup");
+		BackupStatusPartItemTO mainItemTO2 = new BackupStatusPartItemTO();
+		testResponseCode(mainItemTO2, monitorAddress + lastBackupWs);
 		List<BackupStatusMonitorItemTO> list = new ArrayList<>();
 
 		String dummTarget = "TTT Last backup:  ";
 		String dummyDate = "HH:MM:SS DD.MM.YYYY";
 		String dummyLog = dummTarget + dummyDate;
 
-		if (to.isSuccess()) {
-			for (String part : to.getOutput().split("\n")) {
+		if (mainItemTO2.isSuccess()) {
+			for (String part : mainItemTO2.getStateDetails().split("\n")) {
 				BackupStatusMonitorItemTO itemTO = new BackupStatusMonitorItemTO();
 				mainItemTO.getItems().add(itemTO);
 				if (part.length() == dummyLog.length()) {
@@ -207,7 +192,7 @@ public class MonitorServiceImpl implements MonitorService {
 			}
 		} else {
 			BackupStatusMonitorItemTO itemTO = new BackupStatusMonitorItemTO();
-			itemTO.setMonitorState(MonitorState.UNAVAILABLE);
+			itemTO.setMonitorState(MonitorState.ERROR);
 			list.add(itemTO);
 		}
 		return mainItemTO;
@@ -216,16 +201,11 @@ public class MonitorServiceImpl implements MonitorService {
 	@Override
 	public DiskStatusPartItemTO getDiskStatus() {
 		DiskStatusPartItemTO partItemTO = new DiskStatusPartItemTO();
+		testResponseCode(partItemTO, monitorAddress + diskMountsWs);
+		if (!partItemTO.isSuccess())
+			return createDiskStatusErrorOutput(partItemTO.getStateDetails());
 
-		// #!/bin/bash
-		// /usr/bin/mount | egrep '^/'
-		ConsoleOutputTO to = runScript("getDiskMounts");
-		if (!to.isSuccess()) {
-			return createDiskStatusErrorOutput(to.getOutput());
-		} else {
-			partItemTO.setMonitorState(MonitorState.SUCCESS);
-		}
-		String mounts[] = to.getOutput().split("\n");
+		String mounts[] = partItemTO.getStateDetails().split("\n");
 		Map<String, String> devToMount = new HashMap<>();
 		for (String mount : mounts) {
 			String info[] = mount.split(" ");
@@ -246,7 +226,7 @@ public class MonitorServiceImpl implements MonitorService {
 					continue;
 				itemTO.setMonitorState(MonitorState.SUCCESS);
 			} catch (IOException e) {
-				itemTO.setMonitorState(MonitorState.UNAVAILABLE);
+				itemTO.setMonitorState(MonitorState.ERROR);
 			}
 			disks.add(itemTO);
 		}
@@ -257,7 +237,7 @@ public class MonitorServiceImpl implements MonitorService {
 		DiskStatusPartItemTO partItemTO = new DiskStatusPartItemTO();
 		DiskStatusMonitorItemTO item = new DiskStatusMonitorItemTO();
 		item.setStateDetails(reason);
-		item.setMonitorState(MonitorState.UNAVAILABLE);
+		item.setMonitorState(MonitorState.ERROR);
 		partItemTO.getItems().add(item);
 		return partItemTO;
 	}
@@ -269,7 +249,7 @@ public class MonitorServiceImpl implements MonitorService {
 			to.setUptime(ManagementFactory.getRuntimeMXBean().getUptime());
 			to.setMonitorState(MonitorState.SUCCESS);
 		} catch (Exception e) {
-			to.setMonitorState(MonitorState.UNAVAILABLE);
+			to.setMonitorState(MonitorState.ERROR);
 		}
 		return to;
 	}
@@ -283,7 +263,7 @@ public class MonitorServiceImpl implements MonitorService {
 			to.setPeak(tb.getPeakThreadCount());
 			to.setMonitorState(MonitorState.SUCCESS);
 		} catch (Exception e) {
-			to.setMonitorState(MonitorState.UNAVAILABLE);
+			to.setMonitorState(MonitorState.ERROR);
 		}
 		return to;
 	}
@@ -299,7 +279,7 @@ public class MonitorServiceImpl implements MonitorService {
 			to.setMaxMemory(runtime.maxMemory());
 			to.setMonitorState(MonitorState.SUCCESS);
 		} catch (Exception e) {
-			to.setMonitorState(MonitorState.UNAVAILABLE);
+			to.setMonitorState(MonitorState.ERROR);
 		}
 		return to;
 	}
@@ -312,7 +292,7 @@ public class MonitorServiceImpl implements MonitorService {
 			to.setPid(ManagementFactory.getRuntimeMXBean().getName().split("@")[0]);
 			to.setMonitorState(MonitorState.SUCCESS);
 		} catch (Exception e) {
-			to.setMonitorState(MonitorState.UNAVAILABLE);
+			to.setMonitorState(MonitorState.ERROR);
 		}
 		return to;
 	}
@@ -332,28 +312,28 @@ public class MonitorServiceImpl implements MonitorService {
 	public ServersPartItemTO getServersStatus() {
 		ServersPartItemTO partItemTO = new ServersPartItemTO();
 
-		ServersMonitorItemTO syncthingTO = new ServersMonitorItemTO("Syncthing", "http://gattserver.cz:8127");
-		testResponseCode(syncthingTO, true);
+		URLMonitorItemTO syncthingTO = new URLMonitorItemTO("Syncthing", "http://gattserver.cz:8127");
+		testResponseCode(syncthingTO, syncthingTO.getUrl(), true);
 		partItemTO.getItems().add(syncthingTO);
 
-		ServersMonitorItemTO nexusTO = new ServersMonitorItemTO("Sonatype Nexus", "https://nexus.gattserver.cz");
-		testResponseCode(nexusTO);
+		URLMonitorItemTO nexusTO = new URLMonitorItemTO("Sonatype Nexus", "https://nexus.gattserver.cz");
+		testResponseCode(nexusTO, nexusTO.getUrl());
 		partItemTO.getItems().add(nexusTO);
 
-		ServersMonitorItemTO sonarTO = new ServersMonitorItemTO("SonarQube", "https://sonarqube.gattserver.cz");
-		testResponseCode(sonarTO);
+		URLMonitorItemTO sonarTO = new URLMonitorItemTO("SonarQube", "https://sonarqube.gattserver.cz");
+		testResponseCode(sonarTO, sonarTO.getUrl());
 		partItemTO.getItems().add(sonarTO);
 
 		return partItemTO;
 	}
 
-	private void testResponseCode(ServersMonitorItemTO itemTO) {
-		testResponseCode(itemTO, false);
+	private void testResponseCode(MonitorItemTO itemTO, String address) {
+		testResponseCode(itemTO, address, false);
 	}
 
-	private void testResponseCode(ServersMonitorItemTO itemTO, boolean anyCode) {
+	private void testResponseCode(MonitorItemTO itemTO, String address, boolean anyCode) {
 		try {
-			URL url = new URL(itemTO.getAddress());
+			URL url = new URL(address);
 			URLConnection uc = url.openConnection();
 			if (uc != null && uc instanceof HttpURLConnection) {
 				// HttpURLConnection
@@ -366,16 +346,16 @@ public class MonitorServiceImpl implements MonitorService {
 				hc.setConnectTimeout(HTTP_TEST_TIMEOUT);
 				hc.setReadTimeout(HTTP_TEST_TIMEOUT);
 				hc.connect();
-				itemTO.setResponseCode(hc.getResponseCode());
-				if (anyCode || itemTO.getResponseCode() >= 200 && itemTO.getResponseCode() < 300)
+				itemTO.setStateDetails(hc.getResponseMessage());
+				if (anyCode || hc.getResponseCode() >= 200 && hc.getResponseCode() < 300) {
 					itemTO.setMonitorState(MonitorState.SUCCESS);
-				else
+				} else {
 					itemTO.setMonitorState(MonitorState.ERROR);
+				}
 			}
-		} catch (SocketTimeoutException e) {
+		} catch (IOException e) {
+			itemTO.setStateDetails(e.getMessage());
 			itemTO.setMonitorState(MonitorState.ERROR);
-		} catch (Exception e) {
-			itemTO.setMonitorState(MonitorState.UNAVAILABLE);
 		}
 	}
 
@@ -386,12 +366,11 @@ public class MonitorServiceImpl implements MonitorService {
 		final String MESSAGE_HEADER = "MESSAGE";
 
 		SMARTPartItemTO partItemTO = new SMARTPartItemTO();
-		// /usr/bin/journalctl -e -u smartd -S 2019-11-03 --lines=10
-		// --output-fields=SYSLOG_TIMESTAMP,PRIORITY,MESSAGE -o json
-		ConsoleOutputTO out = runScript("getSmartStatus");
-		if (out.isSuccess()) {
+		testResponseCode(partItemTO, monitorAddress + smartStatusWs);
+
+		if (partItemTO.isSuccess()) {
 			try {
-				String[] lines = out.getOutput().split("\n");
+				String[] lines = partItemTO.getStateDetails().split("\n");
 				for (String line : lines) {
 					ObjectMapper mapper = new ObjectMapper();
 					JsonNode jsonNode = mapper.readTree(line);
@@ -403,20 +382,20 @@ public class MonitorServiceImpl implements MonitorService {
 
 					// https://www.freedesktop.org/software/systemd/man/journalctl.html
 					switch (priority) {
-					case 0: // "emerg" (0)
-					case 1: // "alert" (1)
-					case 2: // "crit" (2)
-					case 3: // "err" (3)
-					case 4: // "warning" (4)
-						to.setMonitorState(MonitorState.ERROR);
-						partItemTO.getItems().add(to);
-						break;
-					case 5: // "notice" (5)
-					case 6: // "info" (6)
-					case 7: // "debug" (7)
-					default:
-						// unused
-						break;
+						case 0: // "emerg" (0)
+						case 1: // "alert" (1)
+						case 2: // "crit" (2)
+						case 3: // "err" (3)
+						case 4: // "warning" (4)
+							to.setMonitorState(MonitorState.ERROR);
+							partItemTO.getItems().add(to);
+							break;
+						case 5: // "notice" (5)
+						case 6: // "info" (6)
+						case 7: // "debug" (7)
+						default:
+							// unused
+							break;
 					}
 				}
 				if (partItemTO.getItems().isEmpty()) {
@@ -436,18 +415,17 @@ public class MonitorServiceImpl implements MonitorService {
 	private SMARTPartItemTO createSMARTErrorOutput(String reason) {
 		SMARTPartItemTO partItemTO = new SMARTPartItemTO();
 		partItemTO.setStateDetails(reason);
-		partItemTO.setMonitorState(MonitorState.UNAVAILABLE);
+		partItemTO.setMonitorState(MonitorState.ERROR);
 		return partItemTO;
 	}
 
 	@Override
 	public ServicesPartItemTO getServicesStatus() {
 		ServicesPartItemTO partItemTO = new ServicesPartItemTO();
-		partItemTO.setMonitorState(MonitorState.ERROR);
-		ConsoleOutputTO out = runScript("getServicesStatus");
-		if (out.isSuccess()) {
+		testResponseCode(partItemTO,monitorAddress + servicesStatusWs);
+		if (partItemTO.isSuccess()) {
 			try {
-				String[] lines = out.getOutput().split("\n");
+				String[] lines = partItemTO.getStateDetails().split("\n");
 				if (lines.length < 2)
 					return createServicesErrorOutput("Nezdařilo se získat přehled služeb");
 				String lastLine = lines[lines.length - 1];
@@ -478,8 +456,7 @@ public class MonitorServiceImpl implements MonitorService {
 	private ServicesPartItemTO createServicesErrorOutput(String reason) {
 		ServicesPartItemTO partItemTO = new ServicesPartItemTO();
 		partItemTO.setStateDetails(reason);
-		partItemTO.setMonitorState(MonitorState.UNAVAILABLE);
+		partItemTO.setMonitorState(MonitorState.ERROR);
 		return partItemTO;
 	}
-
 }

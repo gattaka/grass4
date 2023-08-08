@@ -2,7 +2,7 @@ package cz.gattserver.grass.monitor.processor.item;
 
 import elemental.json.JsonObject;
 
-public class ServersPartItemTO extends ListPartItemTO<ServersMonitorItemTO> {
+public class ServersPartItemTO extends ListPartItemTO<URLMonitorItemTO> {
 
 	public ServersPartItemTO() {
 	}
@@ -12,8 +12,8 @@ public class ServersPartItemTO extends ListPartItemTO<ServersMonitorItemTO> {
 	}
 
 	@Override
-	protected ServersMonitorItemTO createItem(JsonObject jsonObject) {
-		return new ServersMonitorItemTO(jsonObject);
+	protected URLMonitorItemTO createItem(JsonObject jsonObject) {
+		return new URLMonitorItemTO(jsonObject);
 	}
 
 }

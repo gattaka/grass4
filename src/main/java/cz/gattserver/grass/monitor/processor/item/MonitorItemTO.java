@@ -11,7 +11,7 @@ import elemental.json.JsonType;
  */
 public abstract class MonitorItemTO {
 
-	protected MonitorState monitorState = MonitorState.UNAVAILABLE;
+	protected MonitorState monitorState = MonitorState.ERROR;
 	protected String stateDetails;
 	protected String type;
 
@@ -56,4 +56,7 @@ public abstract class MonitorItemTO {
 		this.type = type;
 	}
 
+	public boolean isSuccess() {
+		return MonitorState.SUCCESS == monitorState;
+	}
 }

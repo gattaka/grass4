@@ -5,22 +5,21 @@ import elemental.json.JsonObject;
 public class SMARTMonitorItemTO extends MonitorItemTO {
 
 	private String time;
-	private String message;
 
 	public SMARTMonitorItemTO() {
 	}
 
-	public SMARTMonitorItemTO(String time, String message) {
+	public SMARTMonitorItemTO(String time, String stateDetails) {
 		this.time = time;
-		this.message = message;
+		this.stateDetails = stateDetails;
 	}
 
 	public SMARTMonitorItemTO(JsonObject jsonObject) {
 		super(jsonObject);
-		if (monitorState == MonitorState.UNAVAILABLE)
+		if (monitorState == MonitorState.ERROR)
 			return;
 		time = jsonObject.getString("time");
-		message = jsonObject.getString("message");
+		stateDetails = jsonObject.getString("stateDetails");
 	}
 
 	public String getTime() {
@@ -29,14 +28,6 @@ public class SMARTMonitorItemTO extends MonitorItemTO {
 
 	public void setTime(String time) {
 		this.time = time;
-	}
-
-	public String getMessage() {
-		return message;
-	}
-
-	public void setMessage(String message) {
-		this.message = message;
 	}
 
 }

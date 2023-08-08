@@ -8,25 +8,24 @@ public class ServicesMonitorItemTO extends MonitorItemTO {
 	private String load;
 	private String active;
 	private String sub;
-	private String description;
 
 	public ServicesMonitorItemTO() {
 	}
 
-	public ServicesMonitorItemTO(String unit, String load, String active, String sub, String description) {
+	public ServicesMonitorItemTO(String unit, String load, String active, String sub, String stateDetails) {
 		super();
 		this.unit = unit;
 		this.load = load;
 		this.active = active;
 		this.sub = sub;
-		this.description = description;
+		this.stateDetails = stateDetails;
 	}
 
 	public ServicesMonitorItemTO(JsonObject jsonObject) {
 		super(jsonObject);
-		if (monitorState == MonitorState.UNAVAILABLE)
+		if (monitorState == MonitorState.ERROR)
 			return;
-		description = jsonObject.getString("description");
+		stateDetails = jsonObject.getString("stateDetails");
 		// detaily se zde vyplňují pouze, pokud jde o chybu
 		if (monitorState == MonitorState.SUCCESS)
 			return;
@@ -66,14 +65,6 @@ public class ServicesMonitorItemTO extends MonitorItemTO {
 
 	public void setSub(String sub) {
 		this.sub = sub;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
 	}
 
 }
