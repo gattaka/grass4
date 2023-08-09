@@ -13,7 +13,7 @@ public class SystemUptimeMonitorItemTO extends MonitorItemTO {
 		super(jsonObject);
 		if (monitorState != MonitorState.SUCCESS)
 			return;
-		value = jsonObject.getString("value");
+		stateDetails = jsonObject.getString("stateDetails");
 	}
 
 	public String getValue() {

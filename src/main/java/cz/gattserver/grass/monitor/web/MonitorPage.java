@@ -130,14 +130,13 @@ public class MonitorPage extends OneColumnPage {
 			String content = to.getName();
 			Anchor anchor = new Anchor(to.getUrl(), to.getUrl());
 			anchor.setTarget("_blank");
-			String response = "[status: " + to.getStateDetails() + "]";
 			switch (to.getMonitorState()) {
 				case SUCCESS:
-					serversTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(content).add(anchor).add(response);
+					serversTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(content).add(anchor);
 					break;
 				case ERROR:
 				default:
-					serversTableLayout.newRow().add(new ErrorMonitorStateLabel()).add(content);
+					serversTableLayout.newRow().add(new ErrorMonitorStateLabel()).add(content).add(anchor);
 			}
 		}
 	}
@@ -148,7 +147,7 @@ public class MonitorPage extends OneColumnPage {
 		uptimeLayout.add(uptimeTableLayout);
 		switch (uptimeTO.getMonitorState()) {
 			case SUCCESS:
-				uptimeTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(uptimeTO.getValue());
+				uptimeTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(uptimeTO.getStateDetails());
 				break;
 			case ERROR:
 			default:
@@ -184,7 +183,7 @@ public class MonitorPage extends OneColumnPage {
 				systemSwapStatusTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(
 						constructProgressMonitor(swapTO.getUsedRation(),
 								constructUsedTotalFreeDescription(swapTO.getUsed(),
-								swapTO.getUsedRation(), swapTO.getTotal(), swapTO.getFree())));
+										swapTO.getUsedRation(), swapTO.getTotal(), swapTO.getFree())));
 				break;
 			case ERROR:
 			default:
@@ -250,7 +249,7 @@ public class MonitorPage extends OneColumnPage {
 				jvmMemoryTableLayout.newRow().add(new SuccessMonitorStateLabel())
 						.add(constructProgressMonitor(usedRatio,
 								constructUsedTotalFreeDescription(memoryTO.getUsedMemory(),
-								usedRatio, memoryTO.getTotalMemory(), memoryTO.getFreeMemory())));
+										usedRatio, memoryTO.getTotalMemory(), memoryTO.getFreeMemory())));
 				jvmMemoryTableLayout.add(" Max memory: " + humanFormat(memoryTO.getMaxMemory()), false);
 				break;
 			case ERROR:
@@ -269,7 +268,8 @@ public class MonitorPage extends OneColumnPage {
 				backupTableLayout.newRow().add(new SuccessMonitorStateLabel()).add("Backup disk je připojen");
 				break;
 			case ERROR:
-				backupTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("Backup disk není připojen nebo info " +
+				backupTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("Backup disk není připojen nebo info" +
+						" " +
 						"není dostupné");
 				break;
 		}

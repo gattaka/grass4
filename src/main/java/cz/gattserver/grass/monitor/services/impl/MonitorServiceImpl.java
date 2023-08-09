@@ -17,6 +17,11 @@ import java.util.Map;
 
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.monitor.processor.item.*;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -332,22 +337,12 @@ public class MonitorServiceImpl implements MonitorService {
 	}
 
 	private void testResponseCode(MonitorItemTO itemTO, String address, boolean anyCode) {
-		try {
-			URL url = new URL(address);
-			URLConnection uc = url.openConnection();
-			if (uc != null && uc instanceof HttpURLConnection) {
-				// HttpURLConnection
-				HttpURLConnection hc = (HttpURLConnection) uc;
-				hc.setInstanceFollowRedirects(true);
-
-				// bez agenta to často hodí 403 Forbidden, protože si myslí,
-				// že jsem asi bot ... (což vlastně jsem)
-				hc.setRequestProperty("User-Agent", "Mozilla");
-				hc.setConnectTimeout(HTTP_TEST_TIMEOUT * 10);
-				hc.setReadTimeout(HTTP_TEST_TIMEOUT * 10);
-				hc.connect();
-				itemTO.setStateDetails(hc.getResponseMessage());
-				if (anyCode || hc.getResponseCode() >= 200 && hc.getResponseCode() < 300) {
+		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+			HttpGet httpGet = new HttpGet(address);
+			try (CloseableHttpResponse resp = httpclient.execute(httpGet)) {
+				itemTO.setStateDetails(EntityUtils.toString(resp.getEntity()));
+				int statusCode = resp.getStatusLine().getStatusCode();
+				if (anyCode || statusCode >= 200 && statusCode < 300) {
 					itemTO.setMonitorState(MonitorState.SUCCESS);
 				} else {
 					itemTO.setMonitorState(MonitorState.ERROR);
