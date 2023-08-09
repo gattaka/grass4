@@ -343,8 +343,8 @@ public class MonitorServiceImpl implements MonitorService {
 				// bez agenta to často hodí 403 Forbidden, protože si myslí,
 				// že jsem asi bot ... (což vlastně jsem)
 				hc.setRequestProperty("User-Agent", "Mozilla");
-				hc.setConnectTimeout(HTTP_TEST_TIMEOUT);
-				hc.setReadTimeout(HTTP_TEST_TIMEOUT);
+				hc.setConnectTimeout(HTTP_TEST_TIMEOUT * 10);
+				hc.setReadTimeout(HTTP_TEST_TIMEOUT * 10);
 				hc.connect();
 				itemTO.setStateDetails(hc.getResponseMessage());
 				if (anyCode || hc.getResponseCode() >= 200 && hc.getResponseCode() < 300) {
@@ -422,7 +422,7 @@ public class MonitorServiceImpl implements MonitorService {
 	@Override
 	public ServicesPartItemTO getServicesStatus() {
 		ServicesPartItemTO partItemTO = new ServicesPartItemTO();
-		testResponseCode(partItemTO,monitorAddress + servicesStatusWs);
+		testResponseCode(partItemTO, monitorAddress + servicesStatusWs);
 		if (partItemTO.isSuccess()) {
 			try {
 				String[] lines = partItemTO.getStateDetails().split("\n");
