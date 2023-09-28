@@ -4,24 +4,19 @@ import java.io.Serializable;
 import java.util.Collection;
 
 import cz.gattserver.common.Identifiable;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.components.GridOperationsTab;
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class MedicPageTab<T extends Identifiable, C extends Collection<T> & Serializable>
-		extends GridOperationsTab<T, C> {
+public abstract class MedicPageTab<T extends Identifiable, F, C extends Collection<T> & Serializable>
+		extends GridOperationsTab<T, F, C> {
 
 	private static final long serialVersionUID = 2057957439013190170L;
 
-	private transient MedicFacade medicFacade;
+	@Autowired
+	protected MedicService medicService;
 
 	public MedicPageTab(Class<T> clazz) {
 		super(clazz);
-	}
-
-	protected MedicFacade getMedicFacade() {
-		if (medicFacade == null)
-			medicFacade = SpringContextHelper.getBean(MedicFacade.class);
-		return medicFacade;
 	}
 }

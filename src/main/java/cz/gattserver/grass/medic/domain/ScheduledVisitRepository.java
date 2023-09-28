@@ -1,4 +1,4 @@
-package cz.gattserver.grass.medic.dao;
+package cz.gattserver.grass.medic.domain;
 
 import java.util.List;
 

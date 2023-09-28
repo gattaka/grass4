@@ -9,6 +9,7 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 
 import cz.gattserver.common.Identifiable;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.DetailGridButton;
@@ -25,12 +26,13 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
  *            třída zobrazované entity
  * 
  */
-public abstract class GridOperationsTab<T extends Identifiable, C extends Collection<T> & Serializable> extends Div {
+public abstract class GridOperationsTab<T extends Identifiable, F, C extends Collection<T> & Serializable> extends Div {
 
 	private static final long serialVersionUID = 6844434642906509277L;
 
 	protected Grid<T> grid;
 	protected C data;
+	protected F filterTO;
 
 	/**
 	 * Vytvoří okno pro založení entity
@@ -59,15 +61,22 @@ public abstract class GridOperationsTab<T extends Identifiable, C extends Collec
 	protected void customizeGrid(Grid<T> grid) {
 	}
 
-	protected abstract C getItems();
+	protected abstract C getItems(F filterTO);
+
+	protected void populateGrid() {
+		data = getItems(filterTO);
+		grid.setItems(data);
+	}
 
 	public GridOperationsTab(Class<T> clazz) {
+		SpringContextHelper.inject(this);
+
 		init();
 
 		grid = new Grid<>(clazz);
 		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		UIUtils.applyGrassDefaultStyle(grid);
-		grid.setItems(getItems());
+		grid.setItems(getItems(filterTO));
 		customizeGrid(grid);
 		add(grid);
 

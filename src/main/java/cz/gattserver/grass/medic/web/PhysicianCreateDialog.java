@@ -8,7 +8,7 @@ import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 
 public abstract class PhysicianCreateDialog extends EditWebDialog {
@@ -35,7 +35,7 @@ public abstract class PhysicianCreateDialog extends EditWebDialog {
 			PhysicianTO writeTO = originalTO == null ? new PhysicianTO() : originalTO;
 			if (binder.writeBeanIfValid(writeTO)) {
 				try {
-					SpringContextHelper.getBean(MedicFacade.class).savePhysician(writeTO);
+					SpringContextHelper.getBean(MedicService.class).savePhysician(writeTO);
 					onSuccess(writeTO);
 					close();
 				} catch (Exception ex) {

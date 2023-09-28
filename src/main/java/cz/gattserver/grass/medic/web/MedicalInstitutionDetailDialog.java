@@ -10,14 +10,14 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 
 public class MedicalInstitutionDetailDialog extends Dialog {
 
 	private static final long serialVersionUID = -1240133390770972624L;
 
-	private transient MedicFacade medicFacade;
+	private transient MedicService medicService;
 
 	public MedicalInstitutionDetailDialog(Long id) {
 		final MedicalInstitutionTO medicalInstitutionDTO = getMedicFacade().getMedicalInstitutionById(id);
@@ -51,10 +51,10 @@ public class MedicalInstitutionDetailDialog extends Dialog {
 		layout.add(div);
 	}
 
-	protected MedicFacade getMedicFacade() {
-		if (medicFacade == null)
-			medicFacade = SpringContextHelper.getBean(MedicFacade.class);
-		return medicFacade;
+	protected MedicService getMedicFacade() {
+		if (medicService == null)
+			medicService = SpringContextHelper.getBean(MedicService.class);
+		return medicService;
 	}
 
 }

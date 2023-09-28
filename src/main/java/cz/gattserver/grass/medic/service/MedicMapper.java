@@ -1,4 +1,4 @@
-package cz.gattserver.grass.medic.facade;
+package cz.gattserver.grass.medic.service;
 
 import java.util.List;
 import java.util.Set;

@@ -6,21 +6,24 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 
+import com.vaadin.flow.component.grid.HeaderRow;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 import cz.gattserver.grass.medic.web.PhysicianCreateDialog;
 import cz.gattserver.grass.medic.web.PhysicianDetailDialog;
 
-public class PhysiciansTab extends MedicPageTab<PhysicianTO, ArrayList<PhysicianTO>> {
+public class PhysiciansTab extends MedicPageTab<PhysicianTO, PhysicianTO, ArrayList<PhysicianTO>> {
 
 	private static final long serialVersionUID = -5013459007975657195L;
 
 	public PhysiciansTab() {
 		super(PhysicianTO.class);
+		filterTO = new PhysicianTO();
 	}
 
 	@Override
-	protected ArrayList<PhysicianTO> getItems() {
-		return new ArrayList<>(getMedicFacade().getAllPhysicians());
+	protected ArrayList<PhysicianTO> getItems(PhysicianTO filterTO) {
+		return new ArrayList<>(medicService.getPhysicians(filterTO));
 	}
 
 	@Override
@@ -30,7 +33,7 @@ public class PhysiciansTab extends MedicPageTab<PhysicianTO, ArrayList<Physician
 
 			@Override
 			protected void onSuccess(PhysicianTO to) {
-				data = getItems();
+				data = getItems(filterTO);
 				grid.setItems(data);
 			}
 		};
@@ -55,15 +58,22 @@ public class PhysiciansTab extends MedicPageTab<PhysicianTO, ArrayList<Physician
 
 	@Override
 	protected void deleteEntity(PhysicianTO dto) {
-		getMedicFacade().deletePhysician(dto);
+		medicService.deletePhysician(dto);
 	}
 
 	@Override
 	protected void customizeGrid(Grid<PhysicianTO> grid) {
-		grid.getColumnByKey("name").setHeader("Jméno");
+		grid.removeAllColumns();
+		Grid.Column<PhysicianTO> nameCol = grid.addColumn("name").setHeader("Jméno");
 		grid.setWidthFull();
 		grid.setSelectionMode(SelectionMode.SINGLE);
-		grid.setColumns("name");
-	}
 
+		HeaderRow filteringHeader = grid.appendHeaderRow();
+
+		// Název
+		UIUtils.addHeaderTextField(filteringHeader.getCell(nameCol), e -> {
+			filterTO.setName(e.getValue());
+			populateGrid();
+		});
+	}
 }

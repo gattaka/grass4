@@ -7,7 +7,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 
 public class MedicamentDetailDialog extends Dialog {
@@ -22,7 +22,7 @@ public class MedicamentDetailDialog extends Dialog {
 
 		setWidth("400px");
 
-		final MedicamentTO medicamentDTO = SpringContextHelper.getBean(MedicFacade.class).getMedicamentById(id);
+		final MedicamentTO medicamentDTO = SpringContextHelper.getBean(MedicService.class).getMedicamentById(id);
 
 		layout.add(new Strong("Název"));
 		layout.add(medicamentDTO.getName());

@@ -1,4 +1,4 @@
-package cz.gattserver.grass.medic.facade;
+package cz.gattserver.grass.medic.service;
 
 import java.util.List;
 import java.util.Set;
@@ -9,13 +9,15 @@ import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
-public interface MedicFacade {
+public interface MedicService {
 
 	// Instituce
 
 	void deleteMedicalInstitution(MedicalInstitutionTO dto);
 
-	List<MedicalInstitutionTO> getAllMedicalInstitutions();
+	List<MedicalInstitutionTO> getMedicalInstitutions(MedicalInstitutionTO filterTO);
+
+	List<MedicalInstitutionTO> getMedicalInstitutions();
 
 	void saveMedicalInstitution(MedicalInstitutionTO dto);
 
@@ -23,7 +25,7 @@ public interface MedicFacade {
 
 	// Návštěvy
 
-	void deleteScheduledVisit(ScheduledVisitTO dto);
+	void deleteScheduledVisit(ScheduledVisitTO to);
 
 	List<ScheduledVisitTO> getAllScheduledVisits(boolean planned);
 
@@ -37,31 +39,37 @@ public interface MedicFacade {
 
 	// Záznamy
 
-	void deleteMedicalRecord(MedicalRecordTO dto);
+	void deleteMedicalRecord(MedicalRecordTO to);
 
-	List<MedicalRecordTO> getAllMedicalRecords();
+	List<MedicalRecordTO> getMedicalRecords(MedicalRecordTO filterTO);
 
-	void saveMedicalRecord(MedicalRecordTO dto);
+	List<MedicalRecordTO> getMedicalRecords();
+
+	void saveMedicalRecord(MedicalRecordTO to);
 
 	MedicalRecordTO getMedicalRecordById(Long id);
 
 	// Medikamenty
 
-	void deleteMedicament(MedicamentTO dto);
+	void deleteMedicament(MedicamentTO to);
 
-	Set<MedicamentTO> getAllMedicaments();
+	Set<MedicamentTO> getMedicaments(MedicamentTO filterTO);
 
-	void saveMedicament(MedicamentTO dto);
+	Set<MedicamentTO> getMedicaments();
+
+	void saveMedicament(MedicamentTO to);
 
 	MedicamentTO getMedicamentById(Long id);
 
 	// Doktoři
 
-	void deletePhysician(PhysicianTO dto);
+	void deletePhysician(PhysicianTO to);
 
-	Set<PhysicianTO> getAllPhysicians();
+	Set<PhysicianTO> getPhysicians(PhysicianTO filterTO);
 
-	void savePhysician(PhysicianTO dto);
+	Set<PhysicianTO> getPhysicians();
+
+	void savePhysician(PhysicianTO to);
 
 	PhysicianTO getPhysicianById(Long id);
 

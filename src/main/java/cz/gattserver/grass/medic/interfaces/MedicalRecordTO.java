@@ -22,11 +22,17 @@ public class MedicalRecordTO implements Identifiable {
 	@NotNull
 	private MedicalInstitutionTO institution;
 
+	// filter
+	private String institutionName;
+
 	/**
 	 * Lékař - ošetřující
 	 */
 	@NotNull
 	private PhysicianTO physician;
+
+	// filter
+	private String physicianName;
 
 	/**
 	 * Kdy se to stalo
@@ -107,6 +113,22 @@ public class MedicalRecordTO implements Identifiable {
 
 	public void setMedicaments(Set<MedicamentTO> medicaments) {
 		this.medicaments = medicaments;
+	}
+
+	public String getInstitutionName() {
+		return institutionName;
+	}
+
+	public void setInstitutionName(String institutionName) {
+		this.institutionName = institutionName;
+	}
+
+	public String getPhysicianName() {
+		return physicianName;
+	}
+
+	public void setPhysicianName(String physicianName) {
+		this.physicianName = physicianName;
 	}
 
 	@Override

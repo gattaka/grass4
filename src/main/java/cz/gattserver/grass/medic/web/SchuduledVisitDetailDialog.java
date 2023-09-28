@@ -10,7 +10,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.LinkButton;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
 public class SchuduledVisitDetailDialog extends Dialog {
@@ -18,7 +18,7 @@ public class SchuduledVisitDetailDialog extends Dialog {
 	private static final long serialVersionUID = -1240133390770972624L;
 
 	public SchuduledVisitDetailDialog(Long id) {
-		final ScheduledVisitTO scheduledVisitDTO = SpringContextHelper.getBean(MedicFacade.class)
+		final ScheduledVisitTO scheduledVisitDTO = SpringContextHelper.getBean(MedicService.class)
 				.getScheduledVisitById(id);
 
 		setWidth("400px");

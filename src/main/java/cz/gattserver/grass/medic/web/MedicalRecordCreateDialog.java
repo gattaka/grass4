@@ -19,7 +19,7 @@ import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
@@ -30,7 +30,7 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
 
-	private transient MedicFacade medicFacade;
+	private transient MedicService medicService;
 
 	public MedicalRecordCreateDialog() {
 		this(null, null);
@@ -51,11 +51,11 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 		binder.setBean(new MedicalRecordTO());
 
 		final ComboBox<MedicalInstitutionTO> institutionComboBox = new ComboBox<>("Instituce",
-				getMedicFacade().getAllMedicalInstitutions());
+				getMedicFacade().getMedicalInstitutions());
 		institutionComboBox.setWidthFull();
 		binder.forField(institutionComboBox).asRequired().bind("institution");
 
-		Set<PhysicianTO> physicians = getMedicFacade().getAllPhysicians();
+		Set<PhysicianTO> physicians = getMedicFacade().getPhysicians();
 		final ComboBox<PhysicianTO> physicianComboBox = new ComboBox<>("Ošetřující lékař", physicians);
 		physicianComboBox.setWidthFull();
 		binder.forField(physicianComboBox).asRequired().bind("physician");
@@ -85,8 +85,8 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 		recordField.setHeight("200px");
 		binder.forField(recordField).asRequired().bind("record");
 
-		Map<String, MedicamentTO> medicaments = new HashMap<String, MedicamentTO>();
-		for (MedicamentTO mto : getMedicFacade().getAllMedicaments())
+		Map<String, MedicamentTO> medicaments = new HashMap<>();
+		for (MedicamentTO mto : getMedicFacade().getMedicaments())
 			medicaments.put(mto.getName(), mto);
 
 		TokenField tokenField = new TokenField(medicaments.keySet());
@@ -122,10 +122,10 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 		}
 	}
 
-	protected MedicFacade getMedicFacade() {
-		if (medicFacade == null)
-			medicFacade = SpringContextHelper.getBean(MedicFacade.class);
-		return medicFacade;
+	protected MedicService getMedicFacade() {
+		if (medicService == null)
+			medicService = SpringContextHelper.getBean(MedicService.class);
+		return medicService;
 	}
 
 	protected abstract void onSuccess();

@@ -135,7 +135,7 @@ public class HWItemsGrid extends Div {
 		grid.setWidthFull();
 		grid.setHeight("480px");
 
-		grid.addColumn(new IconRenderer<HWItemOverviewTO>(c -> {
+		grid.addColumn(new IconRenderer<>(c -> {
 			ImageIcon ii = HWUIUtils.chooseImageIcon(c);
 			if (ii != null) {
 				Image img = new Image(ii.createResource(), c.getState().getName());
@@ -173,7 +173,7 @@ public class HWItemsGrid extends Div {
 			grid.addColumn(hw -> FieldUtils.formatMoney(hw.getPrice())).setHeader("Cena").setKey(PRICE_BIND)
 					.setTextAlign(ColumnTextAlign.END).setWidth("90px").setFlexGrow(0).setSortable(true);
 		}
-		grid.addColumn(new LocalDateRenderer<HWItemOverviewTO>(HWItemOverviewTO::getPurchaseDate, "d.M.yyyy"))
+		grid.addColumn(new LocalDateRenderer<>(HWItemOverviewTO::getPurchaseDate, "d.M.yyyy"))
 				.setHeader("Získáno").setKey(PURCHASE_DATE_BIND).setTextAlign(ColumnTextAlign.END).setWidth("80px")
 				.setFlexGrow(0).setSortable(true);
 

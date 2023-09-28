@@ -1,4 +1,4 @@
-package cz.gattserver.grass.medic.facade;
+package cz.gattserver.grass.medic.service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;

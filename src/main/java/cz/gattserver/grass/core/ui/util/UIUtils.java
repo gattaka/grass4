@@ -1,6 +1,7 @@
 package cz.gattserver.grass.core.ui.util;
 
 import java.net.*;
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -10,6 +11,7 @@ import com.vaadin.flow.component.HasValue;
 import com.vaadin.flow.component.ItemLabelGenerator;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow.HeaderCell;
@@ -72,7 +74,7 @@ public class UIUtils {
 	 * Scroll v gridu na pozici
 	 */
 	public static void scrollGridToIndex(Grid<?> grid, int index) {
-//		UI.getCurrent().getPage().executeJs("$0._scrollToIndex(" + index + ")", grid.getElement());
+		//		UI.getCurrent().getPage().executeJs("$0._scrollToIndex(" + index + ")", grid.getElement());
 		grid.scrollToIndex(index);
 	}
 
@@ -92,6 +94,14 @@ public class UIUtils {
 	}
 
 	/**
+	 * Přidá styl, aby pole bylo malé
+	 */
+	public static DatePicker asSmall(DatePicker datePicker) {
+		datePicker.getElement().setAttribute("theme", TextFieldVariant.LUMO_SMALL.getVariantName());
+		return datePicker;
+	}
+
+	/**
 	 * Přidá styl, aby combo bylo malé
 	 */
 	public static <T> ComboBox<T> asSmall(ComboBox<T> comboBox) {
@@ -103,8 +113,7 @@ public class UIUtils {
 	 * Přidá filtrovací pole do záhlaví gridu
 	 */
 	public static TextField addHeaderTextField(HeaderCell cell,
-											   HasValue.ValueChangeListener<?
-													   super ComponentValueChangeEvent<TextField, String>> listener) {
+			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
 		TextField field = UIUtils.asSmall(new TextField());
 		field.setWidthFull();
 		field.addValueChangeListener(listener);
@@ -114,12 +123,23 @@ public class UIUtils {
 	}
 
 	/**
+	 * Přidá filtrovací datepicker do záhlaví gridu
+	 */
+	public static DatePicker addHeaderDatePicker(HeaderCell cell,
+			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
+		DatePicker field = UIUtils.asSmall(new DatePicker());
+		field.setWidthFull();
+		field.addValueChangeListener(listener);
+		cell.setComponent(field);
+		return field;
+	}
+
+	/**
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
 	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, Class<T> enumType,
-																	ItemLabelGenerator<T> itemLabelGenerator,
-																	HasValue.ValueChangeListener<?
-																			super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+			ItemLabelGenerator<T> itemLabelGenerator,
+			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		return addHeaderComboBox(cell, enumType.getEnumConstants(), itemLabelGenerator, listener);
 	}
 
@@ -127,9 +147,8 @@ public class UIUtils {
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
 	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, T[] values,
-																	ItemLabelGenerator<T> itemLabelGenerator,
-																	HasValue.ValueChangeListener<?
-																			super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+			ItemLabelGenerator<T> itemLabelGenerator,
+			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		return addHeaderComboBox(cell, Arrays.asList(values), itemLabelGenerator, listener);
 	}
 
@@ -137,9 +156,8 @@ public class UIUtils {
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
 	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, Collection<T> values,
-																	ItemLabelGenerator<T> itemLabelGenerator,
-																	HasValue.ValueChangeListener<?
-																			super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
+			ItemLabelGenerator<T> itemLabelGenerator,
+			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		ComboBox<T> combo = UIUtils.asSmall(new ComboBox<>(null, values));
 		combo.setWidthFull();
 		combo.setRequired(false);
@@ -186,9 +204,8 @@ public class UIUtils {
 	}
 
 	/**
-	 * Nahraje více JS skriptů, synchronně za sebou (mohou se tedy navzájem na
-	 * sebe odkazovat a bude zaručeno, že 1. skript bude celý nahrán před 2.
-	 * skriptem, který využívá jeho funkcí)
+	 * Nahraje více JS skriptů, synchronně za sebou (mohou se tedy navzájem na sebe odkazovat a bude zaručeno, že 1.
+	 * skript bude celý nahrán před 2. skriptem, který využívá jeho funkcí)
 	 *
 	 * @param scripts skripty, které budou nahrány
 	 */
@@ -197,9 +214,8 @@ public class UIUtils {
 	}
 
 	/**
-	 * Nahraje více JS skriptů, synchronně za sebou (mohou se tedy navzájem na
-	 * sebe odkazovat a bude zaručeno, že 1. skript bude celý nahrán před 2.
-	 * skriptem, který využívá jeho funkcí)
+	 * Nahraje více JS skriptů, synchronně za sebou (mohou se tedy navzájem na sebe odkazovat a bude zaručeno, že 1.
+	 * skript bude celý nahrán před 2. skriptem, který využívá jeho funkcí)
 	 *
 	 * @param scripts skripty, které budou nahrány
 	 */
@@ -242,8 +258,8 @@ public class UIUtils {
 		StringBuilder loadStylesheet = new StringBuilder();
 		loadStylesheet.append("var head=document.getElementsByTagName('head')[0];")
 				.append("var link=document.createElement('link');").append("link.type='text/css';")
-				.append("link.rel='stylesheet';").append("link.href='" + link + "';").append("head.appendChild(link)" +
-						";");
+				.append("link.rel='stylesheet';").append("link.href='" + link + "';")
+				.append("head.appendChild(link)" + ";");
 		UI.getCurrent().getPage().executeJs(loadStylesheet.toString());
 	}
 

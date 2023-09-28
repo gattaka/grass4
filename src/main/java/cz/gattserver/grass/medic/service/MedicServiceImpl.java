@@ -1,4 +1,4 @@
-package cz.gattserver.grass.medic.facade;
+package cz.gattserver.grass.medic.service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import cz.gattserver.grass.medic.dao.MedicalInstitutionRepository;
-import cz.gattserver.grass.medic.dao.MedicalRecordRepository;
-import cz.gattserver.grass.medic.dao.MedicamentRepository;
-import cz.gattserver.grass.medic.dao.PhysicianRepository;
-import cz.gattserver.grass.medic.dao.ScheduledVisitRepository;
+import cz.gattserver.grass.medic.domain.MedicalInstitutionRepository;
+import cz.gattserver.grass.medic.domain.MedicalRecordRepository;
+import cz.gattserver.grass.medic.domain.MedicamentRepository;
+import cz.gattserver.grass.medic.domain.PhysicianRepository;
+import cz.gattserver.grass.medic.domain.ScheduledVisitRepository;
 import cz.gattserver.grass.medic.domain.MedicalInstitution;
 import cz.gattserver.grass.medic.domain.MedicalRecord;
 import cz.gattserver.grass.medic.domain.Medicament;
@@ -27,7 +27,7 @@ import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
 @Transactional
 @Component
-public class MedicFacadeImpl implements MedicFacade {
+public class MedicServiceImpl implements MedicService {
 
 	@Autowired
 	private MedicalInstitutionRepository medicalInstitutionRepository;
@@ -55,7 +55,12 @@ public class MedicFacadeImpl implements MedicFacade {
 	}
 
 	@Override
-	public List<MedicalInstitutionTO> getAllMedicalInstitutions() {
+	public List<MedicalInstitutionTO> getMedicalInstitutions(MedicalInstitutionTO filterTO) {
+		return medicMapper.mapMedicalInstitutions(medicalInstitutionRepository.findList(filterTO));
+	}
+
+	@Override
+	public List<MedicalInstitutionTO> getMedicalInstitutions() {
 		return medicMapper.mapMedicalInstitutions(medicalInstitutionRepository.findAll());
 	}
 
@@ -78,8 +83,8 @@ public class MedicFacadeImpl implements MedicFacade {
 	// Návštěvy
 
 	@Override
-	public void deleteScheduledVisit(ScheduledVisitTO dto) {
-		scheduledVisitRepository.deleteById(dto.getId());
+	public void deleteScheduledVisit(ScheduledVisitTO to) {
+		scheduledVisitRepository.deleteById(to.getId());
 	}
 
 	@Override
@@ -103,30 +108,28 @@ public class MedicFacadeImpl implements MedicFacade {
 	}
 
 	@Override
-	public void saveScheduledVisit(ScheduledVisitTO dto) {
+	public void saveScheduledVisit(ScheduledVisitTO to) {
 		ScheduledVisit visit = new ScheduledVisit();
-		visit.setId(dto.getId());
-		if (dto.getTime() == null)
-			visit.setDate(dto.getDate().atStartOfDay());
+		visit.setId(to.getId());
+		if (to.getTime() == null)
+			visit.setDate(to.getDate().atStartOfDay());
 		else
-			visit.setDate(dto.getDate().atTime(dto.getTime()));
-		visit.setPeriod(dto.getPeriod());
-		visit.setPurpose(dto.getPurpose());
-		visit.setPlanned(dto.isPlanned());
+			visit.setDate(to.getDate().atTime(to.getTime()));
+		visit.setPeriod(to.getPeriod());
+		visit.setPurpose(to.getPurpose());
+		visit.setPlanned(to.isPlanned());
 
 		// pouze pokud jde o save nikoliv o update
 		if (visit.getId() == null) {
 			// save nemůže mít stav MISSED
-			visit.setPlanned(ScheduledVisitState.PLANNED.equals(dto.getState()));
+			visit.setPlanned(ScheduledVisitState.PLANNED.equals(to.getState()));
 		}
 
-		if (dto.getRecord() != null) {
-			visit.setRecord(medicalRecordRepository.findById(dto.getRecord().getId()).orElse(null));
-		}
+		if (to.getRecord() != null)
+			visit.setRecord(medicalRecordRepository.findById(to.getRecord().getId()).orElse(null));
 
-		if (dto.getInstitution() != null) {
-			visit.setInstitution(medicalInstitutionRepository.findById(dto.getInstitution().getId()).orElse(null));
-		}
+		if (to.getInstitution() != null)
+			visit.setInstitution(medicalInstitutionRepository.findById(to.getInstitution().getId()).orElse(null));
 
 		scheduledVisitRepository.save(visit);
 	}
@@ -139,30 +142,35 @@ public class MedicFacadeImpl implements MedicFacade {
 	// Záznamy
 
 	@Override
-	public void deleteMedicalRecord(MedicalRecordTO dto) {
-		scheduledVisitRepository.deleteById(dto.getId());
+	public void deleteMedicalRecord(MedicalRecordTO to) {
+		scheduledVisitRepository.deleteById(to.getId());
 	}
 
 	@Override
-	public List<MedicalRecordTO> getAllMedicalRecords() {
-		return medicMapper.mapMedicalRecords(medicalRecordRepository.findOrderByDateDesc());
+	public List<MedicalRecordTO> getMedicalRecords(MedicalRecordTO filterTO) {
+		return medicMapper.mapMedicalRecords(medicalRecordRepository.findList(filterTO));
 	}
 
 	@Override
-	public void saveMedicalRecord(MedicalRecordTO dto) {
+	public List<MedicalRecordTO> getMedicalRecords() {
+		return medicMapper.mapMedicalRecords(medicalRecordRepository.findAll());
+	}
+
+	@Override
+	public void saveMedicalRecord(MedicalRecordTO to) {
 		MedicalRecord record = new MedicalRecord();
-		record.setId(dto.getId());
-		record.setDate(dto.getDate().atTime(dto.getTime()));
-		record.setRecord(dto.getRecord());
+		record.setId(to.getId());
+		record.setDate(to.getDate().atTime(to.getTime()));
+		record.setRecord(to.getRecord());
 
-		if (dto.getPhysician() != null)
-			record.setPhysician(physicianRepository.findById(dto.getPhysician().getId()).orElse(null));
+		if (to.getPhysician() != null)
+			record.setPhysician(physicianRepository.findById(to.getPhysician().getId()).orElse(null));
 
-		if (dto.getInstitution() != null)
-			record.setInstitution(medicalInstitutionRepository.findById(dto.getInstitution().getId()).orElse(null));
+		if (to.getInstitution() != null)
+			record.setInstitution(medicalInstitutionRepository.findById(to.getInstitution().getId()).orElse(null));
 
 		List<Medicament> medicaments = new ArrayList<>();
-		for (MedicamentTO m : dto.getMedicaments()) {
+		for (MedicamentTO m : to.getMedicaments()) {
 			Medicament medicament = medicamentRepository.findById(m.getId()).orElse(null);
 			medicaments.add(medicament);
 		}
@@ -179,21 +187,26 @@ public class MedicFacadeImpl implements MedicFacade {
 	// Medikamenty
 
 	@Override
-	public void deleteMedicament(MedicamentTO dto) {
-		medicamentRepository.deleteById(dto.getId());
+	public void deleteMedicament(MedicamentTO to) {
+		medicamentRepository.deleteById(to.getId());
 	}
 
 	@Override
-	public Set<MedicamentTO> getAllMedicaments() {
+	public Set<MedicamentTO> getMedicaments(MedicamentTO filterTO) {
+		return medicMapper.mapMedicaments(medicamentRepository.findList(filterTO));
+	}
+
+	@Override
+	public Set<MedicamentTO> getMedicaments() {
 		return medicMapper.mapMedicaments(medicamentRepository.findAll());
 	}
 
 	@Override
-	public void saveMedicament(MedicamentTO dto) {
+	public void saveMedicament(MedicamentTO to) {
 		Medicament medicament = new Medicament();
-		medicament.setId(dto.getId());
-		medicament.setName(dto.getName());
-		medicament.setTolerance(dto.getTolerance());
+		medicament.setId(to.getId());
+		medicament.setName(to.getName());
+		medicament.setTolerance(to.getTolerance());
 		medicamentRepository.save(medicament);
 	}
 
@@ -205,20 +218,25 @@ public class MedicFacadeImpl implements MedicFacade {
 	// Doktoři
 
 	@Override
-	public void deletePhysician(PhysicianTO dto) {
-		physicianRepository.deleteById(dto.getId());
+	public void deletePhysician(PhysicianTO to) {
+		physicianRepository.deleteById(to.getId());
 	}
 
 	@Override
-	public Set<PhysicianTO> getAllPhysicians() {
+	public Set<PhysicianTO> getPhysicians(PhysicianTO filterTO) {
+		return medicMapper.mapPhysicians(physicianRepository.findList(filterTO));
+	}
+
+	@Override
+	public Set<PhysicianTO> getPhysicians() {
 		return medicMapper.mapPhysicians(physicianRepository.findAll());
 	}
 
 	@Override
-	public void savePhysician(PhysicianTO dto) {
+	public void savePhysician(PhysicianTO to) {
 		Physician physician = new Physician();
-		physician.setId(dto.getId());
-		physician.setName(dto.getName());
+		physician.setId(to.getId());
+		physician.setName(to.getName());
 		physicianRepository.save(physician);
 	}
 

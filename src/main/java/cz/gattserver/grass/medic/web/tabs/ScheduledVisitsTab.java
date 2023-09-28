@@ -27,7 +27,7 @@ import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.components.button.*;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitState;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 import cz.gattserver.grass.medic.util.MedicUtil;
@@ -40,7 +40,7 @@ public class ScheduledVisitsTab extends Div {
 
 	private static final long serialVersionUID = -5013459007975657195L;
 
-	private transient MedicFacade medicFacade;
+	private transient MedicService medicService;
 
 	private Grid<ScheduledVisitTO> toBePlannedGrid = new Grid<>();
 	private Grid<ScheduledVisitTO> plannedGrid = new Grid<>();
@@ -272,10 +272,10 @@ public class ScheduledVisitsTab extends Div {
 		populateContainer(false);
 	}
 
-	protected MedicFacade getMedicFacade() {
-		if (medicFacade == null)
-			medicFacade = SpringContextHelper.getBean(MedicFacade.class);
-		return medicFacade;
+	protected MedicService getMedicFacade() {
+		if (medicService == null)
+			medicService = SpringContextHelper.getBean(MedicService.class);
+		return medicService;
 	}
 
 }

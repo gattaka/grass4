@@ -13,14 +13,14 @@ import cz.gattserver.common.vaadin.LinkButton;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 
 public class MedicalRecordDetailDialog extends Dialog {
 
 	private static final long serialVersionUID = -1240133390770972624L;
 
-	private transient MedicFacade medicFacade;
+	private transient MedicService medicService;
 
 	public MedicalRecordDetailDialog(Long id) {
 		VerticalLayout layout = new VerticalLayout();
@@ -72,9 +72,9 @@ public class MedicalRecordDetailDialog extends Dialog {
 		layout.add(tags);
 	}
 
-	protected MedicFacade getMedicFacade() {
-		if (medicFacade == null)
-			medicFacade = SpringContextHelper.getBean(MedicFacade.class);
-		return medicFacade;
+	protected MedicService getMedicFacade() {
+		if (medicService == null)
+			medicService = SpringContextHelper.getBean(MedicService.class);
+		return medicService;
 	}
 }

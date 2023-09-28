@@ -9,14 +9,14 @@ import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 
 public abstract class MedicamentCreateDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
 
-	private transient MedicFacade medicFacade;
+	private transient MedicService medicService;
 
 	public MedicamentCreateDialog() {
 		this(null);
@@ -58,10 +58,10 @@ public abstract class MedicamentCreateDialog extends EditWebDialog {
 			binder.readBean(originalDTO);
 	}
 
-	protected MedicFacade getMedicFacade() {
-		if (medicFacade == null)
-			medicFacade = SpringContextHelper.getBean(MedicFacade.class);
-		return medicFacade;
+	protected MedicService getMedicFacade() {
+		if (medicService == null)
+			medicService = SpringContextHelper.getBean(MedicService.class);
+		return medicService;
 	}
 
 	protected abstract void onSuccess();

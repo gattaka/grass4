@@ -18,7 +18,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
 
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitState;
@@ -37,7 +37,7 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
 	public ScheduledVisitsCreateDialog(Operation operation, ScheduledVisitTO originalDTO) {
 		boolean planned = operation.equals(Operation.PLANNED) || operation.equals(Operation.PLANNED_FROM_TO_BE_PLANNED);
 
-		MedicFacade medicalFacade = SpringContextHelper.getBean(MedicFacade.class);
+		MedicService medicalFacade = SpringContextHelper.getBean(MedicService.class);
 
 		setWidth("400px");
 
@@ -80,13 +80,13 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
 		dateField.setWidthFull();
 		binder.forField(dateField).asRequired().bind("date");
 
-		List<MedicalRecordTO> records = medicalFacade.getAllMedicalRecords();
+		List<MedicalRecordTO> records = medicalFacade.getMedicalRecords();
 		final ComboBox<MedicalRecordTO> recordsComboBox = new ComboBox<>("Navazuje na kontrolu", records);
 		add(recordsComboBox);
 		recordsComboBox.setWidthFull();
 		binder.forField(recordsComboBox).bind("record");
 
-		List<MedicalInstitutionTO> institutions = medicalFacade.getAllMedicalInstitutions();
+		List<MedicalInstitutionTO> institutions = medicalFacade.getMedicalInstitutions();
 		final ComboBox<MedicalInstitutionTO> institutionComboBox = new ComboBox<>("Instituce", institutions);
 		add(institutionComboBox);
 		institutionComboBox.setWidthFull();

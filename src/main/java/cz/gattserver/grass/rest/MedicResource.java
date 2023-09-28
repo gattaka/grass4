@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import cz.gattserver.grass.medic.facade.MedicFacade;
+import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
 @Controller
@@ -19,12 +19,12 @@ public class MedicResource {
 	private static Logger logger = LoggerFactory.getLogger(MedicResource.class);
 
 	@Autowired
-	private MedicFacade medicFacade;
+	private MedicService medicService;
 
 	@RequestMapping(value = "visit", headers = "Accept=application/json")
 	@ResponseBody
 	public List<ScheduledVisitTO> getInstitutions() {
-		return medicFacade.getAllScheduledVisits();
+		return medicService.getAllScheduledVisits();
 	}
 
 	public MedicResource() {
