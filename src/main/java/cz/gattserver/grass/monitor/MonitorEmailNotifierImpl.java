@@ -29,20 +29,20 @@ public class MonitorEmailNotifierImpl extends TimerTask implements MonitorEmailN
 		// Test, zda jsou nahozené systémy serveru
 		for (URLMonitorItemTO to : monitorFacade.getServersStatus().getItems()) {
 			if (!MonitorState.SUCCESS.equals(to.getMonitorState()))
-				mailService.sendToAdmin("GRASS3 Monitor oznámení o změně stavu monitorovaného předmětu",
+				mailService.sendToAdmin("GRASS Monitor oznámení o změně stavu monitorovaného předmětu",
 						"Server služba " + to.getName() + " není aktivní nebo se nezdařilo zjistit její stav");
 		}
 
 		// Test, zda je připojen backup disk
 		BackupStatusPartItemTO backupStatusPartItemTO = monitorFacade.getBackupStatus();
 		if (!MonitorState.SUCCESS.equals(backupStatusPartItemTO.getMonitorState())) {
-			mailService.sendToAdmin("GRASS3 Monitor oznámení o změně stavu monitorovaného předmětu",
+			mailService.sendToAdmin("GRASS Monitor oznámení o změně stavu monitorovaného předmětu",
 					"Backup disk není připojen nebo se nezdařilo zjistit jeho stav");
 
 			// Test, zda jsou prováděny pravidelně zálohy
 			for (BackupStatusMonitorItemTO to : backupStatusPartItemTO.getItems()) {
 				if (!MonitorState.SUCCESS.equals(to.getMonitorState()))
-					mailService.sendToAdmin("GRASS3 Monitor oznámení o změně stavu monitorovaného předmětu", to
+					mailService.sendToAdmin("GRASS Monitor oznámení o změně stavu monitorovaného předmětu", to
 							.getValue()
 							+ " Záloha nebyla provedena, je starší než 24h nebo se nezdařilo zjistit její stav");
 			}
@@ -51,12 +51,12 @@ public class MonitorEmailNotifierImpl extends TimerTask implements MonitorEmailN
 		// Test, zda jsou disky dle SMART v pořádku
 		for (SMARTMonitorItemTO to : monitorFacade.getSMARTInfo().getItems()) {
 			if (MonitorState.ERROR.equals(to.getMonitorState())) {
-				mailService.sendToAdmin("GRASS3 Monitor oznámení o změně stavu monitorovaného předmětu",
+				mailService.sendToAdmin("GRASS Monitor oznámení o změně stavu monitorovaného předmětu",
 						"Nezdařilo se zjistit stav SMART monitoru: " + to.getStateDetails());
 				break;
 			}
 			if (MonitorState.ERROR.equals(to.getMonitorState())) {
-				mailService.sendToAdmin("GRASS3 Monitor oznámení o změně stavu monitorovaného předmětu",
+				mailService.sendToAdmin("GRASS Monitor oznámení o změně stavu monitorovaného předmětu",
 						"SMART monitor detekoval chyby");
 				break;
 			}

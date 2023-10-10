@@ -30,7 +30,7 @@ public class MedicEmailNotifierImpl extends TimerTask implements MedicEmailNotif
 		logger.info("Medic TimerTask byl spuštěn");
 		for (ScheduledVisitTO to : medicService.getAllScheduledVisits()) {
 			if (MedicUtil.fromNowAfter7Days(to, LocalDateTime.now())) {
-				mailService.sendToAdmin("GRASS3 Medic oznámená o plánované události",
+				mailService.sendToAdmin("GRASS Medic oznámená o plánované události",
 						"Událost naplánovaná na: "
 								+ to.getDate().format(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm"))
 								+ " se blíží (nastane za 7 dní):\n\n" + "Instituce:\t"
