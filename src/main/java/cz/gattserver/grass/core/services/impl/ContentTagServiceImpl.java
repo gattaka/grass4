@@ -95,14 +95,14 @@ public class ContentTagServiceImpl implements ContentTagService {
 	public Map<Long, Integer> getTagsContentsCountsMap() {
 		Map<Long, Integer> map = new LinkedHashMap<>();
 		for (Object[] to : contentTagRepository.countContentTagsContents())
-			map.put(((BigInteger) to[0]).longValue(), ((BigInteger) to[1]).intValue());
+			map.put((Long) to[0], ((Long) to[1]).intValue());
 		return map;
 	}
 
 	@Override
 	public List<Integer> getTagsContentsCountsGroups() {
 		List<Integer> list = new ArrayList<>();
-		contentTagRepository.findContentNodesCountsGroups().forEach(i -> list.add(((BigInteger) i).intValue()));
+		contentTagRepository.findContentNodesCountsGroups().forEach(i -> list.add(((Long) i).intValue()));
 		return list;
 	}
 

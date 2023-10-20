@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface ChordsRepository extends JpaRepository<Chord, Long>, ChordsRepositoryCustom {
 
-	@Query("select s from CHORD s order by instrument asc, name asc")
+	@Query("select s from CHORD s order by s.name asc")
 	List<Chord> findAllOrderByNamePageable(Pageable pageRequest);
 
-	@Query("select s from CHORD s where name = ?1")
+	@Query("select s from CHORD s where s.name = ?1")
 	Chord findByName(String name);
 
 }

@@ -32,9 +32,6 @@ public class DatabaseConfig {
 	@Value("${hibernate.connection.password}")
 	private String password;
 
-	@Value("${hibernate.dialect}")
-	private String hibernateDialect;
-
 	@Value("${hibernate.show_sql:false}")
 	private String hibernateShowSql;
 
@@ -74,7 +71,6 @@ public class DatabaseConfig {
 		bean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 
 		Properties jpaProperties = new Properties();
-		jpaProperties.setProperty("hibernate.dialect", hibernateDialect);
 		jpaProperties.setProperty("hibernate.show_sql", hibernateShowSql);
 		jpaProperties.setProperty("hibernate.format_sql", hibernateFormatSql);
 		jpaProperties.setProperty("hibernate.use_sql_comments", hibernateUseSqlComments);
