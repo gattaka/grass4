@@ -1,4 +1,4 @@
-package cz.gattserver.grass.books.util;
+package cz.gattserver.common;
 
 import com.mortennobel.imagescaling.DimensionConstrain;
 import com.mortennobel.imagescaling.ResampleFilters;

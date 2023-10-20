@@ -2,7 +2,7 @@ package cz.gattserver.grass.recipes;
 
 import java.util.Set;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import cz.gattserver.grass.core.modules.SectionService;
 import cz.gattserver.grass.core.security.Role;

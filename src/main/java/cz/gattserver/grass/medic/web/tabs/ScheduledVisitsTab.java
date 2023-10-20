@@ -174,14 +174,15 @@ public class ScheduledVisitsTab extends Div {
 		grid.addColumn(ScheduledVisitTO::getPurpose).setKey("purpose").setHeader("Účel");
 		if (fullTime)
 			grid.addColumn(new LocalDateTimeRenderer<ScheduledVisitTO>(to -> to.getDate().atTime(to.getTime()),
-					DateTimeFormatter.ofPattern("d. MMMM yyyy H:mm", Locale.forLanguageTag("CS")))).setKey("date")
+							() -> DateTimeFormatter.ofPattern("d. MMMM yyyy H:mm", Locale.forLanguageTag("CS")))).setKey("date")
 					.setHeader("Datum").setWidth("200px").setFlexGrow(0);
 		else
 			grid.addColumn(new LocalDateTimeRenderer<ScheduledVisitTO>(to -> to.getDate().atStartOfDay(),
-					DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("CS")))).setKey("date")
+							() -> DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("CS")))).setKey(
+									"date")
 					.setHeader("Datum").setWidth("150px").setFlexGrow(0);
 		grid.addColumn(new TextRenderer<ScheduledVisitTO>(
-				to -> to.getInstitution() == null ? "" : to.getInstitution().getName())).setKey("institution")
+						to -> to.getInstitution() == null ? "" : to.getInstitution().getName())).setKey("institution")
 				.setHeader("Instituce");
 
 		grid.setWidthFull();

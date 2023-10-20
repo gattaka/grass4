@@ -1,6 +1,6 @@
 package cz.gattserver.grass.core.ui.pages.template;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.services.QuotesService;

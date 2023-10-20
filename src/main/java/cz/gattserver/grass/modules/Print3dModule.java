@@ -6,7 +6,7 @@ import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Component("print3dModule")
 public class Print3dModule implements ContentModule {

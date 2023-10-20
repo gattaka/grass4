@@ -9,8 +9,8 @@ import cz.gattserver.grass.songs.model.domain.QChord;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 
 @Repository

@@ -2,10 +2,10 @@ package cz.gattserver.grass.articles.model.domain;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
 
 @Entity(name = "ARTICLE_JS_CODE")
 public class ArticleJSCode implements ExecutedInOrder, Comparable<ArticleJSCode> {

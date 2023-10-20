@@ -7,7 +7,7 @@ import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import org.springframework.stereotype.Component;
 import cz.gattserver.common.vaadin.ImageIcon;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Component("articlesContentModule")
 public class ArticlesContentModule implements ContentModule {

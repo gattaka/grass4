@@ -69,7 +69,8 @@ public class MedicalRecordsTab extends MedicPageTab<MedicalRecordTO, MedicalReco
 		String fdateID = "fdate";
 		grid.removeAllColumns();
 		Grid.Column<MedicalRecordTO> dateCol = grid.addColumn(new LocalDateTimeRenderer<>(MedicalRecordTO::getDateTime,
-						DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("CS")))).setHeader("Datum")
+						() -> DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("CS")))).setHeader(
+								"Datum")
 				.setKey(fdateID).setTextAlign(ColumnTextAlign.END).setWidth("130px").setFlexGrow(0);
 		Grid.Column<MedicalRecordTO> instCol = grid.addColumn("institution").setHeader("Instituce");
 		Grid.Column<MedicalRecordTO> recordCol = grid.addColumn("record").setHeader("Záznam");

@@ -3,10 +3,10 @@ package cz.gattserver.grass.print3d.model.domain;
 import cz.gattserver.grass.core.model.domain.ContentNode;
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.OneToOne;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 
 @Entity(name = "PRINT3D")
 public class Print3d {

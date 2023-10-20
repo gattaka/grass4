@@ -14,8 +14,6 @@ import java.nio.file.Path;
 
 import org.junit.jupiter.api.Test;
 
-import javax.servlet.http.HttpServletRequest;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 public class FavlinkImageRequestHandlerTest extends DBCleanTest {

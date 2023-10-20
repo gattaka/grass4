@@ -1,7 +1,7 @@
 package cz.gattserver.grass.core.model.repositories.impl;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import cz.gattserver.grass.core.model.domain.QQuote;
 import cz.gattserver.grass.core.model.repositories.QuoteRepositoryCustom;

@@ -3,7 +3,7 @@ package cz.gattserver.grass.core.ui.pages.template;
 import java.time.LocalDate;
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;

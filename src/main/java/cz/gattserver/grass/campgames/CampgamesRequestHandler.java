@@ -3,8 +3,8 @@ package cz.gattserver.grass.campgames;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
 
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;

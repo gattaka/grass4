@@ -6,8 +6,8 @@ import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 

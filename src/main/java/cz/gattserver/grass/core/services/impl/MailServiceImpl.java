@@ -2,12 +2,12 @@ package cz.gattserver.grass.core.services.impl;
 
 import java.util.Properties;
 
-import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import jakarta.mail.Message;
+import jakarta.mail.PasswordAuthentication;
+import jakarta.mail.Session;
+import jakarta.mail.Transport;
+import jakarta.mail.internet.InternetAddress;
+import jakarta.mail.internet.MimeMessage;
 
 import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.services.MailService;
@@ -48,7 +48,7 @@ public class MailServiceImpl implements MailService {
 		props.put("mail.smtp.ssl.trust", "*");
 		props.put("mail.smtp.ssl.protocols", "TLSv1.2");
 
-		Session session = Session.getDefaultInstance(props, new javax.mail.Authenticator() {
+		Session session = Session.getDefaultInstance(props, new jakarta.mail.Authenticator() {
 			@Override
 			protected PasswordAuthentication getPasswordAuthentication() {
 				return new PasswordAuthentication(fromEmail, password);

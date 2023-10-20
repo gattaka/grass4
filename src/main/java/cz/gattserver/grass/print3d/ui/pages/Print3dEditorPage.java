@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -45,7 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -107,7 +109,8 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 		init();
 
 		UI.getCurrent().getPage().executeJs(
-				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - rozpracovaná data nejsou uložena ?\" };");
+				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
+						"rozpracovaná data nejsou uložena ?\" };");
 	}
 
 	@Override
@@ -118,9 +121,10 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 			throw new GrassPageException(404);
 		}
 
-		FetchItemsCallback<String> fetchItemsCallback = (filter, offset, limit) -> contentTagFacade
-				.findByFilter(filter, offset, limit).stream();
-		SerializableFunction<String, Integer> serializableFunction = filter -> contentTagFacade.countByFilter(filter);
+		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade
+				.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+		CallbackDataProvider.CountCallback<String, String> serializableFunction =
+				q -> contentTagFacade.countByFilter(q.getFilter().get());
 		keywords = new TokenField(fetchItemsCallback, serializableFunction);
 
 		nameField = new TextField();
@@ -286,12 +290,12 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 		// Zrušit
 		CloseButton cancelButton = new CloseButton("Zrušit", ev -> new ConfirmDialog(
 				"Opravdu si přejete zavřít editor projektu ? Veškeré neuložené změny budou ztraceny.", e -> {
-					cleanAfterCancelEdit();
-					if (editMode)
-						returnToProject();
-					else
-						returnToNode();
-				}).open());
+			cleanAfterCancelEdit();
+			if (editMode)
+				returnToProject();
+			else
+				returnToNode();
+		}).open());
 		buttonLayout.add(cancelButton);
 	}
 

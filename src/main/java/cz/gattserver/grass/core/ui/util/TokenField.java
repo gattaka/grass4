@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.data.provider.CallbackDataProvider;
 import cz.gattserver.grass.core.ui.components.button.DeleteButton;
 import org.apache.commons.lang3.StringUtils;
 
@@ -29,10 +30,11 @@ public class TokenField extends Div {
 
 	private ComboBox<String> comboBox;
 
-	public TokenField(FetchItemsCallback<String> fetchItemsCallback,
-			SerializableFunction<String, Integer> serializableFunction) {
+	public TokenField(
+			CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback,
+			CallbackDataProvider.CountCallback<String, String> countCallback) {
 		comboBox = new ComboBox<>();
-		comboBox.setDataProvider(fetchItemsCallback, serializableFunction);
+		comboBox.setItems(fetchItemsCallback, countCallback);
 		comboBox.addAttachListener(e -> comboBox.focus());
 		init();
 	}

@@ -1,7 +1,7 @@
 package cz.gattserver.grass.core.ui.pages;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.services.impl.LoginResult;

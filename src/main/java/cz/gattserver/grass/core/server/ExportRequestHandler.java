@@ -3,13 +3,8 @@ package cz.gattserver.grass.core.server;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
-
-import com.vaadin.flow.server.VaadinSession;
-import org.springframework.web.context.request.RequestAttributes;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
 
 @WebServlet(urlPatterns = "/export/*")
 public class ExportRequestHandler extends AbstractGrassRequestHandler {

@@ -5,7 +5,7 @@ import cz.gattserver.grass.core.security.Role;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.Set;
 
 @Component("drinksSection")

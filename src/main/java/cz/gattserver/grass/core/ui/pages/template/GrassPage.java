@@ -7,8 +7,6 @@ import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import com.vaadin.flow.server.InitialPageSettings;
-import com.vaadin.flow.server.PageConfigurator;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 
@@ -31,7 +29,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
  * @author Hynek
  *
  */
-public abstract class GrassPage extends Div implements PageConfigurator  {
+public abstract class GrassPage extends Div {
 
 	private static final long serialVersionUID = 7952966362953000385L;
 
@@ -50,10 +48,13 @@ public abstract class GrassPage extends Div implements PageConfigurator  {
 		return UIUtils.isMobileDevice();
 	}
 
+	// TODO favicon ve v24?
+	/*
 	@Override
 	public void configurePage(InitialPageSettings settings) {
 		settings.addFavIcon("icon", "VAADIN/img/favicon.png", "16px");
 	}
+	 */
 
 	public void init() {
 		createPageElements(this);

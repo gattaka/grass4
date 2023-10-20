@@ -55,7 +55,8 @@ public class CrosswordTab extends Div {
 		btnLayout.add(giveUpTestBtn);
 
 		NumberField numberField = new NumberField();
-		numberField.setHasControls(true);
+		// TODO v24
+		//numberField.setHasControls(true);
 		numberField.setMin(5);
 		numberField.setMax(30);
 		btnLayout.add(numberField);

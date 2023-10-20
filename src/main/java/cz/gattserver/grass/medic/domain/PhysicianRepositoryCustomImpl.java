@@ -5,11 +5,10 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
-import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 
 public class PhysicianRepositoryCustomImpl implements PhysicianRepositoryCustom {

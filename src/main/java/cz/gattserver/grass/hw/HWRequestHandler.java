@@ -4,15 +4,14 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;
 import cz.gattserver.grass.hw.service.HWService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.context.support.SpringBeanAutowiringSupport;
 
 
 @WebServlet(urlPatterns = "/" + HWConfiguration.HW_PATH + "/*")

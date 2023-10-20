@@ -7,8 +7,8 @@ import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 
 import cz.gattserver.grass.core.modules.SectionService;
 import cz.gattserver.grass.core.security.CoreRole;

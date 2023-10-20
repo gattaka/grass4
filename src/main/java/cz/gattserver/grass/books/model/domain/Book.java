@@ -2,7 +2,7 @@ package cz.gattserver.grass.books.model.domain;
 
 import org.hibernate.annotations.GenericGenerator;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 
 @Entity(name = "BOOKS_BOOK")
 public class Book {

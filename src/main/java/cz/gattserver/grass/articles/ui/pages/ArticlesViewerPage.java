@@ -24,7 +24,7 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 @Route("articles")
 public class ArticlesViewerPage extends ContentViewerPage implements HasUrlParameter<String>, HasDynamicTitle {

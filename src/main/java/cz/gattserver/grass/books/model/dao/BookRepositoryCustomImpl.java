@@ -12,8 +12,8 @@ import cz.gattserver.grass.books.model.interfaces.QBookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.QBookTO;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.util.List;
 
 public class BookRepositoryCustomImpl implements BookRepositoryCustom {

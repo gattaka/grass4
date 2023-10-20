@@ -6,7 +6,7 @@ import cz.gattserver.grass.core.services.FileSystemService;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;

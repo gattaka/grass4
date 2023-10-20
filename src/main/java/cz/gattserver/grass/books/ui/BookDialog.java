@@ -15,7 +15,7 @@ import com.vaadin.flow.server.StreamResource;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
-import cz.gattserver.grass.books.util.ImageUtils;
+import cz.gattserver.common.ImageUtils;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteButton;

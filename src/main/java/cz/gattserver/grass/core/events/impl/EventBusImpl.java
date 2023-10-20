@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.events.ProgressEvent;
 
-import javax.annotation.PostConstruct;
+import jakarta.annotation.PostConstruct;
 
 @Component
 public class EventBusImpl implements EventBus {

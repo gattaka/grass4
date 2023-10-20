@@ -4,7 +4,7 @@ import cz.gattserver.grass.core.model.domain.ContentNode;
 import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SortComparator;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Set;
 import java.util.SortedSet;
 

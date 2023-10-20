@@ -3,9 +3,6 @@ package cz.gattserver.grass.monitor.services.impl;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
 import java.time.LocalDateTime;
@@ -17,11 +14,12 @@ import java.util.Map;
 
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.monitor.processor.item.*;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ParseException;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -341,14 +339,14 @@ public class MonitorServiceImpl implements MonitorService {
 			HttpGet httpGet = new HttpGet(address);
 			try (CloseableHttpResponse resp = httpclient.execute(httpGet)) {
 				itemTO.setStateDetails(EntityUtils.toString(resp.getEntity()));
-				int statusCode = resp.getStatusLine().getStatusCode();
+				int statusCode = resp.getCode();
 				if (anyCode || statusCode >= 200 && statusCode < 300) {
 					itemTO.setMonitorState(MonitorState.SUCCESS);
 				} else {
 					itemTO.setMonitorState(MonitorState.ERROR);
 				}
 			}
-		} catch (IOException e) {
+		} catch (IOException | ParseException e) {
 			itemTO.setStateDetails(e.getMessage());
 			itemTO.setMonitorState(MonitorState.ERROR);
 		}

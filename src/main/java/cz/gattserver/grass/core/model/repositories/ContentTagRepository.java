@@ -13,7 +13,7 @@ public interface ContentTagRepository extends JpaRepository<ContentTag, Long>, C
 	ContentTag findByName(String name);
 
 	@Modifying
-	@Query("delete CONTENT_TAG c where size(c.contentNodes) = '0'")
+	@Query("delete CONTENT_TAG c where size(c.contentNodes) = 0")
 	void deleteUnusedTags();
 
 	@Query(value = "select c from (select count(contenttags_id) as c from CONTENTNODE_CONTENT_TAG group by contenttags_id ) as counts group by c order by c asc;",

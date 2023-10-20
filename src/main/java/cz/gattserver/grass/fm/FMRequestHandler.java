@@ -4,8 +4,8 @@ package cz.gattserver.grass.fm;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;
 import cz.gattserver.grass.fm.config.FMConfiguration;
 
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServletRequest;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 

@@ -24,7 +24,7 @@ import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import java.util.List;
 
 public class ListTab extends Div {

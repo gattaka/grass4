@@ -2,8 +2,8 @@ package cz.gattserver.grass.recipes.model.dao;
 
 import java.util.List;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import org.springframework.stereotype.Repository;

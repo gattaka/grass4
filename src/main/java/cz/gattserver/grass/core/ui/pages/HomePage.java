@@ -2,7 +2,7 @@ package cz.gattserver.grass.core.ui.pages;
 
 import java.util.List;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
@@ -41,7 +41,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 @Route("")
 @RouteAlias("home")
 @JsModule("custom.js")
-@Theme(value = Lumo.class)
+@Theme(value = "lumo")
 @CssImport("styles.css")
 @PageTitle("Gattserver")
 public class HomePage extends OneColumnPage {
