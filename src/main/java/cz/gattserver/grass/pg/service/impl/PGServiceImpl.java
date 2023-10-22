@@ -252,16 +252,18 @@ public class PGServiceImpl implements PGService {
 	@Override
 	@Async
 	@Transactional(propagation = Propagation.NEVER)
-	public void modifyPhotogallery(UUID operationId, long photogalleryId, PhotogalleryPayloadTO payloadTO,
-								   LocalDateTime date) {
+	public void modifyPhotogallery(
+			UUID operationId, long photogalleryId, PhotogalleryPayloadTO payloadTO,
+			LocalDateTime date) {
 		innerSavePhotogallery(operationId, payloadTO, photogalleryId, null, null, date);
 	}
 
 	@Override
 	@Async
 	@Transactional(propagation = Propagation.NEVER)
-	public void savePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, long nodeId, long authorId,
-								 LocalDateTime date) {
+	public void savePhotogallery(
+			UUID operationId, PhotogalleryPayloadTO payloadTO, long nodeId, long authorId,
+			LocalDateTime date) {
 		innerSavePhotogallery(operationId, payloadTO, null, nodeId, authorId, date);
 	}
 
@@ -270,8 +272,9 @@ public class PGServiceImpl implements PGService {
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED)
-	protected Photogallery transactionSavePhotogallery(UUID operationId, String galleryDir,
-													   PhotogalleryPayloadTO payloadTO, Long existingId, Long nodeId, Long authorId, LocalDateTime date) {
+	protected Photogallery transactionSavePhotogallery(
+			UUID operationId, String galleryDir,
+			PhotogalleryPayloadTO payloadTO, Long existingId, Long nodeId, Long authorId, LocalDateTime date) {
 		logger.info("modifyPhotogallery thread: " + Thread.currentThread().getId());
 
 		Photogallery photogallery = existingId == null ? new Photogallery()
@@ -311,8 +314,9 @@ public class PGServiceImpl implements PGService {
 	}
 
 	@Transactional(propagation = Propagation.NEVER)
-	protected void innerSavePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, Long existingId, Long nodeId,
-										 Long authorId, LocalDateTime date) {
+	protected void innerSavePhotogallery(
+			UUID operationId, PhotogalleryPayloadTO payloadTO, Long existingId, Long nodeId,
+			Long authorId, LocalDateTime date) {
 		String galleryDir = payloadTO.getGalleryDir();
 		Path galleryPath = getGalleryPath(galleryDir);
 		try (Stream<Path> stream = Files.list(galleryPath).sorted(getComparator())) {
@@ -435,7 +439,8 @@ public class PGServiceImpl implements PGService {
 	}
 
 	@Override
-	public List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(Long userId, String filter, Pageable pageable) {
+	public List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(Long userId, String filter,
+																		Pageable pageable) {
 		filter = QuerydslUtil.transformSimpleLikeFilter(filter);
 		return photogalleriesMapper.mapPhotogalleryForRESTOverviewCollection(
 				userId != null ? photogalleryRepository.findByUserAccess(userId, filter, pageable)
@@ -561,12 +566,18 @@ public class PGServiceImpl implements PGService {
 		String zipFileName = "grassPGTmpFile-" + new Date().getTime() + "-" + galleryDir + ".zip";
 		try {
 			Path zipFile = fileSystemService.createTmpDir("grassPGTmpFolder").resolve(zipFileName);
-			try (FileSystem zipFileSystem = fileSystemService.newZipFileSystem(zipFile, true)) {
+			FileSystem zipFileSystem = null;
+			try {
+				zipFileSystem = fileSystemService.newZipFileSystem(zipFile, true);
 				performZip(galleryPath, zipFileSystem, progress, total);
 				logger.info("Zipování galerie dokončeno");
+				// musí se zavřít před zasláním event, takže nelze použít try-with-resources
+				zipFileSystem.close();
 				eventBus.publish(new PGZipProcessResultEvent(zipFile));
 			} catch (Exception e) {
 				String msg = "Nezdařilo se vytvořit ZIP galerie";
+				if (zipFileSystem != null)
+					zipFileSystem.close();
 				eventBus.publish(new PGZipProcessResultEvent(msg, e));
 				logger.error(msg, e);
 			}
@@ -577,8 +588,9 @@ public class PGServiceImpl implements PGService {
 		}
 	}
 
-	private void performZip(Path galleryPath, FileSystem zipFileSystem, ReferenceHolder<Integer> progress,
-							ReferenceHolder<Integer> total) throws IOException {
+	private void performZip(
+			Path galleryPath, FileSystem zipFileSystem, ReferenceHolder<Integer> progress,
+			ReferenceHolder<Integer> total) throws IOException {
 		final Path root = zipFileSystem.getRootDirectories().iterator().next();
 		try (Stream<Path> stream = Files.list(galleryPath)) {
 			Iterator<Path> it = stream.iterator();

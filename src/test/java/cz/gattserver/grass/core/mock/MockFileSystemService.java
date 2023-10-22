@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import jakarta.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;
@@ -33,13 +34,11 @@ public class MockFileSystemService implements FileSystemService {
 	}
 
 	@Override
-	public FileSystem newZipFileSystem(Path path, boolean create) throws IOException {
-		if (create) {
-			return FileSystems.newFileSystem(URI.create("jar:" + path.toUri()),
-					Collections.singletonMap("create", "true"), Jimfs.class.getClassLoader());
-		} else {
-			return FileSystems.newFileSystem(path, Jimfs.class.getClassLoader());
-		}
+	public synchronized FileSystem newZipFileSystem(Path path, boolean create) throws IOException {
+		if (create)
+			System.out.println("Creating FS '" + path.toUri() + "'");
+		return FileSystems.newFileSystem(URI.create("jar:" + path.toUri()),
+				Collections.singletonMap("create", "" + create), Jimfs.class.getClassLoader());
 	}
 
 	@Override

@@ -196,7 +196,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -289,7 +290,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -414,7 +416,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -533,7 +536,8 @@ public class PGServiceImplTest extends DBCleanTest {
 		Path largeFile = galleryDir.resolve("02.jpg");
 		Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
 
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -623,7 +627,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -674,7 +679,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -721,13 +727,11 @@ public class PGServiceImplTest extends DBCleanTest {
 			assertTrue(false);
 		} else {
 			logger.info("zipPath: {}", zipPath);
-			// ??? Aktuálně je potřeba volat dvakrát, poprvé položky v zipu nejsou -- je jedno
-			// jak dlouho se čeká, působí to jako nějaká lazy-vlastnost, přitom dle výpisů by
-			// vše v zipu už mělo být -- zatím se mi nepodařilo zjistit v čem je problém
-			ZIPUtils.list(fileSystemService.newZipFileSystem(zipPath, false));
-			zipContents = ZIPUtils.list(fileSystemService.newZipFileSystem(zipPath, false));
-			for (Path p : zipContents)
-				System.out.println(p);
+			try (FileSystem fs = fileSystemService.newZipFileSystem(zipPath, false)) {
+				zipContents = ZIPUtils.list(fs);
+				for (Path p : zipContents)
+					System.out.println(p);
+			}
 		}
 		eventBus.unsubscribe(eventsHandler2);
 
@@ -759,7 +763,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -934,7 +939,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -995,7 +1001,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -1050,7 +1057,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
@@ -1085,7 +1093,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		Long userId1 = coreMockService.createMockUser(1);
 		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(),
+		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
+				galleryDir.getFileName().toString(),
 				null, true, false);
 
 		UUID operationId = UUID.randomUUID();
