@@ -14,11 +14,13 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.RememberMeServices;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.security.web.authentication.rememberme.TokenBasedRememberMeServices;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,9 @@ public class SecurityServiceImpl implements SecurityService {
 
 	@Autowired
 	private RememberMeServices rememberMeServices;
+
+	@Autowired
+	private SecurityContextRepository securityContextRepository;
 
 	@Override
 	public void logout(HttpServletRequest request, HttpServletResponse response) {
@@ -59,7 +64,10 @@ public class SecurityServiceImpl implements SecurityService {
 			Authentication auth = authenticationManager.authenticate(token);
 			if (auth.isAuthenticated()) {
 				principal = (UserInfoTO) auth.getPrincipal();
-				SecurityContextHolder.getContext().setAuthentication(auth);
+				// https://docs.spring.io/spring-security/reference/migration/servlet/session-management.html
+				SecurityContext securityContext = SecurityContextHolder.getContext();
+				securityContext.setAuthentication(auth);
+				securityContextRepository.saveContext(securityContext, request, response);
 				if (remember && rememberMeServices instanceof TokenBasedRememberMeServices) {
 					TokenBasedRememberMeServices rms = (TokenBasedRememberMeServices) rememberMeServices;
 					rms.onLoginSuccess(request, response, auth);

@@ -43,7 +43,7 @@ public class LoginPage extends OneColumnPage {
 		if (LoginResult.SUCCESS == loginResult) {
 			// Reinitialize the session to protect against session fixation
 			// attacks. This does not work with websocket communication.
-			VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
+			//VaadinService.reinitializeSession(VaadinService.getCurrentRequest());
 		}
 		return loginResult;
 	}

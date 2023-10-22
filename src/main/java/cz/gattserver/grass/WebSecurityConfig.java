@@ -16,6 +16,10 @@ import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.RememberMeServices;
+import org.springframework.security.web.context.DelegatingSecurityContextRepository;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.sql.DataSource;
@@ -44,7 +48,15 @@ public class WebSecurityConfig {
 	}
 
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+	public SecurityContextRepository securityContextRepository() {
+		return new DelegatingSecurityContextRepository(
+				new RequestAttributeSecurityContextRepository(),
+				new HttpSessionSecurityContextRepository()
+		);
+	}
+
+	@Bean
+	public SecurityFilterChain filterChain(HttpSecurity http, SecurityContextRepository securityContextRepository) throws Exception {
 		// Pokud se tady nechá odkaz na login, tak se Vaadin nedostane na
 		// widgetset na login page (místo JSON response přijde login page...)
 		// Všechny možné ostatní postupy selhaly, takže to je nakonec udělané
@@ -53,12 +65,14 @@ public class WebSecurityConfig {
 		// chce aspoň jeden vstupní bod.
 		http.authorizeRequests().requestMatchers(AntPathRequestMatcher.antMatcher("/**")).permitAll();
 		// http.formLogin().loginPage("/loginpage");
-		http.logout(c -> c.logoutSuccessUrl("/").deleteCookies("JSESSIONID"));
+		http.logout(c -> c.logoutUrl("/logout").logoutSuccessUrl("/").deleteCookies("JSESSIONID"));
+		// https://docs.spring.io/spring-security/reference/5.8/migration/servlet/session-management.html#_require_explicit_saving_of_securitycontextrepository
+		// https://stackoverflow.com/questions/75618616/auto-login-after-registration-spring-boot-3-spring-security-6
+		http.securityContext((securityContext) -> securityContext.requireExplicitSave(true).securityContextRepository(securityContextRepository));
 		// https://www.mkyong.com/spring-security/spring-security-remember-me-example/
 		http.rememberMe(c -> c.rememberMeServices(rememberMeServices).key(SecurityConfig.REMEMBER_ME_KEY));
 		http.csrf(c -> c.disable());
 
-		//http.authorizeHttpRequests((authz) -> authz.anyRequest().authenticated()).httpBasic(withDefaults());
 		return http.build();
 	}
 
