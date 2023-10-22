@@ -46,3 +46,6 @@ build/
 /src/main/resources/mail.properties
 /src/main/resources/db.properties
 /src/main/resources/application.properties
+/frontend/generated/
+/src/main/dev-bundle/
+/frontend/index.html
