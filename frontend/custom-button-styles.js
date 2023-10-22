@@ -18,9 +18,19 @@ const $_documentContainer = html`<dom-module id="grass-lumo-button" theme-for="v
         margin-bottom: -0.25em;        
       }
       
-      :host([theme~="tertiary"]),
-      :host([theme~="tertiary-inline"]) {
+      :host([theme~="menu-button"]) {
         border: none;
+        color: #d1d3d6;
+        text-shadow: rgba(0,0,0,.9) 0 1px 0;
+        text-decoration: none;
+        font: 400 14px/1.55 Helvetica,Arial,lucida grande,tahoma,verdana,arial,sans-serif;
+        cursor: pointer;
+        height: 21px;
+      }
+
+      :host([theme~="menu-button"]):hover {
+          text-decoration: none;
+          color: white;
       }
       
       ::slotted(img.img-only-button) {

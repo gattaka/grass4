@@ -191,7 +191,7 @@ vaadin-horizontal-layout.menu {
 
 .menu-item {
 	display: inline-block;
-	padding: 0px 0px 0px 10px;
+	padding: 1px 0px 0px 10px;
 }
 
 .menu-item a, .menu-item-right a {
@@ -204,7 +204,7 @@ vaadin-horizontal-layout.menu {
 
 .menu-item-right {
 	float: right;
-    padding: 0 10px 0 0;
+    padding: 1px 10px 0 0;
 }
 
 .menu-item a:hover {
