@@ -57,6 +57,7 @@ public abstract class GrassPage extends Div {
 	 */
 
 	public void init() {
+		removeAll();
 		createPageElements(this);
 		setId("main-div");
 		UI.getCurrent().getPage().addJavaScript("context://VAADIN/js/jquery.js");

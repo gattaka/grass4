@@ -34,14 +34,14 @@ public class NodesGrid extends Grid<NodeOverviewTO> {
 		String iconBind = "customIcon";
 		String nameBind = "customName";
 
-		addColumn(new IconRenderer<NodeOverviewTO>(c -> {
+		addColumn(new IconRenderer<>(c -> {
 			Image img = new Image(ImageIcon.BRIEFCASE_16_ICON.createResource(), "");
 			img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
 			return img;
 		}, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
 				.setKey(iconBind);
 
-		addColumn(new ComponentRenderer<Anchor, NodeOverviewTO>(node -> {
+		addColumn(new ComponentRenderer<>(node -> {
 			String url = UIUtils.getPageURL(nodePageFactory,
 					URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
 			return new Anchor(url, node.getName());
