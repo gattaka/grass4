@@ -3,6 +3,11 @@ package cz.gattserver.grass.core.ui.pages.template;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.server.VaadinServletRequest;
+import cz.gattserver.grass.core.services.SecurityService;
 import jakarta.annotation.Resource;
 
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
@@ -38,6 +43,9 @@ public abstract class MenuPage extends GrassPage {
 
 	@Autowired
 	protected NodeService nodeFacade;
+
+	@Autowired
+	protected SecurityService securityService;
 
 	@Resource(name = "homePageFactory")
 	protected PageFactory homePageFactory;
@@ -121,11 +129,11 @@ public abstract class MenuPage extends GrassPage {
 		bottomHolder.add(bottomShadow);
 	}
 
-	protected Div createMenuComponent(Div menu, Anchor component) {
+	protected Div createMenuComponent(Div menu, Component component) {
 		return createMenuComponent(menu, component, false);
 	}
 
-	protected Div createMenuComponent(Div menu, Anchor component, boolean rightMenu) {
+	protected Div createMenuComponent(Div menu, Component component, boolean rightMenu) {
 		Div wrapper = new Div(component);
 		wrapper.add(component);
 		menu.add(wrapper);
@@ -175,9 +183,10 @@ public abstract class MenuPage extends GrassPage {
 		final UserInfoTO userInfoDTO = getUser();
 		if (coreACL.canShowUserDetails(userInfoDTO, getUser())) {
 			// odhlásit
-			createMenuComponent(menu, new Anchor(getPageURL("logout"), "Odhlásit (" + userInfoDTO.getName() + ")"),
-					true);
-
+			Button logoutBtn = new Button("Odhlásit (" + userInfoDTO.getName() + ")",
+					e -> securityService.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null));
+			logoutBtn.addThemeName("menu-button");
+			createMenuComponent(menu, logoutBtn, true);
 			// nastavení
 			createMenuComponent(menu, new Anchor(getPageURL(settingsPageFactory), "Nastavení"), true);
 		}

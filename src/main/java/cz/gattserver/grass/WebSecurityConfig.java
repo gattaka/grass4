@@ -64,7 +64,6 @@ public class WebSecurityConfig {
 		// springSecurityFilterChain ... a ten zase chce http definici ... a ta
 		// chce aspoň jeden vstupní bod.
 		http.authorizeRequests().requestMatchers(AntPathRequestMatcher.antMatcher("/**")).permitAll();
-		// http.formLogin().loginPage("/loginpage");
 		http.logout(c -> c.logoutUrl("/logout").logoutSuccessUrl("/").deleteCookies("JSESSIONID"));
 		// https://docs.spring.io/spring-security/reference/5.8/migration/servlet/session-management.html#_require_explicit_saving_of_securitycontextrepository
 		// https://stackoverflow.com/questions/75618616/auto-login-after-registration-spring-boot-3-spring-security-6
