@@ -330,9 +330,10 @@ public class MonitorServiceImpl implements MonitorService {
 		}
 
 		CountDownLatch countDownLatch = new CountDownLatch(list.size());
-		List<Thread> workers = list.stream().map(item -> new Thread(() -> testResponseCode(item, item.getUrl(),
-						true)))
-				.collect(Collectors.toList());
+		List<Thread> workers = list.stream().map(item -> new Thread(() -> {
+			testResponseCode(item, item.getUrl(), true);
+			countDownLatch.countDown();
+		})).collect(Collectors.toList());
 
 		workers.forEach(Thread::start);
 		try {
