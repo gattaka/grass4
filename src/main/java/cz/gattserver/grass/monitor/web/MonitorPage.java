@@ -412,6 +412,7 @@ public class MonitorPage extends OneColumnPage {
 	@Override
 	protected void createColumnContent(Div layout) {
 		this.layout = new VerticalLayout();
+		this.layout.setSpacing(false);
 		this.layout.setPadding(false);
 		this.layout.addClassName("monitor-content");
 		layout.add(this.layout);
@@ -419,7 +420,7 @@ public class MonitorPage extends OneColumnPage {
 	}
 
 	private void populateMonitor() {
-		layout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+		//layout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 
 		// Servers
 		serversLayout = preparePart("Servers");

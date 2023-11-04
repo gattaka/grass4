@@ -26,9 +26,11 @@ const $_documentContainer = html`<dom-module id="grass-lumo-button" theme-for="v
         font: 400 14px/1.55 Helvetica,Arial,lucida grande,tahoma,verdana,arial,sans-serif;
         cursor: pointer;
         height: 21px;
+        background: none;
+        padding: 0 3px 0 0;
       }
 
-      :host([theme~="menu-button"]):hover {
+      :host([theme~="menu-button"]:hover) {
           text-decoration: none;
           color: white;
       }

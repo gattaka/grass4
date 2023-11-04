@@ -7,19 +7,23 @@ import java.nio.file.FileStore;
 import java.nio.file.FileSystems;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.monitor.processor.item.*;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +44,9 @@ public class MonitorServiceImpl implements MonitorService {
 	private static final Logger logger = LoggerFactory.getLogger(MonitorServiceImpl.class);
 
 	private static final int HTTP_TEST_TIMEOUT = 5000;
+
+	@Value("${servers.items}")
+	private String serversItems;
 
 	@Value("${monitor.address}")
 	private String monitorAddress;
@@ -315,18 +322,26 @@ public class MonitorServiceImpl implements MonitorService {
 	public ServersPartItemTO getServersStatus() {
 		ServersPartItemTO partItemTO = new ServersPartItemTO();
 
-		URLMonitorItemTO syncthingTO = new URLMonitorItemTO("Syncthing", "http://gattserver.cz:8127");
-		testResponseCode(syncthingTO, syncthingTO.getUrl(), true);
-		partItemTO.getItems().add(syncthingTO);
+		List<URLMonitorItemTO> list = Collections.synchronizedList(new ArrayList<>());
+		for (String server : serversItems.split(";")) {
+			String[] serverConfig = server.split(",");
+			URLMonitorItemTO syncthingTO = new URLMonitorItemTO(serverConfig[0], serverConfig[1]);
+			list.add(syncthingTO);
+		}
 
-		URLMonitorItemTO nexusTO = new URLMonitorItemTO("Sonatype Nexus", "https://nexus.gattserver.cz");
-		testResponseCode(nexusTO, nexusTO.getUrl());
-		partItemTO.getItems().add(nexusTO);
+		CountDownLatch countDownLatch = new CountDownLatch(list.size());
+		List<Thread> workers = list.stream().map(item -> new Thread(() -> testResponseCode(item, item.getUrl(),
+						true)))
+				.collect(Collectors.toList());
 
-		URLMonitorItemTO sonarTO = new URLMonitorItemTO("SonarQube", "https://sonarqube.gattserver.cz");
-		testResponseCode(sonarTO, sonarTO.getUrl());
-		partItemTO.getItems().add(sonarTO);
+		workers.forEach(Thread::start);
+		try {
+			countDownLatch.await();
+		} catch (InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 
+		partItemTO.getItems().addAll(list);
 		return partItemTO;
 	}
 
@@ -335,7 +350,10 @@ public class MonitorServiceImpl implements MonitorService {
 	}
 
 	private void testResponseCode(MonitorItemTO itemTO, String address, boolean anyCode) {
-		try (CloseableHttpClient httpclient = HttpClients.createDefault()) {
+		Timeout timeout = Timeout.ofSeconds(10);
+		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
+				.build();
+		try (CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultRequestConfig(config).build()) {
 			HttpGet httpGet = new HttpGet(address);
 			try (CloseableHttpResponse resp = httpclient.execute(httpGet)) {
 				itemTO.setStateDetails(EntityUtils.toString(resp.getEntity()));
@@ -375,20 +393,20 @@ public class MonitorServiceImpl implements MonitorService {
 
 					// https://www.freedesktop.org/software/systemd/man/journalctl.html
 					switch (priority) {
-						case 0: // "emerg" (0)
-						case 1: // "alert" (1)
-						case 2: // "crit" (2)
-						case 3: // "err" (3)
-						case 4: // "warning" (4)
-							to.setMonitorState(MonitorState.ERROR);
-							partItemTO.getItems().add(to);
-							break;
-						case 5: // "notice" (5)
-						case 6: // "info" (6)
-						case 7: // "debug" (7)
-						default:
-							// unused
-							break;
+					case 0: // "emerg" (0)
+					case 1: // "alert" (1)
+					case 2: // "crit" (2)
+					case 3: // "err" (3)
+					case 4: // "warning" (4)
+						to.setMonitorState(MonitorState.ERROR);
+						partItemTO.getItems().add(to);
+						break;
+					case 5: // "notice" (5)
+					case 6: // "info" (6)
+					case 7: // "debug" (7)
+					default:
+						// unused
+						break;
 					}
 				}
 				if (partItemTO.getItems().isEmpty()) {

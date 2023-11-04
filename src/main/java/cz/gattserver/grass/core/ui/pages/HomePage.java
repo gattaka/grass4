@@ -40,9 +40,8 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 
 @Route("")
 @RouteAlias("home")
-@JsModule("custom.js")
-//@Theme(value = "lumo")
-@CssImport("styles.css")
+@JsModule("themes/grass/custom.js")
+//@CssImport("styles.css")
 @PageTitle("Gattserver")
 public class HomePage extends OneColumnPage {
 
