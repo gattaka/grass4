@@ -126,6 +126,10 @@ public class MonitorPage extends OneColumnPage {
 		serversLayout.removeAll();
 		TableLayout serversTableLayout = prepareTableLayout();
 		serversLayout.add(serversTableLayout);
+		if (data.getItems().isEmpty()) {
+			serversTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(data.getStateDetails());
+			return;
+		}
 		for (URLMonitorItemTO to : data.getItems()) {
 			String content = to.getName();
 			Anchor anchor = new Anchor(to.getUrl(), to.getUrl());

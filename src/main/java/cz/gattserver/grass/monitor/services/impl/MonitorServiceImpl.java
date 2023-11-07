@@ -45,7 +45,7 @@ public class MonitorServiceImpl implements MonitorService {
 
 	private static final int HTTP_TEST_TIMEOUT = 5000;
 
-	@Value("${servers.items}")
+	@Value("${servers.items:}")
 	private String serversItems;
 
 	@Value("${monitor.address}")
@@ -321,6 +321,10 @@ public class MonitorServiceImpl implements MonitorService {
 	@Override
 	public ServersPartItemTO getServersStatus() {
 		ServersPartItemTO partItemTO = new ServersPartItemTO();
+		if (serversItems.isEmpty()) {
+			partItemTO.setStateDetails("Nenalezeny žádné servery ke kontrole");
+			return partItemTO;
+		}
 
 		List<URLMonitorItemTO> list = Collections.synchronizedList(new ArrayList<>());
 		for (String server : serversItems.split(";")) {
