@@ -537,17 +537,9 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 	}
 
 	private String getDownloadLink(AttachmentTO item) {
-		VaadinRequest vaadinRequest = VaadinRequest.getCurrent();
-		VaadinServletRequest vaadinServletRequest = (VaadinServletRequest) vaadinRequest;
-		String requestURI = ((VaadinServletRequest) vaadinRequest).getRequestURI();
-		String fullURL = vaadinServletRequest.getRequestURL().toString();
-		String urlBase = fullURL.substring(0, fullURL.length() - requestURI.length());
-		String contextRootURL = UIUtils.getContextPath();
 		StringBuilder sb = new StringBuilder();
-		sb.append(urlBase);
-		sb.append(contextRootURL);
-		if (!contextRootURL.endsWith("/"))
-			sb.append("/");
+		sb.append(UIUtils.getURLBase());
+		sb.append("/");
 		sb.append(ArticlesConfiguration.ATTACHMENTS_PATH);
 		if (!sb.toString().endsWith("/"))
 			sb.append("/");
