@@ -16,6 +16,15 @@ vaadin-progress-bar {
 	display: inline-block;
 }
 
+vaadin-text-area textarea {
+	border: none;
+	font-weight: 400;
+}
+
+vaadin-text-area::part(input-field) {
+	background-color: #fff;
+}
+
 a {
 	white-space: nowrap !important;
 }
@@ -24,6 +33,7 @@ a {
 	font-family: var(--lumo-font-family);
 	font-size: var(--lumo-font-size-m);
 	font-weight: 500;
+	border: none;
 }
 
 .scroll-div {

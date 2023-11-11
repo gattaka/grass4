@@ -90,8 +90,8 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 	private boolean stayInEditor = false;
 
 	/**
-	 * Soubory, které byly nahrány od posledního uložení. V případě, že budou
-	 * úpravy zrušeny, je potřeba tyto soubory smazat.
+	 * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
+	 * smazat.
 	 */
 	private Set<Print3dViewItemTO> newFiles = new HashSet<>();
 
@@ -109,8 +109,8 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 		init();
 
 		UI.getCurrent().getPage().executeJs(
-				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
-						"rozpracovaná data nejsou uložena ?\" };");
+				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - "
+						+ "rozpracovaná data nejsou uložena ?\" };");
 	}
 
 	@Override
@@ -121,10 +121,10 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 			throw new GrassPageException(404);
 		}
 
-		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade
-				.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
-		CallbackDataProvider.CountCallback<String, String> serializableFunction =
-				q -> contentTagFacade.countByFilter(q.getFilter().get());
+		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade.findByFilter(
+				q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+		CallbackDataProvider.CountCallback<String, String> serializableFunction = q -> contentTagFacade.countByFilter(
+				q.getFilter().get());
 		keywords = new TokenField(fetchItemsCallback, serializableFunction);
 
 		nameField = new TextField();
@@ -268,6 +268,24 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 	}
 
 	private void populateButtonsLayout(ButtonLayout buttonLayout) {
+		Div closeJsDiv = new Div() {
+			private static final long serialVersionUID = -7319482130016598549L;
+
+			@ClientCallable
+			private void returnToProjectCallback() {
+				UIUtils.redirect(getPageURL(print3dViewerPageFactory,
+						URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
+			}
+
+			@ClientCallable
+			private void returnToNodeCallback() {
+				UIUtils.redirect(getPageURL(nodePageFactory,
+						URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
+			}
+		};
+		closeJsDiv.setId(CLOSE_JS_DIV_ID);
+		add(closeJsDiv);
+
 		// Uložit
 		SaveButton saveButton = new SaveButton(event -> {
 			if (!isFormValid())
@@ -339,42 +357,16 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 	 * Zavolá vrácení se na obsah
 	 */
 	private void returnToProject() {
-		Div closeJsDiv = new Div() {
-			private static final long serialVersionUID = -7319482130016598549L;
-
-			@ClientCallable
-			private void closeCallback() {
-				UIUtils.redirect(getPageURL(print3dViewerPageFactory,
-						URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
-			}
-		};
-		closeJsDiv.setId(CLOSE_JS_DIV_ID);
-		add(closeJsDiv);
-
-		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null; setTimeout(function(){ document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.closeCallback() }, 10);");
+		UI.getCurrent().getPage().executeJs("window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID
+				+ "').$server.returnToProjectCallback();");
 	}
 
 	/**
 	 * zavolání vrácení se na kategorii
 	 */
 	private void returnToNode() {
-		Div closeJsDiv = new Div() {
-			private static final long serialVersionUID = -7319482130016598549L;
-
-			@ClientCallable
-			private void closeCallback() {
-				UIUtils.redirect(getPageURL(nodePageFactory,
-						URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
-			}
-		};
-		closeJsDiv.setId(CLOSE_JS_DIV_ID);
-		add(closeJsDiv);
-
-		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null; setTimeout(function(){ document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.closeCallback() }, 10);");
+		UI.getCurrent().getPage().executeJs("window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID
+				+ "').$server.returnToNodeCallback();");
 	}
 
 	private void onSaveResult(Long id) {
@@ -387,7 +379,6 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 				returnToProject();
 			// odteď budeme editovat
 			editMode = true;
-			UIUtils.showInfo("Uložení projektu proběhlo úspěšně");
 		} else {
 			UIUtils.showWarning("Uložení projektu se nezdařilo");
 		}
@@ -400,10 +391,8 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 			newFiles.clear();
 			if (!stayInEditor)
 				returnToProject();
-			UIUtils.showInfo("Úprava projektu proběhla úspěšně");
 		} else {
 			UIUtils.showWarning("Úprava projektu se nezdařila");
 		}
 	}
-
 }

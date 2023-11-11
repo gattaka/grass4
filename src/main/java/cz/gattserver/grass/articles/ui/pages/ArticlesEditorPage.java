@@ -304,8 +304,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 	}
 
 	private String createTextareaGetJS() {
-		return "let sr = $(\"vaadin-text-area\")[0].shadowRoot;"
-				+ "let ta = sr.children[1].children[1].children[1].children[0];";
+		return "let ta = $(\"vaadin-text-area\")[0].children[2];";
 	}
 
 	private String createTextareaGetSelectionJS() {
@@ -708,7 +707,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
 	private boolean saveOrUpdateArticle() {
 		try {
-			String text = null;
+			String text;
 			if (parts != null) {
 				StringBuilder builder = new StringBuilder();
 				builder.append(parts.getPrePart());
@@ -757,8 +756,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		add(closeJsDiv);
 
 		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null; setTimeout(function(){ document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.closeCallback() }, 10);");
+				.executeJs("window.onbeforeunload = null; document.getElementById('"
+						+ CLOSE_JS_DIV_ID + "').$server.closeCallback()`");
 	}
 
 	/**
@@ -782,8 +781,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		add(closeJsDiv);
 
 		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null; setTimeout(function(){ document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.closeCallback() }, 10);");
+				.executeJs("window.onbeforeunload = null;document.getElementById('"
+						+ CLOSE_JS_DIV_ID + "').$server.closeCallback()`");
 	}
-
 }
