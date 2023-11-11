@@ -525,13 +525,8 @@ public class MonitorPage extends OneColumnPage {
 					/*								*/ + "},"
 					/*								*/ + "success: function (data) {"
 					/*									*/ + "let jsDiv = document.getElementById('" + jsDivId + "');"
-					/*									*/ + "let func = jsDiv.$server.monitorRefresh;"
-					/*									*/ + "if (typeof func !== \"undefined\") { "
-					// MUSÍ se volat přímo, jinak vypadne 'this' reference a v dalších funkcích to bude zmateně padat
-					// na 'undefined' nelze tedy volat func(), protože https://stackoverflow.com/questions/4011793/this-is-undefined-in-javascript-class-methods
-					// bohužel, uvedené řešení přes .bind nefunguje, takže zatím takhle
+					/*									*/ + "if (jsDiv) "
 					/*										*/ + "jsDiv.$server.monitorRefresh(data);"
-					/*									*/ + "}"
 					/*								*/ + "}"
 					/*				*/ + "});";
 			UI.getCurrent().getPage().executeJs(
