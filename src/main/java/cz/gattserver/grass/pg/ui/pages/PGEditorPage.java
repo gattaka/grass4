@@ -95,8 +95,8 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 	private boolean stayInEditor = false;
 
 	/**
-	 * Soubory, které byly nahrány od posledního uložení. V případě, že budou
-	 * úpravy zrušeny, je potřeba tyto soubory smazat.
+	 * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
+	 * smazat.
 	 */
 	private Set<PhotogalleryViewItemTO> newFiles = new HashSet<>();
 
@@ -114,8 +114,8 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		init();
 
 		UI.getCurrent().getPage().executeJs(
-				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
-						"rozpracovaná data nejsou uložena ?\" };");
+				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - "
+						+ "rozpracovaná data nejsou uložena ?\" };");
 	}
 
 	@Override
@@ -126,10 +126,10 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 			throw new GrassPageException(404);
 		}
 
-		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade
-				.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
-		CallbackDataProvider.CountCallback<String, String> serializableFunction =
-				q -> contentTagFacade.countByFilter(q.getFilter().get());
+		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade.findByFilter(
+				q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+		CallbackDataProvider.CountCallback<String, String> serializableFunction = q -> contentTagFacade.countByFilter(
+				q.getFilter().get());
 		photogalleryKeywords = new TokenField(fetchItemsCallback, serializableFunction);
 
 		photogalleryNameField = new TextField();
@@ -341,8 +341,8 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		eventBus.subscribe(PGEditorPage.this);
 		progressIndicatorWindow = new ProgressDialog();
 
-		LocalDateTime ldt = photogalleryDateField.getValue() == null ? null
-				: photogalleryDateField.getValue().atStartOfDay();
+		LocalDateTime ldt =
+				photogalleryDateField.getValue() == null ? null : photogalleryDateField.getValue().atStartOfDay();
 		if (editMode) {
 			pgService.modifyPhotogallery(UUID.randomUUID(), photogallery.getId(), payloadTO, ldt);
 		} else {
@@ -359,16 +359,17 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
 			@ClientCallable
 			private void closeCallback() {
-				UIUtils.redirect(getPageURL(photogalleryViewerPageFactory, URLIdentifierUtils
-						.createURLIdentifier(photogallery.getId(), photogallery.getContentNode().getName())));
+				UIUtils.redirect(getPageURL(photogalleryViewerPageFactory,
+						URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
+								photogallery.getContentNode().getName())));
 			}
 		};
 		closeJsDiv.setId(CLOSE_JS_DIV_ID);
 		add(closeJsDiv);
 
-		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null; setTimeout(function(){ document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.closeCallback() }, 10);");
+		UI.getCurrent().getPage().executeJs(
+				"window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID
+						+ "').$server.closeCallback();");
 	}
 
 	/**
@@ -387,9 +388,9 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		closeJsDiv.setId(CLOSE_JS_DIV_ID);
 		add(closeJsDiv);
 
-		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null; setTimeout(function(){ document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.closeCallback() }, 10);");
+		UI.getCurrent().getPage().executeJs(
+				"window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID
+						+ "').$server.closeCallback();");
 	}
 
 	@Handler
@@ -429,7 +430,6 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 				returnToPhotogallery();
 			// odteď budeme editovat
 			editMode = true;
-			UIUtils.showInfo("Uložení galerie proběhlo úspěšně");
 		} else {
 			UIUtils.showWarning("Uložení galerie se nezdařilo");
 		}
@@ -442,10 +442,8 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 			newFiles.clear();
 			if (!stayInEditor)
 				returnToPhotogallery();
-			UIUtils.showInfo("Úprava galerie proběhla úspěšně");
 		} else {
 			UIUtils.showWarning("Úprava galerie se nezdařila");
 		}
 	}
-
 }

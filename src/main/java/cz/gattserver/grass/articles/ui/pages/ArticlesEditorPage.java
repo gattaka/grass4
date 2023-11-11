@@ -693,6 +693,24 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		Span autosaveLabel = createAutosaveLabel();
 		buttonLayout.add(autosaveLabel);
 
+		Div closeJsDiv = new Div() {
+			private static final long serialVersionUID = -7319482130016598549L;
+
+			@ClientCallable
+			private void returnToNodeCallback() {
+				UIUtils.redirect(getPageURL(nodePageFactory,
+						URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
+			}
+
+			@ClientCallable
+			private void returnToArticleCallback() {
+				UIUtils.redirect(getPageURL(articlesViewerPageFactory,
+						URLIdentifierUtils.createURLIdentifier(existingArticleId, existingArticleName)));
+			}
+		};
+		closeJsDiv.setId(CLOSE_JS_DIV_ID);
+		add(closeJsDiv);
+
 		populateGrid();
 	}
 
@@ -743,21 +761,9 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		if (existingDraftId != null)
 			articleService.deleteArticle(existingDraftId, existingArticleId == null);
 
-		Div closeJsDiv = new Div() {
-			private static final long serialVersionUID = -7319482130016598549L;
-
-			@ClientCallable
-			private void closeCallback() {
-				UIUtils.redirect(getPageURL(articlesViewerPageFactory,
-						URLIdentifierUtils.createURLIdentifier(existingArticleId, existingArticleName)));
-			}
-		};
-		closeJsDiv.setId(CLOSE_JS_DIV_ID);
-		add(closeJsDiv);
-
 		UI.getCurrent().getPage()
 				.executeJs("window.onbeforeunload = null; document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.closeCallback()`");
+						+ CLOSE_JS_DIV_ID + "').$server.returnToArticleCallback()");
 	}
 
 	/**
@@ -768,20 +774,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		if (existingDraftId != null)
 			articleService.deleteArticle(existingDraftId, existingArticleId == null);
 
-		Div closeJsDiv = new Div() {
-			private static final long serialVersionUID = -7319482130016598549L;
-
-			@ClientCallable
-			private void closeCallback() {
-				UIUtils.redirect(getPageURL(nodePageFactory,
-						URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
-			}
-		};
-		closeJsDiv.setId(CLOSE_JS_DIV_ID);
-		add(closeJsDiv);
-
 		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null;document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.closeCallback()`");
+				.executeJs("window.onbeforeunload = null; document.getElementById('"
+						+ CLOSE_JS_DIV_ID + "').$server.returnToNodeCallback()");
 	}
 }
