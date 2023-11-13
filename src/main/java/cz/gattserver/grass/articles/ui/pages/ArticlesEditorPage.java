@@ -1,9 +1,6 @@
 package cz.gattserver.grass.articles.ui.pages;
 
-import com.vaadin.flow.component.ClientCallable;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox.FetchItemsCallback;
@@ -75,7 +72,7 @@ import java.util.List;
 
 @Route("articles-editor")
 @PageTitle("Editor článku")
-public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter<String> {
+public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter<String>, BeforeLeaveObserver {
 
 	private static final long serialVersionUID = -5107777679764121445L;
 
@@ -131,8 +128,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		init();
 
 		UI.getCurrent().getPage().executeJs(
-				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
-                        "rozpracovaná data nejsou uložena ?\" };");
+				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - "
+						+ "rozpracovaná data nejsou uložena?\" };");
 	}
 
 	private void populateByExistingArticle(ArticleTO article, String partNumberToken) {
@@ -260,10 +257,10 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		articleNameField = new TextField();
 		articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
 
-		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade
-				.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
-		CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagFacade.countByFilter(q.getFilter().get());
+		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade.findByFilter(
+				q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+		CallbackDataProvider.CountCallback<String, String> serializableFunction = q -> contentTagFacade.countByFilter(
+				q.getFilter().get());
 		articleKeywords = new TokenField(fetchItemsCallback, serializableFunction);
 		articleKeywords.isEnabled();
 		articleKeywords.setPlaceholder("klíčové slovo");
@@ -381,11 +378,11 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 			if (StringUtils.isNotBlank(desc))
 				headerSpan.add(new HtmlSpan(" " + desc));
 			Div header = new Div(headerSpan);
-			header.getStyle().set("border-bottom", "2px solid #aaa").set("line-height", "0").set("margin",
-					i == 0 ? "10px 0" : "20px 0 10px 0");
-			headerSpan.getStyle().set("cz/gattserver/grass/articles/plugins/basic/color", "#888").set("font-size",
-                            "11pt").set("font-weight", "600")
-					.set("background", "#f4f1e6").set("padding", "0 10px");
+			header.getStyle().set("border-bottom", "2px solid #aaa").set("line-height", "0")
+					.set("margin", i == 0 ? "10px 0" : "20px 0 10px 0");
+			headerSpan.getStyle().set("cz/gattserver/grass/articles/plugins/basic/color", "#888")
+					.set("font-size", "11pt").set("font-weight", "600").set("background", "#f4f1e6")
+					.set("padding", "0 10px");
 			layout.add(header);
 			layout.add(familyToolsLayout);
 
@@ -434,11 +431,12 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 			if (!isFormValid())
 				return;
 			if (saveOrUpdateArticle()) {
-				UIUtils.showSilentInfo(
-						ArticlesEditorPage.this.existingArticleId != null ? "Úprava článku proběhla úspěšně"
-								: "Uložení článku proběhlo úspěšně");
+				UIUtils.showSilentInfo(ArticlesEditorPage.this.existingArticleId != null
+						? "Úprava článku proběhla úspěšně"
+						: "Uložení článku proběhlo úspěšně");
 			} else {
-				UIUtils.showWarning(ArticlesEditorPage.this.existingArticleId != null ? "Úprava článku se nezdařila"
+				UIUtils.showWarning(ArticlesEditorPage.this.existingArticleId != null
+						? "Úprava článku se nezdařila"
 						: "Uložení článku se nezdařilo");
 			}
 		});
@@ -454,7 +452,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 				// Tady nemá cena dávat infowindow
 				returnToArticle();
 			} else {
-				UIUtils.showWarning(ArticlesEditorPage.this.existingArticleId != null ? "Úprava článku se nezdařila"
+				UIUtils.showWarning(ArticlesEditorPage.this.existingArticleId != null
+						? "Úprava článku se nezdařila"
 						: "Uložení článku se nezdařilo");
 			}
 		});
@@ -463,17 +462,16 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 	}
 
 	private Button createCancelButton() {
-		Button cancelButton = new ImageButton("Zrušit", ImageIcon.DELETE_16_ICON,
-				event -> new ConfirmDialog(
-						"Opravdu si přejete zavřít editor článku ? Veškeré neuložené změny budou ztraceny.", e -> {
-					// ruším úpravu existujícího článku (vracím se na
-					// článek), nebo nového (vracím se do kategorie) ?
-					if (existingArticleId != null) {
-						returnToArticle();
-					} else {
-						returnToNode();
-					}
-				}).open());
+		Button cancelButton = new ImageButton("Zrušit", ImageIcon.DELETE_16_ICON, event -> new ConfirmDialog(
+				"Opravdu si přejete zavřít editor článku ? Veškeré neuložené změny budou ztraceny.", e -> {
+			// ruším úpravu existujícího článku (vracím se na
+			// článek), nebo nového (vracím se do kategorie) ?
+			if (existingArticleId != null) {
+				returnToArticle();
+			} else {
+				returnToNode();
+			}
+		}).open());
 		return cancelButton;
 	}
 
@@ -523,8 +521,14 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		autosaveJsDiv.setId(autosaveJsDivId);
 		add(autosaveJsDiv);
 
-		UI.getCurrent().getPage().executeJs("setInterval(function(){ document.getElementById('" + autosaveJsDivId
-				+ "').$server.autosaveCallback() }, 10000);");
+		UI.getCurrent().getPage().executeJs("window.autosaveInterval = setInterval(function(){"
+				/*		*/ + "let callbackDiv = document.getElementById('" + autosaveJsDivId + "');"
+				/*		*/ + "if (callbackDiv) {"
+				/*			*/ + "callbackDiv.$server.autosaveCallback()"
+				/*		*/ + "} else {"
+				/*			*/ + "clearInterval(window.autosaveInterval); "
+				/*		*/ + "}"
+				/*		*/ + "}, 10000);");
 
 		return autosaveLabel;
 	}
@@ -558,21 +562,22 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		new ConfirmDialog(e -> {
 			AttachmentsOperationResult result = articleService.deleteAttachment(attachmentsDirId, to.getName());
 			switch (result.getState()) {
-				case SUCCESS:
-					attachmentsDirId = result.getAttachmentDirId();
-					populateGrid();
-					break;
-				default:
-					UIUtils.showWarning("Soubor '" + to.getName() + "' nebylo možné smazat - došlo k systémové chybě" +
-                            ".");
+			case SUCCESS:
+				attachmentsDirId = result.getAttachmentDirId();
+				populateGrid();
+				break;
+			default:
+				UIUtils.showWarning(
+						"Soubor '" + to.getName() + "' nebylo možné smazat - došlo k systémové chybě" + ".");
 			}
 		}).open();
 	}
 
 	private void handleInsertAction(AttachmentTO to) {
 		String url = getDownloadLink(to);
-		String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "document.getElementById('"
-				+ HANDLER_JS_DIV_ID + "').$server.handleSelection(\"" + url + "\", \"\", start, finish)";
+		String js =
+				createTextareaGetJS() + createTextareaGetSelectionJS() + "document.getElementById('" + HANDLER_JS_DIV_ID
+						+ "').$server.handleSelection(\"" + url + "\", \"\", start, finish)";
 		UI.getCurrent().getPage().executeJs(js);
 	}
 
@@ -620,17 +625,17 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 			AttachmentsOperationResult result = articleService.saveAttachment(attachmentsDirId,
 					buffer.getInputStream(event.getFileName()), event.getFileName());
 			switch (result.getState()) {
-				case SUCCESS:
-					attachmentsDirId = result.getAttachmentDirId();
-					populateGrid();
-					break;
-				case ALREADY_EXISTS:
-					UIUtils.showWarning("Soubor '" + event.getFileName()
-							+ "' nebylo možné uložit - soubor s tímto názvem již existuje.");
-					break;
-				default:
-					UIUtils.showWarning(
-							"Soubor '" + event.getFileName() + "' nebylo možné uložit - došlo k systémové chybě.");
+			case SUCCESS:
+				attachmentsDirId = result.getAttachmentDirId();
+				populateGrid();
+				break;
+			case ALREADY_EXISTS:
+				UIUtils.showWarning("Soubor '" + event.getFileName()
+						+ "' nebylo možné uložit - soubor s tímto názvem již existuje.");
+				break;
+			default:
+				UIUtils.showWarning(
+						"Soubor '" + event.getFileName() + "' nebylo možné uložit - došlo k systémové chybě.");
 			}
 			if (existingDraftId == null)
 				saveArticleDraft(false);
@@ -753,9 +758,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		if (existingDraftId != null)
 			articleService.deleteArticle(existingDraftId, existingArticleId == null);
 
-		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null; document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.returnToArticleCallback()");
+		UI.getCurrent().getPage().executeJs("window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID
+				+ "').$server.returnToArticleCallback()");
 	}
 
 	/**
@@ -766,8 +770,15 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		if (existingDraftId != null)
 			articleService.deleteArticle(existingDraftId, existingArticleId == null);
 
-		UI.getCurrent().getPage()
-				.executeJs("window.onbeforeunload = null; document.getElementById('"
-						+ CLOSE_JS_DIV_ID + "').$server.returnToNodeCallback()");
+		UI.getCurrent().getPage().executeJs("window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID
+				+ "').$server.returnToNodeCallback()");
+	}
+
+	@Override
+	public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+		beforeLeaveEvent.postpone();
+		new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
+			beforeLeaveEvent.getContinueNavigationAction().proceed();
+	 	}).open();
 	}
 }

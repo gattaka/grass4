@@ -59,7 +59,7 @@ import java.util.*;
 
 @Route("pg-editor")
 @PageTitle("Editor fotogalerie")
-public class PGEditorPage extends OneColumnPage implements HasUrlParameter<String> {
+public class PGEditorPage extends OneColumnPage implements HasUrlParameter<String>, BeforeLeaveObserver {
 
 	private static final long serialVersionUID = 8685208356478891386L;
 
@@ -445,5 +445,13 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		} else {
 			UIUtils.showWarning("Úprava galerie se nezdařila");
 		}
+	}
+
+	@Override
+	public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+		beforeLeaveEvent.postpone();
+		new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
+			beforeLeaveEvent.getContinueNavigationAction().proceed();
+		}).open();
 	}
 }

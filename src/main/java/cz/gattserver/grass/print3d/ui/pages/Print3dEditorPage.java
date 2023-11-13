@@ -58,7 +58,7 @@ import java.util.Set;
 
 @Route("print3d-editor")
 @PageTitle("Editor 3D projektu")
-public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<String> {
+public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<String>, BeforeLeaveObserver {
 
 	private static final long serialVersionUID = 8685208356478891386L;
 
@@ -394,5 +394,13 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 		} else {
 			UIUtils.showWarning("Úprava projektu se nezdařila");
 		}
+	}
+
+	@Override
+	public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+		beforeLeaveEvent.postpone();
+		new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
+			beforeLeaveEvent.getContinueNavigationAction().proceed();
+		}).open();
 	}
 }
