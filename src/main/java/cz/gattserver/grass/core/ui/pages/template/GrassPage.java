@@ -49,14 +49,6 @@ public abstract class GrassPage extends Div {
 		return UIUtils.isMobileDevice();
 	}
 
-	// TODO favicon ve v24?
-	/*
-	@Override
-	public void configurePage(InitialPageSettings settings) {
-		settings.addFavIcon("icon", "VAADIN/img/favicon.png", "16px");
-	}
-	 */
-
 	public void init() {
 		removeAll();
 		createPageElements(this);
