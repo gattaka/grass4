@@ -61,6 +61,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -70,7 +71,7 @@ import java.util.*;
 
 @Route("fm")
 @PageTitle("Správce souborů")
-public class FMPage extends OneColumnPage implements HasUrlParameter<String>, BeforeEnterObserver  {
+public class FMPage extends OneColumnPage implements HasUrlParameter<String>, BeforeEnterObserver {
 
 	private static final long serialVersionUID = -5884444775720831930L;
 
@@ -150,31 +151,25 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 		FileProcessState result = explorer.goToDir(path);
 
 		switch (result) {
-		case SUCCESS:
-			// úspěch - pokračujeme
-			History history = UI.getCurrent().getPage().getHistory();
-			history.setHistoryStateChangeHandler(e -> {
-				String url = urlBase + "/" + e.getLocation().getPath();
-				if (FileProcessState.SUCCESS
-						.equals(explorer.goToDirByURL(UIUtils.getContextPath(), fmPageFactory.getPageName(), url))) {
-					refreshView();
-				}
-			});
-			updatePageState();
-			break;
-		case MISSING:
-			UIUtils.showWarning("Cíl neexistuje - vracím se do kořenového adresáře");
-			break;
-		case NOT_VALID:
-			UIUtils.showWarning(
-					"Cíl se nachází mimo povolený rozsah souborů k prohlížení - vracím se do kořenového adresáře");
-			break;
-		case SYSTEM_ERROR:
-			UIUtils.showWarning("Z cíle nelze číst - vracím se do kořenového adresáře");
-			break;
-		default:
-			UIUtils.showWarning("Neznámá chyba - vracím se do kořenového adresáře");
-			break;
+			case SUCCESS:
+				// úspěch - pokračujeme
+				String url = urlBase + "/" + path;
+				explorer.goToDirByURL(UIUtils.getContextPath(), fmPageFactory.getPageName(), url);
+				refreshView();
+				break;
+			case MISSING:
+				UIUtils.showWarning("Cíl neexistuje - vracím se do kořenového adresáře");
+				break;
+			case NOT_VALID:
+				UIUtils.showWarning(
+						"Cíl se nachází mimo povolený rozsah souborů k prohlížení - vracím se do kořenového adresáře");
+				break;
+			case SYSTEM_ERROR:
+				UIUtils.showWarning("Z cíle nelze číst - vracím se do kořenového adresáře");
+				break;
+			default:
+				UIUtils.showWarning("Neznámá chyba - vracím se do kořenového adresáře");
+				break;
 		}
 
 		createBreadcrumb(layout);
@@ -190,21 +185,22 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 		upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		upload.addSucceededListener(event -> {
 			switch (explorer.saveFile(buffer.getInputStream(event.getFileName()), event.getFileName())) {
-			case SUCCESS:
-				// refresh
-				populateGrid();
-				break;
-			case ALREADY_EXISTS:
-				UIUtils.showWarning("Soubor '" + event.getFileName()
-						+ "' nebylo možné uložit - soubor s tímto názvem již existuje.");
-				break;
-			case NOT_VALID:
-				UIUtils.showWarning("Soubor '" + event.getFileName()
-						+ "' nebylo možné uložit - cílové umístění souboru se nachází mimo povolený rozsah souborů k prohlížení.");
-				break;
-			default:
-				UIUtils.showWarning(
-						"Soubor '" + event.getFileName() + "' nebylo možné uložit - došlo k systémové chybě.");
+				case SUCCESS:
+					// refresh
+					populateGrid();
+					break;
+				case ALREADY_EXISTS:
+					UIUtils.showWarning("Soubor '" + event.getFileName()
+							+ "' nebylo možné uložit - soubor s tímto názvem již existuje.");
+					break;
+				case NOT_VALID:
+					UIUtils.showWarning("Soubor '" + event.getFileName()
+							+ "' nebylo možné uložit - cílové umístění souboru se nachází mimo povolený rozsah souborů" +
+							" k prohlížení.");
+					break;
+				default:
+					UIUtils.showWarning(
+							"Soubor '" + event.getFileName() + "' nebylo možné uložit - došlo k systémové chybě.");
 			}
 		});
 		layout.add(upload);
@@ -221,7 +217,8 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 		List<Breadcrumb.BreadcrumbElement> breadcrumbElements = new ArrayList<>();
 		for (FMItemTO c : explorer.getBreadcrumbChunks())
 			breadcrumbElements
-					.add(new Breadcrumb.BreadcrumbElement(c.getName(), getPageURL(fmPageFactory, c.getPathFromFMRoot())));
+					.add(new Breadcrumb.BreadcrumbElement(c.getName(), getPageURL(fmPageFactory,
+							c.getPathFromFMRoot())));
 		breadcrumb.resetBreadcrumb(breadcrumbElements);
 	}
 
@@ -271,7 +268,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 		})).setHeader("URL").setTextAlign(ColumnTextAlign.CENTER).setWidth("50px").setFlexGrow(0);
 
 		grid.addColumn(new ComponentRenderer<Button, FMItemTO>(
-				to -> new LinkButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
+						to -> new LinkButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
 				.setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
 		grid.addColumn(new ComponentRenderer<>(to -> {
@@ -376,19 +373,20 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 	private void handleNewDirectory() {
 		new FileNameDialog((s, w) -> {
 			switch (explorer.createNewDir(s.getName())) {
-			case SUCCESS:
-				populateGrid();
-				w.close();
-				break;
-			case ALREADY_EXISTS:
-				UIUtils.showWarning("Nezdařilo se vytvořit nový adresář - adresář s tímto jménem již existuje.");
-				break;
-			case NOT_VALID:
-				UIUtils.showWarning(
-						"Nezdařilo se vytvořit nový adresář - cílové umístění adresáře se nachází mimo povolený rozsah souborů k prohlížení.");
-				break;
-			default:
-				UIUtils.showWarning("Nezdařilo se vytvořit nový adresář - došlo k systémové chybě.");
+				case SUCCESS:
+					populateGrid();
+					w.close();
+					break;
+				case ALREADY_EXISTS:
+					UIUtils.showWarning("Nezdařilo se vytvořit nový adresář - adresář s tímto jménem již existuje.");
+					break;
+				case NOT_VALID:
+					UIUtils.showWarning(
+							"Nezdařilo se vytvořit nový adresář - cílové umístění adresáře se nachází mimo povolený " +
+									"rozsah souborů k prohlížení.");
+					break;
+				default:
+					UIUtils.showWarning("Nezdařilo se vytvořit nový adresář - došlo k systémové chybě.");
 			}
 		}).open();
 	}
@@ -409,7 +407,6 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 		if (FileProcessState.SUCCESS.equals(explorer.goToDirFromCurrentDir(item.getName()))) {
 			filterNameField.setValue("");
 			refreshView();
-			updatePageState();
 		}
 	}
 
@@ -421,20 +418,21 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 	private void handleRenameAction(final FMItemTO item) {
 		new FileNameDialog(item, (s, w) -> {
 			switch (explorer.renameFile(item.getName(), s.getName())) {
-			case SUCCESS:
-				populateGrid();
-				w.close();
-				break;
-			case ALREADY_EXISTS:
-				UIUtils.showWarning("Přejmenování se nezdařilo - soubor s tímto názvem již existuje.");
-				break;
-			case NOT_VALID:
-				UIUtils.showWarning(
-						"Přejmenování se nezdařilo - cílové umístění souboru se nachází mimo povolený rozsah souborů k prohlížení.");
-				break;
-			default:
-				UIUtils.showWarning("Přejmenování se nezdařilo - došlo k systémové chybě.");
-				break;
+				case SUCCESS:
+					populateGrid();
+					w.close();
+					break;
+				case ALREADY_EXISTS:
+					UIUtils.showWarning("Přejmenování se nezdařilo - soubor s tímto názvem již existuje.");
+					break;
+				case NOT_VALID:
+					UIUtils.showWarning(
+							"Přejmenování se nezdařilo - cílové umístění souboru se nachází mimo povolený rozsah " +
+									"souborů k prohlížení.");
+					break;
+				default:
+					UIUtils.showWarning("Přejmenování se nezdařilo - došlo k systémové chybě.");
+					break;
 			}
 		}).open();
 	}
@@ -501,16 +499,6 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 			}
 		});
 		eventBus.unsubscribe(FMPage.this);
-	}
-
-	private void updatePageState() {
-		// Tohle je potřeba pushovat celé znova od kořene webu, protože jakmile
-		// se ve stavu objeví "/", je to bráno jako nový kořen a další pushState
-		// nahradí pouze poslední chunk
-		// TODO
-		String currentURL = explorer.getCurrentURL("", fmPageFactory.getPageName());
-		History history = UI.getCurrent().getPage().getHistory();
-		history.pushState(null, currentURL.substring(1));
 	}
 
 	@Override

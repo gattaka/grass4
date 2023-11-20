@@ -53,10 +53,17 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
 
 	private String categoryParameter;
 
+	private Div layout;
+
 	@Override
 	public void setParameter(BeforeEvent event, String parameter) {
 		categoryParameter = parameter;
-		init();
+		if (layout == null) {
+			init();
+		} else {
+			layout.removeAll();
+			createContent();
+		}
 	}
 
 	@Override
@@ -65,7 +72,13 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
 	}
 
 	@Override
-	protected void createColumnContent(Div layout) {
+	protected void createColumnContent(Div contentLayout) {
+		layout = new Div();
+		contentLayout.add(layout);
+		createContent();
+	}
+
+	private void createContent() {
 		URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(categoryParameter);
 		if (identifier == null)
 			throw new GrassPageException(404);
