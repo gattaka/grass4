@@ -55,6 +55,7 @@ import cz.gattserver.grass.fm.interfaces.FMItemTO;
 import cz.gattserver.grass.fm.service.FMService;
 import net.engio.mbassy.listener.Handler;
 import net.glxn.qrgen.javase.QRCode;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,9 +124,17 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 	private String urlBase;
 	private String parameter;
 
+	private Div layout;
+
 	@Override
 	public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
 		this.parameter = parameter;
+		if (layout == null) {
+			init();
+		} else {
+			layout.removeAll();
+			createContent();
+		}
 	}
 
 	public FMPage() {
@@ -134,7 +143,13 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 	}
 
 	@Override
-	protected void createColumnContent(Div layout) {
+	protected void createColumnContent(Div contentLayout) {
+		layout = new Div();
+		contentLayout.add(layout);
+		createContent();
+	}
+
+	private void createContent() {
 		urlBase = UIUtils.getURLBase();
 
 		statusLabel = new Div();
@@ -155,7 +170,6 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 				// úspěch - pokračujeme
 				String url = urlBase + "/" + path;
 				explorer.goToDirByURL(UIUtils.getContextPath(), fmPageFactory.getPageName(), url);
-				refreshView();
 				break;
 			case MISSING:
 				UIUtils.showWarning("Cíl neexistuje - vracím se do kořenového adresáře");
@@ -195,7 +209,8 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 					break;
 				case NOT_VALID:
 					UIUtils.showWarning("Soubor '" + event.getFileName()
-							+ "' nebylo možné uložit - cílové umístění souboru se nachází mimo povolený rozsah souborů" +
+							+ "' nebylo možné uložit - cílové umístění souboru se nachází mimo povolený rozsah " +
+							"souborů" +
 							" k prohlížení.");
 					break;
 				default:
@@ -404,10 +419,19 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 	}
 
 	private void handleGotoDirFromCurrentDirAction(FMItemTO item) {
-		if (FileProcessState.SUCCESS.equals(explorer.goToDirFromCurrentDir(item.getName()))) {
-			filterNameField.setValue("");
-			refreshView();
+		String target = item.getName();
+		if ("..".equals(target)) {
+			int lastDelimiter = parameter.lastIndexOf("/");
+			if (lastDelimiter < 0) {
+				target = "";
+			} else {
+				target = parameter.substring(0, lastDelimiter);
+			}
+		} else {
+			if (StringUtils.isNotBlank(parameter))
+				target = parameter + "/" + target;
 		}
+		UI.getCurrent().navigate(FMPage.class, target);
 	}
 
 	private void refreshView() {
@@ -503,10 +527,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
-		if (!SpringContextHelper.getBean(FMSection.class).isVisibleForRoles(getUser().getRoles())) {
+		if (!SpringContextHelper.getBean(FMSection.class).isVisibleForRoles(getUser().getRoles()))
 			throw new GrassPageException(403);
-		} else {
-			init();
-		}
 	}
 }
