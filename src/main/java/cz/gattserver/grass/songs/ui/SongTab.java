@@ -34,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Resource;
+
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -203,10 +204,10 @@ public class SongTab extends Div {
 		SongTO s = new SongTO(choosenSong.getName(), choosenSong.getAuthor(), choosenSong.getYear(),
 				choosenSong.getText().replaceAll("<br/>", "\n"), choosenSong.getId(),
 				choosenSong.getPublicated(), choosenSong.getEmbedded());
-		JRDataSource jrDataSource = new JasperExportDataSource<SongTO>(new PagedDataSource<SongTO>(1, 1) {
+		JRDataSource jrDataSource = new JasperExportDataSource<>(new PagedDataSource<SongTO>(1, 1) {
 			@Override
 			protected List<SongTO> getData(int page, int size) {
-				return Arrays.asList(new SongTO[]{s});
+				return Arrays.asList(s);
 			}
 
 			@Override
@@ -248,8 +249,8 @@ public class SongTab extends Div {
 					String chordLink = c;
 					chordLink = "<span style='cursor: pointer' onclick='document.getElementById(\"" + JS_DIV_ID
 							+ "\").\\$server.chordClickCallback(\"" + c + "\")' "
-							+ "onmouseover='document.getElementById(\"" + JS_DIV_ID + "\").\\$server.chordCallback(\""
-							+ c + "\", event.clientX, event.clientY)' " + "onmouseout='document.getElementById(\""
+							+ "onmouseover='let bound = document.body.getBoundingClientRect(); document.getElementById(\"" + JS_DIV_ID + "\").\\$server.chordCallback(\""
+							+ c + "\", event.clientX - bound.x, event.clientY - bound.y)' " + "onmouseout='document.getElementById(\""
 							+ JS_DIV_ID + "\").\\$server.hideCallback()'>" + c + "</span>";
 					line = line.replaceAll(c + " ", chordLink + " ");
 					line = line.replaceAll(c + ",", chordLink + ",");
@@ -279,5 +280,4 @@ public class SongTab extends Div {
 		choosenSong = songsFacade.getSongById(songId);
 		showDetail(choosenSong);
 	}
-
 }

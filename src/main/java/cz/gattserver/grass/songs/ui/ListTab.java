@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -25,7 +26,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Resource;
+
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ListTab extends Div {
 
@@ -46,6 +50,8 @@ public class ListTab extends Div {
 
 	private SongsPage songsPage;
 
+	private Map<Long, Integer> indexMap = new HashMap<>();
+
 	public ListTab(SongsPage songsPage) {
 		SpringContextHelper.inject(this);
 		filterTO = new SongOverviewTO();
@@ -59,8 +65,8 @@ public class ListTab extends Div {
 
 		grid.addColumn(SongOverviewTO::getId).setHeader("Id").setSortable(true).setWidth("50px").setFlexGrow(0);
 		Column<SongOverviewTO> nazevColumn = grid
-				.addColumn(new ComponentRenderer<Button, SongOverviewTO>(
-						to -> new LinkButton(to.getName(), e -> selectSong(to, true))))
+				.addColumn(new ComponentRenderer<>(
+						to -> new Anchor("songs/" + to.getId(), to.getName())))
 				.setHeader("Název").setSortable(true);
 		Column<SongOverviewTO> authorColumn = grid.addColumn(SongOverviewTO::getAuthor).setHeader("Autor")
 				.setSortable(true).setWidth("250px").setFlexGrow(0);
@@ -122,21 +128,20 @@ public class ListTab extends Div {
 			}.open();
 		}));
 
-		btnLayout.add(new ModifyGridButton<SongOverviewTO>("Upravit", event -> {
-			new SongDialog(songsService.getSongById(grid.getSelectedItems().iterator().next().getId())) {
+		btnLayout.add(new ModifyGridButton<>("Upravit", event ->
+				new SongDialog(songsService.getSongById(grid.getSelectedItems().iterator().next().getId())) {
 
-				private static final long serialVersionUID = 5264621441522056786L;
+					private static final long serialVersionUID = 5264621441522056786L;
 
-				@Override
-				protected void onSave(SongTO to) {
-					to = songsService.saveSong(to);
-					populate();
-					selectSong(to, false);
-				}
-			}.open();
-		}, grid));
+					@Override
+					protected void onSave(SongTO to) {
+						to = songsService.saveSong(to);
+						populate();
+						selectSong(to, false);
+					}
+				}.open(), grid));
 
-		btnLayout.add(new DeleteGridButton<SongOverviewTO>("Smazat", items -> {
+		btnLayout.add(new DeleteGridButton<>("Smazat", items -> {
 			for (SongOverviewTO s : items)
 				songsService.deleteSong(s.getId());
 			populate();
@@ -152,7 +157,8 @@ public class ListTab extends Div {
 
 	public void populate() {
 		List<SongOverviewTO> songs = songsService.getSongs(filterTO, grid.getSortOrder());
+		for (int i = 0; i < songs.size(); i++)
+			indexMap.put(songs.get(i).getId(), i);
 		grid.setItems(songs);
 	}
-
 }

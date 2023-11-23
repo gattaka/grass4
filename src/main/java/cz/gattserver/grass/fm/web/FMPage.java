@@ -434,11 +434,6 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 		UI.getCurrent().navigate(FMPage.class, target);
 	}
 
-	private void refreshView() {
-		populateBreadcrumb();
-		populateGrid();
-	}
-
 	private void handleRenameAction(final FMItemTO item) {
 		new FileNameDialog(item, (s, w) -> {
 			switch (explorer.renameFile(item.getName(), s.getName())) {

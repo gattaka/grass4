@@ -3,15 +3,17 @@ package cz.gattserver.grass.songs.ui;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
+import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 
-@Route("songs")
+import java.util.Optional;
+
+@Route("songs/:id?([0-9]*)")
 @PageTitle("Zpěvník")
-public class SongsPage extends OneColumnPage {
+public class SongsPage extends OneColumnPage implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = -6336711256361320029L;
 
@@ -25,9 +27,26 @@ public class SongsPage extends OneColumnPage {
 	private ChordsTab chordsTabContent;
 
 	private Div pageLayout;
+	private Long songId;
 
 	public SongsPage() {
 		init();
+	}
+
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		Optional<Long> param = event.getRouteParameters().get("id").map(Long::parseLong);
+		if (param.isPresent()) {
+			songId = param.get();
+			selectSong(songId);
+		} else {
+			selectListTab();
+			if (songId != null) {
+				SongOverviewTO to = new SongOverviewTO();
+				to.setId(songId);
+				listTabContent.selectSong(to, false);
+			}
+		}
 	}
 
 	@Override
@@ -63,16 +82,16 @@ public class SongsPage extends OneColumnPage {
 
 		tabSheet.addSelectedChangeListener(e -> {
 			switch (tabSheet.getSelectedIndex()) {
-			default:
-			case 0:
-				switchListTab();
-				break;
-			case 1:
-				switchSongTab();
-				break;
-			case 2:
-				switchChordsTab();
-				break;
+				default:
+				case 0:
+					switchListTab();
+					break;
+				case 1:
+					switchSongTab();
+					break;
+				case 2:
+					switchChordsTab();
+					break;
 			}
 		});
 		switchListTab();
@@ -123,5 +142,4 @@ public class SongsPage extends OneColumnPage {
 		}
 		selectSongTab();
 	}
-
 }
