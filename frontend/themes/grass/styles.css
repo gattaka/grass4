@@ -7,6 +7,19 @@ html, body {
     background-color: #d8cda6;
 }
 
+vaadin-button {
+    cursor: pointer;
+}
+
+vaadin-button[theme~="tertiary-inline"] {
+    border: none;
+    font-weight: normal;
+}
+
+vaadin-button[theme~="tertiary-inline"]::part(label):hover {
+    text-decoration: underline;
+}
+
 vaadin-tab img {
     margin: 0px 5px 1px 0;
 }

@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.html.Anchor;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.HtmlDiv;
@@ -64,7 +67,7 @@ public class HWItemsGrid extends Div {
 	private Grid<HWItemOverviewTO> grid;
 	private TokenField hwTypesFilter;
 
-	private Map<String, HWItemTypeTO> tokenMap = new HashMap<String, HWItemTypeTO>();
+	private Map<String, HWItemTypeTO> tokenMap = new HashMap<>();
 	private HWFilterTO filterTO;
 
 	public HWItemsGrid(Consumer<HWItemOverviewTO> onSelect) {
@@ -98,13 +101,6 @@ public class HWItemsGrid extends Div {
 			private void imgHideCallback() {
 				iconDiv.setVisible(false);
 			}
-
-			@ClientCallable
-			private void itemClickCallback(Long id) {
-				HWItemOverviewTO to = hwService.getHWOverviewItem(id);
-				onSelect.accept(to);
-			}
-
 		};
 		callbackDiv.setId(JS_DIV_ID);
 		add(callbackDiv);
@@ -147,14 +143,21 @@ public class HWItemsGrid extends Div {
 			}
 		}, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
-		Column<HWItemOverviewTO> nameColumn = grid.addColumn(new ComponentRenderer<Div, HWItemOverviewTO>(to -> {
+		Column<HWItemOverviewTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
 			Long id = to.getId();
-			String link = "<a style='cursor: pointer' onclick='document.getElementById(\"" + JS_DIV_ID
-					+ "\").$server.itemClickCallback(\"" + id + "\")' " + "onmouseover='document.getElementById(\""
-					+ JS_DIV_ID + "\").$server.imgShowCallback(\"" + id + "\", event.clientX, event.clientY)' "
-					+ "onmouseout='document.getElementById(\"" + JS_DIV_ID + "\").$server.imgHideCallback()'>"
-					+ to.getName() + "</a>";
-			return new HtmlDiv(link);
+			Button button = new Button(to.getName(), e ->
+					onSelect.accept(hwService.getHWOverviewItem(id))
+			);
+			//<theme-editor-local-classname>
+			button.addClassName("h-w-items-grid-button-1");
+			button.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+			button.getElement().setAttribute("onmouseover", "let bound = document.body.getBoundingClientRect(); " +
+					"document.getElementById(\""
+					+ JS_DIV_ID + "\").$server.imgShowCallback(\"" + id + "\", event.clientX - bound.x, event" +
+					".clientY - bound.y)");
+			button.getElement().setAttribute("onmouseout", "document.getElementById(\"" + JS_DIV_ID + "\").$server" +
+					".imgHideCallback()");
+			return button;
 		})).setHeader("Název").setSortable(true).setKey(NAME_BIND).setResizable(true);
 
 		// kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
@@ -216,20 +219,20 @@ public class HWItemsGrid extends Div {
 			FetchCallback<HWItemOverviewTO, HWItemOverviewTO> fetchCallback = q -> hwService.getHWItems(filterTO,
 					q.getOffset(), q.getLimit(), QuerydslUtil.transformOrdering(q.getSortOrders(), column -> {
 						switch (column) {
-						case PRICE_BIND:
-							return "price";
-						case STATE_BIND:
-							return "state";
-						case PURCHASE_DATE_BIND:
-							return "purchaseDate";
-						case NAME_BIND:
-							return "name";
-						case USED_IN_BIND:
-							return "usedIn";
-						case SUPERVIZED_FOR_BIND:
-							return "supervizedFor";
-						default:
-							return column;
+							case PRICE_BIND:
+								return "price";
+							case STATE_BIND:
+								return "state";
+							case PURCHASE_DATE_BIND:
+								return "purchaseDate";
+							case NAME_BIND:
+								return "name";
+							case USED_IN_BIND:
+								return "usedIn";
+							case SUPERVIZED_FOR_BIND:
+								return "supervizedFor";
+							default:
+								return column;
 						}
 					})).stream();
 			CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback = q -> hwService.countHWItems(filterTO);
