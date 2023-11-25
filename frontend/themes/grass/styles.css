@@ -437,3 +437,10 @@ vaadin-horizontal-layout.menu {
 	margin-right: 10px;
 	margin-bottom: -3px;
 }
+
+vaadin-date-picker::part(input-field) {
+	background-color:rgba(26,58,97,0);
+	border-color:#ddd;
+	border-style:solid;
+	border-width:1px;
+}
