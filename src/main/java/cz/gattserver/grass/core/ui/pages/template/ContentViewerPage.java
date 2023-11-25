@@ -52,6 +52,7 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 	private Span contentCreationDateNameLabel;
 	private Span contentLastModificationDateLabel;
 	private Div tagsListLayout;
+	private Div operationsDiv;
 	private Div operationsListLayout;
 
 	private ImageButton removeFromFavouritesButton;
@@ -93,7 +94,8 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 		if (!content.isDraft())
 			createContentOperations(operationsListLayout);
 
-		UI.getCurrent().getPage().executeJs("var pageScroll = document.getElementsByClassName('v-ui v-scrollable')[0]; "
+		UI.getCurrent().getPage().executeJs("var pageScroll = document.getElementsByClassName('v-ui v-scrollable')" +
+				"[0]; "
 				/*	*/ + "$(pageScroll).scroll(function() { "
 				/*		*/ + "var height = $(pageScroll).scrollTop(); "
 				/*		*/ + "if (height > 100) "
@@ -119,35 +121,36 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 		}
 
 		// Oblíbené
-		removeFromFavouritesButton = new ImageButton("Odebrat z oblíbených", ImageIcon.BROKEN_HEART_16_ICON, event -> {
-			// zdařilo se ? Pokud ano, otevři info okno
-			try {
-				userFacade.removeContentFromFavourites(content.getId(), getUser().getId());
-				removeFromFavouritesButton.setVisible(false);
-				addToFavouritesButton.setVisible(true);
-			} catch (Exception e) {
-				// Pokud ne, otevři warn okno
-				new WarnDialog("Odebrání z oblíbených se nezdařilo.").open();
-			}
-		});
+		if (coreACL.canRemoveContentFromFavourites(content, getUser())) {
+			removeFromFavouritesButton = new ImageButton("Odebrat z oblíbených", ImageIcon.BROKEN_HEART_16_ICON,
+					event -> {
+						// zdařilo se ? Pokud ano, otevři info okno
+						try {
+							userFacade.removeContentFromFavourites(content.getId(), getUser().getId());
+							removeFromFavouritesButton.setVisible(false);
+							addToFavouritesButton.setVisible(true);
+						} catch (Exception e) {
+							// Pokud ne, otevři warn okno
+							new WarnDialog("Odebrání z oblíbených se nezdařilo.").open();
+						}
+					});
+			operationsListLayout.add(removeFromFavouritesButton);
+		}
 
-		addToFavouritesButton = new ImageButton("Přidat do oblíbených", ImageIcon.HEART_16_ICON, event -> {
-			// zdařilo se ? Pokud ano, otevři info okno
-			try {
-				userFacade.addContentToFavourites(content.getId(), getUser().getId());
-				addToFavouritesButton.setVisible(false);
-				removeFromFavouritesButton.setVisible(true);
-			} catch (Exception e) {
-				// Pokud ne, otevři warn okno
-				new WarnDialog("Vložení do oblíbených se nezdařilo.").open();
-			}
-		});
-
-		addToFavouritesButton.setVisible(coreACL.canAddContentToFavourites(content, getUser()));
-		removeFromFavouritesButton.setVisible(coreACL.canRemoveContentFromFavourites(content, getUser()));
-
-		operationsListLayout.add(addToFavouritesButton);
-		operationsListLayout.add(removeFromFavouritesButton);
+		if (coreACL.canAddContentToFavourites(content, getUser())) {
+			addToFavouritesButton = new ImageButton("Přidat do oblíbených", ImageIcon.HEART_16_ICON, event -> {
+				// zdařilo se? Pokud ano, otevři info okno
+				try {
+					userFacade.addContentToFavourites(content.getId(), getUser().getId());
+					addToFavouritesButton.setVisible(false);
+					removeFromFavouritesButton.setVisible(true);
+				} catch (Exception e) {
+					// Pokud ne, otevři warn okno
+					new WarnDialog("Vložení do oblíbených se nezdařilo.").open();
+				}
+			});
+			operationsListLayout.add(addToFavouritesButton);
+		}
 
 		// Změna kategorie
 		if (coreACL.canModifyContent(content, getUser())) {
@@ -158,7 +161,8 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 						@Override
 						protected void onMove() {
 							UIUtils.redirect(getPageURL(getContentViewerPageFactory(),
-									URLIdentifierUtils.createURLIdentifier(content.getContentID(), content.getName())));
+									URLIdentifierUtils.createURLIdentifier(content.getContentID(),
+											content.getName())));
 						}
 					}.open());
 			operationsListLayout.add(moveBtn);
@@ -208,11 +212,12 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 		layout.add(tagsListLayout);
 
 		// nástrojová lišta
-		layout.add(new H3("Operace s obsahem"));
-		Div operations = new Div();
-		operations.setClassName("content-operations");
-		layout.add(operations);
-		operations.add(operationsListLayout);
+		operationsDiv = new Div();
+		layout.add(operationsDiv);
+		H3 operationsHeader = new H3("Operace s obsahem");
+		operationsDiv.add(operationsHeader);
+		operationsDiv.add(operationsListLayout);
+		operationsDiv.setVisible(operationsListLayout.getChildren().count() > 0);
 	}
 
 	@Override
@@ -239,8 +244,9 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 		/**
 		 * obsah
 		 */
-		breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(content.getName(), getPageURL(getContentViewerPageFactory(),
-				URLIdentifierUtils.createURLIdentifier(content.getContentID(), content.getName()))));
+		breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(content.getName(),
+				getPageURL(getContentViewerPageFactory(),
+						URLIdentifierUtils.createURLIdentifier(content.getContentID(), content.getName()))));
 
 		/**
 		 * kategorie

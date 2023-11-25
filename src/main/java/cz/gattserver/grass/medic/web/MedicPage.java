@@ -3,11 +3,14 @@ package cz.gattserver.grass.medic.web;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.exception.GrassPageException;
+import cz.gattserver.grass.core.ui.pages.template.AccessDeniedErrorPage;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.medic.MedicSection;
 import cz.gattserver.grass.medic.web.tabs.MedicalInstitutionsTab;
@@ -18,7 +21,7 @@ import cz.gattserver.grass.medic.web.tabs.ScheduledVisitsTab;
 
 @Route("medic")
 @PageTitle("Medic")
-public class MedicPage extends OneColumnPage {
+public class MedicPage extends OneColumnPage implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = -7969964922025344992L;
 
@@ -32,8 +35,6 @@ public class MedicPage extends OneColumnPage {
 	private Tab physiciansTab;
 
 	public MedicPage() {
-		if (!SpringContextHelper.getBean(MedicSection.class).isVisibleForRoles(getUser().getRoles()))
-			throw new GrassPageException(403);
 		init();
 	}
 
@@ -118,4 +119,9 @@ public class MedicPage extends OneColumnPage {
 		switchScheduledVisitsTab();
 	}
 
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		if (!SpringContextHelper.getBean(MedicSection.class).isVisibleForRoles(getUser().getRoles()))
+			event.rerouteTo(AccessDeniedErrorPage.class);
+	}
 }

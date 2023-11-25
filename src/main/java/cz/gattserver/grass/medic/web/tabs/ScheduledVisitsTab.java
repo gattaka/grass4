@@ -149,7 +149,7 @@ public class ScheduledVisitsTab extends Div {
 		/**
 		 * Detail
 		 */
-		final Button detailBtn = new DetailGridButton<ScheduledVisitTO>(
+		final Button detailBtn = new DetailGridButton<>(
 				item -> new SchuduledVisitDetailDialog(item.getId()).open(), plannedGrid);
 		buttonLayout.add(detailBtn);
 
@@ -159,7 +159,7 @@ public class ScheduledVisitsTab extends Div {
 	private void prepareGrid(Grid<ScheduledVisitTO> grid, boolean fullTime) {
 		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		UIUtils.applyGrassDefaultStyle(grid);
-		grid.addColumn(new IconRenderer<ScheduledVisitTO>(item -> {
+		grid.addColumn(new IconRenderer<>(item -> {
 			if (item.getState().equals(ScheduledVisitState.MISSED)) {
 				Image img = new Image(ImageIcon.WARNING_16_ICON.createResource(), "Zmeškáno");
 				img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
@@ -173,15 +173,15 @@ public class ScheduledVisitsTab extends Div {
 
 		grid.addColumn(ScheduledVisitTO::getPurpose).setKey("purpose").setHeader("Účel");
 		if (fullTime)
-			grid.addColumn(new LocalDateTimeRenderer<ScheduledVisitTO>(to -> to.getDate().atTime(to.getTime()),
+			grid.addColumn(new LocalDateTimeRenderer<>(to -> to.getDate().atTime(to.getTime()),
 							() -> DateTimeFormatter.ofPattern("d. MMMM yyyy H:mm", Locale.forLanguageTag("CS")))).setKey("date")
-					.setHeader("Datum").setWidth("200px").setFlexGrow(0);
+					.setHeader("Datum").setSortable(false).setWidth("200px").setFlexGrow(0);
 		else
-			grid.addColumn(new LocalDateTimeRenderer<ScheduledVisitTO>(to -> to.getDate().atStartOfDay(),
+			grid.addColumn(new LocalDateTimeRenderer<>(to -> to.getDate().atStartOfDay(),
 							() -> DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("CS")))).setKey(
 									"date")
-					.setHeader("Datum").setWidth("150px").setFlexGrow(0);
-		grid.addColumn(new TextRenderer<ScheduledVisitTO>(
+					.setHeader("Datum").setSortable(false).setWidth("150px").setFlexGrow(0);
+		grid.addColumn(new TextRenderer<>(
 						to -> to.getInstitution() == null ? "" : to.getInstitution().getName())).setKey("institution")
 				.setHeader("Instituce");
 

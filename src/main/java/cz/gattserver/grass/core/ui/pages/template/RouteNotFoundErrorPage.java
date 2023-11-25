@@ -23,13 +23,17 @@ public class RouteNotFoundErrorPage extends ErrorPage implements HasErrorParamet
 	private static final Logger logger = LoggerFactory.getLogger(RouteNotFoundErrorPage.class);
 
 	@Override
-	protected GrassPageException getException() {
-		return new GrassPageException(HttpServletResponse.SC_NOT_FOUND);
+	public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<NotFoundException> parameter) {
+		return HttpServletResponse.SC_NOT_FOUND;
 	}
 
 	@Override
-	public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<NotFoundException> parameter) {
-		init();
-		return HttpServletResponse.SC_NOT_FOUND;
+	protected String getErrorText() {
+		return "404 - Hledaný obsah neexistuje";
+	}
+
+	@Override
+	protected String getErrorImage() {
+		return "VAADIN/img/404.png";
 	}
 }

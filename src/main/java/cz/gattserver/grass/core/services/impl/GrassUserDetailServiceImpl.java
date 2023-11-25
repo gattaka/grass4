@@ -20,5 +20,4 @@ public class GrassUserDetailServiceImpl implements UserDetailsService {
 			throw new UsernameNotFoundException("Unable to find user");
 		return user;
 	}
-
 }
