@@ -1,5 +1,7 @@
 package cz.gattserver.grass.songs.ui;
 
+import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -115,31 +117,20 @@ public class ListTab extends Div {
 
 		btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-		btnLayout.add(new CreateGridButton("Přidat", event -> {
-			new SongDialog() {
-				private static final long serialVersionUID = -4863260002363608014L;
-
-				@Override
-				protected void onSave(SongTO to) {
+		btnLayout.add(new CreateGridButton("Přidat", event ->
+				new SongDialog(to -> {
 					to = songsService.saveSong(to);
 					populate();
 					selectSong(to, true);
-				}
-			}.open();
-		}));
+				}).open()
+		));
 
 		btnLayout.add(new ModifyGridButton<>("Upravit", event ->
-				new SongDialog(songsService.getSongById(grid.getSelectedItems().iterator().next().getId())) {
-
-					private static final long serialVersionUID = 5264621441522056786L;
-
-					@Override
-					protected void onSave(SongTO to) {
-						to = songsService.saveSong(to);
-						populate();
-						selectSong(to, false);
-					}
-				}.open(), grid));
+				new SongDialog(songsService.getSongById(grid.getSelectedItems().iterator().next().getId()), to -> {
+					to = songsService.saveSong(to);
+					populate();
+					selectSong(to, false);
+				}).open(), grid));
 
 		btnLayout.add(new DeleteGridButton<>("Smazat", items -> {
 			for (SongOverviewTO s : items)
@@ -151,8 +142,9 @@ public class ListTab extends Div {
 
 	public void selectSong(SongOverviewTO to, boolean switchToDetail) {
 		grid.select(to);
+		grid.scrollToIndex(indexMap.get(to.getId()));
 		if (switchToDetail)
-			songsPage.selectSong(to.getId());
+			UI.getCurrent().navigate("songs/" + to.getId());
 	}
 
 	public void populate() {

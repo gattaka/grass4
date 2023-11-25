@@ -105,31 +105,19 @@ public class SongTab extends Div {
 		ButtonLayout btnLayout = new ButtonLayout();
 		add(btnLayout);
 
-		CreateButton addSongBtn = new CreateButton("Přidat", event -> {
-			new SongDialog() {
-				private static final long serialVersionUID = -4863260002363608014L;
-
-				@Override
-				protected void onSave(SongTO to) {
+		CreateButton addSongBtn = new CreateButton("Přidat", event ->
+				new SongDialog(to -> {
 					to = songsFacade.saveSong(to);
 					songsPage.selectSong(to.getId());
-				}
-			}.open();
-		});
+				}).open());
 		btnLayout.add(addSongBtn);
 		addSongBtn.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-		ModifyButton modifyButton = new ModifyButton("Upravit", event -> {
-			new SongDialog(choosenSong) {
-				private static final long serialVersionUID = 5264621441522056786L;
-
-				@Override
-				protected void onSave(SongTO to) {
+		ModifyButton modifyButton = new ModifyButton("Upravit", event ->
+				new SongDialog(choosenSong, to -> {
 					to = songsFacade.saveSong(to);
 					showDetail(to);
-				}
-			}.open();
-		});
+				}).open());
 		btnLayout.add(modifyButton);
 		modifyButton.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
@@ -249,8 +237,11 @@ public class SongTab extends Div {
 					String chordLink = c;
 					chordLink = "<span style='cursor: pointer' onclick='document.getElementById(\"" + JS_DIV_ID
 							+ "\").\\$server.chordClickCallback(\"" + c + "\")' "
-							+ "onmouseover='let bound = document.body.getBoundingClientRect(); document.getElementById(\"" + JS_DIV_ID + "\").\\$server.chordCallback(\""
-							+ c + "\", event.clientX - bound.x, event.clientY - bound.y)' " + "onmouseout='document.getElementById(\""
+							+ "onmouseover='let bound = document.body.getBoundingClientRect(); document" +
+							".getElementById" +
+							"(\"" + JS_DIV_ID + "\").\\$server.chordCallback(\""
+							+ c + "\", event.clientX - bound.x, event.clientY - bound.y)' " + "onmouseout='document" +
+							".getElementById(\""
 							+ JS_DIV_ID + "\").\\$server.hideCallback()'>" + c + "</span>";
 					line = line.replaceAll(c + " ", chordLink + " ");
 					line = line.replaceAll(c + ",", chordLink + ",");

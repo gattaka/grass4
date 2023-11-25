@@ -8,6 +8,7 @@ import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
+import cz.gattserver.grass.songs.model.interfaces.SongTO;
 
 import java.util.Optional;
 
@@ -41,11 +42,12 @@ public class SongsPage extends OneColumnPage implements BeforeEnterObserver {
 			selectSong(songId);
 		} else {
 			selectListTab();
-			if (songId != null) {
-				SongOverviewTO to = new SongOverviewTO();
-				to.setId(songId);
-				listTabContent.selectSong(to, false);
-			}
+		}
+
+		if (songId != null) {
+			SongOverviewTO to = new SongOverviewTO();
+			to.setId(songId);
+			listTabContent.selectSong(to, false);
 		}
 	}
 
@@ -115,19 +117,24 @@ public class SongsPage extends OneColumnPage implements BeforeEnterObserver {
 	private void switchListTab() {
 		songTabContent.setVisible(false);
 		chordsTabContent.setVisible(false);
-		listTabContent.setVisible(true);
+		listTabContent.getStyle().set("display", "block");
+		if (songId != null) {
+			SongOverviewTO to = new SongOverviewTO();
+			to.setId(songId);
+			listTabContent.selectSong(to, false);
+		}
 	}
 
 	private void switchSongTab() {
 		songTabContent.setVisible(true);
 		chordsTabContent.setVisible(false);
-		listTabContent.setVisible(false);
+		listTabContent.getStyle().set("display", "none");
 	}
 
 	private void switchChordsTab() {
 		songTabContent.setVisible(false);
 		chordsTabContent.setVisible(true);
-		listTabContent.setVisible(false);
+		listTabContent.getStyle().set("display", "none");
 	}
 
 	public void selectChord(ChordTO chord) {

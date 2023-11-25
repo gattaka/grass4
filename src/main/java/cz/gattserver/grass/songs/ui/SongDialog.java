@@ -16,18 +16,20 @@ import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class SongDialog extends EditWebDialog {
+import java.util.function.Consumer;
+
+public class SongDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = 6803519662032576371L;
 
 	@Autowired
 	private SongsService songsFacade;
 
-	public SongDialog() {
-		this(null);
+	public SongDialog(Consumer<SongTO> onSave) {
+		this(null, onSave);
 	}
 
-	public SongDialog(final SongTO originalTO) {
+	public SongDialog(final SongTO originalTO, Consumer<SongTO> onSave) {
 		SpringContextHelper.inject(this);
 		setWidth("600px");
 
@@ -76,7 +78,7 @@ public abstract class SongDialog extends EditWebDialog {
 		embeddedField.setPlaceholder("YouTube video ID (tZtPcQJkEcU,...)");
 		add(embeddedField);
 
-		add(new SaveCloseLayout(event -> save(originalTO, binder), e -> close()));
+		add(new SaveCloseLayout(event -> save(originalTO, binder, onSave), e -> close()));
 
 		if (originalTO != null) {
 			binder.readBean(originalTO);
@@ -84,11 +86,11 @@ public abstract class SongDialog extends EditWebDialog {
 		}
 	}
 
-	private void save(SongTO originalTO, Binder<SongTO> binder) {
+	private void save(SongTO originalTO, Binder<SongTO> binder, Consumer<SongTO> onSave) {
 		SongTO writeTO = originalTO == null ? new SongTO() : originalTO;
 		if (binder.writeBeanIfValid(writeTO)) {
 			try {
-				onSave(writeTO);
+				onSave.accept(writeTO);
 				close();
 			} catch (Exception ve) {
 				new ErrorDialog("Uložení se nezdařilo").open();
@@ -96,7 +98,4 @@ public abstract class SongDialog extends EditWebDialog {
 			}
 		}
 	}
-
-	protected abstract void onSave(SongTO to);
-
 }

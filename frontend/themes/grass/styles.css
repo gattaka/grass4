@@ -23,6 +23,7 @@ vaadin-text-area textarea {
 
 vaadin-text-area::part(input-field) {
 	background-color: #fff;
+	border: 1px solid #ddd;
 }
 
 a {
