@@ -1,9 +1,10 @@
 package cz.gattserver.grass.core.ui.pages.settings;
 
+import java.util.Comparator;
 import java.util.List;
 
-import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.modules.register.ModuleSettingsPageFactoriesRegister;
+import cz.gattserver.grass.core.ui.pages.template.AccessDeniedErrorPage;
 import cz.gattserver.grass.core.ui.pages.template.TwoColumnPage;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -33,25 +34,27 @@ public class SettingsPage extends TwoColumnPage implements HasUrlParameter<Strin
 
 	private String moduleParameter;
 
+	private Div layout;
+
 	@Override
 	public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
 		moduleParameter = parameter;
-		init();
-	}
 
-	@Override
-	protected void createPageElements(Div layout) {
 		ModuleSettingsPageFactory moduleSettingsPageFactory = register.getFactory(moduleParameter);
-
 		if (moduleSettingsPageFactory != null) {
 			if (!moduleSettingsPageFactory.isAuthorized()) {
-				throw new GrassPageException(403);
+				event.rerouteTo(AccessDeniedErrorPage.class);
 			} else {
 				this.settingsTabFactory = moduleSettingsPageFactory;
 			}
 		}
 
-		super.createPageElements(layout);
+		if (layout == null) {
+			init();
+		} else {
+			layout.removeAll();
+			createContent();
+		}
 	}
 
 	@Override
@@ -60,7 +63,7 @@ public class SettingsPage extends TwoColumnPage implements HasUrlParameter<Strin
 		menuLayout.setSpacing(true);
 		menuLayout.setPadding(false);
 		leftContentLayout.add(menuLayout);
-		settingsTabFactories.sort((a, b) -> a.getSettingsCaption().compareTo(b.getSettingsCaption()));
+		settingsTabFactories.sort(Comparator.comparing(ModuleSettingsPageFactory::getSettingsCaption));
 		for (ModuleSettingsPageFactory f : settingsTabFactories) {
 			Anchor link = new Anchor(getPageURL(settingsPageFactory, f.getSettingsURL()), f.getSettingsCaption());
 			menuLayout.add(link);
@@ -69,12 +72,17 @@ public class SettingsPage extends TwoColumnPage implements HasUrlParameter<Strin
 
 	@Override
 	protected void createRightColumnContent(Div rightContentLayout) {
-		if (settingsTabFactory != null) {
-			settingsTabFactory.createFragmentIfAuthorized(rightContentLayout);
-		} else {
-			Span span = new Span("Zvolte položku nastavení z menu");
-			rightContentLayout.add(span);
-		}
+		layout = new Div();
+		rightContentLayout.add(layout);
+		createContent();
 	}
 
+	private void createContent() {
+		if (settingsTabFactory != null) {
+			settingsTabFactory.createFragmentIfAuthorized(layout);
+		} else {
+			Span span = new Span("Zvolte položku nastavení z menu");
+			layout.add(span);
+		}
+	}
 }
