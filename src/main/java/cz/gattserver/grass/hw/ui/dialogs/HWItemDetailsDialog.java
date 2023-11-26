@@ -17,6 +17,8 @@ import cz.gattserver.grass.hw.ui.tabs.HWDetailsPrint3dTab;
 import cz.gattserver.grass.hw.ui.tabs.HWDetailsServiceNotesTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
 
+import java.util.function.Consumer;
+
 public class HWItemDetailsDialog extends Dialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
@@ -37,7 +39,12 @@ public class HWItemDetailsDialog extends Dialog {
 
 	private HWItemsTab itemsTab;
 
+	private Consumer<HWItemTO> onRefreshListener;
+
 	public HWItemDetailsDialog(HWItemsTab itemsTab, Long hwItemId) {
+		setDraggable(true);
+		//setModal(false);
+
 		this.itemsTab = itemsTab;
 		this.hwItemId = hwItemId;
 		this.hwItem = getHWService().getHWItem(hwItemId);
@@ -68,31 +75,42 @@ public class HWItemDetailsDialog extends Dialog {
 		switchInfoTab();
 	}
 
+	public Consumer<HWItemTO> getOnRefreshListener() {
+		return onRefreshListener;
+	}
+
+	public HWItemDetailsDialog setOnRefreshListener(Consumer<HWItemTO> onRefreshListener) {
+		this.onRefreshListener = onRefreshListener;
+		return this;
+	}
+
 	private void switchToTab(int tabId) {
 		switch (tabId) {
-		default:
-		case 0:
-			switchInfoTab();
-			break;
-		case 1:
-			switchServiceNotesTab();
-			break;
-		case 2:
-			switchPhotosTab();
-			break;
-		case 3:
-			switchPrint3dTab();
-			break;
-		case 4:
-			switchDocsTab();
-			break;
+			default:
+			case 0:
+				switchInfoTab();
+				break;
+			case 1:
+				switchServiceNotesTab();
+				break;
+			case 2:
+				switchPhotosTab();
+				break;
+			case 3:
+				switchPrint3dTab();
+				break;
+			case 4:
+				switchDocsTab();
+				break;
 		}
 	}
 
 	public HWItemTO refreshItem() {
-		this.hwItem = getHWService().getHWItem(hwItemId);
+		hwItem = getHWService().getHWItem(hwItemId);
 		refreshTabLabels();
 		switchToTab(tabs.getSelectedIndex());
+		if (onRefreshListener != null)
+			onRefreshListener.accept(hwItem);
 		return hwItem;
 	}
 
@@ -154,5 +172,4 @@ public class HWItemDetailsDialog extends Dialog {
 		tabLayout.add(new HWDetailsDocsTab(hwItem, this));
 		tabs.setSelectedTab(docsTab);
 	}
-
 }

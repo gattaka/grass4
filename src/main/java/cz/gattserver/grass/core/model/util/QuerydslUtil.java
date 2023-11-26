@@ -111,5 +111,4 @@ public final class QuerydslUtil {
 					columnReplacer.replace(sortProperties.get(i).getSorted()));
 		return specifiers;
 	}
-
 }

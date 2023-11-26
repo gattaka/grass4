@@ -1,14 +1,16 @@
 package cz.gattserver.grass.hw.ui;
 
 import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
+import com.querydsl.core.types.OrderSpecifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.internal.AllowInert;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.HtmlDiv;
@@ -17,6 +19,7 @@ import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.interfaces.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.ClientCallable;
@@ -39,10 +42,6 @@ import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.server.StreamResource;
 
-import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
-import cz.gattserver.grass.hw.interfaces.HWItemState;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 
 public class HWItemsGrid extends Div {
@@ -68,6 +67,7 @@ public class HWItemsGrid extends Div {
 	private TokenField hwTypesFilter;
 
 	private Map<String, HWItemTypeTO> tokenMap = new HashMap<>();
+	private Map<Long, Integer> indexMap = new HashMap<>();
 	private HWFilterTO filterTO;
 
 	public HWItemsGrid(Consumer<HWItemOverviewTO> onSelect) {
@@ -124,7 +124,13 @@ public class HWItemsGrid extends Div {
 		}
 
 		// Tabulka HW
-		grid = new Grid<>();
+		grid = new Grid<>() {
+			@AllowInert
+			@ClientCallable
+			private void scrollToId(Long id) {
+				onGridScrollToId(id);
+			}
+		};
 		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		UIUtils.applyGrassDefaultStyle(grid);
 		grid.setSelectionMode(SelectionMode.SINGLE);
@@ -216,30 +222,41 @@ public class HWItemsGrid extends Div {
 		if (hwTypesFilter != null)
 			filterTO.setTypes(hwTypesFilter.getValues());
 		if (grid.getDataProvider() == null || !(grid.getDataProvider() instanceof CallbackDataProvider)) {
-			FetchCallback<HWItemOverviewTO, HWItemOverviewTO> fetchCallback = q -> hwService.getHWItems(filterTO,
-					q.getOffset(), q.getLimit(), QuerydslUtil.transformOrdering(q.getSortOrders(), column -> {
-						switch (column) {
-							case PRICE_BIND:
-								return "price";
-							case STATE_BIND:
-								return "state";
-							case PURCHASE_DATE_BIND:
-								return "purchaseDate";
-							case NAME_BIND:
-								return "name";
-							case USED_IN_BIND:
-								return "usedIn";
-							case SUPERVIZED_FOR_BIND:
-								return "supervizedFor";
-							default:
-								return column;
-						}
-					})).stream();
+			FetchCallback<HWItemOverviewTO, HWItemOverviewTO> fetchCallback = q -> {
+				OrderSpecifier<?>[] order = QuerydslUtil.transformOrdering(q.getSortOrders(),
+						column -> switch (column) {
+							case PRICE_BIND -> "price";
+							case STATE_BIND -> "state";
+							case PURCHASE_DATE_BIND -> "purchaseDate";
+							case NAME_BIND -> "name";
+							case USED_IN_BIND -> "usedIn";
+							case SUPERVIZED_FOR_BIND -> "supervizedFor";
+							default -> column;
+						});
+				// potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
+				// jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
+				List<Long> ids = hwService.getHWItemIds(filterTO, order);
+				int index = 0;
+				for (Long id : ids)
+					indexMap.put(id, index++);
+				return hwService.getHWItems(filterTO, q.getOffset(), q.getLimit(), order).stream();
+			};
 			CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback = q -> hwService.countHWItems(filterTO);
 			grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
 		} else {
 			grid.getDataProvider().refreshAll();
 		}
+	}
+
+	public void selectAndScroll(Long id) {
+		HWItemOverviewTO to = new HWItemOverviewTO();
+		to.setId(id);
+		grid.select(to);
+		grid.getElement().callJsFunction("$server.scrollToId",to.getId().toString());
+	}
+
+	private void onGridScrollToId(Long id) {
+		grid.scrollToIndex(indexMap.get(id));
 	}
 
 	public Grid<HWItemOverviewTO> getGrid() {
@@ -249,5 +266,4 @@ public class HWItemsGrid extends Div {
 	public HWFilterTO getFilterTO() {
 		return filterTO;
 	}
-
 }

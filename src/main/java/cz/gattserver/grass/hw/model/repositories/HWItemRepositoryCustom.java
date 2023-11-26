@@ -12,4 +12,7 @@ public interface HWItemRepositoryCustom {
 	long countHWItems(HWFilterTO filter);
 
 	List<HWItem> getHWItems(HWFilterTO filter, int offset, int limit, OrderSpecifier<?>[] order);
+
+	List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order);
+
 }

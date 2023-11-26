@@ -3,11 +3,10 @@ package cz.gattserver.grass.hw.ui.pages;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.grass.core.exception.GrassPageException;
+import cz.gattserver.grass.core.ui.pages.template.AccessDeniedErrorPage;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.hw.HWSection;
 import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
@@ -15,7 +14,7 @@ import cz.gattserver.grass.hw.ui.tabs.HWTypesTab;
 
 @Route("hw")
 @PageTitle("Evidence HW")
-public class HWPage extends OneColumnPage {
+public class HWPage extends OneColumnPage implements HasUrlParameter<Long> {
 
 	private static final long serialVersionUID = 3983638941237624740L;
 
@@ -24,16 +23,41 @@ public class HWPage extends OneColumnPage {
 	private Tab overviewTab;
 	private Tab typesTab;
 
-	private Div pageLayout;
+	private HWItemsTab itemsTab;
 
-	public HWPage() {
-		if (!SpringContextHelper.getBean(HWSection.class).isVisibleForRoles(getUser().getRoles()))
-			throw new GrassPageException(403);
-		init();
+	private Div layout;
+	private Div pageLayout;
+	private Long idParameter;
+
+	@Override
+	public void setParameter(BeforeEvent event, @OptionalParameter Long parameter) {
+		if (!SpringContextHelper.getBean(HWSection.class).isVisibleForRoles(getUser().getRoles())) {
+			event.rerouteTo(AccessDeniedErrorPage.class);
+			return;
+		}
+
+		idParameter = parameter;
+		if (layout == null) {
+			init();
+		} else {
+			layout.removeAll();
+			createContent();
+		}
+
+		if (idParameter != null) {
+			itemsTab.select(idParameter);
+			itemsTab.openDetailWindow(idParameter);
+		}
 	}
 
 	@Override
-	protected void createColumnContent(Div layout) {
+	protected void createColumnContent(Div contentLayout) {
+		layout = new Div();
+		contentLayout.add(layout);
+		createContent();
+	}
+
+	private void createContent() {
 		tabSheet = new Tabs();
 		layout.add(tabSheet);
 
@@ -48,16 +72,18 @@ public class HWPage extends OneColumnPage {
 		pageLayout = new Div();
 		layout.add(pageLayout);
 
+		itemsTab = new HWItemsTab();
+
 		tabSheet.addSelectedChangeListener(e -> {
 			pageLayout.removeAll();
 			switch (tabSheet.getSelectedIndex()) {
-			default:
-			case 0:
-				switchOverviewTab();
-				break;
-			case 1:
-				switchTypesTab();
-				break;
+				default:
+				case 0:
+					switchOverviewTab();
+					break;
+				case 1:
+					switchTypesTab();
+					break;
 			}
 		});
 		switchOverviewTab();
@@ -65,10 +91,9 @@ public class HWPage extends OneColumnPage {
 
 	private HWItemsTab switchOverviewTab() {
 		pageLayout.removeAll();
-		HWItemsTab tab = new HWItemsTab();
-		pageLayout.add(tab);
+		pageLayout.add(itemsTab);
 		tabSheet.setSelectedTab(overviewTab);
-		return tab;
+		return itemsTab;
 	}
 
 	private HWTypesTab switchTypesTab() {

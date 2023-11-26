@@ -61,4 +61,10 @@ public class HWItemRepositoryCustomImpl implements HWItemRepositoryCustom {
 		return query.from(h).where(createPredicateHWItems(filter)).orderBy(order).fetch();
 	}
 
+	@Override
+	public List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order) {
+		JPAQuery<HWItem> query = new JPAQuery<>(entityManager);
+		QHWItem h = QHWItem.hWItem;
+		return query.from(h).where(createPredicateHWItems(filter)).orderBy(order).select(h.id).fetch();
+	}
 }

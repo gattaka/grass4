@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -36,46 +37,44 @@ import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.UsedInChooser;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class HWItemEditDialog extends EditWebDialog {
+public class HWItemEditDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
 
 	@Autowired
 	private HWService hwService;
 
-	public HWItemEditDialog(Long originalId) {
-		init(originalId == null ? null : hwService.getHWItem(originalId));
+	private Consumer<HWItemTO> onSuccessConsumer;
+
+	public HWItemEditDialog(Long originalId, Consumer<HWItemTO> onSuccessConsumer) {
+		init(originalId == null ? null : hwService.getHWItem(originalId), onSuccessConsumer);
 	}
 
-	public HWItemEditDialog() {
-		init(null);
-	}
-
-	public HWItemEditDialog(HWItemTO originalDTO) {
-		init(originalDTO);
+	public HWItemEditDialog(HWItemTO originalTO, Consumer<HWItemTO> onSuccessConsumer) {
+		init(originalTO, onSuccessConsumer);
 	}
 
 	/**
 	 * @param originalTO opravuji údaje existující položky, nebo vytvářím novou (
 	 *                   {@code null}) ?
 	 */
-	private void init(HWItemTO originalTO) {
+	private void init(HWItemTO originalTO, Consumer<HWItemTO> onSuccessConsumer) {
 		SpringContextHelper.inject(this);
 		setWidth("900px");
 
-		HWItemTO formDTO = new HWItemTO();
-		formDTO.setName("");
-		formDTO.setPrice(new BigDecimal(0));
-		formDTO.setWarrantyYears(0);
-		formDTO.setState(HWItemState.NEW);
-		formDTO.setPurchaseDate(LocalDate.now());
+		HWItemTO formTO = new HWItemTO();
+		formTO.setName("");
+		formTO.setPrice(new BigDecimal(0));
+		formTO.setWarrantyYears(0);
+		formTO.setState(HWItemState.NEW);
+		formTO.setPurchaseDate(LocalDate.now());
 		if (originalTO != null) {
-			formDTO.setUsedIn(originalTO.getUsedIn());
-			formDTO.setUsedInName(originalTO.getUsedInName());
+			formTO.setUsedIn(originalTO.getUsedIn());
+			formTO.setUsedInName(originalTO.getUsedInName());
 		}
 
 		Binder<HWItemTO> binder = new Binder<>(HWItemTO.class);
-		binder.setBean(formDTO);
+		binder.setBean(formTO);
 
 		TextField nameField = new TextField("Název");
 		nameField.setWidthFull();
@@ -135,8 +134,8 @@ public abstract class HWItemEditDialog extends EditWebDialog {
 		baseLayout.setVerticalComponentAlignment(Alignment.END, publicItemCheckBox);
 
 		add(new UsedInChooser(originalTO, to -> {
-			formDTO.setUsedIn(to);
-			formDTO.setUsedInName(to == null ? null : to.getName());
+			formTO.setUsedIn(to);
+			formTO.setUsedInName(to == null ? null : to.getName());
 		}));
 
 		TextArea descriptionArea = new TextArea("Popis");
@@ -160,13 +159,13 @@ public abstract class HWItemEditDialog extends EditWebDialog {
 
 		SaveCloseLayout buttons = new SaveCloseLayout(e -> {
 			try {
-				HWItemTO writeDTO = originalTO == null ? new HWItemTO() : originalTO;
-				binder.writeBean(writeDTO);
-				writeDTO.setUsedIn(binder.getBean().getUsedIn());
-				writeDTO.setUsedInName(binder.getBean().getUsedInName());
-				writeDTO.setTypes(keywords.getValues());
-				writeDTO.setId(hwService.saveHWItem(writeDTO));
-				onSuccess(writeDTO);
+				HWItemTO writeTO = originalTO == null ? new HWItemTO() : originalTO;
+				binder.writeBean(writeTO);
+				writeTO.setUsedIn(binder.getBean().getUsedIn());
+				writeTO.setUsedInName(binder.getBean().getUsedInName());
+				writeTO.setTypes(keywords.getValues());
+				writeTO.setId(hwService.saveHWItem(writeTO));
+				onSuccessConsumer.accept(writeTO);
 				close();
 			} catch (Exception ve) {
 				throw new GrassException("Uložení se nezdařilo", ve);
@@ -178,7 +177,4 @@ public abstract class HWItemEditDialog extends EditWebDialog {
 		if (originalTO != null)
 			binder.readBean(originalTO);
 	}
-
-	protected abstract void onSuccess(HWItemTO dto);
-
 }

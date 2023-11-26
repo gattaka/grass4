@@ -1,5 +1,6 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
+import com.vaadin.flow.component.UI;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -8,6 +9,7 @@ import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.grass.hw.ui.pages.HWPage;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
@@ -36,7 +38,7 @@ public class HWItemsTab extends Div {
 	public HWItemsTab() {
 		SpringContextHelper.inject(this);
 
-		itemsGrid = new HWItemsGrid(to -> openDetailWindow(to.getId()));
+		itemsGrid = new HWItemsGrid(to -> navigateToDetail(to.getId()));
 
 		add(itemsGrid);
 
@@ -50,7 +52,7 @@ public class HWItemsTab extends Div {
 			buttonLayout.add(newHWBtn);
 
 			// Kopie položky HW
-			Button copyHWBtn = new GridButton<HWItemOverviewTO>("Zkopírovat",
+			Button copyHWBtn = new GridButton<>("Zkopírovat",
 					set -> copyItemWindow(set.iterator().next().getId()), itemsGrid.getGrid());
 			copyHWBtn.setIcon(new Image(ImageIcon.PLUS_16_ICON.createResource(), "image"));
 			buttonLayout.add(copyHWBtn);
@@ -58,7 +60,7 @@ public class HWItemsTab extends Div {
 
 		// Zobrazení detailů položky HW
 		Button detailsBtn = new GridButton<>("Detail",
-				set -> openDetailWindow(set.iterator().next().getId()), itemsGrid.getGrid());
+				set -> navigateToDetail(set.iterator().next().getId()), itemsGrid.getGrid());
 		detailsBtn.setIcon(new Image(ImageIcon.CLIPBOARD_16_ICON.createResource(), "image"));
 		buttonLayout.add(detailsBtn);
 
@@ -91,19 +93,14 @@ public class HWItemsTab extends Div {
 		HWItemTO hwItem = null;
 		if (hwItemOverviewTO != null)
 			hwItem = hwService.getHWItem(hwItemOverviewTO.getId());
-		new HWItemEditDialog(hwItem == null ? null : hwItem.getId()) {
-			private static final long serialVersionUID = -1397391593801030584L;
-
-			@Override
-			protected void onSuccess(HWItemTO dto) {
-				populate();
-				HWItemOverviewTO filterTO = new HWItemOverviewTO();
-				filterTO.setId(dto.getId());
-				itemsGrid.getGrid().select(filterTO);
-				if (hwItemOverviewTO == null)
-					openDetailWindow(dto.getId());
-			}
-		}.open();
+		new HWItemEditDialog(hwItem == null ? null : hwItem.getId(), to -> {
+			populate();
+			HWItemOverviewTO filterTO = new HWItemOverviewTO();
+			filterTO.setId(to.getId());
+			itemsGrid.getGrid().select(filterTO);
+			if (hwItemOverviewTO == null)
+				navigateToDetail(to.getId());
+		}).open();
 	}
 
 	private void copyItemWindow(Long id) {
@@ -112,15 +109,15 @@ public class HWItemsTab extends Div {
 		HWItemOverviewTO newTO = new HWItemOverviewTO();
 		newTO.setId(newId);
 		itemsGrid.getGrid().select(newTO);
-		openDetailWindow(newId);
+		navigateToDetail(newId);
 	}
 
-	private void openDetailWindow(Long id) {
-		new HWItemDetailsDialog(HWItemsTab.this, id) {
-			private static final long serialVersionUID = 1621156205987235037L;
+	public void navigateToDetail(Long id) {
+		UI.getCurrent().navigate(HWPage.class, id);
+	}
 
-			public HWItemTO refreshItem() {
-				HWItemTO to = super.refreshItem();
+	public void openDetailWindow(Long id) {
+		new HWItemDetailsDialog(HWItemsTab.this, id).setOnRefreshListener(to ->
 				itemsGrid.getGrid().getSelectedItems().forEach(item -> {
 					if (item.getId().equals(id)) {
 						item.setName(to.getName());
@@ -130,14 +127,14 @@ public class HWItemsTab extends Div {
 						item.setPrice(to.getPrice());
 						item.setPurchaseDate(to.getPurchaseDate());
 					}
-				});
-				return to;
-			};
-		}.open();
+				})).open();
 	}
 
 	public void populate() {
 		itemsGrid.populate();
 	}
 
+	public void select(Long idParameter) {
+		itemsGrid.selectAndScroll(idParameter);
+	}
 }

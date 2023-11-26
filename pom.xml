@@ -243,6 +243,13 @@
             <version>8.5.23</version>
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.15.0</version>
+        </dependency>
+
         <!-- Testy -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

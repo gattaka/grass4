@@ -221,10 +221,10 @@ public class HWDetailsInfoTab extends Div {
 		grid.addColumn(
 				new ComponentRenderer<Button, HWItemOverviewTO>(c -> new LinkButton(createShortName(c.getName()),
 						e -> {
-					hwItemDetailDialog.close();
-					HWItemTO detailTO = hwService.getHWItem(c.getId());
-					new HWItemDetailsDialog(itemsTab, detailTO.getId()).open();
-				}))).setHeader("Název součásti").setFlexGrow(100);
+							hwItemDetailDialog.close();
+							HWItemTO detailTO = hwService.getHWItem(c.getId());
+							new HWItemDetailsDialog(itemsTab, detailTO.getId()).open();
+						}))).setHeader("Název součásti").setFlexGrow(100);
 
 		// kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
 		// nový objekt a dá se mu akorát ID, které se porovnává) aplikace
@@ -253,15 +253,10 @@ public class HWDetailsInfoTab extends Div {
 		add(operationsLayout);
 
 		if (getUser().isAdmin()) {
-			final Button fixBtn = new ModifyButton(e -> new HWItemEditDialog(hwItem) {
-				private static final long serialVersionUID = -1397391593801030584L;
-
-				@Override
-				protected void onSuccess(HWItemTO dto) {
-					hwItemDetailDialog.refreshItem();
-					hwItemDetailDialog.switchInfoTab();
-				}
-			}.open());
+			final Button fixBtn = new ModifyButton(e -> new HWItemEditDialog(hwItem, to -> {
+				hwItemDetailDialog.refreshItem();
+				hwItemDetailDialog.switchInfoTab();
+			}).open());
 			operationsLayout.add(fixBtn);
 
 			final Button deleteBtn = new DeleteButton(e -> new ConfirmDialog(

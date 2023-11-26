@@ -12,7 +12,7 @@ import cz.gattserver.grass.songs.model.interfaces.SongTO;
 
 import java.util.Optional;
 
-@Route("songs/:id?([0-9]*)")
+@Route("songs")
 @PageTitle("Zpěvník")
 public class SongsPage extends OneColumnPage implements BeforeEnterObserver {
 

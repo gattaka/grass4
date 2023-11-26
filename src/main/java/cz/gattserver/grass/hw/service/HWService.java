@@ -127,6 +127,8 @@ public interface HWService {
 
 	List<HWItemOverviewTO> getHWItems(HWFilterTO filter, int offset, int limit, OrderSpecifier<?>[] order);
 
+	List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order);
+
 	List<HWItemOverviewTO> getHWItemsByTypes(Collection<String> types);
 
 	HWItemTO getHWItem(Long itemId);
