@@ -171,10 +171,6 @@ public abstract class MenuPage extends GrassPage {
 		 * User menu
 		 */
 
-		// Registrace
-		if (coreACL.canRegistrate(getUser()))
-			createMenuComponent(menu, new Anchor(getPageURL(registrationPageFactory), "Registrace"), true);
-
 		// Přihlášení
 		if (!coreACL.isLoggedIn(getUser()))
 			createMenuComponent(menu, new Anchor(getPageURL(loginPageFactory), "Přihlášení"), true);
