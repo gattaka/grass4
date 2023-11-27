@@ -3,8 +3,8 @@ package cz.gattserver.grass.core.ui.pages.settings;
 import java.util.Comparator;
 import java.util.List;
 
+import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.modules.register.ModuleSettingsPageFactoriesRegister;
-import cz.gattserver.grass.core.ui.pages.template.AccessDeniedErrorPage;
 import cz.gattserver.grass.core.ui.pages.template.TwoColumnPage;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -43,7 +43,7 @@ public class SettingsPage extends TwoColumnPage implements HasUrlParameter<Strin
 		ModuleSettingsPageFactory moduleSettingsPageFactory = register.getFactory(moduleParameter);
 		if (moduleSettingsPageFactory != null) {
 			if (!moduleSettingsPageFactory.isAuthorized()) {
-				event.rerouteTo(AccessDeniedErrorPage.class);
+				throw new GrassPageException(403);
 			} else {
 				this.settingsTabFactory = moduleSettingsPageFactory;
 			}

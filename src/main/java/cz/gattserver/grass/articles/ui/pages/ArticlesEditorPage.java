@@ -39,6 +39,7 @@ import cz.gattserver.grass.articles.editor.parser.interfaces.AttachmentTO;
 import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.articles.ui.dialogs.DraftMenuDialog;
+import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
@@ -149,7 +150,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 				parts = PartsFinder.findParts(
 						new ByteArrayInputStream(article.getText().getBytes(StandardCharsets.UTF_8)), partNumber);
 			} catch (IOException e) {
-				throw new GrassPageException(500, e);
+				throw new GrassException("Parsování cesty se nezdařilo", e);
 			}
 			articleTextArea.setValue(parts.getTargetPart());
 		} else {
@@ -562,13 +563,13 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		new ConfirmDialog(e -> {
 			AttachmentsOperationResult result = articleService.deleteAttachment(attachmentsDirId, to.getName());
 			switch (result.getState()) {
-			case SUCCESS:
-				attachmentsDirId = result.getAttachmentDirId();
-				populateGrid();
-				break;
-			default:
-				UIUtils.showWarning(
-						"Soubor '" + to.getName() + "' nebylo možné smazat - došlo k systémové chybě" + ".");
+				case SUCCESS:
+					attachmentsDirId = result.getAttachmentDirId();
+					populateGrid();
+					break;
+				default:
+					UIUtils.showWarning(
+							"Soubor '" + to.getName() + "' nebylo možné smazat - došlo k systémové chybě" + ".");
 			}
 		}).open();
 	}
@@ -625,17 +626,17 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 			AttachmentsOperationResult result = articleService.saveAttachment(attachmentsDirId,
 					buffer.getInputStream(event.getFileName()), event.getFileName());
 			switch (result.getState()) {
-			case SUCCESS:
-				attachmentsDirId = result.getAttachmentDirId();
-				populateGrid();
-				break;
-			case ALREADY_EXISTS:
-				UIUtils.showWarning("Soubor '" + event.getFileName()
-						+ "' nebylo možné uložit - soubor s tímto názvem již existuje.");
-				break;
-			default:
-				UIUtils.showWarning(
-						"Soubor '" + event.getFileName() + "' nebylo možné uložit - došlo k systémové chybě.");
+				case SUCCESS:
+					attachmentsDirId = result.getAttachmentDirId();
+					populateGrid();
+					break;
+				case ALREADY_EXISTS:
+					UIUtils.showWarning("Soubor '" + event.getFileName()
+							+ "' nebylo možné uložit - soubor s tímto názvem již existuje.");
+					break;
+				default:
+					UIUtils.showWarning(
+							"Soubor '" + event.getFileName() + "' nebylo možné uložit - došlo k systémové chybě.");
 			}
 			if (existingDraftId == null)
 				saveArticleDraft(false);
@@ -779,6 +780,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		beforeLeaveEvent.postpone();
 		new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
 			beforeLeaveEvent.getContinueNavigationAction().proceed();
-	 	}).open();
+		}).open();
 	}
 }

@@ -55,8 +55,11 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
 
 	private Div layout;
 
+	private BeforeEvent beforeEvent;
+
 	@Override
 	public void setParameter(BeforeEvent event, String parameter) {
+		beforeEvent = event;
 		categoryParameter = parameter;
 		if (layout == null) {
 			init();

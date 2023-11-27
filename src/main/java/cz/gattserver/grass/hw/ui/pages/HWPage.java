@@ -6,7 +6,7 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.*;
 
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.grass.core.ui.pages.template.AccessDeniedErrorPage;
+import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.hw.HWSection;
 import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
@@ -31,10 +31,8 @@ public class HWPage extends OneColumnPage implements HasUrlParameter<Long> {
 
 	@Override
 	public void setParameter(BeforeEvent event, @OptionalParameter Long parameter) {
-		if (!SpringContextHelper.getBean(HWSection.class).isVisibleForRoles(getUser().getRoles())) {
-			event.rerouteTo(AccessDeniedErrorPage.class);
-			return;
-		}
+		if (!SpringContextHelper.getBean(HWSection.class).isVisibleForRoles(getUser().getRoles()))
+			throw new GrassPageException(403);
 
 		idParameter = parameter;
 		if (layout == null) {

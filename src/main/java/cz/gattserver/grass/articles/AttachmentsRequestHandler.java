@@ -4,6 +4,7 @@ import cz.gattserver.grass.articles.config.ArticlesConfiguration;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;
+import org.apache.hc.core5.http.HttpStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.servlet.annotation.WebServlet;
@@ -22,7 +23,7 @@ public class AttachmentsRequestHandler extends AbstractConfiguratedPathRequestHa
 	@Override
 	protected Path getPath(String fileName, HttpServletRequest request) throws FileNotFoundException {
 		if (!fileName.matches("/[0-9]+/[^/]+"))
-			throw new GrassPageException(400);
+			throw new GrassPageException(HttpStatus.SC_CLIENT_ERROR);
 		String[] chunks = fileName.split("/");
 		String id = chunks[1];
 		String name = chunks[2];

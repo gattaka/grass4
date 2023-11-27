@@ -10,7 +10,6 @@ import com.vaadin.flow.router.Route;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.ui.pages.template.AccessDeniedErrorPage;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.medic.MedicSection;
 import cz.gattserver.grass.medic.web.tabs.MedicalInstitutionsTab;
@@ -97,22 +96,22 @@ public class MedicPage extends OneColumnPage implements BeforeEnterObserver {
 		tabSheet.addSelectedChangeListener(e -> {
 			pageLayout.removeAll();
 			switch (tabSheet.getSelectedIndex()) {
-			default:
-			case 0:
-				switchScheduledVisitsTab();
-				break;
-			case 1:
-				switchMedicalRecordsTab();
-				break;
-			case 2:
-				switchMedicalInstitutionsTab();
-				break;
-			case 3:
-				switchMedicamentsTab();
-				break;
-			case 4:
-				switchPhysiciansTab();
-				break;
+				default:
+				case 0:
+					switchScheduledVisitsTab();
+					break;
+				case 1:
+					switchMedicalRecordsTab();
+					break;
+				case 2:
+					switchMedicalInstitutionsTab();
+					break;
+				case 3:
+					switchMedicamentsTab();
+					break;
+				case 4:
+					switchPhysiciansTab();
+					break;
 			}
 		});
 
@@ -122,6 +121,6 @@ public class MedicPage extends OneColumnPage implements BeforeEnterObserver {
 	@Override
 	public void beforeEnter(BeforeEnterEvent event) {
 		if (!SpringContextHelper.getBean(MedicSection.class).isVisibleForRoles(getUser().getRoles()))
-			event.rerouteTo(AccessDeniedErrorPage.class);
+			throw new GrassPageException(403);
 	}
 }
