@@ -1,26 +1,19 @@
 package cz.gattserver.grass.monitor.services.impl;
 
-import java.io.IOException;
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadMXBean;
-import java.nio.file.FileStore;
-import java.nio.file.FileSystems;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import cz.gattserver.grass.core.services.ConfigurationService;
+import cz.gattserver.grass.monitor.config.MonitorConfiguration;
 import cz.gattserver.grass.monitor.processor.item.*;
+import cz.gattserver.grass.monitor.services.MonitorService;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.ParseException;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.util.Timeout;
@@ -31,11 +24,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import cz.gattserver.grass.monitor.config.MonitorConfiguration;
-import cz.gattserver.grass.monitor.services.MonitorService;
+import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadMXBean;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.FileStore;
+import java.nio.file.FileSystems;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
 
 @Transactional
 @Component
@@ -77,6 +77,12 @@ public class MonitorServiceImpl implements MonitorService {
 
 	@Value("${backup.disk.mount.ws}")
 	private String backupDiskMountWs;
+
+	@Value("${monitor.username}")
+	private String monitorUsername;
+
+	@Value("${monitor.password}")
+	private String monitorPassword;
 
 	@Autowired
 	private ConfigurationService configurationService;
@@ -356,10 +362,33 @@ public class MonitorServiceImpl implements MonitorService {
 
 	private void testResponseCode(MonitorItemTO itemTO, String address, boolean anyCode) {
 		Timeout timeout = Timeout.ofSeconds(10);
-		RequestConfig config = RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
+		RequestConfig config =
+				RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
 				.build();
-		try (CloseableHttpClient httpclient = HttpClientBuilder.create().setDefaultRequestConfig(config).build()) {
+
+		final BasicCredentialsProvider provider = new BasicCredentialsProvider();
+		AuthScope authScope = null;
+		try {
+			URL url = new URL(address);
+			authScope = new AuthScope(url.getHost(), url.getPort());
+		} catch (MalformedURLException e) {
+			throw new RuntimeException(e);
+		}
+		provider.setCredentials(authScope, new UsernamePasswordCredentials(monitorUsername,
+				monitorPassword.toCharArray()));
+
+		try (CloseableHttpClient httpclient =
+					 HttpClientBuilder.create()
+							 .setDefaultCredentialsProvider(provider)
+							 .setDefaultRequestConfig(config).build()) {
 			HttpGet httpGet = new HttpGet(address);
+
+			/*
+			final List<NameValuePair> params = new ArrayList<>();
+			params.add(new BasicNameValuePair("username", monitorUsername));
+			params.add(new BasicNameValuePair("password", monitorPassword));
+			httpGet.setEntity(new UrlEncodedFormEntity(params));
+			*/
 			try (CloseableHttpResponse resp = httpclient.execute(httpGet)) {
 				itemTO.setStateDetails(EntityUtils.toString(resp.getEntity()));
 				int statusCode = resp.getCode();
@@ -398,20 +427,20 @@ public class MonitorServiceImpl implements MonitorService {
 
 					// https://www.freedesktop.org/software/systemd/man/journalctl.html
 					switch (priority) {
-					case 0: // "emerg" (0)
-					case 1: // "alert" (1)
-					case 2: // "crit" (2)
-					case 3: // "err" (3)
-					case 4: // "warning" (4)
-						to.setMonitorState(MonitorState.ERROR);
-						partItemTO.getItems().add(to);
-						break;
-					case 5: // "notice" (5)
-					case 6: // "info" (6)
-					case 7: // "debug" (7)
-					default:
-						// unused
-						break;
+						case 0: // "emerg" (0)
+						case 1: // "alert" (1)
+						case 2: // "crit" (2)
+						case 3: // "err" (3)
+						case 4: // "warning" (4)
+							to.setMonitorState(MonitorState.ERROR);
+							partItemTO.getItems().add(to);
+							break;
+						case 5: // "notice" (5)
+						case 6: // "info" (6)
+						case 7: // "debug" (7)
+						default:
+							// unused
+							break;
 					}
 				}
 				if (partItemTO.getItems().isEmpty()) {
