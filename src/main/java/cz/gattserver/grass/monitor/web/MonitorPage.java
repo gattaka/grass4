@@ -53,7 +53,6 @@ public class MonitorPage extends OneColumnPage {
 	private MailService mailService;
 
 	private final String TIMEOUTS_JS_ARRAY = "timeoutsArray";
-	private final String INTERVALS_JS_ARRAY = "intervalsArray";
 
 	private VerticalLayout layout;
 	private VerticalLayout serversLayout;
@@ -137,12 +136,12 @@ public class MonitorPage extends OneColumnPage {
 			Anchor anchor = new Anchor(to.getUrl(), to.getUrl());
 			anchor.setTarget("_blank");
 			switch (to.getMonitorState()) {
-			case SUCCESS:
-				serversTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(content).add(anchor);
-				break;
-			case ERROR:
-			default:
-				serversTableLayout.newRow().add(new ErrorMonitorStateLabel()).add(content).add(anchor);
+				case SUCCESS:
+					serversTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(content).add(anchor);
+					break;
+				case ERROR:
+				default:
+					serversTableLayout.newRow().add(new ErrorMonitorStateLabel()).add(content).add(anchor);
 			}
 		}
 	}
@@ -152,12 +151,12 @@ public class MonitorPage extends OneColumnPage {
 		TableLayout uptimeTableLayout = prepareTableLayout();
 		uptimeLayout.add(uptimeTableLayout);
 		switch (uptimeTO.getMonitorState()) {
-		case SUCCESS:
-			uptimeTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(uptimeTO.getStateDetails());
-			break;
-		case ERROR:
-		default:
-			uptimeTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("System uptime info není dostupné");
+			case SUCCESS:
+				uptimeTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(uptimeTO.getStateDetails());
+				break;
+			case ERROR:
+			default:
+				uptimeTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("System uptime info není dostupné");
 		}
 	}
 
@@ -166,15 +165,16 @@ public class MonitorPage extends OneColumnPage {
 		TableLayout memoryStatusTableLayout = prepareTableLayout();
 		memoryStatusLayout.add(memoryStatusTableLayout);
 		switch (memoryTO.getMonitorState()) {
-		case SUCCESS:
-			memoryStatusTableLayout.newRow().add(new SuccessMonitorStateLabel())
-					.add(constructProgressMonitor(memoryTO.getUsedRation(),
-							constructUsedTotalFreeDescription(memoryTO.getUsed(), memoryTO.getUsedRation(),
-									memoryTO.getTotal(), memoryTO.getFree())));
-			break;
-		case ERROR:
-		default:
-			memoryStatusTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("System memory info není dostupné");
+			case SUCCESS:
+				memoryStatusTableLayout.newRow().add(new SuccessMonitorStateLabel())
+						.add(constructProgressMonitor(memoryTO.getUsedRation(),
+								constructUsedTotalFreeDescription(memoryTO.getUsed(), memoryTO.getUsedRation(),
+										memoryTO.getTotal(), memoryTO.getFree())));
+				break;
+			case ERROR:
+			default:
+				memoryStatusTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("System memory info není " +
+						"dostupné");
 		}
 	}
 
@@ -184,16 +184,16 @@ public class MonitorPage extends OneColumnPage {
 		systemSwapStatusLayout.add(systemSwapStatusTableLayout);
 		swapTO = monitorFacade.getSystemSwapStatus();
 		switch (swapTO.getMonitorState()) {
-		case SUCCESS:
-			systemSwapStatusTableLayout.newRow().add(new SuccessMonitorStateLabel())
-					.add(constructProgressMonitor(swapTO.getUsedRation(),
-							constructUsedTotalFreeDescription(swapTO.getUsed(), swapTO.getUsedRation(),
-									swapTO.getTotal(), swapTO.getFree())));
-			break;
-		case ERROR:
-		default:
-			systemSwapStatusTableLayout.newRow().add(new ErrorMonitorStateLabel())
-					.add("System swap info není dostupné");
+			case SUCCESS:
+				systemSwapStatusTableLayout.newRow().add(new SuccessMonitorStateLabel())
+						.add(constructProgressMonitor(swapTO.getUsedRation(),
+								constructUsedTotalFreeDescription(swapTO.getUsed(), swapTO.getUsedRation(),
+										swapTO.getTotal(), swapTO.getFree())));
+				break;
+			case ERROR:
+			default:
+				systemSwapStatusTableLayout.newRow().add(new ErrorMonitorStateLabel())
+						.add("System swap info není dostupné");
 		}
 	}
 
@@ -202,15 +202,15 @@ public class MonitorPage extends OneColumnPage {
 		TableLayout jvmUptimeTableLayout = prepareTableLayout();
 		jvmUptimeLayout.add(jvmUptimeTableLayout);
 		switch (uptimeTO.getMonitorState()) {
-		case SUCCESS:
-			jvmUptimeTableLayout.newRow().add(new SuccessMonitorStateLabel())
-					.add(String.format("JVM uptime: %d days, %d hours, %d minutes, %d seconds%n",
-							uptimeTO.getElapsedDays(), uptimeTO.getElapsedHours(), uptimeTO.getElapsedMinutes(),
-							uptimeTO.getElapsedSeconds()));
-			break;
-		case ERROR:
-		default:
-			jvmUptimeTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("JVM uptime info není dostupné");
+			case SUCCESS:
+				jvmUptimeTableLayout.newRow().add(new SuccessMonitorStateLabel())
+						.add(String.format("JVM uptime: %d days, %d hours, %d minutes, %d seconds%n",
+								uptimeTO.getElapsedDays(), uptimeTO.getElapsedHours(), uptimeTO.getElapsedMinutes(),
+								uptimeTO.getElapsedSeconds()));
+				break;
+			case ERROR:
+			default:
+				jvmUptimeTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("JVM uptime info není dostupné");
 		}
 	}
 
@@ -219,12 +219,12 @@ public class MonitorPage extends OneColumnPage {
 		TableLayout jvmPIDTableLayout = prepareTableLayout();
 		jvmPIDLayout.add(jvmPIDTableLayout);
 		switch (pidTO.getMonitorState()) {
-		case SUCCESS:
-			jvmPIDTableLayout.newRow().add(new SuccessMonitorStateLabel()).add("JVM PID: " + pidTO.getPid());
-			break;
-		case ERROR:
-		default:
-			jvmPIDTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("JVM PID info není dostupné");
+			case SUCCESS:
+				jvmPIDTableLayout.newRow().add(new SuccessMonitorStateLabel()).add("JVM PID: " + pidTO.getPid());
+				break;
+			case ERROR:
+			default:
+				jvmPIDTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("JVM PID info není dostupné");
 		}
 	}
 
@@ -233,13 +233,14 @@ public class MonitorPage extends OneColumnPage {
 		TableLayout jvmThreadsTableLayout = prepareTableLayout();
 		jvmThreadsLayout.add(jvmThreadsTableLayout);
 		switch (threadsTO.getMonitorState()) {
-		case SUCCESS:
-			jvmThreadsTableLayout.newRow().add(new SuccessMonitorStateLabel())
-					.add("Aktuální stav vláken: " + threadsTO.getCount() + " peak: " + threadsTO.getPeak());
-			break;
-		case ERROR:
-		default:
-			jvmThreadsTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("JVM thread info není " + "dostupné");
+			case SUCCESS:
+				jvmThreadsTableLayout.newRow().add(new SuccessMonitorStateLabel())
+						.add("Aktuální stav vláken: " + threadsTO.getCount() + " peak: " + threadsTO.getPeak());
+				break;
+			case ERROR:
+			default:
+				jvmThreadsTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("JVM thread info není " +
+						"dostupné");
 		}
 	}
 
@@ -248,16 +249,17 @@ public class MonitorPage extends OneColumnPage {
 		TableLayout jvmMemoryTableLayout = prepareTableLayout();
 		jvmMemoryLayout.add(jvmMemoryTableLayout);
 		switch (memoryTO.getMonitorState()) {
-		case SUCCESS:
-			float usedRatio = memoryTO.getUsedMemory() / (float) memoryTO.getTotalMemory();
-			jvmMemoryTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(constructProgressMonitor(usedRatio,
-					constructUsedTotalFreeDescription(memoryTO.getUsedMemory(), usedRatio, memoryTO.getTotalMemory(),
-							memoryTO.getFreeMemory())));
-			jvmMemoryTableLayout.add(" Max memory: " + humanFormat(memoryTO.getMaxMemory()), false);
-			break;
-		case ERROR:
-		default:
-			jvmMemoryTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("JVM thread info není dostupné");
+			case SUCCESS:
+				float usedRatio = memoryTO.getUsedMemory() / (float) memoryTO.getTotalMemory();
+				jvmMemoryTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(constructProgressMonitor(usedRatio,
+						constructUsedTotalFreeDescription(memoryTO.getUsedMemory(), usedRatio,
+								memoryTO.getTotalMemory(),
+								memoryTO.getFreeMemory())));
+				jvmMemoryTableLayout.add(" Max memory: " + humanFormat(memoryTO.getMaxMemory()), false);
+				break;
+			case ERROR:
+			default:
+				jvmMemoryTableLayout.newRow().add(new ErrorMonitorStateLabel()).add("JVM thread info není dostupné");
 		}
 	}
 
@@ -267,23 +269,25 @@ public class MonitorPage extends OneColumnPage {
 		backupLayout.add(backupTableLayout);
 
 		switch (backupPartItemTO.getMonitorState()) {
-		case SUCCESS:
-			backupTableLayout.newRow().add(new SuccessMonitorStateLabel()).add("Backup disk je připojen");
-			break;
-		case ERROR:
-			backupTableLayout.newRow().add(new ErrorMonitorStateLabel())
-					.add("Backup disk není připojen nebo info" + " " + "není dostupné");
-			break;
+			case SUCCESS:
+				backupTableLayout.newRow().add(new SuccessMonitorStateLabel()).add("Backup disk je připojen");
+				break;
+			case ERROR:
+				backupTableLayout.newRow().add(new ErrorMonitorStateLabel())
+						.add("Backup disk není připojen nebo info" + " " + "není dostupné");
+				break;
 		}
 
 		if (MonitorState.SUCCESS.equals(backupPartItemTO.getMonitorState())) {
 			for (BackupStatusMonitorItemTO lastBackupTO : backupPartItemTO.getItems()) {
 				switch (lastBackupTO.getMonitorState()) {
-				case SUCCESS ->
-						backupTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(lastBackupTO.getValue());
-				case ERROR -> backupTableLayout.newRow().add(new ErrorMonitorStateLabel())
-						.add(lastBackupTO.getValue() + ": Nebyla provedena pravidelná záloha nebo je starší, než 24h "
-								+ "nebo info není dostupné");
+					case SUCCESS ->
+							backupTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(lastBackupTO.getValue());
+					case ERROR -> backupTableLayout.newRow().add(new ErrorMonitorStateLabel())
+							.add(lastBackupTO.getValue() + ": Nebyla provedena pravidelná záloha nebo je starší, než" +
+									" " +
+									"24h "
+									+ "nebo info není dostupné");
 				}
 			}
 		}
@@ -310,32 +314,32 @@ public class MonitorPage extends OneColumnPage {
 		for (DiskStatusMonitorItemTO disk : data.getItems()) {
 			diskTableLayout.newRow();
 			switch (disk.getMonitorState()) {
-			case SUCCESS:
-				diskTableLayout.add(new SuccessMonitorStateLabel());
-				ProgressBar pb = new ProgressBar();
-				pb.setValue(disk.getUsedRation());
-				pb.setWidth("200px");
-				diskTableLayout.add(pb);
-				diskTableLayout.add(disk.getMount());
-				diskTableLayout.add(disk.getName());
-				diskTableLayout.add(disk.getType());
+				case SUCCESS:
+					diskTableLayout.add(new SuccessMonitorStateLabel());
+					ProgressBar pb = new ProgressBar();
+					pb.setValue(disk.getUsedRation());
+					pb.setWidth("200px");
+					diskTableLayout.add(pb);
+					diskTableLayout.add(disk.getMount());
+					diskTableLayout.add(disk.getName());
+					diskTableLayout.add(disk.getType());
 
-				String usableInfo[] = humanFormat(disk.getUsable()).split(" ");
-				diskTableLayout.add(usableInfo[0]);
-				diskTableLayout.add(usableInfo[1]);
+					String usableInfo[] = humanFormat(disk.getUsable()).split(" ");
+					diskTableLayout.add(usableInfo[0]);
+					diskTableLayout.add(usableInfo[1]);
 
-				String usedInfo[] = humanFormat(disk.getUsed()).split(" ");
-				diskTableLayout.add(usedInfo[0]);
-				diskTableLayout.add(usedInfo[1]);
+					String usedInfo[] = humanFormat(disk.getUsed()).split(" ");
+					diskTableLayout.add(usedInfo[0]);
+					diskTableLayout.add(usedInfo[1]);
 
-				String totalInfo[] = humanFormat(disk.getTotal()).split(" ");
-				diskTableLayout.add(totalInfo[0]);
-				diskTableLayout.add(totalInfo[1]);
-				break;
-			case ERROR:
-				diskTableLayout.add(new ErrorMonitorStateLabel());
-				diskTableLayout.add("Chyba disku nebo info není dostupné");
-				break;
+					String totalInfo[] = humanFormat(disk.getTotal()).split(" ");
+					diskTableLayout.add(totalInfo[0]);
+					diskTableLayout.add(totalInfo[1]);
+					break;
+				case ERROR:
+					diskTableLayout.add(new ErrorMonitorStateLabel());
+					diskTableLayout.add("Chyba disku nebo info není dostupné");
+					break;
 			}
 		}
 	}
@@ -360,14 +364,14 @@ public class MonitorPage extends OneColumnPage {
 		for (SMARTMonitorItemTO to : data.getItems()) {
 			// https://www.freedesktop.org/software/systemd/man/journalctl.html
 			switch (to.getMonitorState()) {
-			case SUCCESS:
-				// unused
-				break;
-			case ERROR:
-				smartTableLayout.newRow().add(new ErrorMonitorStateLabel());
-				smartTableLayout.add(to.getTime());
-				smartTableLayout.add(to.getStateDetails());
-				break;
+				case SUCCESS:
+					// unused
+					break;
+				case ERROR:
+					smartTableLayout.newRow().add(new ErrorMonitorStateLabel());
+					smartTableLayout.add(to.getTime());
+					smartTableLayout.add(to.getStateDetails());
+					break;
 			}
 		}
 	}
@@ -396,17 +400,17 @@ public class MonitorPage extends OneColumnPage {
 
 		for (ServicesMonitorItemTO to : data.getItems()) {
 			switch (to.getMonitorState()) {
-			case SUCCESS:
-				// unused
-				break;
-			case ERROR:
-				servicesTableLayout.newRow().add(new ErrorMonitorStateLabel());
-				servicesTableLayout.add(to.getUnit());
-				servicesTableLayout.add(to.getLoad());
-				servicesTableLayout.add(to.getActive());
-				servicesTableLayout.add(to.getSub());
-				servicesTableLayout.add(to.getStateDetails());
-				break;
+				case SUCCESS:
+					// unused
+					break;
+				case ERROR:
+					servicesTableLayout.newRow().add(new ErrorMonitorStateLabel());
+					servicesTableLayout.add(to.getUnit());
+					servicesTableLayout.add(to.getLoad());
+					servicesTableLayout.add(to.getActive());
+					servicesTableLayout.add(to.getSub());
+					servicesTableLayout.add(to.getStateDetails());
+					break;
 			}
 		}
 	}
@@ -512,28 +516,36 @@ public class MonitorPage extends OneColumnPage {
 		partsAndIntervals.put("smart-info", 10000);
 
 		UI.getCurrent().getPage().executeJs("window." + TIMEOUTS_JS_ARRAY + " = [];");
-		UI.getCurrent().getPage().executeJs("window." + INTERVALS_JS_ARRAY + " = [];");
 
+		UI.getCurrent().getPage().executeJs("const delay = ms => new Promise(res => setTimeout(res, ms));");
 		for (Entry<String, Integer> entry : partsAndIntervals.entrySet()) {
 			String partUrl = url + "/" + entry.getKey();
-			String partJS = "$.ajax({ url: \"" + partUrl + "\", type: \"GET\","
-					/*								*/ + "data: \"\","
-					/*								*/ + "beforeSend: function(xhr) {"
-					/*									*/ + "xhr.setRequestHeader(\"Accept\", \"application/json\");"
-					/*									*/ + "xhr.setRequestHeader(\"Content-Type\", "
-					+ "\"application/json\");"
-					/*								*/ + "},"
-					/*								*/ + "success: function (data) {"
-					/*									*/ + "let jsDiv = document.getElementById('" + jsDivId + "');"
-					/*									*/ + "if (jsDiv) "
-					/*										*/ + "jsDiv.$server.monitorRefresh(data);"
-					/*								*/ + "}"
-					/*				*/ + "});";
-			UI.getCurrent().getPage().executeJs(
-					"window." + TIMEOUTS_JS_ARRAY + ".push(setTimeout(function(){" + partJS + "}," + 1000 + "));");
-			UI.getCurrent().getPage().executeJs(
-					"window." + INTERVALS_JS_ARRAY + ".push(setInterval(function(){" + partJS + "}," + entry.getValue()
-							+ "));");
+			String js = """ 
+					(() => {
+						let func = () => {
+							$.ajax({ 
+								url: "##partUrl##", 
+								type: "GET",
+								data: "",
+								beforeSend: xhr => {
+									xhr.setRequestHeader("Accept", "application/json");
+									xhr.setRequestHeader("Content-Type", "application/json");
+								},
+								success: data => {
+									let jsDiv = document.getElementById("##jsDivId##");
+									if (jsDiv) 
+										jsDiv.$server.monitorRefresh(data);
+								}
+							});
+							setTimeout(func, ##timeout##);
+						};
+						func();
+					})();""";
+			js = js.replaceAll("##partUrl##", partUrl);
+			js = js.replaceAll("##jsDivId##", jsDivId);
+			js = js.replaceAll("##timeout##", entry.getValue().toString());
+			UI.getCurrent().getPage().executeJs("window." + TIMEOUTS_JS_ARRAY + ".push(setTimeout(function(){" + js +
+					"}," + 1000 + "));");
 		}
 
 		// Mail test
@@ -549,8 +561,6 @@ public class MonitorPage extends OneColumnPage {
 	protected void onDetach(DetachEvent detachEvent) {
 		UI.getCurrent().getPage()
 				.executeJs("window." + TIMEOUTS_JS_ARRAY + ".forEach(function(i) { clearTimeout(i) })");
-		UI.getCurrent().getPage()
-				.executeJs("window." + INTERVALS_JS_ARRAY + ".forEach(function(i) { clearInterval(i) })");
 		super.onDetach(detachEvent);
 	}
 }
