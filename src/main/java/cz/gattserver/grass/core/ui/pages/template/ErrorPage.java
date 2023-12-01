@@ -27,8 +27,13 @@ public class ErrorPage extends OneColumnPage implements HasErrorParameter<Except
 
 	@Override
 	public int setErrorParameter(BeforeEnterEvent event, ErrorParameter<Exception> parameter) {
-		if (parameter.getException() instanceof GrassPageException) {
-			exception = (GrassPageException) parameter.getException();
+		Throwable ex = parameter.getException();
+		while (true) {
+			if (ex.getCause() == null) break;
+			ex = ex.getCause();
+		}
+		if (ex instanceof GrassPageException) {
+			exception = (GrassPageException) ex;
 		} else {
 			exception = new GrassPageException(500, parameter.getException());
 		}
@@ -80,7 +85,9 @@ public class ErrorPage extends OneColumnPage implements HasErrorParameter<Except
 			default:
 				return "500 - Došlo k chybě na straně serveru";
 		}
-	};
+	}
+
+	;
 
 	protected String getErrorImage(int status) {
 		switch (status) {
