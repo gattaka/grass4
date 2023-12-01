@@ -535,9 +535,9 @@ public class MonitorPage extends OneColumnPage {
 									let jsDiv = document.getElementById("##jsDivId##");
 									if (jsDiv) 
 										jsDiv.$server.monitorRefresh(data);
+									setTimeout(func, ##timeout##);
 								}
-							});
-							setTimeout(func, ##timeout##);
+							});							
 						};
 						func();
 					})();""";
