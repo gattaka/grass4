@@ -102,6 +102,12 @@
             <version>0.2.2</version>
         </dependency>
 
+        <dependency>
+            <groupId>cz.gattserver</groupId>
+            <artifactId>inconsolata</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
         <!-- Image metadata -->
         <!-- Metadata-extractor -->
         <dependency>
