@@ -10,6 +10,8 @@ import java.util.Map;
 import cz.gattserver.grass.core.exception.GrassException;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.repo.RepositoryService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import net.sf.jasperreports.engine.export.JRPdfExporter;
@@ -18,16 +20,21 @@ import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 @Service
 public class ExportsServiceImpl implements ExportsService {
 
-	@Override
-	public Path createPDFReport(JRDataSource jrDataSource, Map<String, Object> params, String reportFileName,
-								ExportType type) {
-		try {
+	private static Logger logger = LoggerFactory.getLogger(ExportsServiceImpl.class);
 
+	@Override
+	public Path createPDFReport(
+			JRDataSource jrDataSource, Map<String, Object> params, String reportFileName,
+			ExportType type) {
+		try {
 			Path tmpPath = Files.createTempFile("grass-jasper-", ".pdf");
 			OutputStream fileOutputStream = Files.newOutputStream(tmpPath);
 
-			String path = "static/VAADIN/jasper/";
-			InputStream jasperReportStream = getClass().getClassLoader().getResourceAsStream(path + reportFileName + ".jasper");
+			String basepath = "/static/VAADIN/jasper";
+			String path = basepath + reportFileName + ".jasper";
+			InputStream jasperReportStream = getClass().getClassLoader().getResourceAsStream(path);
+
+			logger.info("Hledám " + path + ", výsledek: " + jasperReportStream);
 
 			params.put("SUBREPORT_DIR", path);
 
