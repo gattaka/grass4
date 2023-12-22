@@ -1,16 +1,32 @@
 package cz.gattserver.grass.songs.ui;
 
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.tabs.Tab;
-import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.component.internal.AllowInert;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
+import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.grass.core.interfaces.UserInfoTO;
+import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
+import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
+import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
+import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.songs.model.interfaces.ChordTO;
+import cz.gattserver.grass.songs.SongsRole;
+import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
-import elemental.json.JsonType;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Route("songs")
 @PageTitle("Zpěvník")
@@ -20,12 +36,16 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 
 	public static final String SONG_ID_TAB_VAR = "grass-songs-song-id";
 
-	private Tabs tabSheet;
-	private Tab listTab;
-	private Tab chordsTab;
+	@Autowired
+	private SongsService songsService;
 
-	private ListTab listTabContent;
-	private ChordsTab chordsTabContent;
+	private Grid<SongOverviewTO> grid;
+
+	private SongOverviewTO filterTO;
+
+	private Map<Long, Integer> indexMap = new HashMap<>();
+
+	private TabsMenu tabsMenu;
 
 	private Div pageLayout;
 	private Long songId;
@@ -43,88 +63,134 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 				} else if (parameter != null)
 					songId = Long.parseLong(parameter);
 
-				if (tabSheet == null)
+				if (tabsMenu == null)
 					init();
 
 				if (songId != null) {
 					SongOverviewTO to = new SongOverviewTO();
 					to.setId(songId);
-					listTabContent.selectSong(to, false);
+					selectSong(to, false);
 				} else {
-					listTabContent.selectSong(null, false);
+					selectSong(null, false);
 				}
 			});
 		});
 	}
 
-	public void setSongId(Long songId) {
-		this.songId = songId;
-	}
-
 	@Override
 	protected void createColumnContent(Div layout) {
-		tabSheet = new Tabs();
-		layout.add(tabSheet);
+		tabsMenu = new TabsMenu();
+		layout.add(tabsMenu);
 
 		pageLayout = new Div();
 		pageLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		layout.add(pageLayout);
 
-		listTab = new Tab();
-		listTab.setLabel("Seznam");
-		tabSheet.add(listTab);
+		filterTO = new SongOverviewTO();
+		UserInfoTO user = securityService.getCurrentUser();
+		filterTO.setPublicated(user.isAdmin() ? null : true);
 
-		chordsTab = new Tab();
-		chordsTab.setLabel("Akordy");
-		tabSheet.add(chordsTab);
-
-		listTabContent = new ListTab(this);
-		pageLayout.add(listTabContent);
-
-		chordsTabContent = new ChordsTab(this);
-		pageLayout.add(chordsTabContent);
-
-		tabSheet.addSelectedChangeListener(e -> {
-			switch (tabSheet.getSelectedIndex()) {
-				default:
-				case 0:
-					switchListTab();
-					break;
-				case 2:
-					switchChordsTab();
-					break;
+		grid = new Grid<>() {
+			@AllowInert
+			@ClientCallable
+			private void scrollToId(Long id) {
+				// indexMap je přepočetní mapa mezi identifikátory entit a jejich indexem (řádkem) v gridu
+				grid.scrollToIndex(indexMap.get(id));
 			}
+		};
+		grid.setMultiSort(false);
+		UIUtils.applyGrassDefaultStyle(grid);
+
+		grid.addColumn(SongOverviewTO::getId).setHeader("Id").setSortable(true).setWidth("50px").setFlexGrow(0);
+		Grid.Column<SongOverviewTO> nazevColumn = grid
+				.addColumn(new ComponentRenderer<>(to -> new LinkButton(to.getName(), e -> {
+					songId = to.getId();
+					UI.getCurrent().navigate(SongPage.class, new RouteParam("id", to.getId()));
+				}))).setHeader("Název").setSortable(true);
+		Grid.Column<SongOverviewTO> authorColumn = grid.addColumn(SongOverviewTO::getAuthor).setHeader("Autor")
+				.setSortable(true).setWidth("250px").setFlexGrow(0);
+		Grid.Column<SongOverviewTO> yearColumn = grid.addColumn(SongOverviewTO::getYear).setHeader("Rok").setWidth(
+						"60px")
+				.setSortable(true).setFlexGrow(0);
+		grid.setWidthFull();
+		grid.setHeight("600px");
+		layout.add(grid);
+
+		HeaderRow filteringHeader = grid.appendHeaderRow();
+
+		// Název
+		UIUtils.addHeaderTextField(filteringHeader.getCell(nazevColumn), e -> {
+			filterTO.setName(e.getValue());
+			populate();
 		});
-		switchListTab();
+
+		// Autor
+		UIUtils.addHeaderTextField(filteringHeader.getCell(authorColumn), e -> {
+			filterTO.setAuthor(e.getValue());
+			populate();
+		});
+
+		// Rok
+		UIUtils.addHeaderTextField(filteringHeader.getCell(yearColumn), e -> {
+			filterTO.setYear(StringUtils.isBlank(e.getValue()) ? null : Integer.valueOf(e.getValue()));
+			populate();
+		});
+
+		populate();
+
+		GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
+
+		Upload upload = new Upload(buffer);
+		upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+		upload.setAcceptedFileTypes("text/plain");
+		upload.addSucceededListener(event -> {
+			songsService.importSong(buffer.getInputStream(event.getFileName()), event.getFileName());
+			populate();
+		});
+		layout.add(upload);
+		upload.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
+
+		ButtonLayout btnLayout = new ButtonLayout();
+		layout.add(btnLayout);
+
+		btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
+
+		btnLayout.add(new CreateGridButton("Přidat", event ->
+				new SongDialog(to -> {
+					to = songsService.saveSong(to);
+					populate();
+					selectSong(to, true);
+				}).open()
+		));
+
+		btnLayout.add(new ModifyGridButton<>("Upravit", event ->
+				new SongDialog(songsService.getSongById(grid.getSelectedItems().iterator().next().getId()), to -> {
+					to = songsService.saveSong(to);
+					populate();
+					selectSong(to, false);
+				}).open(), grid));
+
+		btnLayout.add(new DeleteGridButton<>("Smazat", items -> {
+			for (SongOverviewTO s : items)
+				songsService.deleteSong(s.getId());
+			populate();
+			selectSong(null, false);
+		}, grid));
 	}
 
-	public void selectListTab() {
-		tabSheet.setSelectedTab(listTab);
-		switchListTab();
-	}
-
-	public void selectChordsTab() {
-		tabSheet.setSelectedTab(chordsTab);
-		switchChordsTab();
-	}
-
-	private void switchListTab() {
-		chordsTabContent.setVisible(false);
-		listTabContent.getStyle().set("display", "block");
-		if (songId != null) {
-			SongOverviewTO to = new SongOverviewTO();
-			to.setId(songId);
-			listTabContent.selectSong(to, false);
+	public void selectSong(SongOverviewTO to, boolean switchToDetail) {
+		grid.select(to);
+		if (to != null) {
+			grid.getElement().callJsFunction("$server.scrollToId", to.getId().toString());
+			if (switchToDetail)
+				UI.getCurrent().navigate("songs/" + to.getId());
 		}
 	}
 
-	private void switchChordsTab() {
-		chordsTabContent.setVisible(true);
-		listTabContent.getStyle().set("display", "none");
-	}
-
-	public void selectChord(ChordTO chord) {
-		chordsTabContent.selectChord(chord);
-		selectChordsTab();
+	public void populate() {
+		List<SongOverviewTO> songs = songsService.getSongs(filterTO, grid.getSortOrder());
+		for (int i = 0; i < songs.size(); i++)
+			indexMap.put(songs.get(i).getId(), i);
+		grid.setItems(songs);
 	}
 }

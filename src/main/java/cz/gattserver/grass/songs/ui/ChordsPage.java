@@ -1,7 +1,6 @@
 package cz.gattserver.grass.songs.ui;
 
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -9,14 +8,14 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.StreamResource;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
+import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
@@ -27,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Resource;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -38,20 +36,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChordsTab extends Div {
+@Route("chords")
+@PageTitle("Akordy")
+public class ChordsPage extends OneColumnPage implements HasUrlParameter<String> {
 
-	private static final long serialVersionUID = 2599065817744507785L;
+	private static final long serialVersionUID = -6336711256361320029L;
 
-	private static final Logger logger = LoggerFactory.getLogger(ChordsTab.class);
+	private static final Logger logger = LoggerFactory.getLogger(ChordsPage.class);
 
 	@Autowired
-	private SongsService songsFacade;
+	private SongsService songsService;
 
-	@Autowired
-	private SecurityService securityService;
-
-	@Resource(name = "songsPageFactory")
-	private SongsPageFactory pageFactory;
+	private TabsMenu tabsMenu;
 
 	private Grid<ChordTO> grid;
 	private H2 nameLabel;
@@ -62,18 +58,40 @@ public class ChordsTab extends Div {
 	private Map<ChordTO, Integer> indexMap = new HashMap<>();
 	private ChordTO filterTO;
 
-	public ChordsTab(SongsPage songsPage) {
-		SpringContextHelper.inject(this);
+	private String chordName;
+
+	@Override
+	public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+		if (parameter != null)
+			chordName = parameter;
+
+		if (tabsMenu == null)
+			init();
+
+		if (chordName != null) {
+			ChordTO to = songsService.getChordByName(chordName);
+			selectChord(to);
+		} else {
+			selectChord(null);
+		}
+	}
+
+	@Override
+	protected void createColumnContent(Div layout) {
+		tabsMenu = new TabsMenu();
+		layout.add(tabsMenu);
+		tabsMenu.selectChordsTab();
 
 		chords = new ArrayList<>();
 		filterTO = new ChordTO();
 
 		HorizontalLayout mainLayout = new HorizontalLayout();
-		add(mainLayout);
+		mainLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+		layout.add(mainLayout);
 
 		grid = new Grid<>();
 		grid.setItems(chords);
-		Column<ChordTO> nazevColumn = grid.addColumn(ChordTO::getName).setHeader("Název");
+		Grid.Column<ChordTO> nazevColumn = grid.addColumn(ChordTO::getName).setHeader("Název");
 		grid.setWidth("398px");
 		grid.setHeight("600px");
 		mainLayout.add(grid);
@@ -108,59 +126,40 @@ public class ChordsTab extends Div {
 		panel.add(chordDescriptionLayout);
 
 		ButtonLayout btnLayout = new ButtonLayout();
-		add(btnLayout);
+		layout.add(btnLayout);
 
 		btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-		btnLayout.add(new CreateGridButton("Přidat", event -> {
-			new ChordDialog() {
-				private static final long serialVersionUID = -4863260002363608014L;
+		btnLayout.add(new CreateGridButton("Přidat", event -> new ChordDialog(to -> {
+			to = songsService.saveChord(to);
+			loadChords();
+			selectChord(to);
+		}).open()));
 
-				@Override
-				protected void onSave(ChordTO to) {
-					to = songsFacade.saveChord(to);
-					loadChords();
-					selectChord(to);
-				}
-			}.open();
-		}));
-
-		btnLayout.add(new ModifyGridButton<ChordTO>("Upravit", event -> {
-			new ChordDialog(choosenChord) {
-
-				private static final long serialVersionUID = 5264621441522056786L;
-
-				@Override
-				protected void onSave(ChordTO to) {
-					to = songsFacade.saveChord(to);
-					loadChords();
-					selectChord(to);
-				}
-			}.open();
+		btnLayout.add(new ModifyGridButton<>("Upravit", event -> {
+			new ChordDialog(choosenChord, to -> {
+				to = songsService.saveChord(to);
+				loadChords();
+				selectChord(to);
+			}).open();
 		}, grid));
 
 		GridButton<ChordTO> copyBtn = new GridButton<>("Kopie", event -> {
-			new ChordDialog(choosenChord, true) {
-				private static final long serialVersionUID = -4863260002363608014L;
-
-				@Override
-				protected void onSave(ChordTO to) {
-					to = songsFacade.saveChord(to);
-					loadChords();
-					selectChord(to);
-				}
-			}.open();
+			new ChordDialog(choosenChord, true, to -> {
+				to = songsService.saveChord(to);
+				loadChords();
+				selectChord(to);
+			}).open();
 		}, grid);
 		copyBtn.setIcon(new Image(ImageIcon.QUICKEDIT_16_ICON.createResource(), "Kopie"));
 		btnLayout.add(copyBtn);
 
 		btnLayout.add(new DeleteGridButton<ChordTO>("Smazat", items -> {
 			for (ChordTO c : items)
-				songsFacade.deleteChord(c.getId());
+				songsService.deleteChord(c.getId());
 			loadChords();
 			showDetail(null);
 		}, grid));
-
 	}
 
 	public void selectChord(ChordTO choosenChord) {
@@ -205,7 +204,7 @@ public class ChordsTab extends Div {
 	private void loadChords() {
 		chords.clear();
 		indexMap.clear();
-		chords.addAll(songsFacade.getChords(filterTO));
+		chords.addAll(songsService.getChords(filterTO));
 		for (int i = 0; i < chords.size(); i++)
 			indexMap.put(chords.get(i), i);
 		grid.getDataProvider().refreshAll();

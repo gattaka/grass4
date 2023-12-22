@@ -12,19 +12,21 @@ import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
 
-public abstract class ChordDialog extends EditWebDialog {
+import java.util.function.Consumer;
+
+public class ChordDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = 6803519662032576371L;
 
-	public ChordDialog() {
-		this(null);
+	public ChordDialog(Consumer<ChordTO> onSaveAction) {
+		this(null, onSaveAction);
 	}
 
-	public ChordDialog(final ChordTO originalDTO) {
-		this(originalDTO, false);
+	public ChordDialog(final ChordTO originalDTO, Consumer<ChordTO> onSaveAction) {
+		this(originalDTO, false, onSaveAction);
 	}
 
-	public ChordDialog(final ChordTO originalDTO, boolean copy) {
+	public ChordDialog(final ChordTO originalDTO, boolean copy, Consumer<ChordTO> onSaveAction) {
 		setWidth("300px");
 
 		ChordTO formTO = new ChordTO();
@@ -41,9 +43,9 @@ public abstract class ChordDialog extends EditWebDialog {
 		VerticalLayout chordDescriptionLayout = new VerticalLayout();
 		chordDescriptionLayout.setMargin(false);
 		add(chordDescriptionLayout);
-		renderDescriptionLayout(binder, originalDTO, formTO, chordDescriptionLayout);
+		renderDescriptionLayout(originalDTO, formTO, chordDescriptionLayout);
 
-		add(new SaveCloseLayout(e -> save(binder), e -> close()));
+		add(new SaveCloseLayout(e -> save(binder, onSaveAction), e -> close()));
 
 		if (originalDTO != null) {
 			binder.readBean(originalDTO);
@@ -54,9 +56,10 @@ public abstract class ChordDialog extends EditWebDialog {
 		}
 	}
 
-	private void renderDescriptionLayout(Binder<ChordTO> binder, ChordTO originalDTO, ChordTO formTO,
+	private void renderDescriptionLayout(
+			ChordTO originalDTO, ChordTO formTO,
 			VerticalLayout chordDescriptionLayout) {
-		String[] stringsLabel = new String[] { "E", "a", "d", "g", "h", "e" };
+		String[] stringsLabel = new String[]{"E", "a", "d", "g", "h", "e"};
 
 		Div layout = new Div();
 		layout.setWidthFull();
@@ -81,12 +84,12 @@ public abstract class ChordDialog extends EditWebDialog {
 						layout.add(cb);
 						long bitMask = 1L << ((row / 2 - 1) * cols + col);
 						if (originalDTO != null)
-							cb.setValue((originalDTO.getConfiguration().longValue() & bitMask) > 0);
+							cb.setValue((originalDTO.getConfiguration() & bitMask) > 0);
 						cb.addValueChangeListener(val -> {
 							if (val.getValue())
-								formTO.setConfiguration(formTO.getConfiguration().longValue() | bitMask);
+								formTO.setConfiguration(formTO.getConfiguration() | bitMask);
 							else
-								formTO.setConfiguration(formTO.getConfiguration().longValue() & ~bitMask);
+								formTO.setConfiguration(formTO.getConfiguration() & ~bitMask);
 						});
 					}
 				}
@@ -95,16 +98,13 @@ public abstract class ChordDialog extends EditWebDialog {
 		}
 	}
 
-	private void save(Binder<ChordTO> binder) {
+	private void save(Binder<ChordTO> binder, Consumer<ChordTO> onSaveAction) {
 		ChordTO writeTO = new ChordTO();
 		if (binder.writeBeanIfValid(writeTO)) {
 			writeTO.setConfiguration(binder.getBean().getConfiguration());
 			writeTO.setId(binder.getBean().getId());
-			onSave(writeTO);
+			onSaveAction.accept(writeTO);
 			close();
 		}
 	}
-
-	protected abstract void onSave(ChordTO to);
-
 }

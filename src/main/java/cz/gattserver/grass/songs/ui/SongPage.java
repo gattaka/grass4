@@ -192,7 +192,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
 
 			@ClientCallable
 			private void chordClickCallback(String chord) {
-				//songsPage.selectChord(songsFacade.getChordByName(chord));
+				UI.getCurrent().navigate(ChordsPage.class, chord);
 			}
 
 		};
