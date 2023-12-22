@@ -1,6 +1,7 @@
 package cz.gattserver.grass.songs.ui;
 
 import com.vaadin.flow.component.AttachEvent;
+import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
@@ -8,8 +9,10 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
+import com.vaadin.flow.router.RouteParam;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.LinkButton;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
@@ -61,15 +64,23 @@ public class ListTab extends Div {
 		filterTO.setPublicated(user.isAdmin() ? null : true);
 		this.songsPage = songsPage;
 
-		grid = new Grid<>();
+		grid = new Grid<>() {
+			@AllowInert
+			@ClientCallable
+			private void scrollToId(Long id) {
+				// indexMap je přepočetní mapa mezi identifikátory entit a jejich indexem (řádkem) v gridu
+				grid.scrollToIndex(indexMap.get(id));
+			}
+		};
 		grid.setMultiSort(false);
 		UIUtils.applyGrassDefaultStyle(grid);
 
 		grid.addColumn(SongOverviewTO::getId).setHeader("Id").setSortable(true).setWidth("50px").setFlexGrow(0);
 		Column<SongOverviewTO> nazevColumn = grid
-				.addColumn(new ComponentRenderer<>(
-						to -> new Anchor("songs/" + to.getId(), to.getName())))
-				.setHeader("Název").setSortable(true);
+				.addColumn(new ComponentRenderer<>(to -> new LinkButton(to.getName(), e -> {
+					songsPage.setSongId(to.getId());
+					UI.getCurrent().navigate(SongPage.class, new RouteParam("id", to.getId()));
+				}))).setHeader("Název").setSortable(true);
 		Column<SongOverviewTO> authorColumn = grid.addColumn(SongOverviewTO::getAuthor).setHeader("Autor")
 				.setSortable(true).setWidth("250px").setFlexGrow(0);
 		Column<SongOverviewTO> yearColumn = grid.addColumn(SongOverviewTO::getYear).setHeader("Rok").setWidth("60px")
@@ -142,9 +153,11 @@ public class ListTab extends Div {
 
 	public void selectSong(SongOverviewTO to, boolean switchToDetail) {
 		grid.select(to);
-		grid.scrollToIndex(indexMap.get(to.getId()));
-		if (switchToDetail)
-			UI.getCurrent().navigate("songs/" + to.getId());
+		if (to != null) {
+			grid.getElement().callJsFunction("$server.scrollToId", to.getId().toString());
+			if (switchToDetail)
+				UI.getCurrent().navigate("songs/" + to.getId());
+		}
 	}
 
 	public void populate() {

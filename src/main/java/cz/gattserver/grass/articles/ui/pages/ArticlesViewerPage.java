@@ -25,7 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import jakarta.annotation.Resource;
 
 @Route("articles")
-public class ArticlesViewerPage extends ContentViewerPage implements HasUrlParameter<String>, HasDynamicTitle {
+public class ArticlesViewerPage extends ContentViewerPage implements HasUrlParameter<String>, HasDynamicTitle, BeforeLeaveListener {
 
 	private static final long serialVersionUID = 7511698289319715316L;
 
@@ -181,4 +181,9 @@ public class ArticlesViewerPage extends ContentViewerPage implements HasUrlParam
 				URLIdentifierUtils.createURLIdentifier(article.getId(), article.getContentNode().getName())));
 	}
 
+
+	@Override
+	public void beforeLeave(BeforeLeaveEvent event) {
+		System.out.print(event.toString());
+	}
 }

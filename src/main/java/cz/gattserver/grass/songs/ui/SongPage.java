@@ -5,6 +5,12 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.tabs.Tab;
+import com.vaadin.flow.component.tabs.Tabs;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -20,20 +26,21 @@ import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteButton;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyButton;
+import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
+import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import cz.gattserver.grass.songs.util.ChordImageUtils;
+import jakarta.annotation.Resource;
 import net.sf.jasperreports.engine.JRDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.annotation.Resource;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -44,11 +51,13 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class SongTab extends Div {
+@Route("song/:id([0-9]*)")
+@PageTitle("Zpěvník")
+public class SongPage extends OneColumnPage implements BeforeEnterObserver {
 
 	private static final long serialVersionUID = 594189301140808163L;
 
-	private static final Logger logger = LoggerFactory.getLogger(SongTab.class);
+	private static final Logger logger = LoggerFactory.getLogger(SongPage.class);
 
 	private static final String JS_DIV_ID = "js-div";
 
@@ -71,13 +80,27 @@ public class SongTab extends Div {
 
 	private SongTO choosenSong;
 
-	public SongTab(SongsPage songsPage) {
-		SpringContextHelper.inject(this);
+	public SongPage() {
+		init();
+	}
 
+	@Override
+	public void beforeEnter(BeforeEnterEvent event) {
+		Optional<Long> param = event.getRouteParameters().get("id").map(Long::parseLong);
+
+		Long id = param.get();
+		setTabVariable(SongsPage.SONG_ID_TAB_VAR, id);
+
+		choosenSong = songsFacade.getSongById(id);
+		showDetail(choosenSong);
+	}
+
+	@Override
+	protected void createColumnContent(Div layout) {
 		Div wrapperDiv = new Div();
 		wrapperDiv.getStyle().set("padding", "10px").set("background", "white").set("border-radius", "3px")
 				.set("border", "1px solid #d5d5d5");
-		add(wrapperDiv);
+		layout.add(wrapperDiv);
 
 		nameLabel = new H2();
 		wrapperDiv.add(nameLabel);
@@ -100,18 +123,10 @@ public class SongTab extends Div {
 		embeddedLabel.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		embeddedLabel.getStyle().set("text-align", "center").set("background", "black").set("border-radius", "3px")
 				.set("border", "1px solid black");
-		add(embeddedLabel);
+		layout.add(embeddedLabel);
 
 		ButtonLayout btnLayout = new ButtonLayout();
-		add(btnLayout);
-
-		CreateButton addSongBtn = new CreateButton("Přidat", event ->
-				new SongDialog(to -> {
-					to = songsFacade.saveSong(to);
-					songsPage.selectSong(to.getId());
-				}).open());
-		btnLayout.add(addSongBtn);
-		addSongBtn.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
+		layout.add(btnLayout);
 
 		ModifyButton modifyButton = new ModifyButton("Upravit", event ->
 				new SongDialog(choosenSong, to -> {
@@ -121,10 +136,7 @@ public class SongTab extends Div {
 		btnLayout.add(modifyButton);
 		modifyButton.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-		DeleteButton deleteButton = new DeleteButton("Smazat", e -> {
-			songsFacade.deleteSong(choosenSong.getId());
-			songsPage.selectSong(null);
-		});
+		DeleteButton deleteButton = new DeleteButton("Smazat", e -> songsFacade.deleteSong(choosenSong.getId()));
 		btnLayout.add(deleteButton);
 		deleteButton.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
@@ -148,7 +160,7 @@ public class SongTab extends Div {
 		chordDiv.setVisible(false);
 		chordDiv.getStyle().set("position", "absolute").set("background", "white").set("padding", "5px")
 				.set("border-radius", "3px").set("border", "1px solid #d5d5d5");
-		add(chordDiv);
+		layout.add(chordDiv);
 
 		Div callbackDiv = new Div() {
 			private static final long serialVersionUID = -7319482130016598549L;
@@ -180,12 +192,12 @@ public class SongTab extends Div {
 
 			@ClientCallable
 			private void chordClickCallback(String chord) {
-				songsPage.selectChord(songsFacade.getChordByName(chord));
+				//songsPage.selectChord(songsFacade.getChordByName(chord));
 			}
 
 		};
 		callbackDiv.setId(JS_DIV_ID);
-		add(callbackDiv);
+		layout.add(callbackDiv);
 	}
 
 	private Path createReportPath(SongTO choosenSong, boolean twoColumn) {
@@ -265,10 +277,5 @@ public class SongTab extends Div {
 				embeddedLabel.setVisible(false);
 			}
 		}
-	}
-
-	public void selectSong(Long songId) {
-		choosenSong = songsFacade.getSongById(songId);
-		showDetail(choosenSong);
 	}
 }
