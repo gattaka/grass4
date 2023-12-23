@@ -88,8 +88,10 @@ public abstract class GrassPage extends Div {
 
 	protected void getTabVariable(String name, Consumer<Long> consumer) {
 		getTabVariableConsumer = consumer;
-		String cmd = "$server.tabVariableCallback(sessionStorage.getItem('" + name + "'))";
-		getElement().callJsFunction(cmd);
+		//String cmd = "$server.tabVariableCallback(sessionStorage.getItem('" + name + "'))";
+		//getElement().callJsFunction(cmd);
+		UI.getCurrent().getPage().executeJs("document.getElementById('main-div').$server.tabVariableCallback" +
+				"(sessionStorage.getItem('" + name + "'))");
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package cz.gattserver.grass.songs.ui;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
@@ -52,6 +53,9 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 
 	@Override
 	public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+		if (tabsMenu == null)
+			init();
+
 		getTabVariable(SongsPage.SONG_ID_TAB_VAR, val -> {
 			songId = val;
 
@@ -62,9 +66,6 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 					UI.getCurrent().getPage().getHistory().replaceState(null, "songs/" + songId);
 				} else if (parameter != null)
 					songId = Long.parseLong(parameter);
-
-				if (tabsMenu == null)
-					init();
 
 				if (songId != null) {
 					SongOverviewTO to = new SongOverviewTO();

@@ -1,5 +1,6 @@
 package cz.gattserver.grass.songs.ui;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
@@ -106,10 +107,14 @@ public class ChordsPage extends OneColumnPage implements HasUrlParameter<String>
 		loadChords();
 
 		grid.addSelectionListener((e) -> {
-			if (e.getFirstSelectedItem().isPresent())
-				showDetail(e.getFirstSelectedItem().get());
-			else
+			if (e.getFirstSelectedItem().isPresent()) {
+				ChordTO choosenChord = e.getFirstSelectedItem().get();
+				showDetail(choosenChord);
+				UI.getCurrent().getPage().getHistory().replaceState(null, "chords/" + choosenChord.getName());
+			} else {
 				showDetail(null);
+				UI.getCurrent().getPage().getHistory().replaceState(null, "chords");
+			}
 		});
 
 		Div panel = new Div();
