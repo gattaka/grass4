@@ -179,9 +179,15 @@ public abstract class MenuPage extends GrassPage {
 		final UserInfoTO userInfoDTO = getUser();
 		if (coreACL.canShowUserDetails(userInfoDTO, getUser())) {
 			// odhlásit
-			Anchor logout = new Anchor("/logout", "Odhlásit (" + userInfoDTO.getName() + ")");
+			/*Anchor logout = new Anchor("/logout", "Odhlásit (" + userInfoDTO.getName() + ")");
 			logout.getElement().setAttribute("router-ignore", "");
-			createMenuComponent(menu, logout, true);
+			createMenuComponent(menu, logout, true);*/
+
+			Button logoutBtn = new Button("Odhlásit (" + userInfoDTO.getName() + ")",
+					e -> securityService.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null));
+			logoutBtn.addThemeName("menu-button");
+			createMenuComponent(menu, logoutBtn, true);
+
 			// nastavení
 			createMenuComponent(menu, new Anchor(getPageURL(settingsPageFactory), "Nastavení"), true);
 		}

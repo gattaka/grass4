@@ -3,6 +3,7 @@ package cz.gattserver.grass.core.services.impl;
 import java.time.LocalDateTime;
 
 import com.vaadin.flow.server.VaadinServletRequest;
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -49,6 +50,11 @@ public class SecurityServiceImpl implements SecurityService {
 		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 		if (auth != null)
 			new SecurityContextLogoutHandler().logout(request, response, auth);
+		try {
+			request.logout();
+		} catch (ServletException e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
