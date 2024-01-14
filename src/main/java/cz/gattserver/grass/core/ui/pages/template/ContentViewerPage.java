@@ -121,36 +121,34 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 		}
 
 		// Oblíbené
-		if (coreACL.canRemoveContentFromFavourites(content, getUser())) {
-			removeFromFavouritesButton = new ImageButton("Odebrat z oblíbených", ImageIcon.BROKEN_HEART_16_ICON,
-					event -> {
-						// zdařilo se ? Pokud ano, otevři info okno
-						try {
-							userFacade.removeContentFromFavourites(content.getId(), getUser().getId());
-							removeFromFavouritesButton.setVisible(false);
-							addToFavouritesButton.setVisible(true);
-						} catch (Exception e) {
-							// Pokud ne, otevři warn okno
-							new WarnDialog("Odebrání z oblíbených se nezdařilo.").open();
-						}
-					});
-			operationsListLayout.add(removeFromFavouritesButton);
-		}
+		removeFromFavouritesButton = new ImageButton("Odebrat z oblíbených", ImageIcon.BROKEN_HEART_16_ICON,
+				event -> {
+					// zdařilo se ? Pokud ano, otevři info okno
+					try {
+						userFacade.removeContentFromFavourites(content.getId(), getUser().getId());
+						removeFromFavouritesButton.setVisible(false);
+						addToFavouritesButton.setVisible(true);
+					} catch (Exception e) {
+						// Pokud ne, otevři warn okno
+						new WarnDialog("Odebrání z oblíbených se nezdařilo.").open();
+					}
+				});
+		operationsListLayout.add(removeFromFavouritesButton);
+		removeFromFavouritesButton.setVisible(coreACL.canRemoveContentFromFavourites(content, getUser()));
 
-		if (coreACL.canAddContentToFavourites(content, getUser())) {
-			addToFavouritesButton = new ImageButton("Přidat do oblíbených", ImageIcon.HEART_16_ICON, event -> {
-				// zdařilo se? Pokud ano, otevři info okno
-				try {
-					userFacade.addContentToFavourites(content.getId(), getUser().getId());
-					addToFavouritesButton.setVisible(false);
-					removeFromFavouritesButton.setVisible(true);
-				} catch (Exception e) {
-					// Pokud ne, otevři warn okno
-					new WarnDialog("Vložení do oblíbených se nezdařilo.").open();
-				}
-			});
-			operationsListLayout.add(addToFavouritesButton);
-		}
+		addToFavouritesButton = new ImageButton("Přidat do oblíbených", ImageIcon.HEART_16_ICON, event -> {
+			// zdařilo se? Pokud ano, otevři info okno
+			try {
+				userFacade.addContentToFavourites(content.getId(), getUser().getId());
+				addToFavouritesButton.setVisible(false);
+				removeFromFavouritesButton.setVisible(true);
+			} catch (Exception e) {
+				// Pokud ne, otevři warn okno
+				new WarnDialog("Vložení do oblíbených se nezdařilo.").open();
+			}
+		});
+		operationsListLayout.add(addToFavouritesButton);
+		addToFavouritesButton.setVisible(coreACL.canAddContentToFavourites(content, getUser()));
 
 		// Změna kategorie
 		if (coreACL.canModifyContent(content, getUser())) {
