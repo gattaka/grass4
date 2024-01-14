@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.List;
 
 @Controller
-@RequestMapping("/drinks")
+@RequestMapping("/ws/drinks")
 public class DrinksResource {
 
 	@Autowired
@@ -25,8 +25,8 @@ public class DrinksResource {
 
 	@RequestMapping("/beer-list")
 	public ResponseEntity<List<BeerOverviewTO>> beerList(@RequestParam(value = "page", required = true) int page,
-			@RequestParam(value = "pageSize", required = true) int pageSize,
-			@RequestParam(value = "filter", required = false) String filter) {
+														 @RequestParam(value = "pageSize", required = true) int pageSize,
+														 @RequestParam(value = "filter", required = false) String filter) {
 		int count = drinksFacade.countBeers(filter);
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho
@@ -51,8 +51,8 @@ public class DrinksResource {
 
 	@RequestMapping("/rum-list")
 	public ResponseEntity<List<RumOverviewTO>> rumList(@RequestParam(value = "page", required = true) int page,
-			@RequestParam(value = "pageSize", required = true) int pageSize,
-			@RequestParam(value = "filter", required = false) String filter) {
+													   @RequestParam(value = "pageSize", required = true) int pageSize,
+													   @RequestParam(value = "filter", required = false) String filter) {
 		int count = drinksFacade.countRums(filter);
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho
@@ -77,8 +77,8 @@ public class DrinksResource {
 
 	@RequestMapping("/whiskey-list")
 	public ResponseEntity<List<WhiskeyOverviewTO>> whiskeyList(@RequestParam(value = "page", required = true) int page,
-			@RequestParam(value = "pageSize", required = true) int pageSize,
-			@RequestParam(value = "filter", required = false) String filter) {
+															   @RequestParam(value = "pageSize", required = true) int pageSize,
+															   @RequestParam(value = "filter", required = false) String filter) {
 		int count = drinksFacade.countWhiskeys(filter);
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho
@@ -103,7 +103,7 @@ public class DrinksResource {
 
 	@RequestMapping("/wine-list")
 	public ResponseEntity<List<WineOverviewTO>> wineList(@RequestParam(value = "page", required = true) int page,
-			@RequestParam(value = "pageSize", required = true) int pageSize) {
+														 @RequestParam(value = "pageSize", required = true) int pageSize) {
 		int count = drinksFacade.countWines();
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho
@@ -128,7 +128,7 @@ public class DrinksResource {
 
 	@RequestMapping("/other-list")
 	public ResponseEntity<List<OtherOverviewTO>> otherList(@RequestParam(value = "page", required = true) int page,
-			@RequestParam(value = "pageSize", required = true) int pageSize) {
+														   @RequestParam(value = "pageSize", required = true) int pageSize) {
 		int count = drinksFacade.countOthers();
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho

@@ -18,7 +18,7 @@ import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 
 @Controller
-@RequestMapping("/campgames")
+@RequestMapping("/ws/campgames")
 public class CampgamesResource {
 
 	@Autowired
