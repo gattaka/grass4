@@ -3,6 +3,7 @@ package cz.gattserver.grass.core.ui.pages.settings.factories;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
@@ -65,20 +66,22 @@ public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactor
 		buttonLayout.setSpacing(true);
 		layout.add(buttonLayout);
 
-		GridButton<UserInfoTO> activateBtn = new GridButton<>("Aktivovat", selectedUsers -> selectedUsers.forEach(u -> {
-			u.setConfirmed(true);
-			userFacade.activateUser(u.getId());
-			grid.getDataProvider().refreshItem(u);
-		}), grid).setEnableResolver(
+		GridButton<UserInfoTO> activateBtn = new GridButton<>("Aktivovat",
+				selectedUsers -> selectedUsers.forEach(u -> {
+					u.setConfirmed(true);
+					userFacade.activateUser(u.getId());
+					grid.getDataProvider().refreshItem(u);
+				}), grid).setEnableResolver(
 				selectedUsers -> !selectedUsers.isEmpty() && !selectedUsers.iterator().next().isConfirmed());
 		activateBtn.setIcon(new Image(ImageIcon.TICK_16_ICON.createResource(), "Aktivovat"));
 		buttonLayout.add(activateBtn);
 
-		GridButton<UserInfoTO> blockBtn = new GridButton<>("Zablokovat", selectedUsers -> users.forEach(user -> {
-			user.setConfirmed(false);
-			userFacade.banUser(user.getId());
-			grid.getDataProvider().refreshItem(user);
-		}), grid).setEnableResolver(
+		GridButton<UserInfoTO> blockBtn = new GridButton<>("Zablokovat",
+				selectedUsers -> selectedUsers.forEach(user -> {
+					user.setConfirmed(false);
+					userFacade.banUser(user.getId());
+					grid.getDataProvider().refreshItem(user);
+				}), grid).setEnableResolver(
 				selectedUsers -> !selectedUsers.isEmpty() && selectedUsers.iterator().next().isConfirmed());
 		blockBtn.setIcon(new Image(ImageIcon.BLOCK_16_ICON.createResource(), "Zablokovat"));
 		buttonLayout.add(blockBtn);
@@ -87,7 +90,7 @@ public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactor
 			WebDialog w = new WebDialog("Uživatelské role");
 
 			UserInfoTO user = users.iterator().next();
-			w.setWidth("220px");
+			w.setWidth("300px");
 
 			for (final Role role : moduleRegister.getRoles()) {
 				final Checkbox checkbox = new Checkbox(role.getRoleName());
@@ -102,11 +105,21 @@ public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactor
 				w.addComponent(checkbox);
 			}
 
-			w.addComponent(new Button("Upravit oprávnění", event -> {
+			HorizontalLayout btnLayout = new HorizontalLayout();
+			btnLayout.setSizeFull();
+			btnLayout.setPadding(true);
+			btnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+
+			w.getFooter().add(btnLayout);
+
+			btnLayout.add(new Button("Upravit oprávnění", event -> {
 				userFacade.changeUserRoles(user.getId(), user.getRoles());
 				grid.getDataProvider().refreshItem(user);
 				w.close();
 			}));
+
+			btnLayout.add(new Button("Storno", event -> w.close()));
+
 			w.open();
 		}, grid);
 		editBtn.setIcon(new Image(ImageIcon.PENCIL_16_ICON.createResource(), "Upravit oprávnění"));
