@@ -14,6 +14,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.vaadin.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
@@ -65,14 +66,12 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 		line1.setPadding(false);
 		add(line1);
 
-		final DatePicker dateField = new DatePicker("Datum návštěvy");
-		dateField.setLocale(Locale.forLanguageTag("CS"));
-		dateField.setWidthFull();
+		ComponentFactory componentFactory = new ComponentFactory();
+
+		final DatePicker dateField = componentFactory.createDatePicker("Datum návštěvy");
 		binder.forField(dateField).asRequired().bind("date");
 
-		final TimePicker timeField = new TimePicker("Čas návštěvy");
-		timeField.setLocale(Locale.forLanguageTag("CS"));
-		timeField.setWidthFull();
+		final TimePicker timeField = componentFactory.createTimePicker("Čas návštěvy");
 		binder.forField(timeField).bind("time");
 
 		HorizontalLayout line2 = new HorizontalLayout(dateField, timeField);

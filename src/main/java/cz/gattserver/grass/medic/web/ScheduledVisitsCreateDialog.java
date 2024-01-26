@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Locale;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.vaadin.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
@@ -63,17 +64,15 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
 					.withConverter(new StringToIntegerConverter(0, "Počet měsíců musí být celé číslo")).bind("period");
 		}
 
-		final DatePicker dateField = new DatePicker("Datum návštěvy");
-		dateField.setLocale(Locale.forLanguageTag("CS"));
+		ComponentFactory componentFactory = new ComponentFactory();
+
+		final DatePicker dateField = componentFactory.createDatePicker("Datum návštěvy");
 		add(dateField);
-		dateField.setWidthFull();
 		binder.forField(dateField).bind("date");
 
 		if (planned) {
-			final TimePicker timeField = new TimePicker("Čas návštěvy");
-			timeField.setLocale(Locale.forLanguageTag("CS"));
+			final TimePicker timeField = componentFactory.createTimePicker("Čas návštěvy");
 			add(timeField);
-			timeField.setWidthFull();
 			binder.forField(timeField).bind("time");
 		}
 
