@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.services.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -7,6 +8,7 @@ import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.CoreMapperService;
 import cz.gattserver.grass.core.services.NodeService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -136,6 +138,12 @@ public class NodeServiceImpl implements NodeService {
 		int contentNodesCount = nodeRepository.countContentNodes(nodeId);
 		int subNodesCount = nodeRepository.countSubNodes(nodeId);
 		return contentNodesCount + subNodesCount == 0;
+	}
+
+	@Override
+	public List<NodeOverviewTO> getByFilter(String filter) {
+		if (StringUtils.isBlank(filter)) return new ArrayList<>();
+		return mapper.mapNodesForOverview(nodeRepository.findByFilter("%" + filter.toLowerCase() + "%"));
 	}
 
 }

@@ -2,6 +2,7 @@ package cz.gattserver.grass.core.model.repositories;
 
 import java.util.List;
 
+import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -28,4 +29,6 @@ public interface NodeRepository extends JpaRepository<Node, Long> {
 	@Query("select count(s) from NODE n join NODE s on s.parent.id = n.id where n.id = ?1")
 	int countContentNodes(Long nodeId);
 
+	@Query("select n from NODE n where LOWER(n.name) like ?1")
+	List<Node> findByFilter(String filter);
 }

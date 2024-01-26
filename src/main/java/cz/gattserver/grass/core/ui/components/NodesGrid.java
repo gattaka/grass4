@@ -22,7 +22,7 @@ public class NodesGrid extends Grid<NodeOverviewTO> {
 
 	private static final long serialVersionUID = -2220485504407844582L;
 
-	public NodesGrid(MenuPage page) {
+	public NodesGrid() {
 		// inject nefunguje kvůli něčemu v předkovi
 		final PageFactory nodePageFactory = (PageFactory) SpringContextHelper.getBean("nodePageFactory");
 

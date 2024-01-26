@@ -2,6 +2,7 @@ package cz.gattserver.grass.core.ui.pages;
 
 import java.util.List;
 
+import cz.gattserver.grass.core.ui.components.NodesGrid;
 import jakarta.annotation.Resource;
 
 import com.vaadin.flow.component.dependency.CssImport;
@@ -127,25 +128,32 @@ public class HomePage extends OneColumnPage {
 		searchField.setWidthFull();
 		layout.add(searchField);
 
-		final ContentsLazyGrid searchResultsTable = new ContentsLazyGrid();
-		searchResultsTable.setWidthFull();
-		searchResultsTable.setVisible(false);
-		searchResultsTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-		layout.add(searchResultsTable);
+		final ContentsLazyGrid searchResultsContentsTable = new ContentsLazyGrid();
+		searchResultsContentsTable.setWidthFull();
+		searchResultsContentsTable.setVisible(false);
+		searchResultsContentsTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+		layout.add(searchResultsContentsTable);
+
+		final NodesGrid searchResultsNodesTable = new NodesGrid();
+		searchResultsNodesTable.setWidthFull();
+		searchResultsNodesTable.setVisible(false);
+		searchResultsNodesTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+		layout.add(searchResultsNodesTable);
 
 		searchField.addValueChangeListener(e -> {
 			String value = searchField.getValue();
-			if (StringUtils.isNotBlank(value) && !searchResultsTable.isVisible()) {
-				searchResultsTable.setVisible(true);
-				// zde musí být searchField.getValue() namísto pouze value,
-				// protože jde o closure a bude se vyhodnocovat opakovaně
-				// později s různými hodnotami obsahu pole
-				searchResultsTable.populate(getUser().getId() != null, HomePage.this,
+			if (StringUtils.isNotBlank(value) && !searchResultsContentsTable.isVisible()) {
+				searchResultsContentsTable.setVisible(true);
+				searchResultsContentsTable.populate(getUser().getId() != null, HomePage.this,
 						q -> contentNodeFacade.getByFilter(createFilterTO(), q.getOffset(), q.getLimit()).stream(),
 						q -> contentNodeFacade.getCountByFilter(createFilterTO()));
-				searchResultsTable.setHeight("200px");
+				searchResultsContentsTable.setHeight("200px");
+
+				searchResultsNodesTable.setVisible(true);
 			}
-			searchResultsTable.getDataProvider().refreshAll();
+			searchResultsContentsTable.getDataProvider().refreshAll();
+			searchResultsNodesTable.populate(nodeFacade.getByFilter(value));
+			searchResultsNodesTable.setHeight("200px");
 		});
 		searchField.setValueChangeMode(ValueChangeMode.EAGER);
 	}

@@ -166,7 +166,7 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
 	}
 
 	private void createSubnodesPart(Div layout, NodeTO node) {
-		subNodesTable = new NodesGrid(NodePage.this);
+		subNodesTable = new NodesGrid();
 
 		layout.add(new H2("Podkategorie"));
 
