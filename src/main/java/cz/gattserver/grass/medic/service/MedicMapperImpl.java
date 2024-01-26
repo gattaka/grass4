@@ -121,10 +121,10 @@ public class MedicMapperImpl implements MedicMapper {
 		if (e == null)
 			return null;
 
-		PhysicianTO dto = new PhysicianTO();
-		dto.setId(e.getId());
-		dto.setName(e.getName());
-		return dto;
+		PhysicianTO to = new PhysicianTO();
+		to.setId(e.getId());
+		to.setName(e.getName());
+		return to;
 	}
 
 	public Set<PhysicianTO> mapPhysicians(List<Physician> e) {

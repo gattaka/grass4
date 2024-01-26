@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -153,7 +154,7 @@ public class MedicServiceImpl implements MedicService {
 
 	@Override
 	public List<MedicalRecordTO> getMedicalRecords() {
-		return medicMapper.mapMedicalRecords(medicalRecordRepository.findAll());
+		return medicMapper.mapMedicalRecords(medicalRecordRepository.findAll(Sort.by(Sort.Order.desc("date"))));
 	}
 
 	@Override
@@ -243,6 +244,11 @@ public class MedicServiceImpl implements MedicService {
 	@Override
 	public PhysicianTO getPhysicianById(Long id) {
 		return medicMapper.mapPhysician(physicianRepository.findById(id).orElse(null));
+	}
+
+	@Override
+	public PhysicianTO getPhysicianByLastVisit(Long institutionId) {
+		return medicMapper.mapPhysician(physicianRepository.findPhysicianByLastVisit(institutionId));
 	}
 
 }

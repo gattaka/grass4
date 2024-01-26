@@ -73,4 +73,5 @@ public interface MedicService {
 
 	PhysicianTO getPhysicianById(Long id);
 
+	PhysicianTO getPhysicianByLastVisit(Long institutionId);
 }

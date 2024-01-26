@@ -32,4 +32,13 @@ public class PhysicianRepositoryCustomImpl implements PhysicianRepositoryCustom 
 		return query.select(p).from(p).where(createPredicate(filterTO))
 				.orderBy(new OrderSpecifier[] { new OrderSpecifier<>(Order.DESC, p.name) }).fetch();
 	}
+
+	@Override
+	public Physician findPhysicianByLastVisit(Long institutionId) {
+		JPAQuery<Physician> query = new JPAQuery<>(entityManager);
+		QPhysician p = QPhysician.physician;
+		QMedicalRecord r = QMedicalRecord.medicalRecord;
+		return query.select(p).from(r).join(p).on(r.physician.id.eq(p.id)).where(r.institution.id.eq(institutionId))
+				.orderBy(new OrderSpecifier[] { new OrderSpecifier<>(Order.DESC, r.date) }).fetchOne();
+	}
 }

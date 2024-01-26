@@ -26,12 +26,11 @@ import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
+import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
-
-	private transient MedicService medicService;
 
 	public MedicalRecordCreateDialog() {
 		this(null, null);
@@ -48,18 +47,31 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 	private MedicalRecordCreateDialog(ScheduledVisitTO scheduledVisitDTO, MedicalRecordTO originalDTO) {
 		setWidth("800px");
 
+		MedicService medicService = SpringContextHelper.getBean(MedicService.class);
+
 		Binder<MedicalRecordTO> binder = new Binder<>(MedicalRecordTO.class);
 		binder.setBean(new MedicalRecordTO());
 
 		final ComboBox<MedicalInstitutionTO> institutionComboBox = new ComboBox<>("Instituce",
-				getMedicFacade().getMedicalInstitutions());
+				medicService.getMedicalInstitutions());
 		institutionComboBox.setWidthFull();
-		binder.forField(institutionComboBox).asRequired().bind("institution");
+		binder.forField(institutionComboBox).asRequired().bind(MedicalRecordTO::getInstitution,
+				MedicalRecordTO::setInstitution);
 
-		Set<PhysicianTO> physicians = getMedicFacade().getPhysicians();
+		Set<PhysicianTO> physicians = medicService.getPhysicians();
 		final ComboBox<PhysicianTO> physicianComboBox = new ComboBox<>("Ošetřující lékař", physicians);
 		physicianComboBox.setWidthFull();
-		binder.forField(physicianComboBox).asRequired().bind("physician");
+		binder.forField(physicianComboBox).bind(MedicalRecordTO::getPhysician,
+				MedicalRecordTO::setPhysician);
+
+		institutionComboBox.addValueChangeListener(e -> {
+			if (institutionComboBox.getValue() == null || physicianComboBox.getValue() != null)
+				return;
+			MedicalInstitutionTO to = institutionComboBox.getValue();
+			PhysicianTO pTO = medicService.getPhysicianByLastVisit(to.getId());
+			if (pTO != null)
+				physicianComboBox.setValue(pTO);
+		});
 
 		HorizontalLayout line1 = new HorizontalLayout(institutionComboBox, physicianComboBox);
 		line1.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
@@ -69,10 +81,10 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 		ComponentFactory componentFactory = new ComponentFactory();
 
 		final DatePicker dateField = componentFactory.createDatePicker("Datum návštěvy");
-		binder.forField(dateField).asRequired().bind("date");
+		binder.forField(dateField).asRequired().bind(MedicalRecordTO::getDate, MedicalRecordTO::setDate);
 
 		final TimePicker timeField = componentFactory.createTimePicker("Čas návštěvy");
-		binder.forField(timeField).bind("time");
+		binder.forField(timeField).bind(MedicalRecordTO::getTime, MedicalRecordTO::setTime);
 
 		HorizontalLayout line2 = new HorizontalLayout(dateField, timeField);
 		line2.setPadding(false);
@@ -82,10 +94,10 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 		add(recordField);
 		recordField.setWidthFull();
 		recordField.setHeight("200px");
-		binder.forField(recordField).asRequired().bind("record");
+		binder.forField(recordField).asRequired().bind(MedicalRecordTO::getRecord, MedicalRecordTO::setRecord);
 
 		Map<String, MedicamentTO> medicaments = new HashMap<>();
-		for (MedicamentTO mto : getMedicFacade().getMedicaments())
+		for (MedicamentTO mto : medicService.getMedicaments())
 			medicaments.put(mto.getName(), mto);
 
 		TokenField tokenField = new TokenField(medicaments.keySet());
@@ -102,7 +114,7 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 				try {
 					writeDTO.setMedicaments(
 							tokenField.getValues().stream().map(medicaments::get).collect(Collectors.toSet()));
-					getMedicFacade().saveMedicalRecord(writeDTO);
+					medicService.saveMedicalRecord(writeDTO);
 					onSuccess();
 					close();
 				} catch (Exception ex) {
@@ -119,12 +131,6 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 			timeField.setValue(scheduledVisitDTO.getTime());
 			institutionComboBox.setValue(scheduledVisitDTO.getInstitution());
 		}
-	}
-
-	protected MedicService getMedicFacade() {
-		if (medicService == null)
-			medicService = SpringContextHelper.getBean(MedicService.class);
-		return medicService;
 	}
 
 	protected abstract void onSuccess();
