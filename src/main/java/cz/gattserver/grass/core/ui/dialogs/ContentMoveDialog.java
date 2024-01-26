@@ -1,8 +1,10 @@
 package cz.gattserver.grass.core.ui.dialogs;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
@@ -36,7 +38,15 @@ public abstract class ContentMoveDialog extends WebDialog {
 			onMove();
 		});
 
-		layout.add(moveBtn);
+		Button stornoBtn = new Button("Storno");
+		stornoBtn.addClickListener(event -> close());
+
+		layout.setHorizontalComponentAlignment(Alignment.END, stornoBtn);
+
+		HorizontalLayout btnLayout = new HorizontalLayout(moveBtn, stornoBtn);
+		btnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		btnLayout.setSizeFull();
+		layout.add(btnLayout);
 		layout.setHorizontalComponentAlignment(Alignment.END, moveBtn);
 
 		NodeOverviewTO to = contentNodeDTO.getParent();
