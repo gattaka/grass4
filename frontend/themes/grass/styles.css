@@ -458,6 +458,6 @@ vaadin-date-picker::part(input-field), vaadin-time-picker::part(input-field), va
     border-width: 1px;
 }
 
-vaadin-text-field::part(input-field) {
+vaadin-text-field::part(input-field), vaadin-text-area textarea {
     font-weight: 500;
 }
