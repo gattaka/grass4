@@ -451,9 +451,13 @@ vaadin-horizontal-layout.menu {
     margin-bottom: -3px;
 }
 
-vaadin-date-picker::part(input-field), vaadin-combo-box::part(input-field) {
+vaadin-date-picker::part(input-field), vaadin-time-picker::part(input-field), vaadin-combo-box::part(input-field) {
     background-color: #fff;
     border-color: #ddd;
     border-style: solid;
     border-width: 1px;
+}
+
+vaadin-text-field::part(input-field) {
+    font-weight: 500;
 }
