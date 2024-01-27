@@ -31,8 +31,11 @@
 	align-items: center;
 	overflow-y: hidden;
 	width: 100%;
-	transform: translate(calc(var(--i, 0)/var(--n)*-100%)) translateY(-50%);	
-    margin-top: 2px;
+	transform: translate(calc(var(--i, 0)/var(--n)*-100%)) translateY(-50%);
+	height: 100%;
+	padding: 0;
+	margin: 0;
+	display: flex;
 }
 
 #pg-slideshow-item-div * {
@@ -59,6 +62,7 @@
     color: lightgray;
     font-weight: normal;
     font-size: 15px;
+	margin-left: 10px;
 }
 
 #pg-slideshow-item-prev-div {

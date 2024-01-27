@@ -7,8 +7,10 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.pg.util.PGUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,18 +30,20 @@ public abstract class PGSlideshow extends Div {
 	protected Div itemLabel;
 	protected Div itemLayout;
 
+	protected PhotogalleryTO photogallery;
+	protected PhotogalleryViewItemTO currentItemTO;
+
 	protected boolean closePrevented = false;
 
 	protected List<ShortcutRegistration> regs = new ArrayList<>();
 
 	protected abstract void pageUpdate(int currentIndex);
 
-	protected abstract String getItemURL(String string);
-
 	protected abstract PhotogalleryViewItemTO getItem(int index) throws IOException;
 
-	public PGSlideshow(int count) {
+	public PGSlideshow(PhotogalleryTO photogallery, int count) {
 		this.totalCount = count;
+		this.photogallery = photogallery;
 
 		setId("pg-slideshow-div");
 
@@ -71,101 +75,103 @@ public abstract class PGSlideshow extends Div {
 
 		UI.getCurrent().getPage()
 				.executeJs("let cont = document.querySelector('#pg-slideshow-item-div');"/*		*/ + "let NF = 30;"
-				/*		*/ + "let N = 1;"
-				/*		*/ + ""
-				/*		*/ + "let i = 0, x0 = null, locked = false, w, ini, fin, rID = null, anf;"
-				/*		*/ + ""
-				/*		*/ + "function smooth(k) {"
-				/*		*/ + "	return .5 * (Math.sin((k - .5) * Math.PI) + 1);"
-				/*		*/ + "};"
-				/*		*/ + ""
-				/*		*/ + "function stopAni() {"
-				/*		*/ + "	cancelAnimationFrame(rID);"
-				/*		*/ + "	rID = null;"
-				/*		*/ + "};"
-				/*		*/ + ""
-				/*		*/ + "function stop() {"
-				/*		*/ + "  stopAni();"
-				/*		*/ + "  i = 0;"
-				/*		*/ + "  anf = 0;"
-				/*		*/ + "	fin = i;"
-				/*		*/ + "	x0 = null;"
-				/*		*/ + "	locked = false;"
-				/*		*/ + "	cont.style.setProperty('--i', 0);"
-				/*		*/ + "	console.log('stop');"
-				/*		*/ + "};"
-				/*		*/ + ""
-				/*		*/ + "function setI(n) {"
-				/*		*/ + "	cont.style.setProperty('--i', Number.isNaN(n) ? 0 : n);"
-				/*		*/ + "  if (n < -.25) {"
-				/*		*/ + "		document.getElementById('" + jsDivId + "').$server.prev();"
-				/*		*/ + "  	stop();"
-				/*		*/ + "  }"
-				/*		*/ + "  if (n > .25) {"
-				/*		*/ + "		document.getElementById('" + jsDivId + "').$server.next();"
-				/*		*/ + "  	stop();"
-				/*		*/ + "  }"
-				/*		*/ + "	console.log(i);"
-				/*		*/ + "};"
-				/*		*/ + ""
-				/*		*/ + "function ani(cf = 0) {"
-				/*		*/ + "  setI(ini + (fin - ini) * smooth(cf / anf));"
-				/*		*/ + "	if (cf === anf) {"
-				/*		*/ + "		stopAni();"
-				/*		*/ + "		return;"
-				/*		*/ + "	}"
-				/*		*/ + "	rID = requestAnimationFrame(ani.bind(this, ++cf));"
-				/*		*/ + "};"
-				/*		*/ + ""
-				/*		*/ + "function unify(e) { return e.changedTouches ? e.changedTouches[0] : e };"
-				/*		*/ + ""
-				/*		*/ + "function lock(e) {"
-				/*		*/ + "	x0 = unify(e).clientX;"
-				/*		*/ + "	locked = true;"
-				/*		*/ + "};"
-				/*		*/ + ""
-				/*		*/ + "function drag(e) {"
-				/*		*/ + "	e.preventDefault();"
-				/*		*/ + "	if (locked) {"
-				/*		*/ + "		let dx = unify(e).clientX - x0, f = +(dx / w).toFixed(2);"
-				/*		*/ + "		setI(i - f);"
-				/*		*/ + "	}"
-				/*		*/ + "};"
-				/*		*/ + ""
-				/*		*/ + "function move(e) {"
-				/*		*/ + "	if (locked) {"
-				/*		*/ + "		let dx = unify(e).clientX - x0;"
-				/*		*/ + "		let s = Math.sign(dx);"
-				/*		*/ + "		let f = +(s * dx / w).toFixed(2);"
-				/*		*/ + "		ini = i - s * f;"
-				/*		*/ + "		if((i > 0 || s < 0) && (i < N - 1 || s > 0) && f > .2) {"
-				/*		*/ + "			i -= s;"
-				/*		*/ + "			f = 1 - f;"
-				/*		*/ + "		}"
-				/*		*/ + "		fin = i;"
-				/*		*/ + "		anf = Math.round(f * NF);"
-				/*		*/ + "		ani();"
-				/*		*/ + "		x0 = null;"
-				/*		*/ + "		locked = false;"
-				/*		*/ + "	}"
-				/*		*/ + "};"
-				/*		*/ + ""
-				/*		*/ + "function size() { w = window.innerWidth };"
-				/*		*/ + "addEventListener('resize', size, false);"
-				/*		*/ + "" + "size();" + "cont.style.setProperty('--n', N);"
-				/*		*/ + "cont.addEventListener('mousedown', lock, false);"
-				/*		*/ + "cont.addEventListener('touchstart', lock, false);"
-				/*		*/ + "cont.addEventListener('mousemove', drag, false);"
-				/*		*/ + "cont.addEventListener('touchmove', drag, false);"
-				/*		*/ + "cont.addEventListener('mouseup', move, false);"
-				/*		*/ + "cont.addEventListener('touchend', move, false);");
+						/*		*/ + "let N = 1;"
+						/*		*/ + ""
+						/*		*/ + "let i = 0, x0 = null, locked = false, w, ini, fin, rID = null, anf;"
+						/*		*/ + ""
+						/*		*/ + "function smooth(k) {"
+						/*		*/ + "	return .5 * (Math.sin((k - .5) * Math.PI) + 1);"
+						/*		*/ + "};"
+						/*		*/ + ""
+						/*		*/ + "function stopAni() {"
+						/*		*/ + "	cancelAnimationFrame(rID);"
+						/*		*/ + "	rID = null;"
+						/*		*/ + "};"
+						/*		*/ + ""
+						/*		*/ + "function stop() {"
+						/*		*/ + "  stopAni();"
+						/*		*/ + "  i = 0;"
+						/*		*/ + "  anf = 0;"
+						/*		*/ + "	fin = i;"
+						/*		*/ + "	x0 = null;"
+						/*		*/ + "	locked = false;"
+						/*		*/ + "	cont.style.setProperty('--i', 0);"
+						/*		*/ + "	console.log('stop');"
+						/*		*/ + "};"
+						/*		*/ + ""
+						/*		*/ + "function setI(n) {"
+						/*		*/ + "	cont.style.setProperty('--i', Number.isNaN(n) ? 0 : n);"
+						/*		*/ + "  if (n < -.25) {"
+						/*		*/ + "		document.getElementById('" + jsDivId + "').$server.prev();"
+						/*		*/ + "  	stop();"
+						/*		*/ + "  }"
+						/*		*/ + "  if (n > .25) {"
+						/*		*/ + "		document.getElementById('" + jsDivId + "').$server.next();"
+						/*		*/ + "  	stop();"
+						/*		*/ + "  }"
+						/*		*/ + "	console.log(i);"
+						/*		*/ + "};"
+						/*		*/ + ""
+						/*		*/ + "function ani(cf = 0) {"
+						/*		*/ + "  setI(ini + (fin - ini) * smooth(cf / anf));"
+						/*		*/ + "	if (cf === anf) {"
+						/*		*/ + "		stopAni();"
+						/*		*/ + "		return;"
+						/*		*/ + "	}"
+						/*		*/ + "	rID = requestAnimationFrame(ani.bind(this, ++cf));"
+						/*		*/ + "};"
+						/*		*/ + ""
+						/*		*/ + "function unify(e) { return e.changedTouches ? e.changedTouches[0] : e };"
+						/*		*/ + ""
+						/*		*/ + "function lock(e) {"
+						/*		*/ + "	x0 = unify(e).clientX;"
+						/*		*/ + "	locked = true;"
+						/*		*/ + "};"
+						/*		*/ + ""
+						/*		*/ + "function drag(e) {"
+						/*		*/ + "	e.preventDefault();"
+						/*		*/ + "	if (locked) {"
+						/*		*/ + "		let dx = unify(e).clientX - x0, f = +(dx / w).toFixed(2);"
+						/*		*/ + "		setI(i - f);"
+						/*		*/ + "	}"
+						/*		*/ + "};"
+						/*		*/ + ""
+						/*		*/ + "function move(e) {"
+						/*		*/ + "	if (locked) {"
+						/*		*/ + "		let dx = unify(e).clientX - x0;"
+						/*		*/ + "		let s = Math.sign(dx);"
+						/*		*/ + "		let f = +(s * dx / w).toFixed(2);"
+						/*		*/ + "		ini = i - s * f;"
+						/*		*/ + "		if((i > 0 || s < 0) && (i < N - 1 || s > 0) && f > .2) {"
+						/*		*/ + "			i -= s;"
+						/*		*/ + "			f = 1 - f;"
+						/*		*/ + "		}"
+						/*		*/ + "		fin = i;"
+						/*		*/ + "		anf = Math.round(f * NF);"
+						/*		*/ + "		ani();"
+						/*		*/ + "		x0 = null;"
+						/*		*/ + "		locked = false;"
+						/*		*/ + "	}"
+						/*		*/ + "};"
+						/*		*/ + ""
+						/*		*/ + "function size() { w = window.innerWidth };"
+						/*		*/ + "addEventListener('resize', size, false);"
+						/*		*/ + "" + "size();" + "cont.style.setProperty('--n', N);"
+						/*		*/ + "cont.addEventListener('mousedown', lock, false);"
+						/*		*/ + "cont.addEventListener('touchstart', lock, false);"
+						/*		*/ + "cont.addEventListener('mousemove', drag, false);"
+						/*		*/ + "cont.addEventListener('touchmove', drag, false);"
+						/*		*/ + "cont.addEventListener('mouseup', move, false);"
+						/*		*/ + "cont.addEventListener('touchend', move, false);");
 
 		Button closeBtn = new LinkButton("Zavřít", e -> {
 			close();
 		});
-		Div closeDiv = new Div(closeBtn);
-		closeDiv.setId("pg-slideshow-item-close-div");
-		add(closeDiv);
+		LinkButton detailButton = new LinkButton("Detail",
+				e -> UI.getCurrent().getPage().open(PGUtils.createDetailURL(currentItemTO, photogallery)));
+		Div btnDiv = new Div(detailButton, closeBtn);
+		btnDiv.setId("pg-slideshow-item-close-div");
+		add(btnDiv);
 	}
 
 	private Component createItemSlide(PhotogalleryViewItemTO itemTO) {
@@ -174,22 +180,22 @@ public abstract class PGSlideshow extends Div {
 		// vytvoř odpovídající komponentu pro zobrazení
 		// obrázku nebo videa
 		switch (itemTO.getType()) {
-		case VIDEO:
-			return createVideoSlide(itemTO);
-		case IMAGE:
-		default:
-			return createImageSlide(itemTO);
+			case VIDEO:
+				return createVideoSlide(itemTO);
+			case IMAGE:
+			default:
+				return createImageSlide(itemTO);
 		}
 	}
 
 	public void showItem(int index) {
 		currentIndex = index;
 		try {
-			PhotogalleryViewItemTO itemTO = getItem(index);
-			Component slideshowComponent = createItemSlide(itemTO);
+			currentItemTO = getItem(index);
+			Component slideshowComponent = createItemSlide(currentItemTO);
 			itemLayout.removeAll();
 			itemLayout.add(slideshowComponent);
-			itemLabel.setText((index + 1) + "/" + totalCount + " " + itemTO.getName());
+			itemLabel.setText((index + 1) + "/" + totalCount + " " + currentItemTO.getName());
 		} catch (Exception e) {
 			logger.error("Chyba při zobrazování slideshow položky fotogalerie", e);
 			UIUtils.showWarning("Zobrazení položky se nezdařilo");
@@ -198,7 +204,7 @@ public abstract class PGSlideshow extends Div {
 	}
 
 	private Component createVideoSlide(PhotogalleryViewItemTO itemTO) {
-		String videoURL = getItemURL(itemTO.getFile().getFileName().toString());
+		String videoURL = PGUtils.createItemURL(itemTO.getFile().getFileName().toString(), photogallery);
 		String videoString = "<video id=\"video\" preload controls>" + "<source src=\"" + videoURL
 				+ "\" type=\"video/mp4\">" + "</video>";
 		HtmlDiv video = new HtmlDiv(videoString);
@@ -215,7 +221,11 @@ public abstract class PGSlideshow extends Div {
 				return null;
 			}
 		}), itemTO.getName());
-		embedded.addClickListener(e -> preventClose());
+		embedded.addClickListener(e -> {
+			preventClose();
+			UI.getCurrent().getPage().open(PGUtils.createDetailURL(currentItemTO, photogallery));
+		});
+		embedded.getStyle().set("cursor", "pointer");
 		return embedded;
 	}
 

@@ -8,6 +8,11 @@ import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.pg.config.PGConfiguration;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryItemType;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
 import net.coobird.thumbnailator.Thumbnails;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
@@ -69,7 +74,7 @@ public class PGUtils {
 		int yc = h / 2;
 		int xr = 20;
 		int yr = 20;
-		bg.fillPolygon(new Polygon(new int[] { xc - xr, xc + xr, xc - xr }, new int[] { yc - yr, yc, yc + yr }, 3));
+		bg.fillPolygon(new Polygon(new int[]{xc - xr, xc + xr, xc - xr}, new int[]{yc - yr, yc, yc + yr}, 3));
 		try (OutputStream o = Files.newOutputStream(destinationFile)) {
 			ImageIO.write(backgroundImage, "png", o);
 		} catch (IOException e) {
@@ -104,7 +109,7 @@ public class PGUtils {
 					TranscoderOutput output = new TranscoderOutput(os);
 					JPEGTranscoder converter = new JPEGTranscoder();
 					converter.addTranscodingHint(JPEGTranscoder.KEY_MAX_WIDTH, Float.valueOf(maxWidth));
-					converter.addTranscodingHint(JPEGTranscoder.KEY_MAX_HEIGHT,  Float.valueOf(maxHeight));
+					converter.addTranscodingHint(JPEGTranscoder.KEY_MAX_HEIGHT, Float.valueOf(maxHeight));
 					converter.transcode(input, output);
 				} catch (TranscoderException e) {
 					throw new IOException("SVG to JPG failed", e);
@@ -130,34 +135,34 @@ public class PGUtils {
 				double angle = 0;
 				if (orinetation != null)
 					switch (orinetation) {
-					case 1:
-						// 0 degrees: the correct orientation, no adjustment
-						// is required.
-					case 2:
-						// 0 degrees, mirrored: image has been flipped
-						// back-to-front.
-						break;
-					case 3:
-						// 180 degrees: image is upside down.
-					case 4:
-						// 180 degrees, mirrored: image has been flipped
-						// back-to-front and is upside down.
-						angle = 180;
-						break;
-					case 5:
-						// 90 degrees: image has been flipped back-to-front
-						// and is on its side.
-					case 6:
-						// 90 degrees, mirrored: image is on its side.
-						angle = 90;
-						break;
-					case 7:
-						// 270 degrees: image has been flipped back-to-front and
-						// is on its far side.
-					case 8:
-						// 270 degrees, mirrored: image is on its far side.
-						angle = 270;
-						break;
+						case 1:
+							// 0 degrees: the correct orientation, no adjustment
+							// is required.
+						case 2:
+							// 0 degrees, mirrored: image has been flipped
+							// back-to-front.
+							break;
+						case 3:
+							// 180 degrees: image is upside down.
+						case 4:
+							// 180 degrees, mirrored: image has been flipped
+							// back-to-front and is upside down.
+							angle = 180;
+							break;
+						case 5:
+							// 90 degrees: image has been flipped back-to-front
+							// and is on its side.
+						case 6:
+							// 90 degrees, mirrored: image is on its side.
+							angle = 90;
+							break;
+						case 7:
+							// 270 degrees: image has been flipped back-to-front and
+							// is on its far side.
+						case 8:
+							// 270 degrees, mirrored: image is on its far side.
+							angle = 270;
+							break;
 					}
 
 				try (InputStream is = Files.newInputStream(inputFile)) {
@@ -186,11 +191,10 @@ public class PGUtils {
 
 	/**
 	 * Zjistí dle přípony souboru, zda se jedná o rasterový obrázek
-	 * 
-	 * @param file
-	 *            jméno souboru s příponou
+	 *
+	 * @param file jméno souboru s příponou
 	 * @return <code>true</code>, pokud se dle přípony jedná o soubor
-	 *         rasterového obrázku
+	 * rasterového obrázku
 	 */
 	public static boolean isRasterImage(String file) {
 		String fileToExt = file.toLowerCase();
@@ -200,11 +204,10 @@ public class PGUtils {
 
 	/**
 	 * Zjistí dle přípony souboru, zda se jedná o rasterový obrázek
-	 * 
-	 * @param file
-	 *            jméno souboru s příponou
+	 *
+	 * @param file jméno souboru s příponou
 	 * @return <code>true</code>, pokud se dle přípony jedná o soubor
-	 *         rasterového obrázku
+	 * rasterového obrázku
 	 */
 	public static boolean isRasterImage(Path file) {
 		return PGUtils.isRasterImage(file.getFileName().toString());
@@ -212,11 +215,10 @@ public class PGUtils {
 
 	/**
 	 * Zjistí dle přípony souboru, zda se jedná o vektorový obrázek
-	 * 
-	 * @param file
-	 *            jméno souboru s příponou
+	 *
+	 * @param file jméno souboru s příponou
 	 * @return <code>true</code>, pokud se dle přípony jedná o soubor
-	 *         vektorového obrázku
+	 * vektorového obrázku
 	 */
 	public static boolean isVectorImage(Path file) {
 		return file.getFileName().toString().endsWith(".svg");
@@ -224,9 +226,8 @@ public class PGUtils {
 
 	/**
 	 * Zjistí dle přípony souboru, zda se jedná o video
-	 * 
-	 * @param file
-	 *            jméno souboru s příponou
+	 *
+	 * @param file jméno souboru s příponou
 	 * @return <code>true</code>, pokud se dle přípony jedná o soubor videa
 	 */
 	public static boolean isVideo(String file) {
@@ -237,13 +238,31 @@ public class PGUtils {
 
 	/**
 	 * Zjistí dle přípony souboru, zda se jedná o video
-	 * 
-	 * @param file
-	 *            jméno souboru s příponou
+	 *
+	 * @param file jméno souboru s příponou
 	 * @return <code>true</code>, pokud se dle přípony jedná o soubor videa
 	 */
 	public static boolean isVideo(Path file) {
 		return PGUtils.isVideo(file.getFileName().toString());
 	}
 
+	public static String createItemURL(String file, PhotogalleryTO photogallery) {
+		return UIUtils.getContextPath() + "/" + PGConfiguration.PG_PATH + "/" + photogallery.getPhotogalleryPath() + "/"
+				+ file;
+	}
+
+	public static String createDetailURL(PhotogalleryViewItemTO item, PhotogalleryTO photogallery) {
+		String file = item.getFile().getFileName().toString();
+		String url = createItemURL(file, photogallery);
+		boolean video = PhotogalleryItemType.VIDEO.equals(item.getType());
+		if (video) {
+			url = url.substring(0, url.length() - 4);
+		} else if (url.endsWith(".svg.png")) {
+			// U vektorů je potřeba uříznout .png příponu, protože
+			// originál je vektor, který se na slideshow dá rovnou
+			// použít
+			url = url.substring(0, url.length() - 4);
+		}
+		return url;
+	}
 }

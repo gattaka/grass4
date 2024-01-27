@@ -38,12 +38,14 @@ import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.ContentViewerPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.pg.util.PGUtils;
 import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Resource;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.UUID;
@@ -312,11 +314,6 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 		eventBus.unsubscribe(PGViewerPage.this);
 	}
 
-	private String getItemURL(String file) {
-		return UIUtils.getContextPath() + "/" + PGConfiguration.PG_PATH + "/" + photogallery.getPhotogalleryPath() + "/"
-				+ file;
-	}
-
 	private void refreshGrid() {
 		galleryLayout.removeAll();
 		if (currentPage < 0)
@@ -327,7 +324,6 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 		int index = start;
 		try {
 			for (PhotogalleryViewItemTO item : pgService.getViewItems(galleryDir, start, PAGE_SIZE)) {
-
 				final int currentIndex = index;
 				Div itemLayout = new Div();
 				itemLayout.getStyle().set("text-align", "center").set("width", "170px").set("display", "inline-block")
@@ -360,21 +356,8 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 				itemLayout.add(new Breakline());
 
 				// Detail
-				String file = item.getFile().getFileName().toString();
-				String url = getItemURL(file);
-				boolean video = PhotogalleryItemType.VIDEO.equals(item.getType());
-				if (video) {
-					url = url.substring(0, url.length() - 4);
-				} else if (url.endsWith(".svg.png")) {
-					// U vektorů je potřeba uříznout .png příponu, protože
-					// originál je vektor, který se na slideshow dá rovnou
-					// použít
-					url = url.substring(0, url.length() - 4);
-				}
-				final String urlFinal = url;
-				LinkButton detailButton = new LinkButton("Detail", e -> {
-					UI.getCurrent().getPage().open(urlFinal);
-				});
+				final String urlFinal = PGUtils.createDetailURL(item, photogallery);
+				LinkButton detailButton = new LinkButton("Detail", e -> UI.getCurrent().getPage().open(urlFinal));
 				itemLayout.add(detailButton);
 
 				// Smazat
@@ -405,7 +388,6 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 
 			populatePaging(upperPagingLayout);
 			populatePaging(lowerPagingLayout);
-
 		} catch (Exception e) {
 			UIUtils.showWarning("Listování galerie selhalo");
 		}
@@ -422,8 +404,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 		numberLayout.setSpacing(true);
 		numberLayout.setPadding(false);
 		layout.add(numberLayout);
-		numberLayout.getElement().getStyle().set("margin-right", "auto");
-		numberLayout.getElement().getStyle().set("margin-left", "auto");
+		numberLayout.getElement().getStyle().set("margin-right", "auto").set("margin-left", "auto");
 
 		if (pageCount > 5) {
 			addPagingButton(numberLayout, "1", e -> setPage(0), currentPage == 0);
@@ -452,15 +433,17 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 				false, true, false);
 	}
 
-	private void addPagingButton(HorizontalLayout layout, String caption,
-								 ComponentEventListener<ClickEvent<Button>> clickListener, boolean primary) {
+	private void addPagingButton(
+			HorizontalLayout layout, String caption,
+			ComponentEventListener<ClickEvent<Button>> clickListener, boolean primary) {
 		addPagingButton(layout, caption, clickListener, primary, false, false);
 	}
 
-	private void addPagingButton(HorizontalLayout layout, String caption,
-								 ComponentEventListener<ClickEvent<Button>> clickListener, boolean primary,
-								 boolean autoLeftMargin,
-								 boolean autoRightMargin) {
+	private void addPagingButton(
+			HorizontalLayout layout, String caption,
+			ComponentEventListener<ClickEvent<Button>> clickListener, boolean primary,
+			boolean autoLeftMargin,
+			boolean autoRightMargin) {
 		Button btn = new Button(caption, clickListener);
 		btn.addThemeVariants(ButtonVariant.LUMO_SMALL);
 		if (primary)
@@ -481,7 +464,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 	}
 
 	private void showItem(final int index) {
-		PGSlideshow slideshow = new PGSlideshow(imageCount) {
+		PGSlideshow slideshow = new PGSlideshow(photogallery, imageCount) {
 			private static final long serialVersionUID = 7926209313704634472L;
 
 			@Override
@@ -492,11 +475,6 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 					currentPage = newPage;
 					refreshGrid();
 				}
-			}
-
-			@Override
-			protected String getItemURL(String string) {
-				return PGViewerPage.this.getItemURL(string);
 			}
 
 			@Override
