@@ -4,6 +4,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox.FetchItemsCallback;
 import com.vaadin.flow.component.datepicker.DatePicker;
@@ -22,8 +23,10 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.StreamResource;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Breakline;
+import cz.gattserver.common.vaadin.ComponentFactory;
 import cz.gattserver.common.vaadin.LinkButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
@@ -132,9 +135,18 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 				q.getFilter().get());
 		photogalleryKeywords = new TokenField(fetchItemsCallback, serializableFunction);
 
+		Button copyFromContentButton = new Button("Kopírovat z obsahu");
+		copyFromContentButton.addClickListener(e ->
+				new CopyTagsFromContentChooseDialog(list -> list.forEach(photogalleryKeywords::addToken)).open());
+		photogalleryKeywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
+
 		photogalleryNameField = new TextField();
 		photogalleryNameField.setValueChangeMode(ValueChangeMode.EAGER);
-		photogalleryDateField = new DatePicker();
+
+		ComponentFactory componentFactory = new ComponentFactory();
+
+		photogalleryDateField = componentFactory.createDatePicker("Přepsat datum vytvoření galerie");
+		photogalleryDateField.setWidth("200px");
 		publicatedCheckBox = new Checkbox();
 		reprocessSlideshowAndMiniCheckBox = new Checkbox();
 
@@ -267,8 +279,6 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		editorLayout.add(reprocessSlideshowAndMiniCheckBox);
 		editorLayout.add(new Breakline());
 
-		photogalleryDateField.setLabel("Přepsat datum vytvoření galerie");
-		photogalleryDateField.setWidth("200px");
 		editorLayout.add(photogalleryDateField);
 		editorLayout.add(new Breakline());
 

@@ -14,7 +14,7 @@ public class ComponentFactory {
 
 	public DatePicker.DatePickerI18n createDatePickerI18n() {
 		DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
-		i18n.setDateFormats("dd. MM. yyyy", "dd.MM.yyyy", "dd. MM.yyyy", "dd. MM.yyyy");
+		i18n.setDateFormats("d. M. yyyy", "d.M.yyyy", "d. M.yyyy", "d. M.yyyy");
 		i18n.setFirstDayOfWeek(1);
 		i18n.setMonthNames(Arrays.asList("Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen",
 				"Září", "Říjen", "Listopad", "Prosinec"));
