@@ -3,7 +3,6 @@ package cz.gattserver.grass.articles.ui.pages;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox.FetchItemsCallback;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
@@ -20,13 +19,11 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.shared.Registration;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
 import cz.gattserver.grass.articles.config.ArticlesConfiguration;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTO;
@@ -43,6 +40,7 @@ import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
@@ -87,6 +85,9 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
 	@Autowired
 	private ContentTagService contentTagFacade;
+
+	@Autowired
+	private ContentNodeService contentNodeService;
 
 	@Autowired
 	private PluginRegisterService pluginRegister;
@@ -257,6 +258,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 	protected void createCenterElements(Div customlayout) {
 		articleNameField = new TextField();
 		articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
+
 
 		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade.findByFilter(
 				q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
@@ -656,6 +658,11 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 		// menu tagů + textfield tagů
 		layout.add(articleKeywords);
 		articleKeywords.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
+
+		Button copyFromContentButton = new Button("Kopírovat z obsahu");
+		copyFromContentButton.addClickListener(e ->
+				new CopyTagsFromContentChooseDialog(list -> list.forEach(articleKeywords::addToken)).open());
+		articleKeywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
 
 		layout.add(new H2("Obsah článku"));
 		layout.add(articleTextArea);

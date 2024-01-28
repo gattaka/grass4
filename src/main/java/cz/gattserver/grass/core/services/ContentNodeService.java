@@ -221,4 +221,10 @@ public interface ContentNodeService {
 	 */
 	List<ContentNodeOverviewTO> getByFilter(ContentNodeFilterTO filter, int offset, int limit);
 
+	/**
+	 * Získá list tagů dle obsahu
+	 * @param id id obsahu
+	 * @return list tagů
+	 */
+	List<String> getTagsByContentId(Long id);
 }

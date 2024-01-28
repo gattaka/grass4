@@ -123,5 +123,4 @@ public interface ContentTagService {
 	 * @return filtrovaný počet tagů
 	 */
 	Integer countByFilter(String filter);
-
 }

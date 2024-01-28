@@ -2,6 +2,8 @@ package cz.gattserver.common.vaadin;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.timepicker.TimePicker;
 
 import java.sql.Time;
@@ -44,5 +46,13 @@ public class ComponentFactory {
 		dateTimeField.setWidthFull();
 		dateTimeField.setDatePickerI18n(createDatePickerI18n());
 		return dateTimeField;
+	}
+
+	public HorizontalLayout createDialogButtonLayout() {
+		HorizontalLayout horizontalLayout = new HorizontalLayout();
+		horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
+		horizontalLayout.setSpacing(true);
+		horizontalLayout.setSizeFull();
+		return horizontalLayout;
 	}
 }

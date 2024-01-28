@@ -25,4 +25,5 @@ public interface ContentNodeRepositoryCustom {
 			ContentNodeFilterTO filter, Long userId,
 			boolean admin, int offset, int limit, String sortProperty);
 
+	List<String> findTagsByContentId(Long id);
 }

@@ -141,4 +141,11 @@ public class ContentNodeRepositoryCustomImpl implements ContentNodeRepositoryCus
 						c.creationDate, c.lastModificationDate, c.publicated, u.name, u.id, c.id).fetch();
 	}
 
+	@Override
+	public List<String> findTagsByContentId(Long id) {
+		QContentNode c = QContentNode.contentNode;
+		QContentTag t = QContentTag.contentTag;
+		JPAQuery<String> query = new JPAQuery<>(entityManager);
+		return query.from(c).join(t).on(t.contentNodes.contains(c)).where(c.id.eq(id)).select(t.name).fetch();
+	}
 }

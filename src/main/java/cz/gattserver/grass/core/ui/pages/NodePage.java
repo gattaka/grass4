@@ -205,7 +205,7 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
 		searchResultsTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		layout.add(searchResultsTable);
 
-		searchResultsTable.populate(getUser().getId() != null, NodePage.this,
+		searchResultsTable.populate(getUser().getId() != null,
 				q -> contentNodeFacade.getByFilter(createFilterTO(), q.getOffset(), q.getLimit()).stream(),
 				q -> contentNodeFacade.getCountByFilter(createFilterTO()));
 

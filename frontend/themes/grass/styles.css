@@ -461,3 +461,8 @@ vaadin-date-picker::part(input-field), vaadin-time-picker::part(input-field), va
 vaadin-text-field::part(input-field), vaadin-text-area textarea {
     font-weight: 500;
 }
+
+#content-tags-div * {
+    margin-right: 10px;
+    margin-bottom: 10px;
+}

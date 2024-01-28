@@ -5,10 +5,7 @@ import java.util.List;
 import cz.gattserver.grass.core.ui.components.NodesGrid;
 import jakarta.annotation.Resource;
 
-import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
@@ -63,10 +60,10 @@ public class HomePage extends OneColumnPage {
 	private static final int MAX_FONT_SIZE_TAG_CLOUD = 22;
 
 	@Autowired
-	private ContentTagService contentTagFacade;
+	private ContentTagService contentTagService;
 
 	@Autowired
-	private ContentNodeService contentNodeFacade;
+	private ContentNodeService contentNodeService;
 
 	@Resource(name = "tagPageFactory")
 	private PageFactory tagPageFactory;
@@ -84,12 +81,12 @@ public class HomePage extends OneColumnPage {
 		UserInfoTO user = getUser();
 		if (coreACL.isLoggedIn(user)) {
 			layout.add(new H2("Oblíbené obsahy"));
-			ContentsLazyGrid favouritesContentsTable = new ContentsLazyGrid();
-			favouritesContentsTable.populate(getUser().getId() != null, this,
-					q -> contentNodeFacade.getUserFavourite(user.getId(), q.getOffset(), q.getLimit()).stream(),
-					q -> contentNodeFacade.getUserFavouriteCount(user.getId()));
-			layout.add(favouritesContentsTable);
-			favouritesContentsTable.setWidthFull();
+			ContentsLazyGrid favouritesContentsGrid = new ContentsLazyGrid();
+			favouritesContentsGrid.populate(getUser().getId() != null,
+					q -> contentNodeService.getUserFavourite(user.getId(), q.getOffset(), q.getLimit()).stream(),
+					q -> contentNodeService.getUserFavouriteCount(user.getId()));
+			layout.add(favouritesContentsGrid);
+			favouritesContentsGrid.setWidthFull();
 		}
 
 		createSearchMenu(layout);
@@ -128,32 +125,32 @@ public class HomePage extends OneColumnPage {
 		searchField.setWidthFull();
 		layout.add(searchField);
 
-		final ContentsLazyGrid searchResultsContentsTable = new ContentsLazyGrid();
-		searchResultsContentsTable.setWidthFull();
-		searchResultsContentsTable.setVisible(false);
-		searchResultsContentsTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-		layout.add(searchResultsContentsTable);
+		final ContentsLazyGrid searchResultsContentsGrid = new ContentsLazyGrid();
+		searchResultsContentsGrid.setWidthFull();
+		searchResultsContentsGrid.setVisible(false);
+		searchResultsContentsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+		layout.add(searchResultsContentsGrid);
 
-		final NodesGrid searchResultsNodesTable = new NodesGrid();
-		searchResultsNodesTable.setWidthFull();
-		searchResultsNodesTable.setVisible(false);
-		searchResultsNodesTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-		layout.add(searchResultsNodesTable);
+		final NodesGrid searchResultsNodesGrid = new NodesGrid();
+		searchResultsNodesGrid.setWidthFull();
+		searchResultsNodesGrid.setVisible(false);
+		searchResultsNodesGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+		layout.add(searchResultsNodesGrid);
 
 		searchField.addValueChangeListener(e -> {
 			String value = searchField.getValue();
-			if (StringUtils.isNotBlank(value) && !searchResultsContentsTable.isVisible()) {
-				searchResultsContentsTable.setVisible(true);
-				searchResultsContentsTable.populate(getUser().getId() != null, HomePage.this,
-						q -> contentNodeFacade.getByFilter(createFilterTO(), q.getOffset(), q.getLimit()).stream(),
-						q -> contentNodeFacade.getCountByFilter(createFilterTO()));
-				searchResultsContentsTable.setHeight("200px");
+			if (StringUtils.isNotBlank(value) && !searchResultsContentsGrid.isVisible()) {
+				searchResultsContentsGrid.setVisible(true);
+				searchResultsContentsGrid.populate(getUser().getId() != null,
+						q -> contentNodeService.getByFilter(createFilterTO(), q.getOffset(), q.getLimit()).stream(),
+						q -> contentNodeService.getCountByFilter(createFilterTO()));
+				searchResultsContentsGrid.setHeight("200px");
 
-				searchResultsNodesTable.setVisible(true);
+				searchResultsNodesGrid.setVisible(true);
 			}
-			searchResultsContentsTable.getDataProvider().refreshAll();
-			searchResultsNodesTable.populate(nodeFacade.getByFilter(value));
-			searchResultsNodesTable.setHeight("200px");
+			searchResultsContentsGrid.getDataProvider().refreshAll();
+			searchResultsNodesGrid.populate(nodeFacade.getByFilter(value));
+			searchResultsNodesGrid.setHeight("200px");
 		});
 		searchField.setValueChangeMode(ValueChangeMode.EAGER);
 	}
@@ -161,7 +158,7 @@ public class HomePage extends OneColumnPage {
 	private void createTagCloud(Div layout) {
 		layout.add(new H2("Tagy"));
 
-		List<ContentTagsCloudItemTO> contentTags = contentTagFacade.createTagsCloud(MAX_FONT_SIZE_TAG_CLOUD,
+		List<ContentTagsCloudItemTO> contentTags = contentTagService.createTagsCloud(MAX_FONT_SIZE_TAG_CLOUD,
 				MIN_FONT_SIZE_TAG_CLOUD);
 		if (contentTags.isEmpty()) {
 			Span noTagsSpan = new Span("Nebyly nalezeny žádné tagy");
@@ -188,7 +185,7 @@ public class HomePage extends OneColumnPage {
 
 			sb.append("<a title='" + contentTag.getContentsCount() + "'href='"
 					+ getPageURL(tagPageFactory,
-							URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()))
+					URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()))
 					+ "' style='font-size:" + contentTag.getFontSize() + "pt'>" + contentTag.getName() + "</a> ");
 		}
 		if (sb != null)
@@ -223,24 +220,24 @@ public class HomePage extends OneColumnPage {
 	private void createRecentAdded(Div layout) {
 		layout.add(new H2("Nedávno přidané obsahy"));
 
-		ContentsLazyGrid recentAddedContentsTable = new ContentsLazyGrid();
-		recentAddedContentsTable.populate(getUser().getId() != null, this,
-				q -> contentNodeFacade.getRecentAdded(q.getOffset(), q.getLimit()).stream(),
-				q -> contentNodeFacade.getCount());
-		recentAddedContentsTable.setWidthFull();
-		recentAddedContentsTable.setHeight("200px");
-		layout.add(recentAddedContentsTable);
+		ContentsLazyGrid recentAddedContentsGrid = new ContentsLazyGrid();
+		recentAddedContentsGrid.populate(getUser().getId() != null,
+				q -> contentNodeService.getRecentAdded(q.getOffset(), q.getLimit()).stream(),
+				q -> contentNodeService.getCount());
+		recentAddedContentsGrid.setWidthFull();
+		recentAddedContentsGrid.setHeight("200px");
+		layout.add(recentAddedContentsGrid);
 	}
 
 	private void createRecentModified(Div layout) {
 		layout.add(new H2("Nedávno upravené obsahy"));
 
-		ContentsLazyGrid recentModifiedContentsTable = new ContentsLazyGrid();
-		recentModifiedContentsTable.populate(getUser().getId() != null, this,
-				q -> contentNodeFacade.getRecentModified(q.getOffset(), q.getLimit()).stream(),
-				q -> contentNodeFacade.getCount());
-		recentModifiedContentsTable.setWidthFull();
-		recentModifiedContentsTable.setHeight("200px");
-		layout.add(recentModifiedContentsTable);
+		ContentsLazyGrid recentModifiedContentsGrid = new ContentsLazyGrid();
+		recentModifiedContentsGrid.populate(getUser().getId() != null,
+				q -> contentNodeService.getRecentModified(q.getOffset(), q.getLimit()).stream(),
+				q -> contentNodeService.getCount());
+		recentModifiedContentsGrid.setWidthFull();
+		recentModifiedContentsGrid.setHeight("200px");
+		layout.add(recentModifiedContentsGrid);
 	}
 }

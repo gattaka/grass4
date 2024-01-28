@@ -58,11 +58,10 @@ public class TagPage extends OneColumnPage implements HasUrlParameter<String>, H
 		layout.add(new H2("Obsahy označené tagem: " + tag.getName()));
 
 		ContentsLazyGrid tagContentsTable = new ContentsLazyGrid();
-		tagContentsTable.populate(getUser().getId() != null, this,
+		tagContentsTable.populate(getUser().getId() != null,
 				q -> contentNodeFacade.getByTag(tag.getId(), q.getOffset(), q.getLimit()).stream(),
 				q -> contentNodeFacade.getCountByTag(tag.getId()));
 		tagContentsTable.setWidthFull();
 		layout.add(tagContentsTable);
 	}
-
 }

@@ -30,5 +30,4 @@ public class EditWebDialog extends WebDialog {
 		super.close();
 		removeBeforeUnload();
 	}
-
 }

@@ -28,13 +28,16 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
 	private static final long serialVersionUID = -5648982639686386190L;
 
+	private boolean dynamicHeight = true;
+
 	public ContentsLazyGrid() {
 		super();
 		UIUtils.applyGrassDefaultStyle(this);
+		setSelectionMode(SelectionMode.NONE);
 	}
 
-	public void populate(boolean showPubLock, final MenuPage page,
-			FetchCallback<ContentNodeOverviewTO, Void> fetchCallback,
+	public void populate(
+			boolean showPubLock, FetchCallback<ContentNodeOverviewTO, Void> fetchCallback,
 			CountCallback<ContentNodeOverviewTO, Void> countCallback) {
 
 		PageFactory nodePageFactory = ((PageFactory) SpringContextHelper.getBean("nodePageFactory"));
@@ -42,7 +45,6 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 		ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);
 
 		setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
-		setSelectionMode(SelectionMode.NONE);
 
 		String iconBind = "customIcon";
 		String nameBind = "customName";
@@ -97,7 +99,15 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 					.setClassNameGenerator(item -> "v-align-right").setFlexGrow(0).setWidth("90px");
 		}
 
-		setHeight(GridUtils.processHeight(countCallback.count(new Query<>())) + "px");
+		if (dynamicHeight)
+			setHeight(GridUtils.processHeight(countCallback.count(new Query<>())) + "px");
 	}
 
+	public boolean isDynamicHeight() {
+		return dynamicHeight;
+	}
+
+	public void setDynamicHeight(boolean dynamicHeight) {
+		this.dynamicHeight = dynamicHeight;
+	}
 }

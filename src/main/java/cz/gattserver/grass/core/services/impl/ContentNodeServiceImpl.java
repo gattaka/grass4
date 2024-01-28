@@ -225,4 +225,8 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 				null);
 	}
 
+	@Override
+	public List<String> getTagsByContentId(Long id) {
+		return contentNodeRepository.findTagsByContentId(id);
+	}
 }
