@@ -97,9 +97,13 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
 
 	@Override
 	protected void createColumnContent(Div layout) {
+		TabsMenu tabsMenu = new TabsMenu();
+		layout.add(tabsMenu);
+
 		Div wrapperDiv = new Div();
 		wrapperDiv.getStyle().set("padding", "10px").set("background", "white").set("border-radius", "3px")
 				.set("border", "1px solid #d5d5d5");
+		wrapperDiv.addClassNames(UIUtils.TOP_MARGIN_CSS_CLASS);
 		layout.add(wrapperDiv);
 
 		nameLabel = new H2();

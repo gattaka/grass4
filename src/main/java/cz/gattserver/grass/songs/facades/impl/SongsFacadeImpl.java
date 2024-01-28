@@ -1,6 +1,8 @@
 package cz.gattserver.grass.songs.facades.impl;
 
-import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.data.provider.QuerySortOrder;
+import com.vaadin.flow.data.provider.SortDirection;
+import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.dao.ChordsRepository;
 import cz.gattserver.grass.songs.model.dao.SongsRepository;
@@ -64,14 +66,31 @@ public class SongsFacadeImpl implements SongsService {
 		return (int) songsRepository.count(filterTO);
 	}
 
-	@Override
-	public List<SongOverviewTO> getSongs(SongOverviewTO filterTO, int offset, int limit) {
-		return songsRepository.findOrderByName(filterTO, offset, limit);
+	private List<QuerySortOrder> ensureSort(List<QuerySortOrder> sortOrders) {
+		// Řeší problém s nekonzistencí pořadí záznamů v celém selektu a v selektu id -- problém se projevuje, když se
+		// provede sort dle sloupce, který má více shodných hodnot -- tyto "duplicity" pak nemají z pohledu DB zřejmě
+		// dané pořadí a tak mohou být jiné mezi jednotlivými selekty
+		for (QuerySortOrder q : sortOrders)
+			if (q.getSorted().equals("id"))
+				return sortOrders;
+
+		sortOrders.add(new QuerySortOrder("id", SortDirection.DESCENDING));
+		return sortOrders;
 	}
-	
+
 	@Override
-	public List<SongOverviewTO> getSongs(SongOverviewTO filterTO,  List<GridSortOrder<SongOverviewTO>> list) {
-		return songsRepository.find(filterTO,list);
+	public List<SongOverviewTO> getSongs(
+			SongOverviewTO filterTO, int offset, int limit,
+			List<QuerySortOrder> sortOrders) {
+		return songsRepository.findSongs(filterTO, offset, limit,
+				QuerydslUtil.transformOrdering(ensureSort(sortOrders),
+						s -> s));
+	}
+
+	@Override
+	public List<Long> getSongsIds(SongOverviewTO filterTO, List<QuerySortOrder> sortOrders) {
+		return songsRepository.findSongsIds(filterTO, QuerydslUtil.transformOrdering(ensureSort(sortOrders),
+				s -> s));
 	}
 
 	@Override

@@ -5,8 +5,10 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
+import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.songs.model.domain.QSong;
 import cz.gattserver.grass.songs.model.interfaces.QSongOverviewTO;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
 import java.util.List;
 
 @Repository
@@ -41,39 +44,32 @@ public class SongsRepositoryCustomImpl implements SongsRepositoryCustom {
 	}
 
 	@Override
-	public List<SongOverviewTO> findOrderByName(SongOverviewTO filterTO, int offset, int limit) {
-		JPAQuery<Integer> query = new JPAQuery<>(entityManager);
+	public List<SongOverviewTO> findSongs(
+			SongOverviewTO filterTO, int offset, int limit,
+			OrderSpecifier<?>[] order) {
+		JPAQuery<SongOverviewTO> query = new JPAQuery<>(entityManager);
 		QSong s = QSong.song;
 		query.offset(offset).limit(limit);
-		return query.select(new QSongOverviewTO(s.name, s.author, s.year, s.id, s.publicated)).from(s)
-				.where(createPredicate(filterTO)).orderBy(new OrderSpecifier<>(Order.ASC, s.name)).fetch();
+		query = query.select(new QSongOverviewTO(s.name, s.author, s.year, s.id, s.publicated)).from(s)
+				.where(createPredicate(filterTO)).orderBy(order);
+		if (order == null || order.length == 0) {
+			query.orderBy(new OrderSpecifier<>(Order.ASC, s.name));
+		} else {
+			query.orderBy(order);
+		}
+		return query.fetch();
 	}
 
 	@Override
-	public List<SongOverviewTO> find(SongOverviewTO filterTO, List<GridSortOrder<SongOverviewTO>> list) {
-		JPAQuery<SongOverviewTO> query = new JPAQuery<>(entityManager);
+	public List<Long> findSongsIds(SongOverviewTO filterTO, OrderSpecifier<?>[] order) {
+		JPAQuery<Long> query = new JPAQuery<>(entityManager);
 		QSong s = QSong.song;
-		query = query.select(new QSongOverviewTO(s.name, s.author, s.year, s.id, s.publicated)).from(s)
-				.where(createPredicate(filterTO));
-		if (list.isEmpty())
-			query = query.orderBy(new OrderSpecifier<>(Order.ASC, s.name));
-		for (GridSortOrder<SongOverviewTO> o : list) {
-			Order order = o.getDirection() == SortDirection.ASCENDING ? Order.ASC : Order.DESC;
-			if (o.getSorted().getKey() != null) {
-				switch (o.getSorted().getKey()) {
-				case "name":
-					query = query.orderBy(new OrderSpecifier<>(order, s.name));
-					break;
-				case "author":
-					query = query.orderBy(new OrderSpecifier<>(order, s.author));
-					break;
-				case "year":
-					query = query.orderBy(new OrderSpecifier<>(order, s.year));
-					break;
-				}
-			} else {
-				query = query.orderBy(new OrderSpecifier<>(order, s.name));
-			}
+		query = query.select(s.id).from(s)
+				.where(createPredicate(filterTO)).orderBy(order);
+		if (order == null || order.length == 0) {
+			query.orderBy(new OrderSpecifier<>(Order.ASC, s.name));
+		} else {
+			query.orderBy(order);
 		}
 		return query.fetch();
 	}

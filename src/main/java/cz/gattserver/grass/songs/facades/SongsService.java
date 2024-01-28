@@ -1,6 +1,6 @@
 package cz.gattserver.grass.songs.facades;
 
-import com.vaadin.flow.component.grid.GridSortOrder;
+import com.vaadin.flow.data.provider.QuerySortOrder;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
@@ -8,7 +8,7 @@ import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import java.io.InputStream;
 import java.util.List;
 
-public interface SongsService {
+ public interface SongsService {
 
 	/**
 	 * Získá počet písniček v DB
@@ -16,51 +16,44 @@ public interface SongsService {
 	 * @param filterTO
 	 *            filtr
 	 */
-	public int getSongsCount(SongOverviewTO filterTO);
+	 int getSongsCount(SongOverviewTO filterTO);
 
 	/**
 	 * Získá všechny písničky
-	 * 
-	 * @param filterTO
-	 *            filtr
+	 *
+	 * @param filterTO   filtr
+	 * @param sortOrders
 	 */
-	public List<SongOverviewTO> getSongs(SongOverviewTO filterTO, int offset, int limit);
+	 List<SongOverviewTO> getSongs(SongOverviewTO filterTO, int offset, int limit, List<QuerySortOrder> sortOrders);
+
+	 List<Long> getSongsIds(SongOverviewTO filterTO, List<QuerySortOrder> sortOrders);
 	
-	/**
-	 * Získá všechny písničky
-	 * 
-	 * @param filterTO
-	 *            filtr
-	 * @param list 
-	 */
-	public List<SongOverviewTO> getSongs(SongOverviewTO filterTO, List<GridSortOrder<SongOverviewTO>> list);
-
 	/**
 	 * Získá písničku dle id
 	 */
-	public SongTO getSongById(Long id);
+	 SongTO getSongById(Long id);
 
 	/**
 	 * Založí/uprav novou písničku
 	 */
-	public SongTO saveSong(SongTO songDTO);
+	 SongTO saveSong(SongTO songDTO);
 
 	/**
 	 * Převede každý "< br/ >" nebo "< br >" v textu na EOL znak
 	 */
-	public String breaklineToEol(String text);
+	 String breaklineToEol(String text);
 
 	/**
 	 * Převede každý EOL znak v textu na "< br/ >"
 	 */
-	public String eolToBreakline(String text);
+	 String eolToBreakline(String text);
 
 	/**
 	 * Smaže písničku
 	 * 
 	 * @param id
 	 */
-	public void deleteSong(Long id);
+	 void deleteSong(Long id);
 
 	/**
 	 * Provede import písničky ze souboru
@@ -69,7 +62,7 @@ public interface SongsService {
 	 * @param fileName
 	 * @return
 	 */
-	public SongTO importSong(InputStream in, String fileName);
+	 SongTO importSong(InputStream in, String fileName);
 
 	/**
 	 * Uloží akord
@@ -78,14 +71,14 @@ public interface SongsService {
 	 *            akord
 	 * @return
 	 */
-	public ChordTO saveChord(ChordTO to);
+	 ChordTO saveChord(ChordTO to);
 
 	/**
 	 * Smaže akord
 	 * 
 	 * @param id
 	 */
-	public void deleteChord(Long id);
+	 void deleteChord(Long id);
 
 	/**
 	 * Vyhledá akordy dle filtru
@@ -93,7 +86,7 @@ public interface SongsService {
 	 * @param filterTO
 	 * @return
 	 */
-	public List<ChordTO> getChords(ChordTO filterTO);
+	 List<ChordTO> getChords(ChordTO filterTO);
 
 	/**
 	 * Vyhledá akord dle id
@@ -101,7 +94,7 @@ public interface SongsService {
 	 * @param id
 	 * @return
 	 */
-	public ChordTO getChordById(Long id);
+	 ChordTO getChordById(Long id);
 
 	/**
 	 * Vyhledá akord dle názvu
@@ -109,6 +102,6 @@ public interface SongsService {
 	 * @param name
 	 * @return
 	 */
-	public ChordTO getChordByName(String name);
+	 ChordTO getChordByName(String name);
 
 }

@@ -1,6 +1,6 @@
 package cz.gattserver.grass.songs.model.dao;
 
-import com.vaadin.flow.component.grid.GridSortOrder;
+import com.querydsl.core.types.OrderSpecifier;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 
 import java.util.List;
@@ -9,8 +9,8 @@ public interface SongsRepositoryCustom {
 
 	long count(SongOverviewTO filterTO);
 
-	List<SongOverviewTO> findOrderByName(SongOverviewTO filterTO, int offset, int limit);
+	List<SongOverviewTO> findSongs(SongOverviewTO filterTO, int offset, int limit, OrderSpecifier<?>[] order);
 
-	List<SongOverviewTO> find(SongOverviewTO filterTO, List<GridSortOrder<SongOverviewTO>> list);
+	List<Long> findSongsIds(SongOverviewTO filterTO, OrderSpecifier<?>[] order);
 
 }

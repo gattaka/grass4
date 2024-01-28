@@ -4,12 +4,17 @@ import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.AllowInert;
+import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.VaadinSession;
 import cz.gattserver.common.vaadin.LinkButton;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
@@ -36,6 +41,8 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 	private static final long serialVersionUID = -6336711256361320029L;
 
 	public static final String SONG_ID_TAB_VAR = "grass-songs-song-id";
+	public static final String SORT_SESSION_VAR = "grass-songs-sort";
+	public static final String FILTER_SESSION_VAR = "grass-songs-filter";
 
 	@Autowired
 	private SongsService songsService;
@@ -61,7 +68,6 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 
 			UI.getCurrent().access(() -> {
 				setTabVariable(SongsPage.SONG_ID_TAB_VAR, null);
-
 				if (songId != null) {
 					UI.getCurrent().getPage().getHistory().replaceState(null, "songs/" + songId);
 				} else if (parameter != null)
@@ -102,41 +108,63 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 		grid.setMultiSort(false);
 		UIUtils.applyGrassDefaultStyle(grid);
 
-		grid.addColumn(SongOverviewTO::getId).setHeader("Id").setSortable(true).setWidth("50px").setFlexGrow(0);
+		grid.addColumn(SongOverviewTO::getId).setHeader("Id").setSortable(true).setKey("id").setWidth("50px").setFlexGrow(0);
 		Grid.Column<SongOverviewTO> nazevColumn = grid
-				.addColumn(new ComponentRenderer<>(to -> new LinkButton(to.getName(), e -> {
-					songId = to.getId();
-					UI.getCurrent().navigate(SongPage.class, new RouteParam("id", to.getId()));
-				}))).setHeader("Název").setSortable(true);
+				.addColumn(new ComponentRenderer<>(to -> new Anchor("song/" + to.getId(), to.getName()))
+				).setHeader("Název").setSortable(true).setKey("name");
 		Grid.Column<SongOverviewTO> authorColumn = grid.addColumn(SongOverviewTO::getAuthor).setHeader("Autor")
-				.setSortable(true).setWidth("250px").setFlexGrow(0);
+				.setSortable(true).setKey("author").setWidth("250px").setFlexGrow(0);
 		Grid.Column<SongOverviewTO> yearColumn = grid.addColumn(SongOverviewTO::getYear).setHeader("Rok").setWidth(
-						"60px")
-				.setSortable(true).setFlexGrow(0);
+				"60px").setSortable(true).setKey("year").setFlexGrow(0);
 		grid.setWidthFull();
 		grid.setHeight("600px");
+		grid.setDataProvider(DataProvider.fromCallbacks(q -> {
+			indexMap.clear();
+			List<Long> ids = songsService.getSongsIds(filterTO, q.getSortOrders());
+			for (int i = 0; i < ids.size(); i++)
+				indexMap.put(ids.get(i), i);
+
+			VaadinSession.getCurrent().setAttribute(SORT_SESSION_VAR, grid.getSortOrder());
+			VaadinSession.getCurrent().setAttribute(FILTER_SESSION_VAR, filterTO);
+
+			return songsService.getSongs(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
+		}, q -> songsService.getSongsCount(filterTO)));
 		layout.add(grid);
+
+		Object order = VaadinSession.getCurrent().getAttribute(SORT_SESSION_VAR);
+		if (order != null)
+			grid.sort((List<GridSortOrder<SongOverviewTO>>) order);
 
 		HeaderRow filteringHeader = grid.appendHeaderRow();
 
 		// Název
-		UIUtils.addHeaderTextField(filteringHeader.getCell(nazevColumn), e -> {
+		TextField nameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nazevColumn), e -> {
 			filterTO.setName(e.getValue());
 			populate();
 		});
 
 		// Autor
-		UIUtils.addHeaderTextField(filteringHeader.getCell(authorColumn), e -> {
+		TextField authorField = UIUtils.addHeaderTextField(filteringHeader.getCell(authorColumn), e -> {
 			filterTO.setAuthor(e.getValue());
 			populate();
 		});
 
 		// Rok
-		UIUtils.addHeaderTextField(filteringHeader.getCell(yearColumn), e -> {
+		TextField yearField = UIUtils.addHeaderTextField(filteringHeader.getCell(yearColumn), e -> {
 			filterTO.setYear(StringUtils.isBlank(e.getValue()) ? null : Integer.valueOf(e.getValue()));
 			populate();
 		});
 
+		Object filterAttr = VaadinSession.getCurrent().getAttribute(FILTER_SESSION_VAR);
+		if (filterAttr != null) {
+			filterTO = (SongOverviewTO) filterAttr;
+			if (filterTO.getName() != null)
+				nameField.setValue(filterTO.getName());
+			if (filterTO.getAuthor() != null)
+				authorField.setValue(filterTO.getAuthor());
+			if (filterTO.getYear() != null)
+				yearField.setValue(String.valueOf(filterTO.getYear()));
+		}
 		populate();
 
 		GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
@@ -189,9 +217,6 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 	}
 
 	public void populate() {
-		List<SongOverviewTO> songs = songsService.getSongs(filterTO, grid.getSortOrder());
-		for (int i = 0; i < songs.size(); i++)
-			indexMap.put(songs.get(i).getId(), i);
-		grid.setItems(songs);
+		grid.getDataProvider().refreshAll();
 	}
 }
