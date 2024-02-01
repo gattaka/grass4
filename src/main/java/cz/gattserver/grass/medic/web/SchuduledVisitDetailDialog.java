@@ -1,6 +1,7 @@
 package cz.gattserver.grass.medic.web;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -28,9 +29,10 @@ public class SchuduledVisitDetailDialog extends Dialog {
 		layout.setPadding(false);
 		add(layout);
 
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("CS"));
 		layout.add(new Strong("Datum"));
 		layout.add(scheduledVisitDTO.getDate().atTime(scheduledVisitDTO.getTime())
-				.format(DateTimeFormatter.ofPattern("d. MMMM yyyy, H:mm")));
+				.format(formatter));
 
 		layout.add(new Strong("Účel"));
 		layout.add(scheduledVisitDTO.getPurpose());

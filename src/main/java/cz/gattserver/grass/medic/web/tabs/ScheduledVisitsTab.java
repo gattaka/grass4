@@ -46,7 +46,7 @@ public class ScheduledVisitsTab extends Div {
 	private Grid<ScheduledVisitTO> plannedGrid = new Grid<>();
 
 	public ScheduledVisitsTab() {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d. MMMM yyyy");
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("CS"));
 		Div div = new HtmlDiv("<strong>Dnes je: </strong>" + LocalDate.now().format(formatter));
 		div.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		add(div);
@@ -115,6 +115,7 @@ public class ScheduledVisitsTab extends Div {
 
 		prepareGrid(plannedGrid, true);
 		add(plannedGrid);
+		plannedGrid.addItemDoubleClickListener(e -> new SchuduledVisitDetailDialog(e.getItem().getId()).open());
 
 		ButtonLayout buttonLayout = new ButtonLayout();
 		add(buttonLayout);
@@ -179,7 +180,7 @@ public class ScheduledVisitsTab extends Div {
 		else
 			grid.addColumn(new LocalDateTimeRenderer<>(to -> to.getDate().atStartOfDay(),
 							() -> DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("CS")))).setKey(
-									"date")
+							"date")
 					.setHeader("Datum").setSortable(false).setWidth("150px").setFlexGrow(0);
 		grid.addColumn(new TextRenderer<>(
 						to -> to.getInstitution() == null ? "" : to.getInstitution().getName())).setKey("institution")
@@ -201,6 +202,7 @@ public class ScheduledVisitsTab extends Div {
 
 		prepareGrid(toBePlannedGrid, false);
 		add(toBePlannedGrid);
+		toBePlannedGrid.addItemDoubleClickListener(e -> new SchuduledVisitDetailDialog(e.getItem().getId()).open());
 
 		ButtonLayout buttonLayout = new ButtonLayout();
 		add(buttonLayout);
@@ -214,17 +216,17 @@ public class ScheduledVisitsTab extends Div {
 		/**
 		 * Detail
 		 */
-		final Button detailBtn = new DetailGridButton<ScheduledVisitTO>(
+		final Button detailBtn = new DetailGridButton<>(
 				item -> new SchuduledVisitDetailDialog(item.getId()).open(), toBePlannedGrid);
 		buttonLayout.add(detailBtn);
 
 		/**
 		 * Objednat návštěvy
 		 */
-		final Button planBtn = new GridButton<ScheduledVisitTO>("Objednáno", toBePlannedGrid);
+		final Button planBtn = new GridButton<>("Objednáno", toBePlannedGrid);
 		planBtn.setIcon(new Image(ImageIcon.CALENDAR_16_ICON.createResource(), "Objednáno"));
 		planBtn.addClickListener(event -> {
-			final ScheduledVisitTO toBePlannedVisitDTO = (ScheduledVisitTO) toBePlannedGrid.getSelectedItems()
+			final ScheduledVisitTO toBePlannedVisitDTO = toBePlannedGrid.getSelectedItems()
 					.iterator().next();
 
 			ScheduledVisitTO newDto = getMedicFacade().createPlannedScheduledVisitFromToBePlanned(toBePlannedVisitDTO);
@@ -258,14 +260,14 @@ public class ScheduledVisitsTab extends Div {
 		/**
 		 * Úprava naplánování
 		 */
-		final Button modifyBtn = new ModifyGridButton<ScheduledVisitTO>(to -> openCreateWindow(false, to),
+		final Button modifyBtn = new ModifyGridButton<>(to -> openCreateWindow(false, to),
 				toBePlannedGrid);
 		buttonLayout.add(modifyBtn);
 
 		/**
 		 * Smazání naplánování
 		 */
-		final Button deleteBtn = new DeleteGridButton<ScheduledVisitTO>("Smazat",
+		final Button deleteBtn = new DeleteGridButton<>("Smazat",
 				set -> openDeleteWindow(set.iterator().next(), false),
 				set -> "Opravdu smazat '" + set.iterator().next().getPurpose() + "' ?", toBePlannedGrid);
 		buttonLayout.add(deleteBtn);
