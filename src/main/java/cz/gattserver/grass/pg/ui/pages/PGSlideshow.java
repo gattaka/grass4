@@ -168,7 +168,7 @@ public abstract class PGSlideshow extends Div {
 			close();
 		});
 		LinkButton detailButton = new LinkButton("Detail",
-				e -> UI.getCurrent().getPage().open(PGUtils.createDetailURL(currentItemTO, photogallery)));
+				e -> UI.getCurrent().getPage().open(PGUtils.createItemURL(currentItemTO.getFile().getFileName().toString(), photogallery)));
 		Div btnDiv = new Div(detailButton, closeBtn);
 		btnDiv.setId("pg-slideshow-item-close-div");
 		add(btnDiv);
