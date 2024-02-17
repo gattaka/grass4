@@ -2,6 +2,7 @@ package cz.gattserver.grass.pg.ui.pages;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
@@ -316,6 +317,10 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 
 	private void refreshGrid() {
 		galleryLayout.removeAll();
+		if (pageCount == 0) {
+			galleryLayout.add(new Text("Galerie neobsahuje žádné položky"));
+			return;
+		}
 		if (currentPage < 0)
 			currentPage = 0;
 		if (currentPage >= pageCount)

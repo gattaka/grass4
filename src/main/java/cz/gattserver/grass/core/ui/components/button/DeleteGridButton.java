@@ -16,11 +16,11 @@ public class DeleteGridButton<T> extends GridButton<T> {
 	private static final String DEFAULT_CAPTION = "Smazat";
 
 	public interface ConfirmAction<T> {
-		public void onConfirm(Set<T> items);
+		void onConfirm(Set<T> items);
 	}
 
 	public interface ConfirmMsgFactory<T> {
-		public String create(Set<T> items);
+		String create(Set<T> items);
 	}
 
 	public DeleteGridButton(ConfirmAction<T> confirmAction, Grid<T> grid) {

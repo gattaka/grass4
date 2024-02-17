@@ -27,10 +27,12 @@ import cz.gattserver.common.vaadin.ComponentFactory;
 import cz.gattserver.common.vaadin.LinkButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
+import cz.gattserver.grass.campgames.interfaces.CampgameOverviewTO;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessStartEvent;
@@ -221,22 +223,10 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		UIUtils.applyGrassDefaultStyle(grid);
 		grid.setItems(items);
 		grid.setColumns("name");
+		grid.setSelectionMode(Grid.SelectionMode.MULTI);
 		grid.getColumnByKey("name").setHeader("Název");
 		grid.setWidthFull();
 		grid.setHeight("400px");
-
-		grid.addColumn(
-				new ComponentRenderer<LinkButton, PhotogalleryViewItemTO>(itemTO -> new LinkButton("Smazat", be -> {
-					new ConfirmDialog("Opravdu smazat?", e -> {
-						try {
-							pgService.deleteFile(itemTO, galleryDir);
-							items.remove(itemTO);
-						} catch (Exception ex) {
-							UIUtils.showWarning("Nezdařilo se smazat některé soubory");
-						}
-						grid.getDataProvider().refreshAll();
-					}).open();
-				}))).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
 		grid.addColumn(new ComponentRenderer<>(itemTO -> {
 			String file = itemTO.getName();
@@ -253,6 +243,28 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		})).setHeader("Zobrazit").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
 		gridLayout.add(grid);
+
+		ButtonLayout buttonLayout = new ButtonLayout();
+		editorLayout.add(buttonLayout);
+
+		DeleteGridButton<PhotogalleryViewItemTO> deleteBtn = new DeleteGridButton<>("Smazat",
+				selectedItems -> {
+					boolean failures = false;
+					for (PhotogalleryViewItemTO itemTO : selectedItems) {
+						try {
+							pgService.deleteFile(itemTO, galleryDir);
+							items.remove(itemTO);
+						} catch (Exception ex) {
+							failures = true;
+						}
+					}
+					if (failures)
+						UIUtils.showWarning("Nezdařilo se smazat některé soubory");
+					grid.getDataProvider().refreshAll();
+				},
+				grid);
+		deleteBtn.setEnabled(false);
+		buttonLayout.add(deleteBtn);
 
 		PGMultiUpload upload = new PGMultiUpload(galleryDir) {
 			private static final long serialVersionUID = 8317049226635860025L;
