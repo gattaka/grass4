@@ -649,6 +649,7 @@ public class HWServiceImpl implements HWService {
 			item = hwItemRepository.findById(hwItemDTO.getId()).orElse(null);
 		item.setName(hwItemDTO.getName());
 		item.setPurchaseDate(DateUtils.toDate(hwItemDTO.getPurchaseDate()));
+		logger.info("Price: " + hwItemDTO.getPrice());
 		item.setPrice(hwItemDTO.getPrice());
 		item.setState(hwItemDTO.getState());
 		item.setDescription(hwItemDTO.getDescription());
@@ -662,7 +663,7 @@ public class HWServiceImpl implements HWService {
 		}
 		item.setWarrantyYears(hwItemDTO.getWarrantyYears());
 		if (hwItemDTO.getTypes() != null) {
-			item.setTypes(new HashSet<HWItemType>());
+			item.setTypes(new HashSet<>());
 			for (String typeName : hwItemDTO.getTypes()) {
 				HWItemType type = hwItemTypeRepository.findByName(typeName);
 				if (type == null) {

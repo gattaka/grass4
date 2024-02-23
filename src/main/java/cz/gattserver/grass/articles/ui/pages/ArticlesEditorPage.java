@@ -21,6 +21,7 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.shared.Registration;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
@@ -40,8 +41,10 @@ import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.ContentTagService;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
@@ -119,6 +122,10 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
 	@Override
 	public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
+		if (!SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
+				.contains(CoreRole.AUTHOR))
+			throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
+
 		String[] chunks = parameter.split("/");
 		if (chunks.length > 0)
 			operationToken = chunks[0];

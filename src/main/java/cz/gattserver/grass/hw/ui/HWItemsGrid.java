@@ -176,11 +176,11 @@ public class HWItemsGrid extends Div {
 		Column<HWItemOverviewTO> usedInColumn = grid.addColumn(HWItemOverviewTO::getUsedInName).setKey(USED_IN_BIND)
 				.setHeader("Je součástí").setWidth("120px").setFlexGrow(0).setSortable(true);
 		Column<HWItemOverviewTO> supervizedColumn = grid.addColumn(HWItemOverviewTO::getSupervizedFor)
-				.setKey(SUPERVIZED_FOR_BIND).setHeader("Spravováno pro").setWidth("110px").setFlexGrow(0)
+				.setKey(SUPERVIZED_FOR_BIND).setHeader("Spravováno pro").setWidth("120px").setFlexGrow(0)
 				.setSortable(true);
 		if (securityFacade.getCurrentUser().isAdmin()) {
 			grid.addColumn(hw -> FieldUtils.formatMoney(hw.getPrice())).setHeader("Cena").setKey(PRICE_BIND)
-					.setTextAlign(ColumnTextAlign.END).setWidth("90px").setFlexGrow(0).setSortable(true);
+					.setTextAlign(ColumnTextAlign.END).setWidth("100px").setFlexGrow(0).setSortable(true);
 		}
 		grid.addColumn(new LocalDateRenderer<>(HWItemOverviewTO::getPurchaseDate, "d.M.yyyy"))
 				.setHeader("Získáno").setKey(PURCHASE_DATE_BIND).setTextAlign(ColumnTextAlign.END).setWidth("80px")

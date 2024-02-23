@@ -10,6 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.textfield.*;
+import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
@@ -24,9 +26,6 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
 
@@ -92,20 +91,12 @@ public class HWItemEditDialog extends EditWebDialog {
 		binder.bind(purchaseDateField, HWItemTO::getPurchaseDate, HWItemTO::setPurchaseDate);
 		baseLayout.add(purchaseDateField);
 
-		TextField priceField = new TextField("Cena");
+		BigDecimalField priceField = new BigDecimalField("Cena");
 		priceField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
 		priceField.setWidth("100px");
-		binder.forField(priceField).withNullRepresentation("").withConverter(toModel -> {
-			try {
-				if (StringUtils.isBlank(toModel))
-					return null;
-				DecimalFormat df = new DecimalFormat();
-				df.setParseBigDecimal(true);
-				return (BigDecimal) df.parse(toModel);
-			} catch (ParseException e1) {
-				throw new IllegalArgumentException();
-			}
-		}, FieldUtils::formatMoney, "Cena musí být číslo").bind("price");
+		priceField.setLocale(new Locale("cs", "CZ"));
+		binder.forField(priceField).withNullRepresentation(BigDecimal.ZERO).bind(HWItemTO::getPrice,
+				HWItemTO::setPrice);
 		baseLayout.add(priceField);
 
 		ComboBox<HWItemState> stateComboBox = new ComboBox<>("Stav", Arrays.asList(HWItemState.values()));
@@ -160,7 +151,12 @@ public class HWItemEditDialog extends EditWebDialog {
 		SaveCloseLayout buttons = new SaveCloseLayout(e -> {
 			try {
 				HWItemTO writeTO = originalTO == null ? new HWItemTO() : originalTO;
-				binder.writeBean(writeTO);
+				try {
+					binder.writeBean(writeTO);
+				} catch (ValidationException ve) {
+					UIUtils.showError("V údajích jsou chyby");
+					return;
+				}
 				writeTO.setUsedIn(binder.getBean().getUsedIn());
 				writeTO.setUsedInName(binder.getBean().getUsedInName());
 				writeTO.setTypes(keywords.getValues());

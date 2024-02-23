@@ -1,12 +1,17 @@
 package cz.gattserver.grass.hw.ui.dialogs;
 
 import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.grass.campgames.CampgamesRole;
+import cz.gattserver.grass.core.exception.GrassPageException;
+import cz.gattserver.grass.core.security.CoreRole;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
@@ -48,6 +53,10 @@ public class HWItemDetailsDialog extends Dialog {
 		this.itemsTab = itemsTab;
 		this.hwItemId = hwItemId;
 		this.hwItem = getHWService().getHWItem(hwItemId);
+
+		if (!hwItem.getPublicItem() && !SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
+				.contains(CoreRole.ADMIN))
+			throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
 
 		setWidth("1120px");
 
