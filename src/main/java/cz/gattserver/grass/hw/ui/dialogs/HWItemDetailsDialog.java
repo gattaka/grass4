@@ -54,7 +54,7 @@ public class HWItemDetailsDialog extends Dialog {
 		this.hwItemId = hwItemId;
 		this.hwItem = getHWService().getHWItem(hwItemId);
 
-		if (!hwItem.getPublicItem() && !SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
+		if (Boolean.TRUE != hwItem.getPublicItem() && !SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
 				.contains(CoreRole.ADMIN))
 			throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
 
