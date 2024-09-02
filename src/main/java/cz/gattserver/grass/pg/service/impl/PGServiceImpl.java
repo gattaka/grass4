@@ -702,6 +702,15 @@ public class PGServiceImpl implements PGService {
 		return comparator;
 	}
 
+	private boolean filterOtherFiles(Path file) {
+		return filterOtherFiles(file.getFileName().toString());
+	}
+
+	private boolean filterOtherFiles(String fileName) {
+		String f = fileName.toLowerCase();
+		return f.endsWith(".xcf") || f.endsWith(".otf") || f.endsWith(".ttf");
+	}
+
 	@Override
 	public List<PhotogalleryViewItemTO> getViewItems(String galleryDir, int skip, int limit) throws IOException {
 		Path galleryPath = getGalleryPath(galleryDir);
@@ -712,9 +721,9 @@ public class PGServiceImpl implements PGService {
 
 		try (Stream<Path> miniaturesStream = Files.list(miniaturesDir).sorted(getComparator());
 			 Stream<Path> previewsStream = Files.list(previewDir).sorted(getComparator());
-			 Stream<Path> xcfStream =
-					 Files.list(galleryPath).filter(f -> f.getFileName().toString().toLowerCase().endsWith(".xcf"))) {
-			Stream.concat(miniaturesStream, Stream.concat(previewsStream, xcfStream)).skip(skip).limit(limit).forEach(file -> {
+			 Stream<Path> otherStream =
+					 Files.list(galleryPath).filter(this::filterOtherFiles)) {
+			Stream.concat(miniaturesStream, Stream.concat(previewsStream, otherStream)).skip(skip).limit(limit).forEach(file -> {
 				PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
 				String fileName = file.getFileName().toString();
 				if (file.startsWith(previewDir)) {
@@ -749,9 +758,9 @@ public class PGServiceImpl implements PGService {
 		List<PhotogalleryViewItemTO> list = new ArrayList<>();
 		try (Stream<Path> miniaturesStream = Files.list(miniaturesDir).sorted(getComparator());
 			 Stream<Path> previewsStream = Files.list(previewDir).sorted(getComparator());
-			 Stream<Path> xcfStream =
-					 Files.list(galleryPath).filter(f -> f.getFileName().toString().toLowerCase().endsWith(".xcf"))) {
-			Stream.concat(miniaturesStream, Stream.concat(previewsStream, xcfStream)).skip(index).limit(1).forEach(file -> {
+			 Stream<Path> otherStream =
+					 Files.list(galleryPath).filter(this::filterOtherFiles)) {
+			Stream.concat(miniaturesStream, Stream.concat(previewsStream, otherStream)).skip(index).limit(1).forEach(file -> {
 				PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
 				String fileName = file.getFileName().toString();
 				if (file.startsWith(previewDir)) {

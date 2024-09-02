@@ -216,6 +216,8 @@ public abstract class PGSlideshow extends Div {
 		Image embedded;
 		if (itemTO.getName().toLowerCase().endsWith(".xcf")) {
 			embedded = new Image("img/gimp.png", "XCF file");
+		} else if (itemTO.getName().toLowerCase().endsWith(".otf") || itemTO.getName().toLowerCase().endsWith(".ttf")) {
+			embedded = new Image("img/font.png", "Font file");
 		} else {
 			embedded = new Image(new StreamResource(itemTO.getName(), () -> {
 				try {

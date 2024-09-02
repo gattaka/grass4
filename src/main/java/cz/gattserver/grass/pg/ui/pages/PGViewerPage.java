@@ -345,6 +345,8 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 					embedded = new Image("img/gimp.png", "XCF file");
 					embedded.getElement().getStyle().setMaxHeight("150px");
 					embedded.getElement().getStyle().setMaxWidth("150px");
+				} else if (fileName.toLowerCase().endsWith(".otf") || fileName.toLowerCase().endsWith(".ttf")) {
+					embedded = new Image("img/font.png", "Font file");
 				} else {
 					embedded = new Image(new StreamResource(fileName, () -> {
 						try {
