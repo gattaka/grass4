@@ -439,8 +439,9 @@ public class PGServiceImpl implements PGService {
 	}
 
 	@Override
-	public List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(Long userId, String filter,
-																		Pageable pageable) {
+	public List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(
+			Long userId, String filter,
+			Pageable pageable) {
 		filter = QuerydslUtil.transformSimpleLikeFilter(filter);
 		return photogalleriesMapper.mapPhotogalleryForRESTOverviewCollection(
 				userId != null ? photogalleryRepository.findByUserAccess(userId, filter, pageable)
@@ -710,8 +711,10 @@ public class PGServiceImpl implements PGService {
 		List<PhotogalleryViewItemTO> list = new ArrayList<>();
 
 		try (Stream<Path> miniaturesStream = Files.list(miniaturesDir).sorted(getComparator());
-			 Stream<Path> previewsStream = Files.list(previewDir).sorted(getComparator());) {
-			Stream.concat(miniaturesStream, previewsStream).skip(skip).limit(limit).forEach(file -> {
+			 Stream<Path> previewsStream = Files.list(previewDir).sorted(getComparator());
+			 Stream<Path> xcfStream =
+					 Files.list(galleryPath).filter(f -> f.getFileName().toString().toLowerCase().endsWith(".xcf"))) {
+			Stream.concat(miniaturesStream, Stream.concat(previewsStream, xcfStream)).skip(skip).limit(limit).forEach(file -> {
 				PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
 				String fileName = file.getFileName().toString();
 				if (file.startsWith(previewDir)) {
@@ -745,8 +748,10 @@ public class PGServiceImpl implements PGService {
 		Path slideshowDir = galleryPath.resolve(configuration.getSlideshowDir());
 		List<PhotogalleryViewItemTO> list = new ArrayList<>();
 		try (Stream<Path> miniaturesStream = Files.list(miniaturesDir).sorted(getComparator());
-			 Stream<Path> previewsStream = Files.list(previewDir).sorted(getComparator());) {
-			Stream.concat(miniaturesStream, previewsStream).skip(index).limit(1).forEach(file -> {
+			 Stream<Path> previewsStream = Files.list(previewDir).sorted(getComparator());
+			 Stream<Path> xcfStream =
+					 Files.list(galleryPath).filter(f -> f.getFileName().toString().toLowerCase().endsWith(".xcf"))) {
+			Stream.concat(miniaturesStream, Stream.concat(previewsStream, xcfStream)).skip(index).limit(1).forEach(file -> {
 				PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
 				String fileName = file.getFileName().toString();
 				if (file.startsWith(previewDir)) {

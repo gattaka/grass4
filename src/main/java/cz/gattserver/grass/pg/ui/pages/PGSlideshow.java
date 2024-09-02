@@ -213,14 +213,20 @@ public abstract class PGSlideshow extends Div {
 	}
 
 	private Component createImageSlide(PhotogalleryViewItemTO itemTO) {
-		Image embedded = new Image(new StreamResource(itemTO.getName(), () -> {
-			try {
-				return Files.newInputStream(itemTO.getFile());
-			} catch (IOException e) {
-				e.printStackTrace();
-				return null;
-			}
-		}), itemTO.getName());
+		Image embedded;
+		if (itemTO.getName().toLowerCase().endsWith(".xcf")) {
+			embedded = new Image("img/gimp.png", "XCF file");
+		} else {
+			embedded = new Image(new StreamResource(itemTO.getName(), () -> {
+				try {
+					return Files.newInputStream(itemTO.getFile());
+				} catch (IOException e) {
+					e.printStackTrace();
+					return null;
+				}
+			}), itemTO.getName());
+		}
+
 		embedded.addClickListener(e -> {
 			preventClose();
 			UI.getCurrent().getPage().open(PGUtils.createDetailURL(currentItemTO, photogallery));

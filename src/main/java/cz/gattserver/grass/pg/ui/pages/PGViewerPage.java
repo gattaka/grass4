@@ -339,16 +339,23 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 				// jako PNG soubor, je potřeba předat, že jde už o PNG soubor (nikoliv ten původní SVG) jinak se
 				// browser bude snažit číst to PNG jako SVG a nic se nezobrazí
 				String fileName = item.getFile().getFileName().toString();
-				Image embedded = new Image(new StreamResource(fileName, () -> {
-					try {
-						return Files.newInputStream(item.getFile());
-					} catch (IOException e) {
-						e.printStackTrace();
-						return null;
-					}
-				}), fileName);
-				itemLayout.add(embedded);
 
+				Image embedded;
+				if (fileName.toLowerCase().endsWith(".xcf")) {
+					embedded = new Image("img/gimp.png", "XCF file");
+					embedded.getElement().getStyle().setMaxHeight("150px");
+					embedded.getElement().getStyle().setMaxWidth("150px");
+				} else {
+					embedded = new Image(new StreamResource(fileName, () -> {
+						try {
+							return Files.newInputStream(item.getFile());
+						} catch (IOException e) {
+							e.printStackTrace();
+							return null;
+						}
+					}), fileName);
+				}
+				itemLayout.add(embedded);
 				itemLayout.add(new Breakline());
 
 				String str = item.getName();

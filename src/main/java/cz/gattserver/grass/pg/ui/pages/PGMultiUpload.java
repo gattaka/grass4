@@ -35,7 +35,7 @@ public class PGMultiUpload extends Upload {
 	public PGMultiUpload(String galleryDir) {
 		existingFiles = new HashSet<>();
 		allUploadsProcessed = false;
-		setAcceptedFileTypes("image/*", "video/*");
+		setAcceptedFileTypes("image/*", "video/*", "font/*", ".xcf");
 		buffer = new GrassMultiFileBuffer();
 		setReceiver(buffer);
 		SpringContextHelper.inject(this);
