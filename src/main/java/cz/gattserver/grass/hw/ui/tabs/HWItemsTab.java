@@ -1,6 +1,7 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.router.QueryParameters;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -9,7 +10,11 @@ import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.grass.hw.interfaces.HWFilterTO;
+import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.pages.HWPage;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
@@ -22,6 +27,9 @@ import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWItemsGrid;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemEditDialog;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class HWItemsTab extends Div {
 
@@ -113,7 +121,8 @@ public class HWItemsTab extends Div {
 	}
 
 	public void navigateToDetail(Long id) {
-		UI.getCurrent().navigate(HWPage.class, id);
+		Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(itemsGrid.getFilterTO());
+		UI.getCurrent().navigate(HWPage.class, id, QueryParameters.simple(filterQuery));
 	}
 
 	public void openDetailWindow(Long id) {
@@ -136,5 +145,9 @@ public class HWItemsTab extends Div {
 
 	public void select(Long idParameter) {
 		itemsGrid.selectAndScroll(idParameter);
+	}
+
+	public void search(HWFilterTO filterTO) {
+		itemsGrid.setFilterTO(filterTO);
 	}
 }

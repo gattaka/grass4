@@ -9,8 +9,15 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.hw.HWSection;
+import cz.gattserver.grass.hw.interfaces.HWFilterTO;
+import cz.gattserver.grass.hw.interfaces.HWItemState;
+import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
 import cz.gattserver.grass.hw.ui.tabs.HWTypesTab;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.util.Strings;
+
+import java.util.*;
 
 @Route("hw")
 @PageTitle("Evidence HW")
@@ -41,6 +48,15 @@ public class HWPage extends OneColumnPage implements HasUrlParameter<Long> {
 			layout.removeAll();
 			createContent();
 		}
+
+		Location location = event.getLocation();
+		QueryParameters queryParameters = location.getQueryParameters();
+
+		Map<String, List<String>> parametersMap = queryParameters
+				.getParameters();
+		HWFilterTO filterTO = HWUIUtils.processToQueryFilter(parametersMap);
+
+		itemsTab.search(filterTO);
 
 		if (idParameter != null) {
 			itemsTab.select(idParameter);

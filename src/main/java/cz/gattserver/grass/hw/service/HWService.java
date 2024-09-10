@@ -91,8 +91,7 @@ public interface HWService {
 	/**
 	 * Uloží nebo aktualizuje typ hw položky
 	 *
-	 * @param hwItemTypeTO
-	 *            to položky
+	 * @param hwItemTypeTO to položky
 	 * @return id uložené položky
 	 */
 	Long saveHWType(HWItemTypeTO hwItemTypeTO);
@@ -101,7 +100,7 @@ public interface HWService {
 
 	HWItemTypeTO getHWItemType(Long fixTypeId);
 
-	Set<HWItemTypeTO> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
+	List<HWItemTypeTO> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
 
 	int countHWItemTypes(HWItemTypeTO filter);
 
@@ -114,8 +113,7 @@ public interface HWService {
 	/**
 	 * Vytvoří kopii základu položky (mimo záznamů a součástí)
 	 *
-	 * @param itemId
-	 *            id předmětu, který má být vyloučen z přehledu
+	 * @param itemId id předmětu, který má být vyloučen z přehledu
 	 */
 	Long copyHWItem(Long itemId);
 
@@ -140,8 +138,7 @@ public interface HWService {
 	/**
 	 * Získá všechny předměty, kromě předmětu jehož id je předáno jako parametr
 	 *
-	 * @param itemId
-	 *            id předmětu, který má být vyloučen z přehledu
+	 * @param itemId id předmětu, který má být vyloučen z přehledu
 	 * @return HW předměty
 	 */
 	List<HWItemOverviewTO> getHWItemsAvailableForPart(Long itemId);

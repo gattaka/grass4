@@ -3,17 +3,15 @@ package cz.gattserver.grass.hw.ui;
 import java.io.InputStream;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import com.querydsl.core.types.OrderSpecifier;
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.internal.AllowInert;
+import com.vaadin.flow.component.textfield.TextField;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -70,6 +68,11 @@ public class HWItemsGrid extends Div {
 	private Map<Long, Integer> indexMap = new HashMap<>();
 	private HWFilterTO filterTO;
 
+	private TextField nameField;
+	private ComboBox<HWItemState> stavCombo;
+	private TextField soucastField;
+	private TextField spravovanField;
+
 	public HWItemsGrid(Consumer<HWItemOverviewTO> onSelect) {
 		SpringContextHelper.inject(this);
 
@@ -106,11 +109,9 @@ public class HWItemsGrid extends Div {
 		add(callbackDiv);
 
 		filterTO = new HWFilterTO();
-		if (!securityFacade.getCurrentUser().isAdmin())
-			filterTO.setPublicItem(true);
 
+		// Filtr na typy HW není veřejný, aby nenapovídal, co vše host nevidí
 		if (securityFacade.getCurrentUser().isAdmin()) {
-			// Filtr na typy HW
 			for (HWItemTypeTO type : hwService.getAllHWTypes())
 				tokenMap.put(type.getName(), type);
 
@@ -189,25 +190,26 @@ public class HWItemsGrid extends Div {
 		HeaderRow filteringHeader = grid.appendHeaderRow();
 
 		// Název
-		UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
+		nameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
 			filterTO.setName(e.getValue());
 			populate();
 		});
 
 		// Stav
-		UIUtils.addHeaderComboBox(filteringHeader.getCell(stateColumn), HWItemState.class, HWItemState::getName, e -> {
-			filterTO.setState(e.getValue());
-			populate();
-		});
+		stavCombo = UIUtils.addHeaderComboBox(filteringHeader.getCell(stateColumn),
+				HWItemState.class, HWItemState::getName, e -> {
+					filterTO.setState(e.getValue());
+					populate();
+				});
 
 		// Je součástí
-		UIUtils.addHeaderTextField(filteringHeader.getCell(usedInColumn), e -> {
+		soucastField = UIUtils.addHeaderTextField(filteringHeader.getCell(usedInColumn), e -> {
 			filterTO.setUsedIn(e.getValue());
 			populate();
 		});
 
 		// Spravován pro
-		UIUtils.addHeaderTextField(filteringHeader.getCell(supervizedColumn), e -> {
+		spravovanField = UIUtils.addHeaderTextField(filteringHeader.getCell(supervizedColumn), e -> {
 			filterTO.setSupervizedFor(e.getValue());
 			populate();
 		});
@@ -219,8 +221,12 @@ public class HWItemsGrid extends Div {
 	}
 
 	public void populate() {
+		if (!securityFacade.getCurrentUser().isAdmin())
+			filterTO.setPublicItem(true);
+
 		if (hwTypesFilter != null)
 			filterTO.setTypes(hwTypesFilter.getValues());
+
 		if (grid.getDataProvider() == null || !(grid.getDataProvider() instanceof CallbackDataProvider)) {
 			FetchCallback<HWItemOverviewTO, HWItemOverviewTO> fetchCallback = q -> {
 				OrderSpecifier<?>[] order = QuerydslUtil.transformOrdering(q.getSortOrders(),
@@ -252,11 +258,13 @@ public class HWItemsGrid extends Div {
 		HWItemOverviewTO to = new HWItemOverviewTO();
 		to.setId(id);
 		grid.select(to);
-		grid.getElement().callJsFunction("$server.scrollToId",to.getId().toString());
+		grid.getElement().callJsFunction("$server.scrollToId", to.getId().toString());
 	}
 
 	private void onGridScrollToId(Long id) {
-		grid.scrollToIndex(indexMap.get(id));
+		Integer index = indexMap.get(id);
+		if (index != null)
+			grid.scrollToIndex(index);
 	}
 
 	public Grid<HWItemOverviewTO> getGrid() {
@@ -265,5 +273,19 @@ public class HWItemsGrid extends Div {
 
 	public HWFilterTO getFilterTO() {
 		return filterTO;
+	}
+
+	public void setFilterTO(HWFilterTO filterTO) {
+		if (filterTO.getName() != null)
+			nameField.setValue(filterTO.getName());
+		if (filterTO.getState() != null)
+			stavCombo.setValue(filterTO.getState());
+		if (filterTO.getUsedIn() != null)
+			soucastField.setValue(filterTO.getUsedIn());
+		if (filterTO.getSupervizedFor() != null)
+			spravovanField.setValue(filterTO.getSupervizedFor());
+
+		if (hwTypesFilter != null && filterTO.getTypes() != null)
+			hwTypesFilter.setValues(filterTO.getTypes());
 	}
 }

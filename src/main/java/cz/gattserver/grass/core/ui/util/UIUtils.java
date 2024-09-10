@@ -117,6 +117,7 @@ public class UIUtils {
 		TextField field = UIUtils.asSmall(new TextField());
 		field.setWidthFull();
 		field.addValueChangeListener(listener);
+		field.setClearButtonVisible(true);
 		field.setValueChangeMode(ValueChangeMode.EAGER);
 		cell.setComponent(field);
 		return field;

@@ -586,8 +586,8 @@ public class HWServiceImpl implements HWService {
 	}
 
 	@Override
-	public Set<HWItemTypeTO> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
-		return hwMapper.mapHWItemTypes(hwItemTypeRepository.getHWItemTypes(filter, offset, limit, order));
+	public List<HWItemTypeTO> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
+		return hwItemTypeRepository.getHWItemTypes(filter, offset, limit, order);
 	}
 
 	@Override

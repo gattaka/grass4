@@ -9,7 +9,7 @@ import cz.gattserver.grass.hw.model.domain.HWItemType;
 
 public interface HWItemTypeRepositoryCustom {
 
-	List<HWItemType> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
+	List<HWItemTypeTO> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
 
 	long countHWItemTypes(HWItemTypeTO filter);
 }

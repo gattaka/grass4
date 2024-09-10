@@ -1,7 +1,11 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
@@ -15,6 +19,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 
+import com.vaadin.flow.router.QueryParameters;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.LinkButton;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -24,15 +29,19 @@ import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
+import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemTypeEditDialog;
+import cz.gattserver.grass.hw.ui.pages.HWPage;
 
 public class HWTypesTab extends Div {
 
 	private static final long serialVersionUID = -5013459007975657195L;
 
 	private static final String NAME_BIND = "nameBind";
+	private static final String COUNT_BIND = "countBind";
 
 	private transient HWService hwService;
 
@@ -50,10 +59,12 @@ public class HWTypesTab extends Div {
 		FetchCallback<HWItemTypeTO, HWItemTypeTO> fetchCallback = q -> getHWService().getHWItemTypes(filterTO,
 				q.getOffset(), q.getLimit(), QuerydslUtil.transformOrdering(q.getSortOrders(), column -> {
 					switch (column) {
-					case NAME_BIND:
-						return "name";
-					default:
-						return column;
+						case NAME_BIND:
+							return "name";
+						case COUNT_BIND:
+							return "count";
+						default:
+							return column;
 					}
 				})).stream();
 		CountCallback<HWItemTypeTO, HWItemTypeTO> countCallback = q -> getHWService().countHWItemTypes(filterTO);
@@ -67,9 +78,18 @@ public class HWTypesTab extends Div {
 		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		UIUtils.applyGrassDefaultStyle(grid);
 
+		grid.addColumn(HWItemTypeTO::getCount)
+				.setHeader("Počet").setSortable(true).setKey(COUNT_BIND).setWidth("100px").setFlexGrow(0);
 		Column<HWItemTypeTO> nameColumn = grid
 				.addColumn(new ComponentRenderer<Button, HWItemTypeTO>(
-						to -> new LinkButton(to.getName(), e -> openNewTypeWindow(to))))
+						to -> new LinkButton(to.getName(), e -> {
+							HWFilterTO filter = new HWFilterTO();
+							List<String> types = new ArrayList<>();
+							types.add(to.getName());
+							filter.setTypes(types);
+							Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(filter);
+							UI.getCurrent().navigate(HWPage.class, QueryParameters.simple(filterQuery));
+						})))
 				.setHeader("Název").setSortable(true).setKey(NAME_BIND).setFlexGrow(1);
 		grid.setWidthFull();
 		grid.setHeight("500px");
