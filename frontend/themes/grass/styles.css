@@ -27,6 +27,7 @@ vaadin-tab img {
 vaadin-progress-bar {
     margin-bottom: 2px;
     display: inline-block;
+    width: 100% !important;
 }
 
 vaadin-text-area textarea {
