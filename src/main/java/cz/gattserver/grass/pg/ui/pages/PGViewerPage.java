@@ -157,6 +157,8 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 
 		loadJS();
 		init();
+
+		UIUtils.turnOffRouterAnchors();
 	}
 
 	private boolean isAdminOrAuthor() {

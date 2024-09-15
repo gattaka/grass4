@@ -59,15 +59,29 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
 
 	private String parameter;
 
+	private Div layout;
+
 	@Override
 	public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
 		this.parameter = parameter;
-		init();
-		loadCSS(getContextPath() + "/VAADIN/books/style.css");
+
+		if (layout == null) {
+			init();
+			loadCSS(getContextPath() + "/VAADIN/books/style.css");
+		} else {
+			layout.removeAll();
+			createContent();
+		}
 	}
 
 	@Override
-	protected void createColumnContent(Div layout) {
+	protected void createColumnContent(Div contentLayout) {
+		layout = new Div();
+		contentLayout.add(layout);
+		createContent();
+	}
+
+	private void createContent() {
 		filterTO = new BookOverviewTO();
 		grid = createGrid(filterTO);
 		UIUtils.applyGrassDefaultStyle(grid);

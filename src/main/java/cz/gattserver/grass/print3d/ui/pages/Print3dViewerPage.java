@@ -132,6 +132,7 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
 
 		init();
 
+		UIUtils.turnOffRouterAnchors();
 	}
 
 	private boolean isAdminOrAuthor() {

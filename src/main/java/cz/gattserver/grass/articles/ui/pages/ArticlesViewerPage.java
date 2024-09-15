@@ -106,19 +106,7 @@ public class ArticlesViewerPage extends ContentViewerPage implements HasUrlParam
 				.executeJs("document.getElementById('" + jsInitDivId + "').$server.initJS();"));
 		add(jsInitDiv);
 
-		// Články můžou přidat na stránku různé JS skritpy a DOM elementy,
-		// které při další vaadin-router navigaci zůstanou i na dalších stránkách
-		// to není žádoucí a nelze zajistit spolehlivě clean stránky od těchto prvků,
-		// řešením je tedy z pozice ArticleViewer všechny vykreslené Anchor elementy
-		// označit jako vaadin router-ignore, aby další navigace byla vždy s full reload
-		UI.getCurrent().getPage().executeJs("""
-				let elements = document.getElementsByTagName("a");
-				for (let i = 0; i < elements.length; i++) {
-					let element = elements.item(i);
-					if (!element.hasAttribute("router-ignore"))
-						element.setAttribute("router-ignore","");
-				}
-				""");
+		UIUtils.turnOffRouterAnchors();
 	}
 
 	@Override

@@ -112,7 +112,8 @@ public class UIUtils {
 	/**
 	 * Přidá filtrovací pole do záhlaví gridu
 	 */
-	public static TextField addHeaderTextField(HeaderCell cell,
+	public static TextField addHeaderTextField(
+			HeaderCell cell,
 			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<TextField, String>> listener) {
 		TextField field = UIUtils.asSmall(new TextField());
 		field.setWidthFull();
@@ -126,7 +127,8 @@ public class UIUtils {
 	/**
 	 * Přidá filtrovací datepicker do záhlaví gridu
 	 */
-	public static DatePicker addHeaderDatePicker(HeaderCell cell,
+	public static DatePicker addHeaderDatePicker(
+			HeaderCell cell,
 			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<DatePicker, LocalDate>> listener) {
 		DatePicker field = UIUtils.asSmall(new DatePicker());
 		field.setWidthFull();
@@ -138,7 +140,8 @@ public class UIUtils {
 	/**
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
-	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, Class<T> enumType,
+	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(
+			HeaderCell cell, Class<T> enumType,
 			ItemLabelGenerator<T> itemLabelGenerator,
 			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		return addHeaderComboBox(cell, enumType.getEnumConstants(), itemLabelGenerator, listener);
@@ -147,7 +150,8 @@ public class UIUtils {
 	/**
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
-	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, T[] values,
+	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(
+			HeaderCell cell, T[] values,
 			ItemLabelGenerator<T> itemLabelGenerator,
 			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		return addHeaderComboBox(cell, Arrays.asList(values), itemLabelGenerator, listener);
@@ -156,7 +160,8 @@ public class UIUtils {
 	/**
 	 * Přidá filtrovací combo do záhlaví gridu
 	 */
-	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(HeaderCell cell, Collection<T> values,
+	public static <T extends Enum<T>> ComboBox<T> addHeaderComboBox(
+			HeaderCell cell, Collection<T> values,
 			ItemLabelGenerator<T> itemLabelGenerator,
 			HasValue.ValueChangeListener<? super ComponentValueChangeEvent<ComboBox<T>, T>> listener) {
 		ComboBox<T> combo = UIUtils.asSmall(new ComboBox<>(null, values));
@@ -351,4 +356,21 @@ public class UIUtils {
 		}
 	}
 
+	/**
+	 * Články a jiné obsahy můžou přidat na stránku různé JS skritpy a DOM elementy,
+	 * které při další vaadin-router navigaci zůstanou i na dalších stránkách
+	 * to není žádoucí a nelze zajistit spolehlivě clean stránky od těchto prvků,
+	 * řešením je tedy z pozice ArticleViewer všechny vykreslené Anchor elementy
+	 * označit jako vaadin router-ignore, aby další navigace byla vždy s full reload
+	 */
+	public static void turnOffRouterAnchors() {
+		UI.getCurrent().getPage().executeJs("""
+				let elements = document.getElementsByTagName("a");
+				for (let i = 0; i < elements.length; i++) {
+					let element = elements.item(i);
+					if (!element.hasAttribute("router-ignore"))
+						element.setAttribute("router-ignore","");
+				}
+				""");
+	}
 }
