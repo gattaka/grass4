@@ -22,7 +22,8 @@ public class DrinksPage extends OneColumnPage implements HasUrlParameter<String>
 	private Tab wineTab;
 	private Tab otherTab;
 
-	private Div pageLayout;
+	private Div layout;
+	private Div tabLayout;
 
 	private String tabParam;
 	private String itemParam;
@@ -35,52 +36,63 @@ public class DrinksPage extends OneColumnPage implements HasUrlParameter<String>
 		if (chunks.length > 1)
 			this.itemParam = chunks[1];
 
-		init();
-		loadCSS(getContextPath() + "/VAADIN/drinks/style.css");
+		if (layout == null) {
+			init();
+			loadCSS(getContextPath() + "/VAADIN/drinks/style.css");
+		} else {
+			layout.removeAll();
+			createContent();
+		}
 	}
 
 	private BeersTab switchBeersTab() {
-		pageLayout.removeAll();
+		tabLayout.removeAll();
 		BeersTab tab = new BeersTab();
-		pageLayout.add(tab);
+		tabLayout.add(tab);
 		tabSheet.setSelectedTab(beerTab);
 		return tab;
 	}
 
 	private RumTab switchRumTab() {
-		pageLayout.removeAll();
+		tabLayout.removeAll();
 		RumTab tab = new RumTab();
-		pageLayout.add(tab);
+		tabLayout.add(tab);
 		tabSheet.setSelectedTab(rumTab);
 		return tab;
 	}
 
 	private WhiskeyTab switchWhiskeyTab() {
-		pageLayout.removeAll();
+		tabLayout.removeAll();
 		WhiskeyTab tab = new WhiskeyTab();
-		pageLayout.add(tab);
+		tabLayout.add(tab);
 		tabSheet.setSelectedTab(whiskeyTab);
 		return tab;
 	}
 
 	private WineTab switchWineTab() {
-		pageLayout.removeAll();
+		tabLayout.removeAll();
 		WineTab tab = new WineTab();
-		pageLayout.add(tab);
+		tabLayout.add(tab);
 		tabSheet.setSelectedTab(wineTab);
 		return tab;
 	}
 
 	private OtherTab switchOtherTab() {
-		pageLayout.removeAll();
+		tabLayout.removeAll();
 		OtherTab tab = new OtherTab();
-		pageLayout.add(tab);
+		tabLayout.add(tab);
 		tabSheet.setSelectedTab(otherTab);
 		return tab;
 	}
 
 	@Override
-	protected void createColumnContent(Div layout) {
+	protected void createColumnContent(Div contentLayout) {
+		layout = new Div();
+		contentLayout.add(layout);
+		createContent();
+	}
+
+	private void createContent() {
 		tabSheet = new Tabs();
 		layout.add(tabSheet);
 
@@ -91,11 +103,11 @@ public class DrinksPage extends OneColumnPage implements HasUrlParameter<String>
 		otherTab = new Tab("Jiné");
 		tabSheet.add(beerTab, rumTab, whiskeyTab, wineTab, otherTab);
 
-		pageLayout = new Div();
-		layout.add(pageLayout);
+		tabLayout = new Div();
+		layout.add(tabLayout);
 
 		tabSheet.addSelectedChangeListener(e -> {
-			pageLayout.removeAll();
+			tabLayout.removeAll();
 			switch (tabSheet.getSelectedIndex()) {
 			default:
 			case 0:
