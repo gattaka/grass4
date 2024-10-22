@@ -461,18 +461,17 @@ public class MonitorServiceImpl implements MonitorService {
 		testResponseCode(partItemTO, monitorAddress + servicesStatusWs);
 		if (partItemTO.isSuccess()) {
 			try {
-				String[] lines = partItemTO.getStateDetails().split("\n");
-				if (lines.length < 2)
+				List<String> units =
+						Arrays.stream(partItemTO.getStateDetails().split("\n")).filter(line -> line.startsWith("●")).collect(Collectors.toList());
+				if (units.size() == 0)
 					return createServicesErrorOutput("Nezdařilo se získat přehled služeb");
-				String lastLine = lines[lines.length - 1];
-				int units = Integer.valueOf(lastLine.split(" ")[0]);
-				for (int i = 0; i < units; i++) {
-					String unitLine = lines[1 + i];
-					String[] columns = unitLine.split(" ");
-					if (columns.length < 6)
+				for (String unit : units) {
+					List<String> columns = Arrays.stream(unit.split(" ")).filter(StringUtils::isNotBlank).toList();
+					if (columns.size() < 6)
 						return createServicesErrorOutput("Nezdařilo se zpracovat přehled služeb");
-					ServicesMonitorItemTO item = new ServicesMonitorItemTO(columns[1], columns[2], columns[3],
-							columns[4], columns[5]);
+					ServicesMonitorItemTO item = new ServicesMonitorItemTO(columns.get(1), columns.get(2),
+							columns.get(3),
+							columns.get(4), columns.get(5));
 					item.setMonitorState(MonitorState.ERROR);
 					partItemTO.getItems().add(item);
 				}

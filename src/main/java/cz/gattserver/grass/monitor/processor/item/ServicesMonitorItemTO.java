@@ -23,12 +23,7 @@ public class ServicesMonitorItemTO extends MonitorItemTO {
 
 	public ServicesMonitorItemTO(JsonObject jsonObject) {
 		super(jsonObject);
-		if (monitorState == MonitorState.ERROR)
-			return;
 		stateDetails = jsonObject.getString("stateDetails");
-		// detaily se zde vyplňují pouze, pokud jde o chybu
-		if (monitorState == MonitorState.SUCCESS)
-			return;
 		unit = jsonObject.getString("unit");
 		load = jsonObject.getString("load");
 		active = jsonObject.getString("active");

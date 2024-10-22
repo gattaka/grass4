@@ -384,7 +384,7 @@ public class MonitorPage extends OneColumnPage {
 		TableLayout servicesTableLayout = prepareTableLayout();
 		servicesLayout.add(servicesTableLayout);
 
-		if (MonitorState.SUCCESS == data.getMonitorState()) {
+		if (MonitorState.SUCCESS == data.getMonitorState() && data.getItems().isEmpty()) {
 			servicesTableLayout.newRow().add(new SuccessMonitorStateLabel());
 			servicesTableLayout.add(data.getStateDetails());
 			return;
