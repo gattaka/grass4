@@ -5,10 +5,9 @@ import elemental.json.JsonObject;
 public class DiskStatusMonitorItemTO extends MonitorItemTO {
 
 	private String name;
-	private String mount;
-	private String type;
 	private long total;
 	private long usable;
+	private String mount;
 
 	public DiskStatusMonitorItemTO() {
 	}
@@ -19,7 +18,6 @@ public class DiskStatusMonitorItemTO extends MonitorItemTO {
 			return;
 		name = jsonObject.getString("name");
 		mount = jsonObject.getString("mount");
-		type = jsonObject.getString("type");
 		total = (long) jsonObject.getNumber("total");
 		usable = (long) jsonObject.getNumber("usable");
 	}
@@ -30,14 +28,6 @@ public class DiskStatusMonitorItemTO extends MonitorItemTO {
 
 	public void setMount(String mount) {
 		this.mount = mount;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public long getTotal() {
