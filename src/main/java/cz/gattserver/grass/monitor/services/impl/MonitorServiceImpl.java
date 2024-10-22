@@ -6,6 +6,7 @@ import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.monitor.config.MonitorConfiguration;
 import cz.gattserver.grass.monitor.processor.item.*;
 import cz.gattserver.grass.monitor.services.MonitorService;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
@@ -222,26 +223,27 @@ public class MonitorServiceImpl implements MonitorService {
 			return createDiskStatusErrorOutput(partItemTO.getStateDetails());
 
 		String mounts[] = partItemTO.getStateDetails().split("\n");
-		Map<String, String> devToMount = new HashMap<>();
-		for (String mount : mounts) {
-			String info[] = mount.split(" ");
-			devToMount.put(info[0], info[2]);
-		}
 
 		List<DiskStatusMonitorItemTO> disks = new ArrayList<>();
-		for (FileStore store : FileSystems.getDefault().getFileStores()) {
-			String mount = devToMount.get(store.name());
-			if (mount == null)
+		for (String mount : mounts) {
+			List<String> parts =
+					Arrays.stream(mount.split(" ")).filter(s -> StringUtils.isNotBlank(s)).collect(Collectors.toList());
+
+			// systémové mounty neřeším, zajímají mne jen ty, co jsou z /dev
+			if (!parts.get(0).startsWith("/"))
 				continue;
+
 			DiskStatusMonitorItemTO itemTO = new DiskStatusMonitorItemTO();
 			partItemTO.getItems().add(itemTO);
-			itemTO.setName(store.name());
-			itemTO.setMount(mount);
+			itemTO.setName(parts.get(0));
+			itemTO.setMount(parts.get(5));
 			try {
-				if (!analyzeStore(itemTO, store))
-					continue;
+				long usable = Long.parseLong(parts.get(3)) * 1024;
+				long used = Long.parseLong(parts.get(2)) * 1024;
+				itemTO.setUsable(usable);
+				itemTO.setTotal(usable + used);
 				itemTO.setMonitorState(MonitorState.SUCCESS);
-			} catch (IOException e) {
+			} catch (Exception e) {
 				itemTO.setMonitorState(MonitorState.ERROR);
 			}
 			disks.add(itemTO);
@@ -313,17 +315,6 @@ public class MonitorServiceImpl implements MonitorService {
 		return to;
 	}
 
-	private boolean analyzeStore(DiskStatusMonitorItemTO to, FileStore store) throws IOException {
-		to.setTotal(store.getTotalSpace());
-		// pokud je velikost disku 0, pak jde o virtuální skupinu jako
-		// proc, sys apod. -- ty stejně nechci zobrazovat
-		if (to.getTotal() == 0)
-			return false;
-		to.setType(store.type());
-		to.setUsable(store.getUsableSpace());
-		return true;
-	}
-
 	@Override
 	public ServersPartItemTO getServersStatus() {
 		ServersPartItemTO partItemTO = new ServersPartItemTO();
@@ -364,7 +355,7 @@ public class MonitorServiceImpl implements MonitorService {
 		Timeout timeout = Timeout.ofSeconds(10);
 		RequestConfig config =
 				RequestConfig.custom().setConnectTimeout(timeout).setConnectionRequestTimeout(timeout)
-				.build();
+						.build();
 
 		final BasicCredentialsProvider provider = new BasicCredentialsProvider();
 		AuthScope authScope = null;

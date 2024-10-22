@@ -303,10 +303,9 @@ public class MonitorPage extends OneColumnPage {
 			return;
 		}
 
-		diskTableLayout.add(new MonitorOutputLabel("Stav")).setColSpan(2);
-		diskTableLayout.add(new MonitorOutputLabel("Mount"));
-		diskTableLayout.add(new MonitorOutputLabel("Název"));
-		diskTableLayout.add(new MonitorOutputLabel("FS Typ"));
+		diskTableLayout.add(new MonitorOutputLabel("Stav"));
+		diskTableLayout.add(new MonitorOutputLabel("Mount")).setColSpan(2);
+		diskTableLayout.add(new MonitorOutputLabel("Disk"));
 		diskTableLayout.add(new MonitorOutputLabel("Volno")).setColSpan(2);
 		diskTableLayout.add(new MonitorOutputLabel("Obsazeno")).setColSpan(2);
 		diskTableLayout.add(new MonitorOutputLabel("Velikost")).setColSpan(2);
@@ -316,13 +315,17 @@ public class MonitorPage extends OneColumnPage {
 			switch (disk.getMonitorState()) {
 				case SUCCESS:
 					diskTableLayout.add(new SuccessMonitorStateLabel());
+
+					diskTableLayout.add(disk.getMount());
+
 					ProgressBar pb = new ProgressBar();
 					pb.setValue(disk.getUsedRation());
-					pb.setWidth("200px");
-					diskTableLayout.add(pb);
-					diskTableLayout.add(disk.getMount());
+					Div pbWrap = new Div();
+					pbWrap.setWidth("200px");
+					pbWrap.add(pb);
+					diskTableLayout.add(pbWrap);
+
 					diskTableLayout.add(disk.getName());
-					diskTableLayout.add(disk.getType());
 
 					String usableInfo[] = humanFormat(disk.getUsable()).split(" ");
 					diskTableLayout.add(usableInfo[0]);
