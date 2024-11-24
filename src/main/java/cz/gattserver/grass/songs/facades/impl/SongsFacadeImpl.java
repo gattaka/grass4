@@ -12,11 +12,10 @@ import cz.gattserver.grass.songs.model.interfaces.ChordTO;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import cz.gattserver.grass.songs.util.Mapper;
-import org.apache.commons.fileupload.util.Streams;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -102,7 +101,7 @@ public class SongsFacadeImpl implements SongsService {
 	public SongTO importSong(InputStream in, String fileName) {
 		SongTO to = SongFileParser.parseSongInfo(fileName);
 		try {
-			to.setText(Streams.asString(in, "cp1250"));
+			to.setText(IOUtils.toString(in, "cp1250"));
 		} catch (IOException e) {
 			to.setText("Nezdařilo se zpracovat obsah souboru");
 		}
