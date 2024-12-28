@@ -4,12 +4,15 @@ import at.dhyan.open_imaging.GifDecoder;
 import at.dhyan.open_imaging.GifDecoder.GifImage;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
+import com.drew.lang.GeoLocation;
 import com.drew.metadata.Directory;
 import com.drew.metadata.Metadata;
 import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.exif.GpsDirectory;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.pg.config.PGConfiguration;
+import cz.gattserver.grass.pg.interfaces.ExifInfoTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryItemType;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
@@ -30,13 +33,13 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 public class PGUtils {
 
 	private static Logger logger = LoggerFactory.getLogger(PGUtils.class);
-
-	public static final String EXIF_DATE_FORMAT = "yyyy:MM:dd HH:mm:ss";
 
 	public static final int MINIATURE_SIZE = 150;
 	public static final int SLIDESHOW_WIDTH = 900;
@@ -57,7 +60,7 @@ public class PGUtils {
 		resizeImage(inputFile, destinationFile, PGUtils.MINIATURE_SIZE, PGUtils.MINIATURE_SIZE);
 	}
 
-	public static void createErrorPreview(String filename, Path destinationFile) {
+	public static void createErrorPreview(Path destinationFile) {
 		int h = MINIATURE_SIZE;
 		int w = MINIATURE_SIZE;
 		BufferedImage backgroundImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
@@ -90,6 +93,47 @@ public class PGUtils {
 		}
 	}
 
+	public static ExifInfoTO readMetadata(Path inputFile) {
+		ExifInfoTO infoTO = new ExifInfoTO();
+		try (InputStream is = Files.newInputStream(inputFile)) {
+			Metadata metadata = ImageMetadataReader.readMetadata(is);
+			ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+
+			// Date
+			if (directory != null) {
+				Date date = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+				if (date != null) {
+					LocalDateTime localDate = LocalDateTime.ofInstant(date.toInstant(), ZoneId.systemDefault());
+					infoTO.setDate(localDate);
+					infoTO.setDateMillis(date.getTime());
+				}
+			}
+
+			// Orientation
+			for (Directory d : metadata.getDirectories()) {
+				if (infoTO.getOrinetation() == null)
+					infoTO.setOrinetation(d.getInteger(ExifIFD0Directory.TAG_ORIENTATION));
+				if (infoTO.getDeviceMaker() == null)
+					infoTO.setDeviceMaker(d.getString(ExifIFD0Directory.TAG_MAKE));
+				if (infoTO.getDeviceModel() == null)
+					infoTO.setDeviceModel(d.getString(ExifIFD0Directory.TAG_MODEL));
+				d.getString(GpsDirectory.TAG_LATITUDE);
+				if (d instanceof GpsDirectory && infoTO.getLatitude() == null && infoTO.getLongitude() == null) {
+					GeoLocation gps = ((GpsDirectory) d).getGeoLocation();
+					if (gps != null) {
+						infoTO.setLatitude(gps.getLatitude());
+						infoTO.setLongitude(gps.getLongitude());
+					}
+				}
+			}
+
+		} catch (IOException | ImageProcessingException e) {
+			// nezdařilo se, nevadí
+			logger.error("Získání EXIF pro soubor {} se nezdařilo", inputFile.getFileName().toString(), e);
+		}
+		return infoTO;
+	}
+
 	public static void resizeImage(Path inputFile, Path destinationFile, int maxWidth, int maxHeight)
 			throws IOException {
 		String filenameLow = inputFile.getFileName().toString().toLowerCase();
@@ -115,26 +159,11 @@ public class PGUtils {
 					throw new IOException("SVG to JPG failed", e);
 				}
 			} else {
-				Date date = null;
-				Integer orinetation = null;
-				try (InputStream is = Files.newInputStream(inputFile)) {
-					Metadata metadata = ImageMetadataReader.readMetadata(is);
-					ExifSubIFDDirectory directory = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
-					if (directory != null)
-						date = directory.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
-					for (Directory d : metadata.getDirectories()) {
-						orinetation = d.getInteger(ExifIFD0Directory.TAG_ORIENTATION);
-						if (orinetation != null)
-							break;
-					}
-				} catch (IOException | ImageProcessingException e) {
-					// nezdařilo se, nevadí
-					logger.error("Získání EXIF pro soubor {} se nezdařilo", inputFile.getFileName().toString(), e);
-				}
+				ExifInfoTO exifInfoTO = readMetadata(inputFile);
 
 				double angle = 0;
-				if (orinetation != null)
-					switch (orinetation) {
+				if (exifInfoTO.getOrinetation() != null)
+					switch (exifInfoTO.getOrinetation()) {
 						case 1:
 							// 0 degrees: the correct orientation, no adjustment
 							// is required.
@@ -171,8 +200,8 @@ public class PGUtils {
 							// aby se nepletlo s ručním otáčením
 							.useExifOrientation(false).rotate(angle).size(maxWidth, maxHeight).toOutputStream(os);
 				}
-				if (date != null)
-					Files.setLastModifiedTime(destinationFile, FileTime.fromMillis(date.getTime()));
+				if (exifInfoTO.getDateMillis() != null)
+					Files.setLastModifiedTime(destinationFile, FileTime.fromMillis(exifInfoTO.getDateMillis()));
 			}
 		}
 

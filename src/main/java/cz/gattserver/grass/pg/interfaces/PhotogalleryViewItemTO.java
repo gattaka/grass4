@@ -7,6 +7,16 @@ public class PhotogalleryViewItemTO {
 	private Path file;
 	private String name;
 	private PhotogalleryItemType type;
+	private ExifInfoTO exifInfoTO;
+
+	public ExifInfoTO getExifInfoTO() {
+		return exifInfoTO;
+	}
+
+	public PhotogalleryViewItemTO setExifInfoTO(ExifInfoTO exifInfoTO) {
+		this.exifInfoTO = exifInfoTO;
+		return this;
+	}
 
 	public String getName() {
 		return name;

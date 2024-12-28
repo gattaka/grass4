@@ -125,7 +125,7 @@ public class PGServiceImpl implements PGService {
 			PGUtils.resizeVideoPreviewImage(image, outputFile);
 			logger.info("Náhled videa {} byl úspěšně uložen", previewName);
 		} catch (Exception e) {
-			PGUtils.createErrorPreview(videoName, outputFile);
+			PGUtils.createErrorPreview(outputFile);
 			logger.info("Chybový náhled videa {} byl úspěšně uložen", previewName);
 		}
 	}
@@ -763,6 +763,7 @@ public class PGServiceImpl implements PGService {
 			Stream.concat(miniaturesStream, Stream.concat(previewsStream, otherStream)).skip(index).limit(1).forEach(file -> {
 				PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
 				String fileName = file.getFileName().toString();
+				itemTO.setExifInfoTO(PGUtils.readMetadata(previewDir.getParent().resolve(fileName)));
 				if (file.startsWith(previewDir)) {
 					itemTO.setType(PhotogalleryItemType.VIDEO);
 					// u videa je potřeba useknout příponu preview obrázku

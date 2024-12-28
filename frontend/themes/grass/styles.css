@@ -467,3 +467,24 @@ vaadin-text-field::part(input-field), vaadin-text-area textarea {
     margin-right: 10px;
     margin-bottom: 10px;
 }
+
+#pg-exif-div {
+    color: lightgray;
+    position: fixed;
+    bottom: 30px;
+    padding: 10px;
+}
+
+#pg-exif-div div div:first-child {
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+#pg-exif-div a {
+    color: lightgrey;
+    text-decoration: underline;
+}
+
+#pg-exif-div a:hover {
+    color: white;
+}

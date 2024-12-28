@@ -157,18 +157,19 @@
         </dependency>
 
         <!-- Util -->
-        <!--
         <dependency>
             <groupId>cz.gattserver</groupId>
             <artifactId>util</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
+            <version>1.0.3-SNAPSHOT</version>
         </dependency>
-        -->
+
+        <!--
         <dependency>
             <groupId>com.github.gattaka</groupId>
             <artifactId>util</artifactId>
             <version>util-1.0.2</version>
         </dependency>
+        -->
 
         <!-- H2 -->
         <dependency>

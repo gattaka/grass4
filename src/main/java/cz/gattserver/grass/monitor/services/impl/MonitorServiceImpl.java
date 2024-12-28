@@ -461,23 +461,24 @@ public class MonitorServiceImpl implements MonitorService {
 		testResponseCode(partItemTO, monitorAddress + servicesStatusWs);
 		if (partItemTO.isSuccess()) {
 			try {
-				List<String> units =
-						Arrays.stream(partItemTO.getStateDetails().split("\n")).filter(line -> line.startsWith("●")).collect(Collectors.toList());
-				if (units.size() == 0)
-					return createServicesErrorOutput("Nezdařilo se získat přehled služeb");
-				for (String unit : units) {
-					List<String> columns = Arrays.stream(unit.split(" ")).filter(StringUtils::isNotBlank).toList();
-					if (columns.size() < 6)
-						return createServicesErrorOutput("Nezdařilo se zpracovat přehled služeb");
-					ServicesMonitorItemTO item = new ServicesMonitorItemTO(columns.get(1), columns.get(2),
-							columns.get(3),
-							columns.get(4), columns.get(5));
-					item.setMonitorState(MonitorState.ERROR);
-					partItemTO.getItems().add(item);
-				}
 				if (partItemTO.getItems().isEmpty()) {
 					partItemTO.setMonitorState(MonitorState.SUCCESS);
 					partItemTO.setStateDetails("Vše OK");
+				} else {
+					List<String> units =
+							Arrays.stream(partItemTO.getStateDetails().split("\n")).filter(line -> line.startsWith("●")).collect(Collectors.toList());
+					if (units.size() == 0)
+						return createServicesErrorOutput("Nezdařilo se získat přehled služeb");
+					for (String unit : units) {
+						List<String> columns = Arrays.stream(unit.split(" ")).filter(StringUtils::isNotBlank).toList();
+						if (columns.size() < 6)
+							return createServicesErrorOutput("Nezdařilo se zpracovat přehled služeb");
+						ServicesMonitorItemTO item = new ServicesMonitorItemTO(columns.get(1), columns.get(2),
+								columns.get(3),
+								columns.get(4), columns.get(5));
+						item.setMonitorState(MonitorState.ERROR);
+						partItemTO.getItems().add(item);
+					}
 				}
 			} catch (Exception e) {
 				return createServicesErrorOutput("Nezdařilo se zpracovat JSON výstup smartd");

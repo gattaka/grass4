@@ -2,11 +2,14 @@ package cz.gattserver.grass.pg.ui.pages;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.grass.pg.interfaces.ExifInfoTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -16,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +34,7 @@ public abstract class PGSlideshow extends Div {
 	protected int totalCount;
 	protected Div itemLabel;
 	protected Div itemLayout;
+	protected Div itemExifLayout;
 
 	protected PhotogalleryTO photogallery;
 	protected PhotogalleryViewItemTO currentItemTO;
@@ -55,6 +61,10 @@ public abstract class PGSlideshow extends Div {
 		Div wrapperDiv = new Div();
 		wrapperDiv.setId("pg-slideshow-item-wrapper-div");
 		add(wrapperDiv);
+
+		itemExifLayout = new Div();
+		itemExifLayout.setId("pg-exif-div");
+		add(itemExifLayout);
 
 		String jsDivId = "pg-slideshow-item-div";
 		itemLayout = new Div() {
@@ -192,6 +202,29 @@ public abstract class PGSlideshow extends Div {
 		currentIndex = index;
 		try {
 			currentItemTO = getItem(index);
+
+			itemExifLayout.removeAll();
+			ExifInfoTO exifInfoTO = currentItemTO.getExifInfoTO();
+			if (exifInfoTO.getDate() != null) {
+				Div dateDiv = new Div();
+				itemExifLayout.add(dateDiv);
+				dateDiv.add(new Div("Datum pořízení:"));
+				dateDiv.add(new Div(exifInfoTO.getDate().format(DateTimeFormatter.ofPattern("dd. MM. yyyy HH:mm:ss"))));
+			}
+			if (exifInfoTO.getDeviceMaker() != null && exifInfoTO.getDeviceModel() != null) {
+				Div dateDiv = new Div();
+				itemExifLayout.add(dateDiv);
+				dateDiv.add(new Div("Fotoaparát:"));
+				dateDiv.add(new Div(exifInfoTO.getDeviceMaker() + ", " + exifInfoTO.getDeviceModel()));
+			}
+			if (exifInfoTO.getLongitude() != null && exifInfoTO.getLatitude() != null) {
+				Div dateDiv = new Div();
+				itemExifLayout.add(dateDiv);
+				dateDiv.add(new Div("Místo:"));
+				dateDiv.add(new Div(exifInfoTO.getLatitude() + " N, " + exifInfoTO.getLongitude() + " E"));
+				dateDiv.add(new Anchor("https://www.google.com/maps?z=15&t=h&q=" + exifInfoTO.getLatitude() + "+" + exifInfoTO.getLongitude(), "Google Maps", AnchorTarget.BLANK));
+			}
+
 			Component slideshowComponent = createItemSlide(currentItemTO);
 			itemLayout.removeAll();
 			itemLayout.add(slideshowComponent);
