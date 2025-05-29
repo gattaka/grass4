@@ -51,25 +51,13 @@ public class ConfirmDialog extends WebDialog {
 		HorizontalLayout btnLayout = new HorizontalLayout();
 		addComponent(btnLayout, Alignment.CENTER);
 
-		Button confirm = new Button("Ano", new ComponentEventListener<ClickEvent<Button>>() {
-			private static final long serialVersionUID = 8490964871266821307L;
-
-			@Override
-			public void onComponentEvent(ClickEvent<Button> event) {
-				ConfirmDialog.this.confirmAction.onConfirm(event);
-				close();
-			}
+		Button confirm = new Button("Ano", (ComponentEventListener<ClickEvent<Button>>) event -> {
+			ConfirmDialog.this.confirmAction.onConfirm(event);
+			close();
 		});
 		btnLayout.add(confirm);
 
-		Button close = new Button("Ne", new ComponentEventListener<ClickEvent<Button>>() {
-			private static final long serialVersionUID = 8490964871266821307L;
-
-			@Override
-			public void onComponentEvent(ClickEvent<Button> event) {
-				close();
-			}
-		});
+		Button close = new Button("Ne", (ComponentEventListener<ClickEvent<Button>>) event -> close());
 		btnLayout.add(close);
 
 	}
