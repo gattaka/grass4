@@ -684,8 +684,7 @@ public class PGServiceImpl implements PGService {
 	}
 
 	private Comparator<Path> getComparator() {
-		Comparator<Path> nameComparator = (p1, p2) -> p1.getFileName().toString()
-				.compareTo(p2.getFileName().toString());
+		Comparator<Path> nameComparator = Comparator.comparing(p -> p.getFileName().toString());
 		Comparator<Path> comparator = (p1, p2) -> {
 			try {
 				LocalDateTime ldt1 = Files.getLastModifiedTime(p1).toInstant().atZone(ZoneId.systemDefault())
