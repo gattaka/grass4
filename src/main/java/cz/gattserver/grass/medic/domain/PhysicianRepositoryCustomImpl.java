@@ -9,6 +9,7 @@ import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+
 import java.util.List;
 
 public class PhysicianRepositoryCustomImpl implements PhysicianRepositoryCustom {
@@ -30,7 +31,7 @@ public class PhysicianRepositoryCustomImpl implements PhysicianRepositoryCustom 
 		JPAQuery<Physician> query = new JPAQuery<>(entityManager);
 		QPhysician p = QPhysician.physician;
 		return query.select(p).from(p).where(createPredicate(filterTO))
-				.orderBy(new OrderSpecifier[] { new OrderSpecifier<>(Order.DESC, p.name) }).fetch();
+				.orderBy(new OrderSpecifier[]{new OrderSpecifier<>(Order.DESC, p.name)}).fetch();
 	}
 
 	@Override
@@ -38,7 +39,8 @@ public class PhysicianRepositoryCustomImpl implements PhysicianRepositoryCustom 
 		JPAQuery<Physician> query = new JPAQuery<>(entityManager);
 		QPhysician p = QPhysician.physician;
 		QMedicalRecord r = QMedicalRecord.medicalRecord;
-		return query.select(p).from(r).join(p).on(r.physician.id.eq(p.id)).where(r.institution.id.eq(institutionId))
-				.orderBy(new OrderSpecifier[] { new OrderSpecifier<>(Order.DESC, r.date) }).fetchOne();
+		return query.select(p).from(r).join(p).on(r.physician.id.eq(p.id)).where(
+						r.institution.id.eq(institutionId))
+				.orderBy(new OrderSpecifier[]{new OrderSpecifier<>(Order.DESC, r.date)}).fetchFirst();
 	}
 }
