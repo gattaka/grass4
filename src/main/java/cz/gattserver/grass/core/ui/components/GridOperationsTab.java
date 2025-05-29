@@ -76,7 +76,7 @@ public abstract class GridOperationsTab<T extends Identifiable, F, C extends Col
 		grid = new Grid<>(clazz);
 		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		UIUtils.applyGrassDefaultStyle(grid);
-		grid.setItems(getItems(filterTO));
+		populateGrid();
 		customizeGrid(grid);
 		add(grid);
 
