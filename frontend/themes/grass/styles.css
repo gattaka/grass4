@@ -225,7 +225,7 @@ span.label-err {
     padding: 2px 4px 1px 10px;
 }
 
-#menu-wrapper a {
+#menu-wrapper a, #menu-wrapper vaadin-button {
     color: #d1d3d6;
     text-shadow: rgba(0, 0, 0, 0.9) 0 1px 0;
     text-decoration: none;
