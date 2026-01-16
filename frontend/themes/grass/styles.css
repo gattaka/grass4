@@ -20,6 +20,15 @@ vaadin-button[theme~="tertiary-inline"]::part(label):hover {
     text-decoration: underline;
 }
 
+vaadin-dialog-overlay::part(header) {
+    padding: 0;
+    margin: 15px 10px 5px 10px;
+}
+
+vaadin-dialog-overlay::part(footer) {
+    padding: var(--lumo-space-m);
+}
+
 vaadin-tab img {
     margin: 0px 5px 1px 0;
 }
@@ -210,16 +219,13 @@ span.label-err {
     }
 }
 
-vaadin-horizontal-layout.menu {
-    padding: 2px 14px;
+#menu-wrapper {
+    display: flex;
+    justify-content: space-between;
+    padding: 2px 4px 1px 10px;
 }
 
-.menu-item {
-    display: inline-block;
-    padding: 1px 0px 0px 10px;
-}
-
-.menu-item a, .menu-item-right a {
+#menu-wrapper a {
     color: #d1d3d6;
     text-shadow: rgba(0, 0, 0, 0.9) 0 1px 0;
     text-decoration: none;
@@ -227,14 +233,14 @@ vaadin-horizontal-layout.menu {
     arial, sans-serif;
 }
 
-.menu-item-right {
-    float: right;
-    padding: 1px 10px 0 0;
-}
-
-.menu-item a:hover {
+#menu-wrapper a:hover {
     text-decoration: none;
     color: white;
+}
+
+#menu-wrapper > div {
+    gap: 8px;
+    display: flex;
 }
 
 /* Page layout */
