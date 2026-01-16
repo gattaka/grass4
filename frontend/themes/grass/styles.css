@@ -222,7 +222,7 @@ span.label-err {
 #menu-wrapper {
     display: flex;
     justify-content: space-between;
-    padding: 2px 4px 1px 10px;
+    padding: 2px 8px 1px 10px;
 }
 
 #menu-wrapper a, #menu-wrapper vaadin-button {
@@ -233,7 +233,7 @@ span.label-err {
     arial, sans-serif;
 }
 
-#menu-wrapper a:hover {
+#menu-wrapper a:hover, #menu-wrapper vaadin-button:hover {
     text-decoration: none;
     color: white;
 }
@@ -241,6 +241,11 @@ span.label-err {
 #menu-wrapper > div {
     gap: 8px;
     display: flex;
+}
+
+
+#menu-wrapper vaadin-button {
+    min-width: 0;
 }
 
 /* Page layout */
