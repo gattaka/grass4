@@ -99,6 +99,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
 	protected void createColumnContent(Div layout) {
 		TabsMenu tabsMenu = new TabsMenu();
 		layout.add(tabsMenu);
+        tabsMenu.selectSongTab();
 
 		Div wrapperDiv = new Div();
 		wrapperDiv.getStyle().set("padding", "10px").set("background", "white").set("border-radius", "3px")

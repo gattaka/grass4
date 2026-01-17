@@ -51,10 +51,10 @@ public class LoginDialog extends WebDialog {
         layout.add(rememberMeCheckbox);
 
         Button loginBtn = new Button("Přihlásit", evt -> {
-            if (!binder.validate().isOk())
-                return;
+            if (!binder.validate().isOk()) return;
             UserFieldsTO userFieldsTO = binder.getBean();
-            LoginResult loginResult = login(userFieldsTO.getName(), userFieldsTO.getPassword(), rememberMeCheckbox.getValue());
+            LoginResult loginResult =
+                    login(userFieldsTO.getName(), userFieldsTO.getPassword(), rememberMeCheckbox.getValue());
             switch (loginResult) {
                 case FAILED_CREDENTIALS:
                     UIUtils.showError("Špatné přihlašovací jméno nebo heslo");
