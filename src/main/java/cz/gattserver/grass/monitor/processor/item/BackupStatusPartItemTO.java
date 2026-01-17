@@ -1,31 +1,29 @@
 package cz.gattserver.grass.monitor.processor.item;
 
+import tools.jackson.databind.JsonNode;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
 
 public class BackupStatusPartItemTO extends MonitorItemTO {
 
-	private List<BackupStatusMonitorItemTO> items = new ArrayList<>();
+    private List<BackupStatusMonitorItemTO> items = new ArrayList<>();
 
-	public BackupStatusPartItemTO() {
-	}
+    public BackupStatusPartItemTO() {
+    }
 
-	public BackupStatusPartItemTO(JsonObject jsonObject) {
-		super(jsonObject);
-		stateDetails = jsonObject.getString("stateDetails");
-		if (JsonType.NULL == jsonObject.get("items").getType())
-			return;
-		JsonArray array = jsonObject.getArray("items");
-		for (int i = 0; i < array.length(); i++)
-			items.add(new BackupStatusMonitorItemTO(array.getObject(i)));
-	}
+    public BackupStatusPartItemTO(JsonNode jsonObject) {
+        super(jsonObject);
+        stateDetails = jsonObject.get("stateDetails").asText();
+        if (jsonObject.get("items").isNull()) return;
+        JsonNode array = jsonObject.get("items");
+        for (JsonNode node : array)
+            items.add(new BackupStatusMonitorItemTO(node));
+    }
 
-	public List<BackupStatusMonitorItemTO> getItems() {
-		return items;
-	}
+    public List<BackupStatusMonitorItemTO> getItems() {
+        return items;
+    }
 
 }

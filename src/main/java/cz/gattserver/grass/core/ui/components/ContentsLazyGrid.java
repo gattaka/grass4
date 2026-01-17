@@ -26,88 +26,86 @@ import cz.gattserver.common.vaadin.ImageIcon;
 
 public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
-	private static final long serialVersionUID = -5648982639686386190L;
+    private static final long serialVersionUID = -5648982639686386190L;
 
-	private boolean dynamicHeight = true;
+    private boolean dynamicHeight = true;
 
-	public ContentsLazyGrid() {
-		super();
-		UIUtils.applyGrassDefaultStyle(this);
-		setSelectionMode(SelectionMode.NONE);
-	}
+    public ContentsLazyGrid() {
+        super();
+        UIUtils.applyGrassDefaultStyle(this);
+        setSelectionMode(SelectionMode.NONE);
+    }
 
-	public void populate(
-			boolean showPubLock, FetchCallback<ContentNodeOverviewTO, Void> fetchCallback,
-			CountCallback<ContentNodeOverviewTO, Void> countCallback) {
+    public void populate(boolean showPubLock, FetchCallback<ContentNodeOverviewTO, Void> fetchCallback,
+                         CountCallback<ContentNodeOverviewTO, Void> countCallback) {
 
-		PageFactory nodePageFactory = ((PageFactory) SpringContextHelper.getBean("nodePageFactory"));
-		PageFactory noServicePageFactory = (PageFactory) SpringContextHelper.getBean("noServicePageFactory");
-		ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);
+        PageFactory nodePageFactory = ((PageFactory) SpringContextHelper.getBean("nodePageFactory"));
+        PageFactory noServicePageFactory = (PageFactory) SpringContextHelper.getBean("noServicePageFactory");
+        ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);
 
-		setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
+        setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
 
-		String iconBind = "customIcon";
-		String nameBind = "customName";
-		String lockIconBind = "lockIcon";
-		String nodeBind = "customNode";
-		String creationDateBind = "customCreationDate";
-		String lastModificationDateBind = "customLastModificationDate";
+        String iconBind = "customIcon";
+        String nameBind = "customName";
+        String lockIconBind = "lockIcon";
+        String nodeBind = "customNode";
+        String creationDateBind = "customCreationDate";
+        String lastModificationDateBind = "customLastModificationDate";
 
-		addColumn(new IconRenderer<>(c -> {
-			ContentModule contentService = serviceHolder.getContentModulesByName(c.getContentReaderID());
-			Image img = new Image(contentService == null ? ImageIcon.WARNING_16_ICON.createResource()
-					: contentService.getContentIcon(), "");
-			img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
-			return img;
-		}, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
-				.setKey(iconBind);
+        addColumn(new IconRenderer<>(c -> {
+            ContentModule contentService = serviceHolder.getContentModulesByName(c.getContentReaderID());
+            Image img = new Image(contentService == null ? ImageIcon.WARNING_16_ICON.createResource() :
+                    contentService.getContentIcon(), "");
+            img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
+            return img;
+        }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
+                .setKey(iconBind);
 
-		addColumn(new ComponentRenderer<>(contentNode -> {
-			ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.getContentReaderID());
-			String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory)
-					: UIUtils.getPageURL(contentService.getContentViewerPageFactory(),
-					URLIdentifierUtils.createURLIdentifier(contentNode.getContentID(), contentNode.getName()));
-			return new Anchor(url, contentNode.getName());
-		})).setFlexGrow(2).setHeader("Název").setId(nameBind);
+        addColumn(new ComponentRenderer<>(contentNode -> {
+            ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.getContentReaderID());
+            String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory) :
+                    UIUtils.getPageURL(contentService.getContentViewerPageFactory(),
+                            URLIdentifierUtils.createURLIdentifier(contentNode.getContentID(), contentNode.getName()));
+            return new Anchor(url, contentNode.getName());
+        })).setFlexGrow(2).setHeader("Název").setId(nameBind);
 
-		if (showPubLock) {
-			addColumn(new IconRenderer<>(c -> {
-				if (c.isPublicated()) {
-					return new Span();
-				} else {
-					Image img = new Image(ImageIcon.SHIELD_16_ICON.createResource(), "locked");
-					img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
-					return img;
-				}
-			}, c -> "")).setFlexGrow(0).setWidth("26px").setHeader("").setKey(lockIconBind);
-		}
+        if (showPubLock) {
+            addColumn(new IconRenderer<>(c -> {
+                if (c.isPublicated()) {
+                    return new Span();
+                } else {
+                    Image img = new Image(ImageIcon.SHIELD_16_ICON.createResource(), "locked");
+                    img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
+                    return img;
+                }
+            }, c -> "")).setFlexGrow(0).setWidth("26px").setHeader("").setKey(lockIconBind);
+        }
 
-		addColumn(new ComponentRenderer<>(contentNode -> {
-			String url = UIUtils.getPageURL(nodePageFactory, URLIdentifierUtils
-					.createURLIdentifier(contentNode.getParentNodeId(), contentNode.getParentNodeName())) + "'>"
-					+ contentNode.getParentNodeName();
-			return new Anchor(url, contentNode.getParentNodeName());
-		})).setFlexGrow(2).setHeader("Kategorie").setId(nodeBind);
+        addColumn(new ComponentRenderer<>(contentNode -> {
+            String url = UIUtils.getPageURL(nodePageFactory,
+                    URLIdentifierUtils.createURLIdentifier(contentNode.getParentNodeId(),
+                            contentNode.getParentNodeName())) + "'>" + contentNode.getParentNodeName();
+            return new Anchor(url, contentNode.getParentNodeName());
+        })).setFlexGrow(2).setHeader("Kategorie").setId(nodeBind);
 
-		if (!UIUtils.isMobileDevice()) {
-			addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getCreationDate, "d.M.yyyy"))
-					.setHeader("Vytvořeno").setKey(creationDateBind).setClassNameGenerator(item -> "v-align-right")
-					.setFlexGrow(0).setWidth("90px");
+        if (!UIUtils.isMobileDevice()) {
+            addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getCreationDate, "d.M.yyyy")).setHeader(
+                            "Vytvořeno").setKey(creationDateBind).setTextAlign(ColumnTextAlign.END).setFlexGrow(0)
+                    .setWidth("90px");
+            addColumn(
+                    new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getLastModificationDate, "d.M.yyyy")).setHeader(
+                            "Upraveno").setKey(lastModificationDateBind).setTextAlign(ColumnTextAlign.END).setFlexGrow(0)
+                    .setWidth("90px");
+        }
 
-			addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getLastModificationDate, "d.M.yyyy"))
-					.setHeader("Upraveno").setKey(lastModificationDateBind)
-					.setClassNameGenerator(item -> "v-align-right").setFlexGrow(0).setWidth("90px");
-		}
+        if (dynamicHeight) setHeight(GridUtils.processHeight(countCallback.count(new Query<>())) + "px");
+    }
 
-		if (dynamicHeight)
-			setHeight(GridUtils.processHeight(countCallback.count(new Query<>())) + "px");
-	}
+    public boolean isDynamicHeight() {
+        return dynamicHeight;
+    }
 
-	public boolean isDynamicHeight() {
-		return dynamicHeight;
-	}
-
-	public void setDynamicHeight(boolean dynamicHeight) {
-		this.dynamicHeight = dynamicHeight;
-	}
+    public void setDynamicHeight(boolean dynamicHeight) {
+        this.dynamicHeight = dynamicHeight;
+    }
 }

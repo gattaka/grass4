@@ -1,11 +1,9 @@
 package cz.gattserver.grass.core.ui.pages.template;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -13,8 +11,6 @@ import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
-import com.vaadin.flow.function.SerializableConsumer;
-import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 
@@ -25,13 +21,8 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.js.JScriptItem;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.songs.ui.SongPage;
-import elemental.json.Json;
-import elemental.json.JsonType;
-import elemental.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.util.Optionals;
 
 /**
  * Základní layout pro stránky systému Grass. Volá {@link SpringContextHelper}
@@ -74,14 +65,14 @@ public abstract class GrassPage extends Div {
 
 	@AllowInert
 	@ClientCallable
-	private void tabVariableCallback(JsonValue value) {
+	private void tabVariableCallback(JsonNode value) {
 		Long val = null;
 		if (value == null) {
 			val = null;
-		} else if (value.getType().equals(JsonType.NUMBER)) {
-			val = (long) value.asNumber();
-		} else if (value.getType().equals(JsonType.STRING)) {
-			val = Long.parseLong(value.asString());
+		} else if (value.isNumber()) {
+			val = value.asLong();
+		} else if (value.isTextual()) {
+			val = Long.parseLong(value.asText());
 		}
 		getTabVariableConsumer.accept(val);
 	}

@@ -34,8 +34,7 @@ import cz.gattserver.grass.monitor.services.MonitorService;
 import cz.gattserver.grass.monitor.web.label.ErrorMonitorStateLabel;
 import cz.gattserver.grass.monitor.web.label.MonitorOutputLabel;
 import cz.gattserver.grass.monitor.web.label.SuccessMonitorStateLabel;
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+import tools.jackson.databind.JsonNode;
 
 @Route("system-monitor")
 @PageTitle("System monitor")
@@ -464,13 +463,13 @@ public class MonitorPage extends OneColumnPage {
 			private static final long serialVersionUID = -7319482130016598549L;
 
 			@ClientCallable
-			private void monitorRefresh(JsonObject jsonObject) {
+			private void monitorRefresh(JsonNode jsonObject) {
 				System.out.println(jsonObject);
-				if (!jsonObject.hasKey("type"))
+				if (!jsonObject.has("type"))
 					return;
-				if (JsonType.NULL == jsonObject.get("type").getType())
+				if (jsonObject.get("type").isNull())
 					return;
-				String type = jsonObject.getString("type");
+				String type = jsonObject.get("type").asText();
 				if (SystemUptimeMonitorItemTO.class.getName().equals(type)) {
 					createSystemUptimePart(new SystemUptimeMonitorItemTO(jsonObject));
 				} else if (SystemMemoryMonitorItemTO.class.getName().equals(type)) {

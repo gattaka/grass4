@@ -1,6 +1,7 @@
 package cz.gattserver.grass.monitor.processor.item;
 
-import elemental.json.JsonObject;
+
+import tools.jackson.databind.JsonNode;
 
 public class JVMPIDMonitorItemTO extends MonitorItemTO {
 
@@ -9,9 +10,9 @@ public class JVMPIDMonitorItemTO extends MonitorItemTO {
 	public JVMPIDMonitorItemTO() {
 	}
 
-	public JVMPIDMonitorItemTO(JsonObject jsonObject) {
+	public JVMPIDMonitorItemTO(JsonNode jsonObject) {
 		super(jsonObject);
-		pid = jsonObject.getString("pid");
+		pid = jsonObject.get("pid").asText();
 	}
 
 	public String getPid() {

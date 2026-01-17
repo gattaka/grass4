@@ -8,11 +8,10 @@ import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import tools.jackson.databind.JsonNode;
 
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
@@ -43,14 +42,12 @@ public class PGMultiUpload extends Upload {
 		// https://github.com/vaadin/vaadin-upload-flow/issues/134
 		getElement().addEventListener("upload-start", e -> this.allUploadsProcessed = false);
 		getElement().addEventListener("upload-success", e -> {
-			JsonArray files = e.getEventData().getArray("element.files");
+			JsonNode files = e.getEventData().get("element.files");
 
 			boolean allUploadsProcessed = true;
-			for (int i = 0; i < files.length(); i++) {
-				JsonObject file = files.getObject(i);
-				if (!file.getBoolean("complete"))
+			for (JsonNode file : files)
+				if (!file.get("complete").asBoolean())
 					allUploadsProcessed = false;
-			}
 
 			if (!this.allUploadsProcessed && allUploadsProcessed)
 				onDone();
@@ -99,11 +96,7 @@ public class PGMultiUpload extends Upload {
 	protected void fileUploadSuccess(String fileName) {
 	}
 
-	;
-
 	protected void allFilesUploaded() {
 	}
-
-	;
 
 }

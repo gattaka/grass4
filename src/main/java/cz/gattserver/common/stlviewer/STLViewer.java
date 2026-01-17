@@ -9,7 +9,7 @@ import com.vaadin.flow.function.SerializableConsumer;
 
 import cz.gattserver.grass.core.ui.js.JScriptItem;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import elemental.json.JsonValue;
+import tools.jackson.databind.JsonNode;
 
 public class STLViewer extends Div {
 
@@ -20,7 +20,7 @@ public class STLViewer extends Div {
 
 	private boolean stlViewerInitialized = false;
 
-	public STLViewer(SerializableConsumer<JsonValue> afterLoad) {
+	public STLViewer(SerializableConsumer<JsonNode> afterLoad) {
 		PendingJavaScriptResult result = UIUtils.loadJS(new JScriptItem(JS_PATH + "stl_viewer.min.js"));
 		if (afterLoad != null)
 			result.then(afterLoad);

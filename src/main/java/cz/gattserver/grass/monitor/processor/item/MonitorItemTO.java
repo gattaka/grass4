@@ -1,7 +1,7 @@
 package cz.gattserver.grass.monitor.processor.item;
 
-import elemental.json.JsonObject;
-import elemental.json.JsonType;
+
+import tools.jackson.databind.JsonNode;
 
 /**
  * TO popisující stav monitorovaného předmětu
@@ -19,12 +19,12 @@ public abstract class MonitorItemTO {
 		type = this.getClass().getName();
 	}
 
-	public MonitorItemTO(JsonObject jsonObject) {
+	public MonitorItemTO(JsonNode jsonObject) {
 		this();
-		monitorState = MonitorState.valueOf(jsonObject.getString("monitorState"));
-		if (JsonType.NULL == jsonObject.get("stateDetails").getType())
+		monitorState = MonitorState.valueOf(jsonObject.get("monitorState").asText());
+		if (jsonObject.get("stateDetails").isNull())
 			return;
-		stateDetails = jsonObject.getString("stateDetails");
+		stateDetails = jsonObject.get("stateDetails").asText();
 	}
 
 	/**

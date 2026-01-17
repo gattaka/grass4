@@ -2,13 +2,13 @@ package cz.gattserver.grass.core.ui.dialogs;
 
 import java.text.DecimalFormat;
 
+import com.vaadin.flow.component.html.Div;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.ui.components.BaseProgressBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.server.Command;
@@ -21,8 +21,8 @@ public class ProgressDialog extends WebDialog {
 	private static DecimalFormat myFormatter = new DecimalFormat("##0.0");
 
 	private BaseProgressBar progressBar;
-	private Label progressItemLabel;
-	private Label descriptionLabel;
+	private Div progressItemLabel;
+	private Div descriptionLabel;
 	private UI ui;
 
 	public static void runInUI(Command r, UI ui) {
@@ -76,14 +76,14 @@ public class ProgressDialog extends WebDialog {
 		processWindowLayout.setSpacing(true);
 		processWindowLayout.setSizeFull();
 
-		progressItemLabel = new Label("0.0%");
+		progressItemLabel = new Div("0.0%");
 		progressItemLabel.setWidth(null);
 
 		progressBar = new BaseProgressBar();
 		progressBar.setIndeterminate(false);
 		progressBar.setValue(0f);
 
-		descriptionLabel = new Label();
+		descriptionLabel = new Div();
 		descriptionLabel.setWidth(null);
 
 		processWindowLayout.add(progressItemLabel);
@@ -92,5 +92,4 @@ public class ProgressDialog extends WebDialog {
 
 		open();
 	}
-
 }

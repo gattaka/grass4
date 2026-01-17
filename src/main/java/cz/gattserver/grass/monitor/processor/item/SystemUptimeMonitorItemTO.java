@@ -1,6 +1,7 @@
 package cz.gattserver.grass.monitor.processor.item;
 
-import elemental.json.JsonObject;
+
+import tools.jackson.databind.JsonNode;
 
 public class SystemUptimeMonitorItemTO extends MonitorItemTO {
 
@@ -9,11 +10,11 @@ public class SystemUptimeMonitorItemTO extends MonitorItemTO {
 	public SystemUptimeMonitorItemTO() {
 	}
 
-	public SystemUptimeMonitorItemTO(JsonObject jsonObject) {
+	public SystemUptimeMonitorItemTO(JsonNode jsonObject) {
 		super(jsonObject);
 		if (monitorState != MonitorState.SUCCESS)
 			return;
-		stateDetails = jsonObject.getString("stateDetails");
+		stateDetails = jsonObject.get("stateDetails").asText();
 	}
 
 	public String getValue() {

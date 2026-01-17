@@ -1,35 +1,36 @@
 package cz.gattserver.grass.monitor.processor.item;
 
-import elemental.json.JsonObject;
+
+import tools.jackson.databind.JsonNode;
 
 public class JVMThreadsMonitorItemTO extends MonitorItemTO {
 
-	private long count;
-	private long peak;
+    private long count;
+    private long peak;
 
-	public JVMThreadsMonitorItemTO() {
-	}
+    public JVMThreadsMonitorItemTO() {
+    }
 
-	public JVMThreadsMonitorItemTO(JsonObject jsonObject) {
-		super(jsonObject);
-		count = (long) jsonObject.getNumber("count");
-		peak = (long) jsonObject.getNumber("peak");
-	}
+    public JVMThreadsMonitorItemTO(JsonNode jsonObject) {
+        super(jsonObject);
+        count = jsonObject.get("count").asLong();
+        peak = jsonObject.get("peak").asLong();
+    }
 
-	public long getCount() {
-		return count;
-	}
+    public long getCount() {
+        return count;
+    }
 
-	public void setCount(long count) {
-		this.count = count;
-	}
+    public void setCount(long count) {
+        this.count = count;
+    }
 
-	public long getPeak() {
-		return peak;
-	}
+    public long getPeak() {
+        return peak;
+    }
 
-	public void setPeak(long peak) {
-		this.peak = peak;
-	}
+    public void setPeak(long peak) {
+        this.peak = peak;
+    }
 
 }

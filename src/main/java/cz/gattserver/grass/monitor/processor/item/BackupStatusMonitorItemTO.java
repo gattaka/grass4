@@ -1,8 +1,9 @@
 package cz.gattserver.grass.monitor.processor.item;
 
+import tools.jackson.databind.JsonNode;
+
 import java.time.LocalDateTime;
 
-import elemental.json.JsonObject;
 
 public class BackupStatusMonitorItemTO extends MonitorItemTO {
 
@@ -12,9 +13,9 @@ public class BackupStatusMonitorItemTO extends MonitorItemTO {
 	public BackupStatusMonitorItemTO() {
 	}
 
-	public BackupStatusMonitorItemTO(JsonObject jsonObject) {
+	public BackupStatusMonitorItemTO(JsonNode jsonObject) {
 		super(jsonObject);
-		value = jsonObject.getString("value");
+		value = jsonObject.get("value").textValue();
 		// TODO date
 	}
 

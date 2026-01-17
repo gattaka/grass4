@@ -1,65 +1,64 @@
 package cz.gattserver.grass.monitor.processor.item;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
 
 public class DiskStatusMonitorItemTO extends MonitorItemTO {
 
-	private String name;
-	private long total;
-	private long usable;
-	private String mount;
+    private String name;
+    private long total;
+    private long usable;
+    private String mount;
 
-	public DiskStatusMonitorItemTO() {
-	}
+    public DiskStatusMonitorItemTO() {
+    }
 
-	public DiskStatusMonitorItemTO(JsonObject jsonObject) {
-		super(jsonObject);
-		if (monitorState != MonitorState.SUCCESS)
-			return;
-		name = jsonObject.getString("name");
-		mount = jsonObject.getString("mount");
-		total = (long) jsonObject.getNumber("total");
-		usable = (long) jsonObject.getNumber("usable");
-	}
+    public DiskStatusMonitorItemTO(JsonNode jsonObject) {
+        super(jsonObject);
+        if (monitorState != MonitorState.SUCCESS) return;
+        name = jsonObject.get("name").asText();
+        mount = jsonObject.get("mount").asText();
+        total = (long) jsonObject.get("total").asLong();
+        usable = (long) jsonObject.get("usable").asLong();
+    }
 
-	public String getMount() {
-		return mount;
-	}
+    public String getMount() {
+        return mount;
+    }
 
-	public void setMount(String mount) {
-		this.mount = mount;
-	}
+    public void setMount(String mount) {
+        this.mount = mount;
+    }
 
-	public long getTotal() {
-		return total;
-	}
+    public long getTotal() {
+        return total;
+    }
 
-	public void setTotal(long total) {
-		this.total = total;
-	}
+    public void setTotal(long total) {
+        this.total = total;
+    }
 
-	public long getUsable() {
-		return usable;
-	}
+    public long getUsable() {
+        return usable;
+    }
 
-	public void setUsable(long usable) {
-		this.usable = usable;
-	}
+    public void setUsable(long usable) {
+        this.usable = usable;
+    }
 
-	public long getUsed() {
-		return total - usable;
-	}
+    public long getUsed() {
+        return total - usable;
+    }
 
-	public float getUsedRation() {
-		return (float) getUsed() / total;
-	}
+    public float getUsedRation() {
+        return (float) getUsed() / total;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

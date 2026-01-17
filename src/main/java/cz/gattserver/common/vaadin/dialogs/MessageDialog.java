@@ -1,8 +1,8 @@
 package cz.gattserver.common.vaadin.dialogs;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -39,7 +39,7 @@ public class MessageDialog extends WebDialog {
 		horizontalLayout.add(embedded);
 		horizontalLayout.setVerticalComponentAlignment(Alignment.CENTER, embedded);
 
-		Label msgLabel = new Label(labelCaption);
+		Div msgLabel = new Div(labelCaption);
 		msgLabel.setSizeUndefined();
 		horizontalLayout.add(msgLabel);
 

@@ -1,6 +1,7 @@
 package cz.gattserver.grass.monitor.processor.item;
 
-import elemental.json.JsonObject;
+
+import tools.jackson.databind.JsonNode;
 
 public class SystemSwapMonitorItemTO extends MonitorItemTO {
 
@@ -11,13 +12,13 @@ public class SystemSwapMonitorItemTO extends MonitorItemTO {
 	public SystemSwapMonitorItemTO() {
 	}
 
-	public SystemSwapMonitorItemTO(JsonObject jsonObject) {
+	public SystemSwapMonitorItemTO(JsonNode jsonObject) {
 		super(jsonObject);
 		if (monitorState != MonitorState.SUCCESS)
 			return;
-		total = (long) jsonObject.getNumber("total");
-		used = (long) jsonObject.getNumber("used");
-		free = (long) jsonObject.getNumber("free");
+		total =  jsonObject.get("total").asLong();
+		used =  jsonObject.get("used").asLong();
+		free = jsonObject.get("free").asLong();
 	}
 
 	public long getTotal() {

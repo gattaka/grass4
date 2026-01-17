@@ -9,8 +9,7 @@ import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.common.server.URLIdentifierUtils;
 
 @Route("drinks")
-@PageTitle("Nápoje")
-public class DrinksPage extends OneColumnPage implements HasUrlParameter<String> {
+public class DrinksPage extends OneColumnPage implements HasUrlParameter<String>, HasDynamicTitle {
 
 	private static final long serialVersionUID = 2066137985312535506L;
 
@@ -166,4 +165,9 @@ public class DrinksPage extends OneColumnPage implements HasUrlParameter<String>
 			switchBeersTab();
 		}
 	}
+
+    @Override
+    public String getPageTitle() {
+        return "Nápoje";
+    }
 }

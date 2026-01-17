@@ -18,8 +18,7 @@ public class SecurityConfig {
 
     @Bean("grassAuthenticator")
     public AuthenticationProvider authenticator(@Qualifier("grassPasswordEncoder") PasswordEncoder passwordEncoder) {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailService);
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailService);
         provider.setPasswordEncoder(passwordEncoder);
         return provider;
     }

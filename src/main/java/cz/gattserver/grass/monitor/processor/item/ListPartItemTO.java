@@ -1,31 +1,29 @@
 package cz.gattserver.grass.monitor.processor.item;
 
+import tools.jackson.databind.JsonNode;
+
 import java.util.ArrayList;
 import java.util.List;
 
-import elemental.json.JsonArray;
-import elemental.json.JsonObject;
-
 public abstract class ListPartItemTO<T extends MonitorItemTO> extends MonitorItemTO {
 
-	private List<T> items = new ArrayList<T>();
+    private List<T> items = new ArrayList<T>();
 
-	protected abstract T createItem(JsonObject jsonObject);
+    protected abstract T createItem(JsonNode jsonObject);
 
-	public ListPartItemTO() {
-	}
+    public ListPartItemTO() {
+    }
 
-	public ListPartItemTO(JsonObject jsonObject) {
-		super(jsonObject);
-		if (jsonObject == null)
-			return;
-		JsonArray array = jsonObject.getArray("items");
-		for (int i = 0; i < array.length(); i++)
-			items.add(createItem(array.getObject(i)));
-	}
+    public ListPartItemTO(JsonNode jsonObject) {
+        super(jsonObject);
+        if (jsonObject == null) return;
+        JsonNode array = jsonObject.get("items");
+        for (JsonNode node : array)
+            items.add(createItem(node));
+    }
 
-	public List<T> getItems() {
-		return items;
-	}
+    public List<T> getItems() {
+        return items;
+    }
 
 }

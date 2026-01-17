@@ -1,19 +1,19 @@
 package cz.gattserver.grass.monitor.processor.item;
 
-import elemental.json.JsonObject;
+import tools.jackson.databind.JsonNode;
 
 public class SMARTPartItemTO extends ListPartItemTO<SMARTMonitorItemTO> {
 
-	public SMARTPartItemTO() {
-	}
+    public SMARTPartItemTO() {
+    }
 
-	public SMARTPartItemTO(JsonObject jsonObject) {
-		super(jsonObject);
-	}
+    public SMARTPartItemTO(JsonNode jsonObject) {
+        super(jsonObject);
+    }
 
-	@Override
-	protected SMARTMonitorItemTO createItem(JsonObject jsonObject) {
-		return new SMARTMonitorItemTO(jsonObject);
-	}
+    @Override
+    protected SMARTMonitorItemTO createItem(JsonNode jsonObject) {
+        return new SMARTMonitorItemTO(jsonObject);
+    }
 
 }
