@@ -166,8 +166,7 @@ public class LanguageFacadeImpl implements LanguageFacade {
 	public List<StatisticsTO> getStatisticsItems(ItemType type, Long languageId) {
 		List<Object[]> items = type == null ? itemRepository.findStatisticsByLanguage(languageId)
 				: itemRepository.findStatisticsByLanguage(type.ordinal(), languageId);
-		return items.stream().map(o -> new StatisticsTO(((BigInteger) o[1]).intValue(), (Double) o[0]))
+		return items.stream().map(o -> new StatisticsTO(((Long) o[1]).intValue(), (Double) o[0]))
 				.collect(Collectors.toList());
 	}
-
 }
