@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.pages.template;
 
+import com.vaadin.flow.component.dependency.StyleSheet;
 import jakarta.annotation.Resource;
 
 import cz.gattserver.grass.core.exception.GrassPageException;

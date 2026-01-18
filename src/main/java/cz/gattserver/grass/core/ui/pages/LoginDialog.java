@@ -72,7 +72,7 @@ public class LoginDialog extends WebDialog {
             }
         });
         loginBtn.addClickShortcut(Key.ENTER);
-        loginBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        loginBtn.addThemeVariants(ButtonVariant.AURA_PRIMARY);
 
         Button stornoBtn = new Button("Storno", evt -> close());
 

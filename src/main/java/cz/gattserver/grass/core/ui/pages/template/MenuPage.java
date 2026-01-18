@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.server.VaadinServletRequest;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.components.button.InlineButton;
 import cz.gattserver.grass.core.ui.pages.LoginDialog;
 import jakarta.annotation.Resource;
 
@@ -19,6 +20,8 @@ import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.VersionInfoService;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 
@@ -31,6 +34,7 @@ import com.vaadin.flow.server.VaadinRequest;
 public abstract class MenuPage extends GrassPage {
 
     private static final long serialVersionUID = 8095742933880807949L;
+    private static final Logger log = LoggerFactory.getLogger(MenuPage.class);
 
     @Autowired
     protected VersionInfoService versionInfoService;
@@ -159,8 +163,7 @@ public abstract class MenuPage extends GrassPage {
 
         // Přihlášení
         if (!coreACL.isLoggedIn(getUser())) {
-            Button loginBtn = new Button("Přihlásit", e -> new LoginDialog().open());
-            loginBtn.addThemeName("menu-button");
+            InlineButton loginBtn = new InlineButton("Přihlásit",e -> new LoginDialog().open());
             menuRight.add(loginBtn);
         }
 
@@ -170,9 +173,8 @@ public abstract class MenuPage extends GrassPage {
             menuRight.add(new Anchor(getPageURL(settingsPageFactory), "Nastavení"));
 
             // Odhlášení
-            Button logoutBtn = new Button("Odhlásit (" + userInfoDTO.getName() + ")",
+            InlineButton logoutBtn = new InlineButton("Odhlásit (" + userInfoDTO.getName() + ")",
                     e -> securityService.logout(VaadinServletRequest.getCurrent().getHttpServletRequest(), null));
-            logoutBtn.addThemeName("menu-button");
             menuRight.add(logoutBtn);
         }
     }

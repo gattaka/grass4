@@ -105,6 +105,14 @@ h2 {
     font-size: 15pt;
 }
 
+vaadin-dialog::part(title) {
+    font-size: 15pt;
+}
+
+vaadin-dialog::part(header) {
+    padding-bottom: 0;
+}
+
 h3 {
     font-size: 11pt;
 }
@@ -163,239 +171,6 @@ span.label-err {
 
 .tag-labels {
     padding: 0 0 0 15px;
-}
-
-/* Quotes */
-#quotes {
-    width: 790px;
-    height: 16px;
-    text-align: center;
-    margin-left: auto;
-    display: inline-block;
-}
-
-#quotes-menu-item {
-    display: none;
-}
-
-@media only screen and (max-width: 1010px) {
-    #quotes {
-        display: none;
-    }
-
-    #quotes-menu-item {
-        display: inline-block;
-    }
-}
-
-#quotes a, #quotes a:hover {
-    font-family: Tahoma, sans-serif;
-    font-size: 9pt;
-    color: white;
-}
-
-/* Menu */
-#menu {
-    padding: 0 0 2px 0;
-}
-
-@media only screen and (min-width: 1010px) {
-    #menu {
-        width: 990px;
-    }
-}
-
-#menu-wrapper {
-    background-color: #333436;
-    border-top: 1px solid #505154;
-    border-bottom: 1px solid #424246;
-    border-radius: 4px;
-    box-shadow: 0 0px 10px 0px black;
-}
-
-@media only screen and (max-width: 1010px) {
-    #menu-wrapper {
-        border-radius: 0px;
-    }
-}
-
-#menu-wrapper {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 8px 1px 10px;
-}
-
-#menu-wrapper a, #menu-wrapper vaadin-button {
-    color: #d1d3d6;
-    text-shadow: rgba(0, 0, 0, 0.9) 0 1px 0;
-    text-decoration: none;
-    font: 400 14px/1.55 Helvetica, Arial, "lucida grande", tahoma, verdana,
-    arial, sans-serif;
-}
-
-#menu-wrapper a:hover, #menu-wrapper vaadin-button:hover {
-    text-decoration: none;
-    color: white;
-}
-
-#menu-wrapper > div {
-    gap: 8px;
-    display: flex;
-}
-
-
-#menu-wrapper vaadin-button {
-    min-width: 0;
-}
-
-/* Page layout */
-#center-content h2, #right-content h2 {
-    margin-top: var(--lumo-space-m);
-}
-
-#center-content h2:FIRST-CHILD, #right-content h2:FIRST-CHILD {
-    margin-top: 0px;
-}
-
-#main-div {
-    position: relative;
-    min-height: 100vh;
-}
-
-#holder {
-    background-position: bottom right;
-    padding-bottom: 3rem;
-}
-
-#top-holder {
-    position: relative;
-    background: url(/img/headPattern.png);
-    background-repeat: repeat-x;
-}
-
-#top {
-    max-width: 990px;
-    color: black;
-    margin-left: auto;
-    margin-right: auto;
-    margin-bottom: 18px;
-    margin-top: 0;
-}
-
-#logo-line {
-    padding: 25px 0px 0px 0px;
-    height: 48px;
-}
-
-@media only screen and (max-width: 1010px) {
-    #logo-line {
-        padding-left: 15px;
-        padding-right: 15px;
-    }
-}
-
-#homelink {
-    display: inline-block;
-    position: relative;
-    top: 7px;
-}
-
-#top > h1 {
-    display: none;
-}
-
-#content {
-    margin-left: auto;
-    margin-right: auto;
-    max-width: 990px;
-}
-
-#center {
-    width: 990px;
-}
-
-#center-content, #left-content, #right-content {
-    border: 1px solid #b3b3b3;
-}
-
-#bottom {
-    border-top: 1px solid #b3b3b3;
-    border-bottom: 1px solid #b3b3b3;
-}
-
-#center-content, #left-content, #right-content {
-    background-color: #f4f1e6;
-    border-radius: 4px;
-    padding: var(--lumo-space-l);
-    box-sizing: border-box;
-}
-
-@media only screen and (max-width: 1010px) {
-    #center-content, #left-content, #right-content {
-        border-left: none;
-        border-right: none;
-        border-radius: 0;
-    }
-}
-
-@media only screen and (min-width: 1010px) {
-    #left-content {
-        position: sticky;
-        position: -webkit-sticky;
-        top: 15px;
-    }
-}
-
-#left-content {
-    width: 220px;
-    display: inline-block;
-    vertical-align: top;
-}
-
-@media only screen and (max-width: 1010px) {
-    #left-content {
-        width: 100%;
-        margin-bottom: 14px;
-    }
-}
-
-
-#right-content {
-    display: inline-block;
-    width: 100%;
-}
-
-@media only screen and (min-width: 1010px) {
-    #right-content {
-        width: 755px;
-        margin-left: 14px;
-    }
-}
-
-#bottom-holder {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-}
-
-#bottom {
-    clear: both;
-    background-color: #c2dfef;
-    padding: 5px;
-    font-size: 12px;
-    font-family: Verdana, "Verdana CE", Arial, "Arial CE",
-    "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;
-    text-align: center;
-    color: #555555;
-}
-
-#bottom-shadow, #bottom {
-    overflow: hidden;
-    width: auto;
-}
-
-#bottom-shadow {
-    height: 11px;
 }
 
 /* Breadcrumb */
@@ -498,4 +273,12 @@ vaadin-text-field::part(input-field), vaadin-text-area textarea {
 
 #pg-exif-div a:hover {
     color: white;
+}
+
+vaadin-checkbox::part(label) {
+    font-size: var(--vaadin-input-field-label-font-size, var(--lumo-font-size-s));
+}
+
+vaadin-checkbox::part(checkbox) {
+    margin-left: 0;
 }
