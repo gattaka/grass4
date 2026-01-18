@@ -78,7 +78,8 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
                     img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
                     return img;
                 }
-            }, c -> "")).setFlexGrow(0).setWidth("26px").setHeader("").setKey(lockIconBind);
+            }, c -> "")).setFlexGrow(0).setTextAlign(ColumnTextAlign.CENTER).setWidth("31px").setHeader("")
+                    .setKey(lockIconBind);
         }
 
         addColumn(new ComponentRenderer<>(contentNode -> {
@@ -89,13 +90,12 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
         })).setFlexGrow(2).setHeader("Kategorie").setId(nodeBind);
 
         if (!UIUtils.isMobileDevice()) {
-            addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getCreationDate, "d.M.yyyy")).setHeader(
+            addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getCreationDate, "d. M. yyyy")).setHeader(
                             "Vytvořeno").setKey(creationDateBind).setTextAlign(ColumnTextAlign.END).setFlexGrow(0)
                     .setWidth("90px");
-            addColumn(
-                    new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getLastModificationDate, "d.M.yyyy")).setHeader(
-                            "Upraveno").setKey(lastModificationDateBind).setTextAlign(ColumnTextAlign.END).setFlexGrow(0)
-                    .setWidth("90px");
+            addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getLastModificationDate,
+                    "d. M. yyyy")).setHeader("Upraveno").setKey(lastModificationDateBind)
+                    .setTextAlign(ColumnTextAlign.END).setFlexGrow(0).setWidth("90px");
         }
 
         if (dynamicHeight) setHeight(GridUtils.processHeight(countCallback.count(new Query<>())) + "px");

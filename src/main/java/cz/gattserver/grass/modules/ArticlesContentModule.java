@@ -1,7 +1,7 @@
 
 package cz.gattserver.grass.modules;
 
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import org.springframework.stereotype.Component;
@@ -25,7 +25,7 @@ public class ArticlesContentModule implements ContentModule {
 	}
 
 	@Override
-	public StreamResource getContentIcon() {
+	public DownloadHandler getContentIcon() {
 		return ImageIcon.DOCUMENT_16_ICON.createResource();
 	}
 

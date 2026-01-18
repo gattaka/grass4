@@ -6,7 +6,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 
 public class MessageDialog extends WebDialog {
 
@@ -20,7 +20,7 @@ public class MessageDialog extends WebDialog {
 	 * @param imageResource
 	 *            resource ikony okna
 	 */
-	public MessageDialog(String labelCaption, StreamResource imageResource) {
+	public MessageDialog(String labelCaption, DownloadHandler imageResource) {
 		this(labelCaption, null, imageResource);
 	}
 
@@ -30,7 +30,7 @@ public class MessageDialog extends WebDialog {
 	 * @param imageResource
 	 *            resource ikony okna
 	 */
-	public MessageDialog(String labelCaption, String details, StreamResource imageResource) {
+	public MessageDialog(String labelCaption, String details, DownloadHandler imageResource) {
 		HorizontalLayout horizontalLayout = new HorizontalLayout();
 		horizontalLayout.setSpacing(true);
 		addComponent(horizontalLayout);

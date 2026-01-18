@@ -1,6 +1,7 @@
 package cz.gattserver.grass.modules;
 
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
@@ -25,7 +26,7 @@ public class PGModule implements ContentModule {
 	}
 
 	@Override
-	public StreamResource getContentIcon() {
+	public DownloadHandler getContentIcon() {
 		return ImageIcon.IMG_16_ICON.createResource();
 	}
 

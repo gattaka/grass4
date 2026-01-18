@@ -1,6 +1,37 @@
-@import "menu.css";
+@import "header.css";
+@import "layout.css";
 
 /* vaadin AURA theme fix -- z nějakého důvodu dělá 2px vertical scroll na dialogu */
 vaadin-dialog[has-footer]::part(content) {
     padding-bottom: 2px;
+}
+
+/* odebrání protivného výrazného obtažení focus dialogů */
+vaadin-dialog::part(overlay) {
+    outline: none !important;
+}
+
+/* https://vaadin.com/docs/latest/styling/themes/aura/other */
+/* https://vaadin.com/docs/latest/styling/themes/base */
+
+html {
+    --aura-app-background: #d8cda6;
+    --vaadin-radius-m: 4px;
+    --vaadin-grid-background: #f9f9f9;
+    --vaadin-grid-border-color: #ddd;
+}
+
+vaadin-grid a {
+    text-decoration: none;
+    color: #045491;
+}
+vaadin-grid a:hover {
+    text-decoration: underline;
+}
+vaadin-grid {
+    font-size: 10pt;
+}
+vaadin-grid img {
+    margin-bottom: -3px;
+    margin-top: 3px;
 }
