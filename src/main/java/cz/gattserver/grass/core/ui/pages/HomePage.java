@@ -169,8 +169,8 @@ public class HomePage extends OneColumnPage {
 		}
 
 		ButtonLayout tagsMenu = new ButtonLayout();
+        tagsMenu.setId("tag-menu");
 		tagsMenu.setWidthFull();
-		tagsMenu.getStyle().set("text-align", "center");
 		layout.add(tagsMenu);
 
 		char oldChar = 0;
