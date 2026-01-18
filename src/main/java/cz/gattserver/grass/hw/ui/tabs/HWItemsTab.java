@@ -33,121 +33,119 @@ import java.util.Map;
 
 public class HWItemsTab extends Div {
 
-	private static final long serialVersionUID = -5013459007975657195L;
+    private static final long serialVersionUID = -5013459007975657195L;
 
-	@Autowired
-	private HWService hwService;
+    @Autowired
+    private HWService hwService;
 
-	@Autowired
-	private SecurityService securityFacade;
+    @Autowired
+    private SecurityService securityFacade;
 
-	private HWItemsGrid itemsGrid;
+    private HWItemsGrid itemsGrid;
 
-	public HWItemsTab() {
-		SpringContextHelper.inject(this);
+    public HWItemsTab() {
+        SpringContextHelper.inject(this);
 
-		itemsGrid = new HWItemsGrid(to -> navigateToDetail(to.getId()));
+        itemsGrid = new HWItemsGrid(to -> navigateToDetail(to.getId()));
 
-		add(itemsGrid);
+        add(itemsGrid);
 
-		ButtonLayout buttonLayout = new ButtonLayout();
-		add(buttonLayout);
+        ButtonLayout buttonLayout = new ButtonLayout();
+        add(buttonLayout);
 
-		if (securityFacade.getCurrentUser().isAdmin()) {
+        if (securityFacade.getCurrentUser().isAdmin()) {
 
-			// Založení nové položky HW
-			Button newHWBtn = new CreateButton("Přidat", e -> openItemWindow(null));
-			buttonLayout.add(newHWBtn);
+            // Založení nové položky HW
+            Button newHWBtn = new CreateButton("Přidat", e -> openItemWindow(null));
+            buttonLayout.add(newHWBtn);
 
-			// Kopie položky HW
-			Button copyHWBtn = new GridButton<>("Zkopírovat",
-					set -> copyItemWindow(set.iterator().next().getId()), itemsGrid.getGrid());
-			copyHWBtn.setIcon(new Image(ImageIcon.PLUS_16_ICON.createResource(), "image"));
-			buttonLayout.add(copyHWBtn);
-		}
+            // Kopie položky HW
+            Button copyHWBtn = new GridButton<>("Zkopírovat", set -> copyItemWindow(set.iterator().next().getId()),
+                    itemsGrid.getGrid());
+            copyHWBtn.setIcon(ImageIcon.PLUS_16_ICON.createImage("image"));
+            buttonLayout.add(copyHWBtn);
+        }
 
-		// Zobrazení detailů položky HW
-		Button detailsBtn = new GridButton<>("Detail",
-				set -> navigateToDetail(set.iterator().next().getId()), itemsGrid.getGrid());
-		detailsBtn.setIcon(new Image(ImageIcon.CLIPBOARD_16_ICON.createResource(), "image"));
-		buttonLayout.add(detailsBtn);
+        // Zobrazení detailů položky HW
+        Button detailsBtn =
+                new GridButton<>("Detail", set -> navigateToDetail(set.iterator().next().getId()), itemsGrid.getGrid());
+        detailsBtn.setIcon(ImageIcon.CLIPBOARD_16_ICON.createImage("image"));
+        buttonLayout.add(detailsBtn);
 
-		if (securityFacade.getCurrentUser().isAdmin()) {
-			// Oprava údajů existující položky HW
-			Button fixBtn = new GridButton<>("Upravit", set -> openItemWindow(set.iterator().next()),
-					itemsGrid.getGrid());
-			fixBtn.setIcon(new Image(ImageIcon.QUICKEDIT_16_ICON.createResource(), "image"));
-			buttonLayout.add(fixBtn);
+        if (securityFacade.getCurrentUser().isAdmin()) {
+            // Oprava údajů existující položky HW
+            Button fixBtn =
+                    new GridButton<>("Upravit", set -> openItemWindow(set.iterator().next()), itemsGrid.getGrid());
+            fixBtn.setIcon(ImageIcon.QUICKEDIT_16_ICON.createImage("image"));
+            buttonLayout.add(fixBtn);
 
-			// Smazání položky HW
-			Button deleteBtn = new DeleteGridButton<>("Smazat", set -> {
-				HWItemOverviewTO item = set.iterator().next();
-				deleteItem(item);
-			}, itemsGrid.getGrid());
-			buttonLayout.add(deleteBtn);
-		}
-	}
+            // Smazání položky HW
+            Button deleteBtn = new DeleteGridButton<>("Smazat", set -> {
+                HWItemOverviewTO item = set.iterator().next();
+                deleteItem(item);
+            }, itemsGrid.getGrid());
+            buttonLayout.add(deleteBtn);
+        }
+    }
 
-	private void deleteItem(HWItemOverviewTO item) {
-		try {
-			hwService.deleteHWItem(item.getId());
-			populate();
-		} catch (Exception ex) {
-			new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
-		}
-	}
+    private void deleteItem(HWItemOverviewTO item) {
+        try {
+            hwService.deleteHWItem(item.getId());
+            populate();
+        } catch (Exception ex) {
+            new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
+        }
+    }
 
-	private void openItemWindow(HWItemOverviewTO hwItemOverviewTO) {
-		HWItemTO hwItem = null;
-		if (hwItemOverviewTO != null)
-			hwItem = hwService.getHWItem(hwItemOverviewTO.getId());
-		new HWItemEditDialog(hwItem == null ? null : hwItem.getId(), to -> {
-			populate();
-			HWItemOverviewTO filterTO = new HWItemOverviewTO();
-			filterTO.setId(to.getId());
-			itemsGrid.getGrid().select(filterTO);
-			if (hwItemOverviewTO == null)
-				navigateToDetail(to.getId());
-		}).open();
-	}
+    private void openItemWindow(HWItemOverviewTO hwItemOverviewTO) {
+        HWItemTO hwItem = null;
+        if (hwItemOverviewTO != null) hwItem = hwService.getHWItem(hwItemOverviewTO.getId());
+        new HWItemEditDialog(hwItem == null ? null : hwItem.getId(), to -> {
+            populate();
+            HWItemOverviewTO filterTO = new HWItemOverviewTO();
+            filterTO.setId(to.getId());
+            itemsGrid.getGrid().select(filterTO);
+            if (hwItemOverviewTO == null) navigateToDetail(to.getId());
+        }).open();
+    }
 
-	private void copyItemWindow(Long id) {
-		Long newId = hwService.copyHWItem(id);
-		populate();
-		HWItemOverviewTO newTO = new HWItemOverviewTO();
-		newTO.setId(newId);
-		itemsGrid.getGrid().select(newTO);
-		navigateToDetail(newId);
-	}
+    private void copyItemWindow(Long id) {
+        Long newId = hwService.copyHWItem(id);
+        populate();
+        HWItemOverviewTO newTO = new HWItemOverviewTO();
+        newTO.setId(newId);
+        itemsGrid.getGrid().select(newTO);
+        navigateToDetail(newId);
+    }
 
-	public void navigateToDetail(Long id) {
-		Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(itemsGrid.getFilterTO());
-		UI.getCurrent().navigate(HWPage.class, id, QueryParameters.simple(filterQuery));
-	}
+    public void navigateToDetail(Long id) {
+        Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(itemsGrid.getFilterTO());
+        UI.getCurrent().navigate(HWPage.class, id, QueryParameters.simple(filterQuery));
+    }
 
-	public void openDetailWindow(Long id) {
-		new HWItemDetailsDialog(HWItemsTab.this, id).setOnRefreshListener(to ->
-				itemsGrid.getGrid().getSelectedItems().forEach(item -> {
-					if (item.getId().equals(id)) {
-						item.setName(to.getName());
-						item.setState(to.getState());
-						item.setUsedInName(to.getUsedInName());
-						item.setSupervizedFor(to.getSupervizedFor());
-						item.setPrice(to.getPrice());
-						item.setPurchaseDate(to.getPurchaseDate());
-					}
-				})).open();
-	}
+    public void openDetailWindow(Long id) {
+        new HWItemDetailsDialog(HWItemsTab.this, id).setOnRefreshListener(
+                to -> itemsGrid.getGrid().getSelectedItems().forEach(item -> {
+                    if (item.getId().equals(id)) {
+                        item.setName(to.getName());
+                        item.setState(to.getState());
+                        item.setUsedInName(to.getUsedInName());
+                        item.setSupervizedFor(to.getSupervizedFor());
+                        item.setPrice(to.getPrice());
+                        item.setPurchaseDate(to.getPurchaseDate());
+                    }
+                })).open();
+    }
 
-	public void populate() {
-		itemsGrid.populate();
-	}
+    public void populate() {
+        itemsGrid.populate();
+    }
 
-	public void select(Long idParameter) {
-		itemsGrid.selectAndScroll(idParameter);
-	}
+    public void select(Long idParameter) {
+        itemsGrid.selectAndScroll(idParameter);
+    }
 
-	public void search(HWFilterTO filterTO) {
-		itemsGrid.setFilterTO(filterTO);
-	}
+    public void search(HWFilterTO filterTO) {
+        itemsGrid.setFilterTO(filterTO);
+    }
 }

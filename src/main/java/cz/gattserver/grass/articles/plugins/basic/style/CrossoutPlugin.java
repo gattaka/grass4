@@ -34,7 +34,7 @@ public class CrossoutPlugin extends AbstractStylePlugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, PLUGIN_FAMILY)
-				.setImageAsThemeResource("basic/img/cross_16.png").build();
+				.setImage("basic/img/cross_16.png").build();
 	}
 
 }

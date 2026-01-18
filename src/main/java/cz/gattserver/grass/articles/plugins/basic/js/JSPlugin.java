@@ -28,6 +28,6 @@ public class JSPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "HTML").setDescription(DESCRIPTION)
-				.setImageAsThemeResource("basic/img/js_16.png").build();
+				.setImage("basic/img/js_16.png").build();
 	}
 }

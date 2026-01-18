@@ -34,7 +34,7 @@ public class LeftAlignPlugin extends AbstractStylePlugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, AbstractStylePlugin.PLUGIN_FAMILY)
-				.setImageAsThemeResource("basic/img/algnl_16.png").build();
+				.setImage("basic/img/algnl_16.png").build();
 	}
 
 }

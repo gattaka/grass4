@@ -29,6 +29,6 @@ public class SourcesPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "Šablony").setDescription("Zdroje")
-				.setImageAsThemeResource(IMAGE_PATH).build();
+				.setImage(IMAGE_PATH).build();
 	}
 }

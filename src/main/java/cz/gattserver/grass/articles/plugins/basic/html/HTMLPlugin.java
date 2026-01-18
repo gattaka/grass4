@@ -28,6 +28,6 @@ public class HTMLPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "HTML").setDescription(DESCRIPTION)
-				.setImageAsThemeResource("basic/img/htmlxml_16.png").build();
+				.setImage("basic/img/htmlxml_16.png").build();
 	}
 }

@@ -29,6 +29,6 @@ public class AbbrPlugin implements Plugin {
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "HTML").setPrefix("[" + TAG + "]")
 				.setSuffix("[" + TITLE_TAG + "][/" + TITLE_TAG + "][/" + TAG + "]")
-				.setImageAsThemeResource("basic/img/abbr_16.png").build();
+				.setImage("basic/img/abbr_16.png").build();
 	}
 }

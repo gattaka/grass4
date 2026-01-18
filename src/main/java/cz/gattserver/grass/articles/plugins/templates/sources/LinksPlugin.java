@@ -14,21 +14,21 @@ import org.springframework.stereotype.Component;
 @Component
 public class LinksPlugin implements Plugin {
 
-	private static final String TAG = "LINKS";
+    private static final String TAG = "LINKS";
 
-	@Override
-	public String getTag() {
-		return TAG;
-	}
+    @Override
+    public String getTag() {
+        return TAG;
+    }
 
-	@Override
-	public Parser getParser() {
-		return new SourcesParser(TAG, new CombinedFaviconObtainStrategy(), false, false);
-	}
+    @Override
+    public Parser getParser() {
+        return new SourcesParser(TAG, new CombinedFaviconObtainStrategy(), false, false);
+    }
 
-	@Override
-	public EditorButtonResourcesTO getEditorButtonResources() {
-		return new EditorButtonResourcesTOBuilder(TAG, "Šablony").setDescription("Odkazy")
-				.setImageResource(ImageIcon.GLOBE_16_ICON.createResource()).build();
-	}
+    @Override
+    public EditorButtonResourcesTO getEditorButtonResources() {
+        return new EditorButtonResourcesTOBuilder(TAG, "Šablony").setDescription("Odkazy")
+                .setImage(ImageIcon.GLOBE_16_ICON.createImage()).build();
+    }
 }

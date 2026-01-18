@@ -28,6 +28,6 @@ public class JSLibPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "JS Libs").setPrefix("[" + TAG + "]").setSuffix("[/" + TAG + "]")
-				.setDescription("JS lib").setImageAsThemeResource(IMAGE_PATH).build();
+				.setDescription("JS lib").setImage(IMAGE_PATH).build();
 	}
 }

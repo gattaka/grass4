@@ -35,6 +35,6 @@ public class GJSLibPlotterPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "JS Libs").setPrefix("[" + TAG + "]").setSuffix("[/" + TAG + "]")
-				.setDescription("Plotter").setImageAsThemeResource(IMAGE_PATH).build();
+				.setDescription("Plotter").setImage(IMAGE_PATH).build();
 	}
 }

@@ -35,6 +35,6 @@ public class GJSLibNeuralNetPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "JS Libs").setPrefix("[" + TAG + "]").setSuffix("[/" + TAG + "]")
-				.setDescription("NNet").setImageAsThemeResource(IMAGE_PATH).build();
+				.setDescription("NNet").setImage(IMAGE_PATH).build();
 	}
 }

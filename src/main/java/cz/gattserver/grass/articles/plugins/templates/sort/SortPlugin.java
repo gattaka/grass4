@@ -28,6 +28,6 @@ public class SortPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "Šablony").setDescription("Řazení")
-				.setImageAsThemeResource(IMAGE_PATH).build();
+				.setImage(IMAGE_PATH).build();
 	}
 }

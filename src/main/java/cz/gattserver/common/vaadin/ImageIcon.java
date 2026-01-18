@@ -1,5 +1,6 @@
 package cz.gattserver.common.vaadin;
 
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.streams.DownloadHandler;
 
 public enum ImageIcon {
@@ -193,17 +194,21 @@ public enum ImageIcon {
      */
     WARNING_16_ICON("warning_16.png");
 
-    private String image;
+    private String imageName;
 
-    public String getImage() {
-        return image;
+    public String getImageName() {
+        return imageName;
     }
 
     ImageIcon(String name) {
-        this.image = name;
+        this.imageName = name;
     }
 
-    public DownloadHandler createResource() {
-        return DownloadHandler.forClassResource(ImageIcon.class, "/static/VAADIN/icons/" + image);
+    public Image createImage(String alt) {
+        return new Image("/icons/" + imageName, alt);
+    }
+
+    public Image createImage() {
+        return createImage(imageName);
     }
 }

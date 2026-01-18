@@ -10,6 +10,8 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.ImageIcon;
@@ -44,248 +46,241 @@ import cz.gattserver.grass.hw.service.HWService;
 
 public class HWItemsGrid extends Div {
 
-	private static final long serialVersionUID = -6094970451516214174L;
+    private static final long serialVersionUID = -6094970451516214174L;
 
-	private static final String NAME_BIND = "nameBind";
-	private static final String USED_IN_BIND = "usedInBind";
-	private static final String SUPERVIZED_FOR_BIND = "supervizedForBind";
-	private static final String PRICE_BIND = "priceBind";
-	private static final String STATE_BIND = "stateBind";
-	private static final String PURCHASE_DATE_BIND = "purchaseDateBind";
+    private static final String NAME_BIND = "nameBind";
+    private static final String USED_IN_BIND = "usedInBind";
+    private static final String SUPERVIZED_FOR_BIND = "supervizedForBind";
+    private static final String PRICE_BIND = "priceBind";
+    private static final String STATE_BIND = "stateBind";
+    private static final String PURCHASE_DATE_BIND = "purchaseDateBind";
 
-	private static final String JS_DIV_ID = "js-div";
+    private static final String JS_DIV_ID = "js-div";
 
-	@Autowired
-	private HWService hwService;
+    @Autowired
+    private HWService hwService;
 
-	@Autowired
-	private SecurityService securityFacade;
+    @Autowired
+    private SecurityService securityFacade;
 
-	private Grid<HWItemOverviewTO> grid;
-	private TokenField hwTypesFilter;
+    private Grid<HWItemOverviewTO> grid;
+    private TokenField hwTypesFilter;
 
-	private Map<String, HWItemTypeTO> tokenMap = new HashMap<>();
-	private Map<Long, Integer> indexMap = new HashMap<>();
-	private HWFilterTO filterTO;
+    private Map<String, HWItemTypeTO> tokenMap = new HashMap<>();
+    private Map<Long, Integer> indexMap = new HashMap<>();
+    private HWFilterTO filterTO;
 
-	private TextField nameField;
-	private ComboBox<HWItemState> stavCombo;
-	private TextField soucastField;
-	private TextField spravovanField;
+    private TextField nameField;
+    private ComboBox<HWItemState> stavCombo;
+    private TextField soucastField;
+    private TextField spravovanField;
 
-	public HWItemsGrid(Consumer<HWItemOverviewTO> onSelect) {
-		SpringContextHelper.inject(this);
+    public HWItemsGrid(Consumer<HWItemOverviewTO> onSelect) {
+        SpringContextHelper.inject(this);
 
-		Div iconDiv = new Div();
-		iconDiv.setVisible(false);
-		iconDiv.getStyle().set("position", "absolute").set("background", "white").set("padding", "5px")
-				.set("border-radius", "3px").set("border", "1px solid #d5d5d5").set("z-index", "999");
-		add(iconDiv);
+        Div iconDiv = new Div();
+        iconDiv.setVisible(false);
+        iconDiv.getStyle().set("position", "absolute").set("background", "white").set("padding", "5px")
+                .set("border-radius", "3px").set("border", "1px solid #d5d5d5").set("z-index", "999");
+        add(iconDiv);
 
-		Div callbackDiv = new Div() {
-			private static final long serialVersionUID = -7319482130016598549L;
+        Div callbackDiv = new Div() {
+            private static final long serialVersionUID = -7319482130016598549L;
 
-			@ClientCallable
-			private void imgShowCallback(Long id, double x, double y) {
-				InputStream iconIs = hwService.getHWItemIconMiniFileInputStream(id);
-				if (iconIs == null)
-					return;
-				iconDiv.setVisible(true);
-				iconDiv.removeAll();
-				String name = "hw-item-" + id;
-				Image img = new Image(new StreamResource(name, () -> iconIs), name);
-				iconDiv.add(img);
-				iconDiv.getStyle().set("left", (15 + x) + "px").set("top", y + "px");
-				img.setMaxWidth("200px");
-				img.setMaxHeight("200px");
-			}
+            @ClientCallable
+            private void imgShowCallback(Long id, double x, double y) {
+                InputStream iconIs = hwService.getHWItemIconMiniFileInputStream(id);
+                if (iconIs == null) return;
+                iconDiv.setVisible(true);
+                iconDiv.removeAll();
+                String name = "hw-item-" + id;
+                Image img =
+                        new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(iconIs, name, null, -1)),
+                                name);
+                iconDiv.add(img);
+                iconDiv.getStyle().set("left", (15 + x) + "px").set("top", y + "px");
+                img.setMaxWidth("200px");
+                img.setMaxHeight("200px");
+            }
 
-			@ClientCallable
-			private void imgHideCallback() {
-				iconDiv.setVisible(false);
-			}
-		};
-		callbackDiv.setId(JS_DIV_ID);
-		add(callbackDiv);
+            @ClientCallable
+            private void imgHideCallback() {
+                iconDiv.setVisible(false);
+            }
+        };
+        callbackDiv.setId(JS_DIV_ID);
+        add(callbackDiv);
 
-		filterTO = new HWFilterTO();
+        filterTO = new HWFilterTO();
 
-		// Filtr na typy HW není veřejný, aby nenapovídal, co vše host nevidí
-		if (securityFacade.getCurrentUser().isAdmin()) {
-			for (HWItemTypeTO type : hwService.getAllHWTypes())
-				tokenMap.put(type.getName(), type);
+        // Filtr na typy HW není veřejný, aby nenapovídal, co vše host nevidí
+        if (securityFacade.getCurrentUser().isAdmin()) {
+            for (HWItemTypeTO type : hwService.getAllHWTypes())
+                tokenMap.put(type.getName(), type);
 
-			hwTypesFilter = new TokenField(tokenMap.keySet());
-			hwTypesFilter.getInputField().setWidth("200px");
-			hwTypesFilter.addTokenAddListener(token -> populate());
-			hwTypesFilter.addTokenRemoveListener(e -> populate());
-			hwTypesFilter.setAllowNewItems(false);
-			hwTypesFilter.getInputField().setPlaceholder("Filtrovat dle typu hw");
-			add(hwTypesFilter);
-		}
+            hwTypesFilter = new TokenField(tokenMap.keySet());
+            hwTypesFilter.getInputField().setWidth("200px");
+            hwTypesFilter.addTokenAddListener(token -> populate());
+            hwTypesFilter.addTokenRemoveListener(e -> populate());
+            hwTypesFilter.setAllowNewItems(false);
+            hwTypesFilter.getInputField().setPlaceholder("Filtrovat dle typu hw");
+            add(hwTypesFilter);
+        }
 
-		// Tabulka HW
-		grid = new Grid<>() {
-			@AllowInert
-			@ClientCallable
-			private void scrollToId(Long id) {
-				onGridScrollToId(id);
-			}
-		};
-		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-		UIUtils.applyGrassDefaultStyle(grid);
-		grid.setSelectionMode(SelectionMode.SINGLE);
-		grid.setWidthFull();
-		grid.setHeight("480px");
+        // Tabulka HW
+        grid = new Grid<>() {
+            @AllowInert
+            @ClientCallable
+            private void scrollToId(Long id) {
+                onGridScrollToId(id);
+            }
+        };
+        grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        UIUtils.applyGrassDefaultStyle(grid);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        grid.setWidthFull();
+        grid.setHeight("480px");
 
-		grid.addColumn(new IconRenderer<>(c -> {
-			ImageIcon ii = HWUIUtils.chooseImageIcon(c);
-			if (ii != null) {
-				Image img = new Image(ii.createResource(), c.getState().getName());
-				img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
-				img.setTitle(c.getState().getName());
-				return img;
-			} else {
-				return new Span();
-			}
-		}, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
+        grid.addColumn(new IconRenderer<>(c -> {
+            ImageIcon ii = HWUIUtils.chooseImageIcon(c);
+            if (ii != null) {
+                Image img = ii.createImage(c.getState().getName());
+                img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
+                img.setTitle(c.getState().getName());
+                return img;
+            } else {
+                return new Span();
+            }
+        }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
-		Column<HWItemOverviewTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
-			Long id = to.getId();
-			Button button = new Button(to.getName(), e ->
-					onSelect.accept(hwService.getHWOverviewItem(id))
-			);
-			//<theme-editor-local-classname>
-			button.addClassName("h-w-items-grid-button-1");
-			button.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-			button.getElement().setAttribute("onmouseover", "let bound = document.body.getBoundingClientRect(); " +
-					"document.getElementById(\""
-					+ JS_DIV_ID + "\").$server.imgShowCallback(\"" + id + "\", event.clientX - bound.x, event" +
-					".clientY - bound.y)");
-			button.getElement().setAttribute("onmouseout", "document.getElementById(\"" + JS_DIV_ID + "\").$server" +
-					".imgHideCallback()");
-			return button;
-		})).setHeader("Název").setSortable(true).setKey(NAME_BIND).setResizable(true);
+        Column<HWItemOverviewTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
+            Long id = to.getId();
+            Button button = new Button(to.getName(), e -> onSelect.accept(hwService.getHWOverviewItem(id)));
+            //<theme-editor-local-classname>
+            button.addClassName("h-w-items-grid-button-1");
+            button.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+            button.getElement().setAttribute("onmouseover",
+                    "let bound = document.body.getBoundingClientRect(); " + "document.getElementById(\"" + JS_DIV_ID +
+                            "\").$server.imgShowCallback(\"" + id + "\", event.clientX - bound.x, event" +
+                            ".clientY - bound.y)");
+            button.getElement().setAttribute("onmouseout",
+                    "document.getElementById(\"" + JS_DIV_ID + "\").$server" + ".imgHideCallback()");
+            return button;
+        })).setHeader("Název").setSortable(true).setKey(NAME_BIND).setResizable(true);
 
-		// kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
-		// nový objekt a dá se mu akorát ID, které se porovnává) aplikace
-		// nespadla na NPE -- což je trochu zvláštní, protože ve skutečnosti
-		// žádný majetek nemá stav null.
-		Column<HWItemOverviewTO> stateColumn = grid
-				.addColumn(hw -> hw.getState() == null ? "" : hw.getState().getName()).setHeader("Stav")
-				.setKey(STATE_BIND).setWidth("120px").setFlexGrow(0).setSortable(true);
-		Column<HWItemOverviewTO> usedInColumn = grid.addColumn(HWItemOverviewTO::getUsedInName).setKey(USED_IN_BIND)
-				.setHeader("Je součástí").setWidth("120px").setFlexGrow(0).setSortable(true);
-		Column<HWItemOverviewTO> supervizedColumn = grid.addColumn(HWItemOverviewTO::getSupervizedFor)
-				.setKey(SUPERVIZED_FOR_BIND).setHeader("Spravováno pro").setWidth("120px").setFlexGrow(0)
-				.setSortable(true);
-		if (securityFacade.getCurrentUser().isAdmin()) {
-			grid.addColumn(hw -> FieldUtils.formatMoney(hw.getPrice())).setHeader("Cena").setKey(PRICE_BIND)
-					.setTextAlign(ColumnTextAlign.END).setWidth("100px").setFlexGrow(0).setSortable(true);
-		}
-		grid.addColumn(new LocalDateRenderer<>(HWItemOverviewTO::getPurchaseDate, "d.M.yyyy"))
-				.setHeader("Získáno").setKey(PURCHASE_DATE_BIND).setTextAlign(ColumnTextAlign.END).setWidth("80px")
-				.setFlexGrow(0).setSortable(true);
+        // kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
+        // nový objekt a dá se mu akorát ID, které se porovnává) aplikace
+        // nespadla na NPE -- což je trochu zvláštní, protože ve skutečnosti
+        // žádný majetek nemá stav null.
+        Column<HWItemOverviewTO> stateColumn =
+                grid.addColumn(hw -> hw.getState() == null ? "" : hw.getState().getName()).setHeader("Stav")
+                        .setKey(STATE_BIND).setWidth("120px").setFlexGrow(0).setSortable(true);
+        Column<HWItemOverviewTO> usedInColumn =
+                grid.addColumn(HWItemOverviewTO::getUsedInName).setKey(USED_IN_BIND).setHeader("Je součástí")
+                        .setWidth("120px").setFlexGrow(0).setSortable(true);
+        Column<HWItemOverviewTO> supervizedColumn =
+                grid.addColumn(HWItemOverviewTO::getSupervizedFor).setKey(SUPERVIZED_FOR_BIND)
+                        .setHeader("Spravováno pro").setWidth("120px").setFlexGrow(0).setSortable(true);
+        if (securityFacade.getCurrentUser().isAdmin()) {
+            grid.addColumn(hw -> FieldUtils.formatMoney(hw.getPrice())).setHeader("Cena").setKey(PRICE_BIND)
+                    .setTextAlign(ColumnTextAlign.END).setWidth("100px").setFlexGrow(0).setSortable(true);
+        }
+        grid.addColumn(new LocalDateRenderer<>(HWItemOverviewTO::getPurchaseDate, "d.M.yyyy")).setHeader("Získáno")
+                .setKey(PURCHASE_DATE_BIND).setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0)
+                .setSortable(true);
 
-		HeaderRow filteringHeader = grid.appendHeaderRow();
+        HeaderRow filteringHeader = grid.appendHeaderRow();
 
-		// Název
-		nameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
-			filterTO.setName(e.getValue());
-			populate();
-		});
+        // Název
+        nameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
+            filterTO.setName(e.getValue());
+            populate();
+        });
 
-		// Stav
-		stavCombo = UIUtils.addHeaderComboBox(filteringHeader.getCell(stateColumn),
-				HWItemState.class, HWItemState::getName, e -> {
-					filterTO.setState(e.getValue());
-					populate();
-				});
+        // Stav
+        stavCombo =
+                UIUtils.addHeaderComboBox(filteringHeader.getCell(stateColumn), HWItemState.class, HWItemState::getName,
+                        e -> {
+                            filterTO.setState(e.getValue());
+                            populate();
+                        });
 
-		// Je součástí
-		soucastField = UIUtils.addHeaderTextField(filteringHeader.getCell(usedInColumn), e -> {
-			filterTO.setUsedIn(e.getValue());
-			populate();
-		});
+        // Je součástí
+        soucastField = UIUtils.addHeaderTextField(filteringHeader.getCell(usedInColumn), e -> {
+            filterTO.setUsedIn(e.getValue());
+            populate();
+        });
 
-		// Spravován pro
-		spravovanField = UIUtils.addHeaderTextField(filteringHeader.getCell(supervizedColumn), e -> {
-			filterTO.setSupervizedFor(e.getValue());
-			populate();
-		});
+        // Spravován pro
+        spravovanField = UIUtils.addHeaderTextField(filteringHeader.getCell(supervizedColumn), e -> {
+            filterTO.setSupervizedFor(e.getValue());
+            populate();
+        });
 
-		populate();
-		grid.sort(Arrays.asList(new GridSortOrder<>(nameColumn, SortDirection.ASCENDING)));
+        populate();
+        grid.sort(Arrays.asList(new GridSortOrder<>(nameColumn, SortDirection.ASCENDING)));
 
-		add(grid);
-	}
+        add(grid);
+    }
 
-	public void populate() {
-		if (!securityFacade.getCurrentUser().isAdmin())
-			filterTO.setPublicItem(true);
+    public void populate() {
+        if (!securityFacade.getCurrentUser().isAdmin()) filterTO.setPublicItem(true);
 
-		if (hwTypesFilter != null)
-			filterTO.setTypes(hwTypesFilter.getValues());
+        if (hwTypesFilter != null) filterTO.setTypes(hwTypesFilter.getValues());
 
-		if (grid.getDataProvider() == null || !(grid.getDataProvider() instanceof CallbackDataProvider)) {
-			FetchCallback<HWItemOverviewTO, HWItemOverviewTO> fetchCallback = q -> {
-				OrderSpecifier<?>[] order = QuerydslUtil.transformOrdering(q.getSortOrders(),
-						column -> switch (column) {
-							case PRICE_BIND -> "price";
-							case STATE_BIND -> "state";
-							case PURCHASE_DATE_BIND -> "purchaseDate";
-							case NAME_BIND -> "name";
-							case USED_IN_BIND -> "usedIn";
-							case SUPERVIZED_FOR_BIND -> "supervizedFor";
-							default -> column;
-						});
-				// potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
-				// jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
-				List<Long> ids = hwService.getHWItemIds(filterTO, order);
-				int index = 0;
-				for (Long id : ids)
-					indexMap.put(id, index++);
-				return hwService.getHWItems(filterTO, q.getOffset(), q.getLimit(), order).stream();
-			};
-			CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback = q -> hwService.countHWItems(filterTO);
-			grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
-		} else {
-			grid.getDataProvider().refreshAll();
-		}
-	}
+        if (grid.getDataProvider() == null || !(grid.getDataProvider() instanceof CallbackDataProvider)) {
+            FetchCallback<HWItemOverviewTO, HWItemOverviewTO> fetchCallback = q -> {
+                OrderSpecifier<?>[] order =
+                        QuerydslUtil.transformOrdering(q.getSortOrders(), column -> switch (column) {
+                            case PRICE_BIND -> "price";
+                            case STATE_BIND -> "state";
+                            case PURCHASE_DATE_BIND -> "purchaseDate";
+                            case NAME_BIND -> "name";
+                            case USED_IN_BIND -> "usedIn";
+                            case SUPERVIZED_FOR_BIND -> "supervizedFor";
+                            default -> column;
+                        });
+                // potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
+                // jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
+                List<Long> ids = hwService.getHWItemIds(filterTO, order);
+                int index = 0;
+                for (Long id : ids)
+                    indexMap.put(id, index++);
+                return hwService.getHWItems(filterTO, q.getOffset(), q.getLimit(), order).stream();
+            };
+            CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback = q -> hwService.countHWItems(filterTO);
+            grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
+        } else {
+            grid.getDataProvider().refreshAll();
+        }
+    }
 
-	public void selectAndScroll(Long id) {
-		HWItemOverviewTO to = new HWItemOverviewTO();
-		to.setId(id);
-		grid.select(to);
-		grid.getElement().callJsFunction("$server.scrollToId", to.getId().toString());
-	}
+    public void selectAndScroll(Long id) {
+        HWItemOverviewTO to = new HWItemOverviewTO();
+        to.setId(id);
+        grid.select(to);
+        grid.getElement().callJsFunction("$server.scrollToId", to.getId().toString());
+    }
 
-	private void onGridScrollToId(Long id) {
-		Integer index = indexMap.get(id);
-		if (index != null)
-			grid.scrollToIndex(index);
-	}
+    private void onGridScrollToId(Long id) {
+        Integer index = indexMap.get(id);
+        if (index != null) grid.scrollToIndex(index);
+    }
 
-	public Grid<HWItemOverviewTO> getGrid() {
-		return grid;
-	}
+    public Grid<HWItemOverviewTO> getGrid() {
+        return grid;
+    }
 
-	public HWFilterTO getFilterTO() {
-		return filterTO;
-	}
+    public HWFilterTO getFilterTO() {
+        return filterTO;
+    }
 
-	public void setFilterTO(HWFilterTO filterTO) {
-		if (filterTO.getName() != null)
-			nameField.setValue(filterTO.getName());
-		if (filterTO.getState() != null)
-			stavCombo.setValue(filterTO.getState());
-		if (filterTO.getUsedIn() != null)
-			soucastField.setValue(filterTO.getUsedIn());
-		if (filterTO.getSupervizedFor() != null)
-			spravovanField.setValue(filterTO.getSupervizedFor());
+    public void setFilterTO(HWFilterTO filterTO) {
+        if (filterTO.getName() != null) nameField.setValue(filterTO.getName());
+        if (filterTO.getState() != null) stavCombo.setValue(filterTO.getState());
+        if (filterTO.getUsedIn() != null) soucastField.setValue(filterTO.getUsedIn());
+        if (filterTO.getSupervizedFor() != null) spravovanField.setValue(filterTO.getSupervizedFor());
 
-		if (hwTypesFilter != null && filterTO.getTypes() != null)
-			hwTypesFilter.setValues(filterTO.getTypes());
-	}
+        if (hwTypesFilter != null && filterTO.getTypes() != null) hwTypesFilter.setValues(filterTO.getTypes());
+    }
 }

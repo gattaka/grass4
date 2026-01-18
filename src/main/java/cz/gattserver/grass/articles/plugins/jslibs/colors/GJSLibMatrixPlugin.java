@@ -35,6 +35,6 @@ public class GJSLibMatrixPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "JS Libs").setPrefix("[" + TAG + "]").setSuffix("[/" + TAG + "]")
-				.setDescription("Matrix").setImageAsThemeResource(IMAGE_PATH).build();
+				.setDescription("Matrix").setImage(IMAGE_PATH).build();
 	}
 }

@@ -33,6 +33,6 @@ public abstract class AbstractListPlugin implements Plugin {
 
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
-		return new EditorButtonResourcesTOBuilder(tag, "HTML").setImageAsThemeResource(image).build();
+		return new EditorButtonResourcesTOBuilder(tag, "HTML").setImage(image).build();
 	}
 }

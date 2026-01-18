@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.modules;
 
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 
@@ -33,7 +34,7 @@ public interface ContentModule {
 	 * 
 	 * @return cesta k ikoně obsahu
 	 */
-    DownloadHandler getContentIcon();
+    Image getContentIcon();
 
 	/**
 	 * Vrátí identifikátor služby obsahu

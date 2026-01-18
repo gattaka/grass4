@@ -36,20 +36,19 @@ public class NewContentNodeGrid extends Grid<ContentModule> {
 		List<ContentModule> contentServices = serviceHolder.getContentModules();
 		setItems(contentServices);
 
-		addColumn(new IconRenderer<ContentModule>(c -> {
-			Image img = new Image(c.getContentIcon(), "");
+		addColumn(new IconRenderer<>(c -> {
+			Image img = c.getContentIcon();
 			img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
 			return img;
 		}, c -> "")).setHeader("").setFlexGrow(0).setWidth("28px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
 				.setKey(iconBind);
 
-		addColumn(new ComponentRenderer<Anchor, ContentModule>(c -> {
-			String url = UIUtils.getPageURL(c.getContentEditorPageFactory(), DefaultContentOperations.NEW.toString(),
-					URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
-			return new Anchor(url, c.getCreateNewContentLabel());
-		})).setHeader("Obsah").setKey(nameBind);
+		addColumn(new ComponentRenderer<>(c -> {
+            String url = UIUtils.getPageURL(c.getContentEditorPageFactory(), DefaultContentOperations.NEW.toString(),
+                    URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
+            return new Anchor(url, c.getCreateNewContentLabel());
+        })).setHeader("Obsah").setKey(nameBind);
 
 		setHeight(GridUtils.processHeight(contentServices.size()) + "px");
 	}
-
 }

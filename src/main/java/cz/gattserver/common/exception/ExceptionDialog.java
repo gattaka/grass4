@@ -10,11 +10,10 @@ public class ExceptionDialog extends MessageDialog {
 
 	public ExceptionDialog(Throwable throwable) {
 		super("Neočekávaná systémová chyba", ExceptionUtils.getStackTrace(throwable),
-				ImageIcon.DELETE_16_ICON.createResource());
+				ImageIcon.DELETE_16_ICON.createImage());
 		layout.addClassName("error-layout");
 		detailsArea.addClassName("error-text-field");
 		detailsArea.setHeight("500px");
 		setWidth("1200px");
 	}
-
 }

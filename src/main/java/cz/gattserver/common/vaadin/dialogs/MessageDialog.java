@@ -17,27 +17,26 @@ public class MessageDialog extends WebDialog {
 	/**
 	 * @param labelCaption
 	 *            obsah zprávy v okně
-	 * @param imageResource
-	 *            resource ikony okna
+	 * @param image
+	 *            ikona okna
 	 */
-	public MessageDialog(String labelCaption, DownloadHandler imageResource) {
-		this(labelCaption, null, imageResource);
+	public MessageDialog(String labelCaption, Image image) {
+		this(labelCaption, null, image);
 	}
 
 	/**
 	 * @param labelCaption
 	 *            obsah zprávy v okně
-	 * @param imageResource
-	 *            resource ikony okna
+	 * @param image
+     * 	 *            ikona okna
 	 */
-	public MessageDialog(String labelCaption, String details, DownloadHandler imageResource) {
+	public MessageDialog(String labelCaption, String details, Image image) {
 		HorizontalLayout horizontalLayout = new HorizontalLayout();
 		horizontalLayout.setSpacing(true);
 		addComponent(horizontalLayout);
 
-		Image embedded = new Image(imageResource, "img");
-		horizontalLayout.add(embedded);
-		horizontalLayout.setVerticalComponentAlignment(Alignment.CENTER, embedded);
+		horizontalLayout.add(image);
+		horizontalLayout.setVerticalComponentAlignment(Alignment.CENTER, image);
 
 		Div msgLabel = new Div(labelCaption);
 		msgLabel.setSizeUndefined();
@@ -62,5 +61,4 @@ public class MessageDialog extends WebDialog {
 			addComponent(detailsArea);
 		}
 	}
-
 }

@@ -1,6 +1,5 @@
 package cz.gattserver.common.vaadin.dialogs;
 
-
 import cz.gattserver.common.vaadin.ImageIcon;
 
 public class WarnDialog extends MessageDialog {
@@ -12,7 +11,6 @@ public class WarnDialog extends MessageDialog {
 	}
 
 	public WarnDialog(String labelCaption, String details) {
-		super(labelCaption, details, ImageIcon.WARNING_16_ICON.createResource());
+		super(labelCaption, details, ImageIcon.WARNING_16_ICON.createImage());
 	}
-
 }

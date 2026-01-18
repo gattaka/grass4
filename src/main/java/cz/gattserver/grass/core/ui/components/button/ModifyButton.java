@@ -16,7 +16,6 @@ public class ModifyButton extends ImageButton {
     }
 
     public ModifyButton(String caption, ComponentEventListener<ClickEvent<Button>> clickListener) {
-        super(caption, new Image(ImageIcon.PENCIL_16_ICON.createResource(), "Upravit"), clickListener);
+        super(caption, ImageIcon.PENCIL_16_ICON.createImage("Upravit"), clickListener);
     }
-
 }

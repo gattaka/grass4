@@ -1,6 +1,6 @@
 package cz.gattserver.grass.articles.editor.parser.interfaces;
 
-import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.component.html.Image;
 
 /**
  * Třída obsahující všechny potřebné informace pro začlenění pluginu do UI
@@ -15,16 +15,17 @@ public class EditorButtonResourcesTO implements Comparable<EditorButtonResources
     private final String description;
     private final String prefix;
     private final String suffix;
-    private final DownloadHandler imageResource;
+    private final Image image;
 
     protected EditorButtonResourcesTO(String tag, String tagFamily, String description, String prefix, String suffix,
-                                      DownloadHandler imageResource) {
+                                      Image image) {
         this.tag = tag;
         this.tagFamily = tagFamily;
         this.description = description;
         this.prefix = prefix;
         this.suffix = suffix;
-        this.imageResource = imageResource;
+        this.image = image;
+        if (image != null) image.setAlt(tag);
     }
 
     /**
@@ -68,8 +69,8 @@ public class EditorButtonResourcesTO implements Comparable<EditorButtonResources
      *
      * @return resource obrázku
      */
-    public DownloadHandler getImage() {
-        return imageResource;
+    public Image getImage() {
+        return image;
     }
 
     /**
@@ -94,8 +95,7 @@ public class EditorButtonResourcesTO implements Comparable<EditorButtonResources
     public boolean equals(Object obj) {
         if (obj instanceof EditorButtonResourcesTO) {
             return tag.equals(((EditorButtonResourcesTO) obj).getTag());
-        } else
-            return false;
+        } else return false;
     }
 
 }

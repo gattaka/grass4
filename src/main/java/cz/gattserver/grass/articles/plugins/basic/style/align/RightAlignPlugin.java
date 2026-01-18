@@ -36,7 +36,6 @@ public class RightAlignPlugin extends AbstractStylePlugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, AbstractStylePlugin.PLUGIN_FAMILY)
-				.setImageAsThemeResource("basic/img/algnr_16.png").build();
+				.setImage("basic/img/algnr_16.png").build();
 	}
-
 }

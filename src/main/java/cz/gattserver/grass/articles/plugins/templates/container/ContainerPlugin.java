@@ -28,6 +28,6 @@ public class ContainerPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "Šablony").setDescription("Kontejner")
-				.setImageResource(ImageIcon.DOWN_16_ICON.createResource()).build();
+				.setImage(ImageIcon.DOWN_16_ICON.createImage()).build();
 	}
 }

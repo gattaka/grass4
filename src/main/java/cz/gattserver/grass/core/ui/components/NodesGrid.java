@@ -20,37 +20,36 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class NodesGrid extends Grid<NodeOverviewTO> {
 
-	private static final long serialVersionUID = -2220485504407844582L;
+    private static final long serialVersionUID = -2220485504407844582L;
 
-	public NodesGrid() {
-		// inject nefunguje kvůli něčemu v předkovi
-		final PageFactory nodePageFactory = (PageFactory) SpringContextHelper.getBean("nodePageFactory");
+    public NodesGrid() {
+        // inject nefunguje kvůli něčemu v předkovi
+        final PageFactory nodePageFactory = (PageFactory) SpringContextHelper.getBean("nodePageFactory");
 
-		UIUtils.applyGrassDefaultStyle(this);
+        UIUtils.applyGrassDefaultStyle(this);
 
-		setHeight("200px");
-		setSelectionMode(SelectionMode.NONE);
+        setHeight("200px");
+        setSelectionMode(SelectionMode.NONE);
 
-		String iconBind = "customIcon";
-		String nameBind = "customName";
+        String iconBind = "customIcon";
+        String nameBind = "customName";
 
-		addColumn(new IconRenderer<>(c -> {
-			Image img = new Image(ImageIcon.BRIEFCASE_16_ICON.createResource(), "");
-			img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
-			return img;
-		}, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
-				.setKey(iconBind);
+        addColumn(new IconRenderer<>(c -> {
+            Image img = ImageIcon.BRIEFCASE_16_ICON.createImage("");
+            img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
+            return img;
+        }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
+                .setKey(iconBind);
 
-		addColumn(new ComponentRenderer<>(node -> {
-			String url = UIUtils.getPageURL(nodePageFactory,
-					URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
-			return new Anchor(url, node.getName());
-		})).setHeader("Kategorie").setId(nameBind);
-	}
+        addColumn(new ComponentRenderer<>(node -> {
+            String url = UIUtils.getPageURL(nodePageFactory,
+                    URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
+            return new Anchor(url, node.getName());
+        })).setHeader("Kategorie").setId(nameBind);
+    }
 
-	public void populate(List<NodeOverviewTO> nodes) {
-		setItems(nodes);
-		setHeight(GridUtils.processHeight(nodes.size()) + "px");
-	}
-
+    public void populate(List<NodeOverviewTO> nodes) {
+        setItems(nodes);
+        setHeight(GridUtils.processHeight(nodes.size()) + "px");
+    }
 }

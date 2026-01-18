@@ -93,7 +93,7 @@ public abstract class MenuPage extends GrassPage {
         homelinkDiv.setId("homelink");
         logoLine.add(homelinkDiv);
         String url = VaadinRequest.getCurrent().getContextPath();
-        Anchor homelink = new Anchor(url, new Image("VAADIN/img/logo.png", "Gattserver"));
+        Anchor homelink = new Anchor(url, new Image("img/logo.png", "Gattserver"));
         homelinkDiv.add(homelink);
 
         if (!isMobileDevice()) {

@@ -29,6 +29,6 @@ public class PlotterPlugin implements Plugin {
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "Šablony")
 				.setPrefix("[" + TAG + "]x*x;2;5;0;0[;width][;height]").setSuffix("[/" + TAG + "]")
-				.setDescription("Plotter").setImageAsThemeResource(IMAGE_PATH).build();
+				.setDescription("Plotter").setImage(IMAGE_PATH).build();
 	}
 }

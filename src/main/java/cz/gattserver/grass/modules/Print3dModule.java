@@ -1,6 +1,6 @@
 package cz.gattserver.grass.modules;
 
-import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.component.html.Image;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
@@ -25,8 +25,8 @@ public class Print3dModule implements ContentModule {
 	}
 
 	@Override
-	public DownloadHandler getContentIcon() {
-		return ImageIcon.STOP_16_ICON.createResource();
+	public Image getContentIcon() {
+		return ImageIcon.STOP_16_ICON.createImage();
 	}
 
 	@Override
@@ -43,5 +43,4 @@ public class Print3dModule implements ContentModule {
 	public PageFactory getContentViewerPageFactory() {
 		return print3dViewerPageFactory;
 	}
-
 }

@@ -35,6 +35,6 @@ public class GJSLibColorsPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "JS Libs").setPrefix("[" + TAG + "]").setSuffix("[/" + TAG + "]")
-				.setDescription("Colors").setImageAsThemeResource(IMAGE_PATH).build();
+				.setDescription("Colors").setImage(IMAGE_PATH).build();
 	}
 }
