@@ -62,7 +62,6 @@ public class FaviconCache {
 	 *         se stažení nezdařilo (soubor na adrese neexistuje apod.)
 	 */
 	public String downloadAndSaveFavicon(URL pageURL, String faviconAddress) {
-
 		String filename = FaviconUtils.getFaviconFilename(pageURL, faviconAddress);
 		if (FaviconUtils.downloadFile(cacheDir.resolve(filename), faviconAddress)) {
 			return filename;

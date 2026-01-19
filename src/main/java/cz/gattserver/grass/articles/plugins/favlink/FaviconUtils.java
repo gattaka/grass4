@@ -148,7 +148,7 @@ public class FaviconUtils {
 	public static boolean downloadFile(Path targetFile, String address) {
 		Validate.notNull(targetFile, "'targetFile' nesmí být null");
 		Validate.notBlank(address, "'address' nesmí být null");
-		logger.info("Zkouším stáhnout a uložit favicon adresy {} jako {}", address, targetFile.toString());
+		logger.info("Zkouším stáhnout a uložit favicon adresy {} jako {}", address, targetFile);
 		InputStream stream = getResponseReader(address);
 		if (stream != null) {
 			try {
