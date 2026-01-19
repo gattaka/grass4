@@ -5,16 +5,20 @@
     flex-wrap: wrap;
     justify-content: center;
 }
+
 .tag-letter {
     font-weight: bold;
     margin: 4px 0px;
 }
+
 .tag-labels {
     padding: 0 0 0 15px;
 }
+
 .tag-labels a {
     text-decoration: none;
 }
+
 .tag-labels a:hover {
     text-decoration: underline;
 }

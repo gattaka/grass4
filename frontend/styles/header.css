@@ -41,6 +41,7 @@
 .inline-button {
     cursor: pointer;
 }
+
 .inline-button:hover {
     text-decoration: underline;
 }
