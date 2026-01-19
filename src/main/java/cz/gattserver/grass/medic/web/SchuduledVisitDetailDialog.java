@@ -8,7 +8,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
@@ -38,14 +38,14 @@ public class SchuduledVisitDetailDialog extends Dialog {
 		layout.add(scheduledVisitDTO.getPurpose());
 
 		layout.add(new Strong("Instituce"));
-		final Button instButton = new LinkButton(scheduledVisitDTO.getInstitution().getName(),
+		final InlineButton instButton = new InlineButton(scheduledVisitDTO.getInstitution().getName(),
 				e -> new MedicalInstitutionDetailDialog(scheduledVisitDTO.getInstitution().getId()).open());
 		instButton.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
 		layout.add(instButton);
 
 		layout.add(new Strong("Navazuje na"));
 		if (scheduledVisitDTO.getRecord() != null) {
-			final Button recordButton = new LinkButton(scheduledVisitDTO.getRecord().toString(),
+			final InlineButton recordButton = new InlineButton(scheduledVisitDTO.getRecord().toString(),
 					e -> new MedicalRecordDetailDialog(scheduledVisitDTO.getRecord().getId()).open());
 			recordButton.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
 			layout.add(recordButton);

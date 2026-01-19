@@ -18,7 +18,7 @@ import com.vaadin.flow.server.StreamResource;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
@@ -26,9 +26,7 @@ import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
-import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.impl.*;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryItemType;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryPayloadTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
@@ -371,14 +369,18 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 
 				itemLayout.add(new Breakline());
 
+                Div buttonLayout = new Div();
+                buttonLayout.addClassName("pg-thumb-button-div");
+                itemLayout.add(buttonLayout);
+
 				// Detail
 				final String urlFinal = PGUtils.createDetailURL(item, photogallery);
-				LinkButton detailButton = new LinkButton("Detail", e -> UI.getCurrent().getPage().open(urlFinal));
-				itemLayout.add(detailButton);
+				InlineButton detailButton = new InlineButton("Detail", e -> UI.getCurrent().getPage().open(urlFinal));
+                buttonLayout.add(detailButton);
 
 				// Smazat
 				if (coreACL.canModifyContent(photogallery.getContentNode(), getUser())) {
-					LinkButton deleteButton = new LinkButton("Smazat", e -> {
+					InlineButton deleteButton = new InlineButton("Smazat", e -> {
 						new ConfirmDialog(e2 -> {
 							pgService.deleteFile(item, galleryDir);
 							eventBus.subscribe(PGViewerPage.this);
@@ -392,7 +394,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 						}).open();
 					});
 					deleteButton.getStyle().set("margin-left", "20px").set("color", "red");
-					itemLayout.add(deleteButton);
+                    buttonLayout.add(deleteButton);
 				}
 
 				galleryLayout.add(itemLayout);

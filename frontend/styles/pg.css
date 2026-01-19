@@ -1,3 +1,24 @@
+#pg-exif-div {
+    color: lightgray;
+    position: fixed;
+    bottom: 30px;
+    padding: 10px;
+}
+
+#pg-exif-div div div:first-child {
+    font-weight: 500;
+    margin-top: 10px;
+}
+
+#pg-exif-div a {
+    color: lightgrey;
+    text-decoration: underline;
+}
+
+#pg-exif-div a:hover {
+    color: white;
+}
+
 #pg-slideshow-div {
     position: fixed;
     top: 0;
@@ -66,9 +87,13 @@
     text-align: center;
     background: hsl(0 0% 0%/ 0.5);
     color: lightgray;
-    padding: 2px 0 0px 0;
+    padding: 4px 0 0px 0;
     box-sizing: border-box;
     height: 30px;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
 }
 
 #pg-slideshow-item-close-div vaadin-button {
@@ -92,4 +117,10 @@
     right: 0;
     height: 100%;
     width: 50px;
+}
+
+.pg-thumb-button-div {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }

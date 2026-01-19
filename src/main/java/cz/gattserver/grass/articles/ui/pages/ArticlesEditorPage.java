@@ -8,7 +8,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -55,7 +54,7 @@ import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.HtmlSpan;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -593,16 +592,16 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         grid.addColumn(AttachmentTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px")
                 .setFlexGrow(0).setSortProperty("size");
 
-        grid.addColumn(new ComponentRenderer<Button, AttachmentTO>(
-                        to -> new LinkButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> new InlineButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
                 .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<Button, AttachmentTO>(
-                        to -> new LinkButton("Vložit", e -> handleInsertAction(to)))).setHeader("Vložit")
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> new InlineButton("Vložit", e -> handleInsertAction(to)))).setHeader("Vložit")
                 .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<Button, AttachmentTO>(
-                        to -> new LinkButton("Smazat", e -> handleDeleteAction(to)))).setHeader("Smazat")
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> new InlineButton("Smazat", e -> handleDeleteAction(to)))).setHeader("Smazat")
                 .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d.MM.yyyy HH:mm"))

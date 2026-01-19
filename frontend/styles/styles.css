@@ -1,5 +1,8 @@
 @import "header.css";
 @import "layout.css";
+@import "content.css";
+@import "pg.css";
+@import "tag-menu.css";
 
 /* vaadin AURA theme fix -- z nějakého důvodu dělá 2px vertical scroll na dialogu */
 vaadin-dialog[has-footer]::part(content) {
@@ -36,24 +39,54 @@ vaadin-grid img {
     margin-top: 3px;
 }
 
-/* Tag menu */
-#tag-menu {
-    display: flex;
-    gap: 5px;
-    flex-direction: row;
-    flex-wrap: wrap;
-    justify-content: center;
+/* Top and Bottom margin */
+.top-margin {
+    margin-top: 10px;
 }
-.tag-letter {
+.bottom-margin {
+    margin-bottom: 10px;
+}
+
+/* Breadcrumb */
+#breadcrumb {
+    background: #fdfaf2;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 10px;
+    padding-right: 3px;
+    line-height: 20px;
     font-weight: bold;
-    margin: 4px 0px;
+    font-size: 12px;
+    font-family: Trebuchet, "Trebuchet MS", Verdana, "Verdana CE", Arial,
+    "Arial CE", "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;
 }
-.tag-labels {
-    padding: 0 0 0 15px;
+#breadcrumb img, #breadcrumb a {
+    margin-right: 10px;
 }
-.tag-labels a {
+#breadcrumb a {
     text-decoration: none;
 }
-.tag-labels a:hover {
+#breadcrumb a:hover {
     text-decoration: underline;
+}
+
+/* Button div  */
+.button-div vaadin-button, .button-div vaadin-combo-box {
+    margin: 10px 10px 0 0;
+}
+
+.button-link {
+    font-size: 12pt;
+    font-weight: 500;
+    border: none;
+}
+
+/* Nadpisy */
+h2, h3 {
+    border-bottom: 1px solid;
+    margin-bottom: 10px;
+    border-color: #888;
+}
+h2 {
+    font-size: 15pt;
 }

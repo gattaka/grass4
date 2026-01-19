@@ -87,17 +87,15 @@ public class ErrorPage extends OneColumnPage implements HasErrorParameter<Except
 		}
 	}
 
-	;
-
 	protected String getErrorImage(int status) {
 		switch (status) {
 			case 403:
-				return "VAADIN/img/403.png";
+				return "img/403.png";
 			case 404:
-				return "VAADIN/img/404.png";
+				return "img/404.png";
 			case 500:
 			default:
-				return "VAADIN/img/500.png";
+				return "img/500.png";
 		}
 	}
 }

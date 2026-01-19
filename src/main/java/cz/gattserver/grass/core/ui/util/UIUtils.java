@@ -1,6 +1,5 @@
 package cz.gattserver.grass.core.ui.util;
 
-import java.net.*;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collection;
@@ -26,6 +25,7 @@ import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.WebBrowser;
 
+import com.vaadin.flow.shared.Registration;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.common.vaadin.dialogs.InfoDialog;
@@ -256,18 +256,15 @@ public class UIUtils {
 	}
 
 	/**
-	 * Nahraje CSS
-	 *
-	 * @param link odkaz k css souboru - relativní, absolutní (http://...)
-	 */
-	public static void loadCSS(String link) {
-		StringBuilder loadStylesheet = new StringBuilder();
-		loadStylesheet.append("var head=document.getElementsByTagName('head')[0];")
-				.append("var link=document.createElement('link');").append("link.type='text/css';")
-				.append("link.rel='stylesheet';").append("link.href='" + link + "';")
-				.append("head.appendChild(link)" + ";");
-		UI.getCurrent().getPage().executeJs(loadStylesheet.toString());
-	}
+     * Nahraje CSS
+     *
+     * @param link odkaz k css souboru - relativní, absolutní (http://...)
+     * @return
+     */
+	public static Registration loadCSS(String link) {
+        // https://vaadin.com/docs/latest/styling/advanced/dynamic-stylesheets
+        return UI.getCurrent().getPage().addStyleSheet(link);
+    }
 
 	private static String getClientIp(HttpServletRequest request) {
 		String remoteAddr = request.getHeader("X-FORWARDED-FOR");

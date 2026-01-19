@@ -21,7 +21,7 @@ import com.vaadin.flow.data.provider.SortDirection;
 
 import com.vaadin.flow.router.QueryParameters;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.ui.components.button.CreateButton;
@@ -81,15 +81,14 @@ public class HWTypesTab extends Div {
 		grid.addColumn(HWItemTypeTO::getCount)
 				.setHeader("Počet").setSortable(true).setKey(COUNT_BIND).setWidth("100px").setFlexGrow(0);
 		Column<HWItemTypeTO> nameColumn = grid
-				.addColumn(new ComponentRenderer<Button, HWItemTypeTO>(
-						to -> new LinkButton(to.getName(), e -> {
-							HWFilterTO filter = new HWFilterTO();
-							List<String> types = new ArrayList<>();
-							types.add(to.getName());
-							filter.setTypes(types);
-							Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(filter);
-							UI.getCurrent().navigate(HWPage.class, QueryParameters.simple(filterQuery));
-						})))
+				.addColumn(new ComponentRenderer<>(to -> new InlineButton(to.getName(), e -> {
+                    HWFilterTO filter = new HWFilterTO();
+                    List<String> types = new ArrayList<>();
+                    types.add(to.getName());
+                    filter.setTypes(types);
+                    Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(filter);
+                    UI.getCurrent().navigate(HWPage.class, QueryParameters.simple(filterQuery));
+                })))
 				.setHeader("Název").setSortable(true).setKey(NAME_BIND).setFlexGrow(1);
 		grid.setWidthFull();
 		grid.setHeight("500px");

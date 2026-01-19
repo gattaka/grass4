@@ -55,7 +55,7 @@ public class Breadcrumb extends Div {
 		for (int i = breadcrumbElements.size() - 1; i >= 0; i--) {
 			element = breadcrumbElements.get(i);
 			if (i != breadcrumbElements.size() - 1) {
-				Image separator = new Image("VAADIN/img/bullet.png", "bullet");
+				Image separator = new Image("img/bullet.png", "bullet");
 				add(separator);
 			}
 			Anchor link = createBreadcrumbElementLink(element);

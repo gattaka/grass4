@@ -39,7 +39,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.HtmlDiv;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 
 public class CampgameDetailDialog extends Dialog {
 
@@ -252,13 +252,12 @@ public class CampgameDetailDialog extends Dialog {
 
 		grid.addColumn(new TextRenderer<>(to -> to.getName())).setHeader("Název").setFlexGrow(100);
 
-		grid.addColumn(new ComponentRenderer<LinkButton, CampgameFileTO>(to -> new LinkButton("Detail",
-				e -> UI.getCurrent().getPage()
-						.open(CampgamesConfiguration.CAMPGAMES_PATH + "/" + campgameTO.getId() + "/" + to.getName()))))
+		grid.addColumn(new ComponentRenderer<>(to -> new InlineButton("Detail", e -> UI.getCurrent().getPage()
+                        .open(CampgamesConfiguration.CAMPGAMES_PATH + "/" + campgameTO.getId() + "/" + to.getName()))))
 				.setHeader("Detail").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
 		grid.addColumn(new ComponentRenderer<>(to -> {
-			Button button = new LinkButton("Smazat", be -> {
+            InlineButton button = new InlineButton("Smazat", be -> {
 				new ConfirmDialog("Opravdu smazat?", e -> {
 					getCampgamesService().deleteCampgameImagesFile(campgameId, to.getName());
 					tabLayout.removeAll();

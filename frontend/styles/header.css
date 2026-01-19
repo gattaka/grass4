@@ -38,8 +38,11 @@
     cursor: pointer;
 }
 
+.inline-button {
+    cursor: pointer;
+}
 .inline-button:hover {
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 #menu-wrapper a:hover, #menu-wrapper .inline-button:hover {

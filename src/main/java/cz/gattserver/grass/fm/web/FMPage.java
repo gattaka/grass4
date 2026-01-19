@@ -13,7 +13,6 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.page.History;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -21,16 +20,13 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.server.VaadinServletRequest;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.util.CZAmountFormatter;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
@@ -42,7 +38,6 @@ import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.pages.template.ErrorPage;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
@@ -63,7 +58,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletRequest;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -260,7 +254,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
                 .setFlexGrow(0).setSortProperty("size");
 
         grid.addColumn(new ComponentRenderer<>(to -> {
-            Button button = new LinkButton("URL", e -> {
+            InlineButton button = new InlineButton("URL", e -> {
                 Dialog ww = new Dialog();
                 String id = UUID.randomUUID().toString();
                 String checkId = "check-" + id;
@@ -283,13 +277,13 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
             return button;
         })).setHeader("URL").setTextAlign(ColumnTextAlign.CENTER).setWidth("50px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<Button, FMItemTO>(
-                        to -> new LinkButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> new InlineButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
                 .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new ComponentRenderer<>(to -> {
             String link = explorer.getDownloadLink(urlBase, to.getName());
-            Button button = new LinkButton("QR", e -> {
+            InlineButton button = new InlineButton("QR", e -> {
                 WebDialog ww = new WebDialog();
                 ww.setCloseOnEsc(true);
                 ww.setCloseOnOutsideClick(true);

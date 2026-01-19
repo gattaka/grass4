@@ -23,7 +23,7 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.Breakline;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.InfoDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
@@ -173,8 +173,8 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 			grid.addColumn(p -> sdf.format(p.getDate())).setHeader("Datum").setTextAlign(ColumnTextAlign.END)
 					.setWidth("70px").setFlexGrow(0).setSortable(true);
 
-			grid.addColumn(new ComponentRenderer<Button, PGSettingsItemTO>(item -> {
-				Button button = new LinkButton("Přegenerovat", be -> {
+			grid.addColumn(new ComponentRenderer<>(item -> {
+                InlineButton button = new InlineButton("Přegenerovat", be -> {
 					new ConfirmDialog("Opravdu přegenerovat galerii?", e -> {
 						UUID operationId = UUID.randomUUID();
 
@@ -193,8 +193,8 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 				return button;
 			})).setHeader("Přegenerování").setTextAlign(ColumnTextAlign.CENTER);
 
-			grid.addColumn(new ComponentRenderer<Button, PGSettingsItemTO>(
-					item -> new LinkButton(item.getOverviewTO() == null ? "Smazat adresář" : "Smazat galerii", be -> {
+			grid.addColumn(new ComponentRenderer<>(
+					item -> new InlineButton(item.getOverviewTO() == null ? "Smazat adresář" : "Smazat galerii", be -> {
 						String caption = item.getOverviewTO() == null ? "Opravdu smazat adresář?"
 								: "Opravdu smazat galerii (záznam v kategorii a data v adresáři)?";
 						new ConfirmDialog(caption, e -> deleteItem(item, path, grid)).open();

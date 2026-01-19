@@ -16,12 +16,11 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
@@ -55,7 +54,6 @@ import jakarta.annotation.Resource;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 @Route("print3d")
@@ -258,7 +256,7 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
         })).setHeader("Stáhnout").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
         if (coreACL.canModifyContent(getContentNodeDTO(), getUser())) {
-            grid.addColumn(new ComponentRenderer<>(item -> new LinkButton("Smazat", be -> {
+            grid.addColumn(new ComponentRenderer<>(item -> new InlineButton("Smazat", be -> {
                 new ConfirmDialog("Opravdu smazat soubor?", e -> {
                     print3dService.deleteFile(item, projectDir);
                     UI.getCurrent().getPage().reload();

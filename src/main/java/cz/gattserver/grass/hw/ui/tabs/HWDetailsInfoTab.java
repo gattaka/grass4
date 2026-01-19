@@ -1,8 +1,6 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -11,7 +9,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -24,7 +22,6 @@ import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.ContainerDiv;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +44,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
-import com.vaadin.flow.server.StreamResource;
 
 import cz.gattserver.common.util.CZAmountFormatter;
 import cz.gattserver.common.util.MoneyFormatter;
@@ -190,7 +186,7 @@ public class HWDetailsInfoTab extends Div {
             tableLayout.add(new Span("-"));
         } else {
             // Samotný button se stále roztahoval, bez ohledu na nastavený width
-            Button usedInBtn = new LinkButton(hwItem.getUsedIn().getName(), e -> {
+            InlineButton usedInBtn = new InlineButton(hwItem.getUsedIn().getName(), e -> {
                 hwItemDetailDialog.close();
                 new HWItemDetailsDialog(itemsTab, hwItem.getUsedIn().getId()).open();
             });
@@ -205,7 +201,7 @@ public class HWDetailsInfoTab extends Div {
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         grid.setHeight("150px");
 
-        grid.addColumn(new IconRenderer<HWItemOverviewTO>(c -> {
+        grid.addColumn(new IconRenderer<>(c -> {
             ImageIcon ii = HWUIUtils.chooseImageIcon(c);
             if (ii != null) {
                 Image img = ii.createImage(c.getState().getName());
@@ -216,12 +212,11 @@ public class HWDetailsInfoTab extends Div {
             }
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addColumn(
-                new ComponentRenderer<Button, HWItemOverviewTO>(c -> new LinkButton(createShortName(c.getName()), e -> {
-                    hwItemDetailDialog.close();
-                    HWItemTO detailTO = hwService.getHWItem(c.getId());
-                    new HWItemDetailsDialog(itemsTab, detailTO.getId()).open();
-                }))).setHeader("Název součásti").setFlexGrow(100);
+        grid.addColumn(new ComponentRenderer<>(c -> new InlineButton(createShortName(c.getName()), e -> {
+            hwItemDetailDialog.close();
+            HWItemTO detailTO = hwService.getHWItem(c.getId());
+            new HWItemDetailsDialog(itemsTab, detailTO.getId()).open();
+        }))).setHeader("Název součásti").setFlexGrow(100);
 
         // kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
         // nový objekt a dá se mu akorát ID, které se porovnává) aplikace

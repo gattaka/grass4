@@ -9,7 +9,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -35,7 +35,7 @@ public class MedicalRecordDetailDialog extends Dialog {
 		VerticalLayout vl1 = new VerticalLayout();
 		vl1.setPadding(false);
 		vl1.add(new Strong("Instituce"));
-		Button button = new LinkButton(medicalRecordDTO.getInstitution().getName(),
+        InlineButton button = new InlineButton(medicalRecordDTO.getInstitution().getName(),
 				e -> new MedicalInstitutionDetailDialog(medicalRecordDTO.getInstitution().getId()).open());
 		button.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
 		vl1.add(button);

@@ -53,13 +53,6 @@ a {
     white-space: nowrap !important;
 }
 
-.button-link {
-    font-family: var(--lumo-font-family);
-    font-size: var(--lumo-font-size-m);
-    font-weight: 500;
-    border: none;
-}
-
 .scroll-div {
     overflow-y: auto;
     height: 100%;
@@ -138,19 +131,7 @@ span.label-err {
     text-align: center;
 }
 
-/* Button div  */
-.button-div vaadin-button, .button-div vaadin-combo-box {
-    margin: var(--lumo-space-m) var(--lumo-space-m) 0 0;
-}
 
-/* Top and Bottom margin */
-.top-margin {
-    margin-top: var(--lumo-space-m);
-}
-
-.bottom-margin {
-    margin-bottom: var(--lumo-space-m);
-}
 
 /* Top clean and Top pull*/
 .top-clean {
@@ -161,81 +142,6 @@ span.label-err {
 .top-pull {
     margin-top: calc(-1 * var(--lumo-space-m));
     padding-top: 0;
-}
-
-/* Tag layout */
-.tag-letter {
-    font-weight: bold;
-    margin: 4px 0px;
-}
-
-.tag-labels {
-    padding: 0 0 0 15px;
-}
-
-/* Breadcrumb */
-#breadcrumb {
-    background: #fdfaf2;
-    padding-top: 3px;
-    padding-bottom: 3px;
-    padding-left: 10px;
-    padding-right: 3px;
-    line-height: 20px;
-    font-weight: bold;
-    font-size: 12px;
-    font-family: Trebuchet, "Trebuchet MS", Verdana, "Verdana CE", Arial,
-    "Arial CE", "Lucida Grande CE", lucida, "Helvetica CE", sans-serif;
-}
-
-#breadcrumb img, #breadcrumb a {
-    margin-right: 10px;
-}
-
-/* Content detail */
-.content-info {
-    font-size: 10pt;
-}
-
-.content-info div, #content-info-tags {
-    margin-bottom: 12px;
-}
-
-@media only screen and (max-width: 1010px) {
-    .content-info div {
-        display: inline-block;
-        margin-left: 12px;
-    }
-
-    .content-info div:first-child {
-        margin-left: 0;
-    }
-}
-
-#content-info-tags {
-    font-size: 10pt;
-    line-height: 15pt;
-}
-
-#content-info-tags div {
-    display: inline-block;
-    margin-right: 10px;
-}
-
-.not-publicated-info {
-    border: 1px #70afe9 solid;
-    padding: 6px 5px 0 5px;
-    height: 25px;
-    text-align: center;
-    background-color: #d5ebff;
-    text-align: center;
-    margin-bottom: 15px;
-    margin-left: 0px !important;
-    display: block !important;
-}
-
-.not-publicated-info img {
-    margin-right: 10px;
-    margin-bottom: -3px;
 }
 
 vaadin-date-picker::part(input-field), vaadin-time-picker::part(input-field), vaadin-combo-box::part(input-field) {
@@ -249,31 +155,7 @@ vaadin-text-field::part(input-field), vaadin-text-area textarea {
     font-weight: 500;
 }
 
-#content-tags-div * {
-    margin-right: 10px;
-    margin-bottom: 10px;
-}
 
-#pg-exif-div {
-    color: lightgray;
-    position: fixed;
-    bottom: 30px;
-    padding: 10px;
-}
-
-#pg-exif-div div div:first-child {
-    font-weight: 500;
-    margin-top: 10px;
-}
-
-#pg-exif-div a {
-    color: lightgrey;
-    text-decoration: underline;
-}
-
-#pg-exif-div a:hover {
-    color: white;
-}
 
 vaadin-checkbox::part(label) {
     font-size: var(--vaadin-input-field-label-font-size, var(--lumo-font-size-s));

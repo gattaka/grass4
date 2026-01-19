@@ -5,7 +5,6 @@ import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.checkbox.Checkbox;
-import com.vaadin.flow.component.combobox.ComboBox.FetchItemsCallback;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
@@ -17,13 +16,12 @@ import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
-import com.vaadin.flow.function.SerializableFunction;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.StreamResource;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.Breakline;
-import cz.gattserver.common.vaadin.LinkButton;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
@@ -223,7 +221,7 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 			return anchor;
 		})).setHeader("Zobrazit").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-		grid.addColumn(new ComponentRenderer<LinkButton, Print3dViewItemTO>(itemTO -> new LinkButton("Smazat", be -> {
+		grid.addColumn(new ComponentRenderer<InlineButton, Print3dViewItemTO>(itemTO -> new InlineButton("Smazat", be -> {
 			new ConfirmDialog("Opravdu smazat?", e -> {
 				try {
 					print3dService.deleteFile(itemTO, projectDir);

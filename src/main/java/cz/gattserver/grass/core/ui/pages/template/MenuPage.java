@@ -3,12 +3,9 @@ package cz.gattserver.grass.core.ui.pages.template;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.server.VaadinServletRequest;
+import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.InlineButton;
 import cz.gattserver.grass.core.ui.pages.LoginDialog;
 import jakarta.annotation.Resource;
 
@@ -163,7 +160,7 @@ public abstract class MenuPage extends GrassPage {
 
         // Přihlášení
         if (!coreACL.isLoggedIn(getUser())) {
-            InlineButton loginBtn = new InlineButton("Přihlásit",e -> new LoginDialog().open());
+            InlineButton loginBtn = new InlineButton("Přihlásit", e -> new LoginDialog().open());
             menuRight.add(loginBtn);
         }
 

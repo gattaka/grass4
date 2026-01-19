@@ -110,7 +110,7 @@ public class MonitorPage extends OneColumnPage {
 		partLayout.setMargin(false);
 		partLayout.setPadding(false);
 		partLayout.setSpacing(false);
-		Image loadingImg = new Image("VAADIN/img/gattload_mini.gif", "loading...");
+		Image loadingImg = new Image("img/gattload_mini.gif", "loading...");
 		loadingImg.getStyle().set("margin", "5px");
 		partLayout.add(loadingImg);
 		layout.add(partLayout);
