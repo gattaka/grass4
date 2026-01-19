@@ -100,7 +100,7 @@ public class HeaderFaviconObtainStrategy implements FaviconObtainStrategy {
 			// need http protocol
 			// bez agenta to často hodí 403 Forbidden, protože si myslí, že jsem
 			// asi bot ... (což vlastně jsem)
-			doc = Jsoup.connect(pageURL.toString()).userAgent("Mozilla").get();
+			doc = Jsoup.connect(pageURL.toString()).ignoreContentType(true).userAgent("Mozilla").get();
 
 			String ico;
 			String base = null;
