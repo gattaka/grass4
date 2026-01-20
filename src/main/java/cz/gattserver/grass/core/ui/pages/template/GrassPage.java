@@ -15,6 +15,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 
 import cz.gattserver.common.exception.ApplicationErrorHandler;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -44,6 +45,8 @@ public abstract class GrassPage extends Div {
 
 	private Consumer<Long> getTabVariableConsumer;
 
+    protected ComponentFactory componentFactory;
+
 	/**
 	 * Konstruktor stránky. Slouží pro přípravu dat pro její sestavení, ale sám
 	 * ještě nesestavuje.
@@ -51,6 +54,7 @@ public abstract class GrassPage extends Div {
 	public GrassPage() {
 		SpringContextHelper.inject(this);
 		VaadinSession.getCurrent().setErrorHandler(new ApplicationErrorHandler());
+        componentFactory = new ComponentFactory();
 	}
 
 	protected boolean isMobileDevice() {

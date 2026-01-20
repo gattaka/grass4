@@ -8,12 +8,10 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.ComponentFactory;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
-import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.ui.components.ContentsLazyGrid;
-import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.apache.commons.lang3.StringUtils;
 

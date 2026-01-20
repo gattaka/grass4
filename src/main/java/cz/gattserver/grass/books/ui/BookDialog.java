@@ -1,5 +1,6 @@
 package cz.gattserver.grass.books.ui;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
@@ -11,14 +12,14 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.common.ImageUtils;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.components.button.CreateButton;
-import cz.gattserver.grass.core.ui.components.button.DeleteButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -130,13 +131,15 @@ public abstract class BookDialog extends EditWebDialog {
 	private void placeImage(BookTO to) {
 		// https://vaadin.com/forum/thread/260778
 		String name = to.getName() + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-		image.setSrc(new StreamResource(name, () -> new ByteArrayInputStream(to.getImage())));
+		image.setSrc(DownloadHandler.fromInputStream(e -> {
+            return new DownloadResponse(new ByteArrayInputStream(to.getImage()), name,null,-1);
+        }));
 		image.setVisible(true);
 		imageLayout.removeAll();
 		imageLayout.add(image);
 		imageLayout.setHorizontalComponentAlignment(Alignment.CENTER, image);
 
-		DeleteButton deleteButton = new DeleteButton(e -> {
+		Button deleteButton = componentFactory.createDeleteButton(e -> {
 			to.setImage(null);
 			placeUpload();
 		});

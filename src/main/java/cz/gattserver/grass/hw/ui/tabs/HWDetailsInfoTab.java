@@ -8,15 +8,14 @@ import java.time.format.DateTimeFormatter;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.Strong;
-import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.OperationsLayout;
-import cz.gattserver.grass.core.ui.components.button.DeleteButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.ContainerDiv;
@@ -251,9 +250,8 @@ public class HWDetailsInfoTab extends Div {
             }).open());
             operationsLayout.add(fixBtn);
 
-            final Button deleteBtn = new DeleteButton(e -> new ConfirmDialog(
-                    "Opravdu smazat '" + hwItem.getName() + "' (budou smazány i servisní záznamy a údaje u součástí)" +
-                            " ?", ev -> {
+            ComponentFactory componentFactory = new ComponentFactory();
+            final Button deleteBtn = componentFactory.createDeleteButton(ev -> {
                 try {
                     hwService.deleteHWItem(hwItem.getId());
                     hwItemDetailDialog.close();
@@ -261,7 +259,7 @@ public class HWDetailsInfoTab extends Div {
                 } catch (Exception ex) {
                     new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
                 }
-            }).open());
+            });
             operationsLayout.add(deleteBtn);
         }
     }
@@ -299,12 +297,11 @@ public class HWDetailsInfoTab extends Div {
         btnLayout.add(hwItemImageDetailBtn);
 
         if (getUser().isAdmin()) {
-            Button hwItemImageDeleteBtn =
-                    new DeleteButton(e -> new ConfirmDialog("Opravdu smazat foto HW položky ?", ev -> {
-                        hwService.deleteHWItemIconFile(hwItem.getId());
-                        createHWItemImageUpload(hwItem);
-                    }).open());
-
+            ComponentFactory componentFactory = new ComponentFactory();
+            Button hwItemImageDeleteBtn = componentFactory.createDeleteButton(e -> {
+                hwService.deleteHWItemIconFile(hwItem.getId());
+                createHWItemImageUpload(hwItem);
+            });
             btnLayout.add(hwItemImageDeleteBtn);
         }
         return true;

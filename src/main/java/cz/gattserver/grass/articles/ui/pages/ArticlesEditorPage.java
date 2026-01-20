@@ -6,9 +6,7 @@ import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -79,7 +77,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     private static final Logger logger = LoggerFactory.getLogger(ArticlesEditorPage.class);
 
-    private static final String CLOSE_JS_DIV_ID = "close-js-div";
     private static final String HANDLER_JS_DIV_ID = "handler-js-div";
 
     @Autowired
@@ -315,7 +312,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     @Override
     protected void createLeftColumnContent(Div layout) {
-        layout.getStyle().set("text-align", "center");
         List<String> families = new ArrayList<>(pluginRegister.getRegisteredFamilies());
         Collections.sort(families, (o1, o2) -> {
             if (o1 == null) {
@@ -325,6 +321,41 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
                 else return o1.compareTo(o2); // ani jeden není null
             }
         });
+
+        // Projdi zaregistrované pluginy a vytvoř menu nástrojů
+        for (int i = 0; i < families.size(); i++) {
+            String family = families.get(i);
+            ButtonLayout familyToolsLayout = new ButtonLayout();
+            Span headerSpan = new Span();
+            headerSpan.add(family);
+            String desc = pluginRegister.getFamilyDescription(family);
+            if (StringUtils.isNotBlank(desc)) headerSpan.add(new HtmlSpan(" " + desc));
+            H3 header = new H3(headerSpan);
+            layout.add(header);
+            layout.add(familyToolsLayout);
+
+            List<EditorButtonResourcesTO> resourcesBundles =
+                    new ArrayList<>(pluginRegister.getTagResourcesByFamily(family));
+            Collections.sort(resourcesBundles);
+
+            for (EditorButtonResourcesTO resourceBundle : resourcesBundles) {
+                String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "document.getElementById('" +
+                        HANDLER_JS_DIV_ID + "').$server.handleSelection(\"" + resourceBundle.getPrefix() + "\", \"" +
+                        resourceBundle.getSuffix() + "\", start, finish)";
+
+                if (resourceBundle.getImage() != null) {
+                    ImageButton btn = new ImageButton(resourceBundle.getDescription(), resourceBundle.getImage(),
+                            event -> UI.getCurrent().getPage().executeJs(js));
+                    btn.setTooltip(resourceBundle.getTag());
+                    familyToolsLayout.add(btn);
+                } else {
+                    Button btn = new Button(resourceBundle.getDescription(),
+                            event -> UI.getCurrent().getPage().executeJs(js));
+                    btn.getElement().setProperty("title", resourceBundle.getTag());
+                    familyToolsLayout.add(btn);
+                }
+            }
+        }
 
         // JS handler
         Div handlerJsDiv = new Div() {
@@ -369,46 +400,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         };
         handlerJsDiv.setId(HANDLER_JS_DIV_ID);
         layout.add(handlerJsDiv);
-
-        // Projdi zaregistrované pluginy a vytvoř menu nástrojů
-        for (int i = 0; i < families.size(); i++) {
-            String family = families.get(i);
-            ButtonLayout familyToolsLayout = new ButtonLayout();
-            Span headerSpan = new Span();
-            headerSpan.add(family);
-            String desc = pluginRegister.getFamilyDescription(family);
-            if (StringUtils.isNotBlank(desc)) headerSpan.add(new HtmlSpan(" " + desc));
-            Div header = new Div(headerSpan);
-            header.getStyle().set("border-bottom", "2px solid #aaa").set("line-height", "0")
-                    .set("margin", i == 0 ? "10px 0" : "20px 0 10px 0");
-            headerSpan.getStyle().set("cz/gattserver/grass/articles/plugins/basic/color", "#888")
-                    .set("font-size", "11pt").set("font-weight", "600").set("background", "#f4f1e6")
-                    .set("padding", "0 10px");
-            layout.add(header);
-            layout.add(familyToolsLayout);
-
-            List<EditorButtonResourcesTO> resourcesBundles =
-                    new ArrayList<>(pluginRegister.getTagResourcesByFamily(family));
-            Collections.sort(resourcesBundles);
-
-            for (EditorButtonResourcesTO resourceBundle : resourcesBundles) {
-                String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "document.getElementById('" +
-                        HANDLER_JS_DIV_ID + "').$server.handleSelection(\"" + resourceBundle.getPrefix() + "\", \"" +
-                        resourceBundle.getSuffix() + "\", start, finish)";
-
-                if (resourceBundle.getImage() != null) {
-                    ImageButton btn = new ImageButton(resourceBundle.getDescription(), resourceBundle.getImage(),
-                            event -> UI.getCurrent().getPage().executeJs(js));
-                    btn.setTooltip(resourceBundle.getTag());
-                    familyToolsLayout.add(btn);
-                } else {
-                    Button btn = new Button(resourceBundle.getDescription(),
-                            event -> UI.getCurrent().getPage().executeJs(js));
-                    btn.getElement().setProperty("title", resourceBundle.getTag());
-                    familyToolsLayout.add(btn);
-                }
-            }
-        }
 
         layout.getStyle().set("width", "420px").set("margin-left", "-200px");
     }
@@ -509,7 +500,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
                     autosaveLabel.setClassName("label-ok");
                 } catch (Exception e) {
                     autosaveLabel.setText(
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "Chyba uložení");
+                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " Chyba uložení");
                     autosaveLabel.setClassName("label-err");
                 }
             }
@@ -592,17 +583,14 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         grid.addColumn(AttachmentTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px")
                 .setFlexGrow(0).setSortProperty("size");
 
-        grid.addColumn(new ComponentRenderer<>(
-                        to -> new InlineButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
-                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new ComponentRenderer<>(to -> new InlineButton("Stáhnout", e -> handleDownloadAction(to))))
+                .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(
-                        to -> new InlineButton("Vložit", e -> handleInsertAction(to)))).setHeader("Vložit")
-                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new ComponentRenderer<>(to -> new InlineButton("Vložit", e -> handleInsertAction(to))))
+                .setHeader("Vložit").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(
-                        to -> new InlineButton("Smazat", e -> handleDeleteAction(to)))).setHeader("Smazat")
-                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new ComponentRenderer<>(to -> new InlineButton("Smazat", e -> handleDeleteAction(to))))
+                .setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d.MM.yyyy HH:mm"))
                 .setHeader("Upraveno").setAutoWidth(true).setTextAlign(ColumnTextAlign.END)
@@ -640,12 +628,12 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     @Override
     protected void createRightColumnContent(Div layout) {
-        layout.add(new H2("Název článku"));
+        layout.add(new H3("Název článku"));
         layout.add(articleNameField);
         articleNameField.setWidthFull();
 
         // label
-        layout.add(new H2("Klíčová slova"));
+        layout.add(new H3("Klíčová slova"));
 
         // menu tagů + textfield tagů
         layout.add(articleKeywords);
@@ -656,13 +644,13 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
                 e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(articleKeywords::addToken)).open());
         articleKeywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
 
-        layout.add(new H2("Obsah článku"));
+        layout.add(new H3("Obsah článku"));
         layout.add(articleTextArea);
 
-        layout.add(new H2("Přílohy článku"));
+        layout.add(new H3("Přílohy článku"));
         createAttachmentsGrid(layout);
 
-        layout.add(new H2("Nastavení článku"));
+        layout.add(new H3("Nastavení článku"));
         publicatedCheckBox.setLabel("Publikovat článek");
         layout.add(publicatedCheckBox);
 
@@ -689,24 +677,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         // Auto-ukládání
         Span autosaveLabel = createAutosaveLabel();
         buttonLayout.add(autosaveLabel);
-
-        Div closeJsDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
-
-            @ClientCallable
-            private void returnToNodeCallback() {
-                UIUtils.redirect(getPageURL(nodePageFactory,
-                        URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
-            }
-
-            @ClientCallable
-            private void returnToArticleCallback() {
-                UIUtils.redirect(getPageURL(articlesViewerPageFactory,
-                        URLIdentifierUtils.createURLIdentifier(existingArticleId, existingArticleName)));
-            }
-        };
-        closeJsDiv.setId(CLOSE_JS_DIV_ID);
-        add(closeJsDiv);
 
         populateGrid();
     }
@@ -751,6 +721,18 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         return false;
     }
 
+    @ClientCallable
+    private void returnToNodeCallback() {
+        UIUtils.redirect(
+                getPageURL(nodePageFactory, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
+    }
+
+    @ClientCallable
+    private void returnToArticleCallback() {
+        UIUtils.redirect(getPageURL(articlesViewerPageFactory,
+                URLIdentifierUtils.createURLIdentifier(existingArticleId, existingArticleName)));
+    }
+
     /**
      * Zavolá vrácení se na článek
      */
@@ -759,8 +741,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         if (existingDraftId != null) articleService.deleteArticle(existingDraftId, existingArticleId == null);
 
         UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID +
-                        "').$server.returnToArticleCallback()");
+                "window.onbeforeunload = null; $0.$server.returnToArticleCallback()",
+                getElement());
     }
 
     /**
@@ -770,9 +752,9 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         // smaž draft, ponechej přílohy, pokud k draftu existuje článek
         if (existingDraftId != null) articleService.deleteArticle(existingDraftId, existingArticleId == null);
 
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID +
-                        "').$server.returnToNodeCallback()");
+        UI.getCurrent().getPage()
+                .executeJs("window.onbeforeunload = null; $0.$server.returnToNodeCallback()",
+                        getElement());
     }
 
     @Override

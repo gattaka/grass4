@@ -119,3 +119,24 @@ h2 {
 vaadin-grid .inline-button {
     color: #045491;
 }
+
+/* Span */
+span.label-ok, span.label-err {
+    border-radius: 5px;
+    margin: auto;
+    padding: 3px 10px;
+}
+
+span.label-ok {
+    border: 2px solid #42af0b;
+    background-color: rgba(66, 175, 11, 0.25);
+}
+
+span.label-err {
+    border: 2px solid #af130b;
+    background-color: rgba(175, 11, 11, 0.25);
+}
+
+.error-label {
+    text-align: center;
+}

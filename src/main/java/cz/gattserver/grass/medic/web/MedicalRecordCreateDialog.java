@@ -1,7 +1,6 @@
 package cz.gattserver.grass.medic.web;
 
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -14,7 +13,7 @@ import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.ComponentFactory;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
@@ -26,7 +25,6 @@ import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 

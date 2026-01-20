@@ -8,14 +8,11 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.data.provider.CallbackDataProvider;
-import cz.gattserver.grass.core.ui.components.button.DeleteButton;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.combobox.ComboBox.FetchItemsCallback;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.function.SerializableFunction;
 
 public class TokenField extends Div {
 
@@ -77,7 +74,7 @@ public class TokenField extends Div {
 
 	public void addToken(String token) {
 		if (!tokens.containsKey(token)) {
-			Button tokenComponent = new DeleteButton(token, e -> deleteToken(token));
+			Button tokenComponent = new Button(token, e -> deleteToken(token));
 			tokens.put(token, tokenComponent);
 			tokensLayout.add(tokenComponent);
 			tokensLayout.remove(comboBox);

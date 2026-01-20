@@ -19,6 +19,14 @@
     margin-top: 0px;
 }
 
+h3 {
+    margin-top: 10px;
+}
+
+h3:first-child {
+    margin-top: 0;
+}
+
 #main-div {
     position: relative;
     min-height: 100vh;

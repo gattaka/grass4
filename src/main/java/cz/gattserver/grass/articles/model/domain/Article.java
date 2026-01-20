@@ -1,6 +1,7 @@
 package cz.gattserver.grass.articles.model.domain;
 
 import cz.gattserver.grass.core.model.domain.ContentNode;
+import org.hibernate.annotations.NativeGenerator;
 import org.hibernate.annotations.SortComparator;
 
 import jakarta.persistence.*;

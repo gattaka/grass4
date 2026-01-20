@@ -1,16 +1,18 @@
 package cz.gattserver.grass.articles.ui.dialogs;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
 import cz.gattserver.grass.articles.services.ArticleService;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -40,6 +42,7 @@ public abstract class DraftMenuDialog extends WebDialog {
     }
 
     public DraftMenuDialog(List<ArticleDraftOverviewTO> drafts) {
+        super("Rozpracované obsahy");
         Span label = new Span("Byly nalezeny rozpracované obsahy -- přejete si pokračovat v jejich úpravách?");
         addComponent(label);
 
@@ -57,8 +60,8 @@ public abstract class DraftMenuDialog extends WebDialog {
                 .setHeader("Náhled");
         grid.addColumn(new LocalDateTimeRenderer<>(
                         a -> a.getContentNode().getLastModificationDate() == null ? a.getContentNode().getCreationDate() :
-                                a.getContentNode().getLastModificationDate(), "d.M.yyyy HH:mm")).setHeader("Naposledy upraveno")
-                .setFlexGrow(0).setWidth("90px");
+                                a.getContentNode().getLastModificationDate(), "d. M. yyyy HH:mm"))
+                .setHeader("Naposledy upraveno").setFlexGrow(0).setWidth("180px");
 
         grid.addItemClickListener(e -> {
             if (e.getClickCount() > 1) {
@@ -69,33 +72,37 @@ public abstract class DraftMenuDialog extends WebDialog {
 
         addComponent(grid);
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        HorizontalLayout btnLayout = new HorizontalLayout();
+        btnLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        btnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         add(btnLayout);
 
-        final Button confirm = new Button("Vybrat", e -> {
+        final Button confirmBtn = new Button("Vybrat", e -> {
             innerChoose(grid.getSelectedItems().iterator().next());
             close();
         });
-        confirm.setEnabled(false);
-        btnLayout.add(confirm);
+        confirmBtn.setEnabled(false);
+        confirmBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
+        btnLayout.add(confirmBtn);
 
-        Button close = new Button("Zrušit", e -> close());
-        btnLayout.add(close);
-
-        Button delete = new Button("Smazat", ev -> new ConfirmDialog("Smazat rozpracovaný článek?", e -> {
+        Button deleteBtn = componentFactory.createDeleteButton(e -> {
             ArticleDraftOverviewTO to = grid.getSelectedItems().iterator().next();
             // smaž draft, ponechej přílohy, pokud k draftu existuje článek
             getArticleService().deleteArticle(to.getId(), to.getContentNode().getDraftSourceId() == null);
             drafts.remove(to);
             grid.getDataProvider().refreshAll();
             grid.deselectAll();
-        }).open());
-        btnLayout.add(delete);
-        delete.setEnabled(false);
+        });
+        deleteBtn.setIcon(null);
+        btnLayout.add(deleteBtn);
+        deleteBtn.setEnabled(false);
+
+        Button closeBtn = new Button("Storno", e -> close());
+        btnLayout.add(closeBtn);
 
         grid.addSelectionListener(e -> {
-            confirm.setEnabled(!e.getAllSelectedItems().isEmpty());
-            delete.setEnabled(!e.getAllSelectedItems().isEmpty());
+            confirmBtn.setEnabled(!e.getAllSelectedItems().isEmpty());
+            deleteBtn.setEnabled(!e.getAllSelectedItems().isEmpty());
         });
     }
 

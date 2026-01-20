@@ -1,10 +1,9 @@
 package cz.gattserver.grass.medic.web;
 
 import java.util.List;
-import java.util.Locale;
 
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.ComponentFactory;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.ui.components.SaveCloseLayout;

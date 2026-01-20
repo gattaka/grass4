@@ -4,6 +4,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.flow.component.button.Button;
 import jakarta.annotation.Resource;
 
 import cz.gattserver.common.vaadin.ImageIcon;
@@ -14,7 +15,6 @@ import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.UserService;
 import cz.gattserver.grass.core.ui.components.Breadcrumb;
-import cz.gattserver.grass.core.ui.components.button.DeleteButton;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.dialogs.ContentMoveDialog;
@@ -25,7 +25,6 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
@@ -115,7 +114,7 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 
         // Smazat
         if (coreACL.canDeleteContent(content, getUser())) {
-            DeleteButton delBtn = new DeleteButton("Smazat", event -> onDeleteOperation());
+            Button delBtn = componentFactory.createDeleteButton(event -> onDeleteOperation());
             operationsListLayout.add(delBtn);
         }
 

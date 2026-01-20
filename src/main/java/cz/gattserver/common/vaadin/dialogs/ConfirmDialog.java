@@ -17,7 +17,7 @@ public class ConfirmDialog extends WebDialog {
     private ConfirmAction confirmAction;
 
     public interface ConfirmAction extends Serializable {
-        public void onConfirm(ClickEvent<?> event);
+        void onConfirm(ClickEvent<?> event);
     }
 
     /**
