@@ -14,9 +14,9 @@ public class ArticlesConfiguration extends AbstractConfiguration {
 	}
 
 	/**
-	 * Kolik je timeout pro zálohu (default 2 minuty)
+	 * Kolik je timeout pro zálohu (default je 10 sekund)
 	 */
-	private int backupTimeout = 2;
+	private int backupTimeout = 10;
 
 	/**
 	 * Kolik je délka tabulátoru ve znacích ?

@@ -219,4 +219,10 @@ public interface ArticleService {
 	 */
 	Stream<AttachmentTO> listing(String attachmentsDirId, int offset, int limit, List<QuerySortOrder> list);
 
+
+    /**
+     * Získá z konfigurace dobu intervalu (v sekundách) pravidelné zálohy rozpracovaných článků.
+     * @return
+     */
+    Integer getBackupTimeout();
 }

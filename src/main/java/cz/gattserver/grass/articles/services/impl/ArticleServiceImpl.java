@@ -328,6 +328,12 @@ public class ArticleServiceImpl implements ArticleService {
 		}
 	}
 
+    public Integer getBackupTimeout() {
+        ArticlesConfiguration configuration = new ArticlesConfiguration();
+        configurationService.loadConfiguration(configuration);
+        return configuration.getBackupTimeout();
+    }
+
 	private Path getAttachmentsPath(String attachmentsDirId, boolean createIfDoesNotExists) {
 		ArticlesConfiguration configuration = new ArticlesConfiguration();
 		configurationService.loadConfiguration(configuration);
@@ -337,7 +343,7 @@ public class ArticleServiceImpl implements ArticleService {
 		if (!Files.exists(rootPath))
 			throw new IllegalStateException("Kořenový adresář modulu článků musí existovat");
 		if (attachmentsDirId != null) {
-			Path attachmentsDirPath = rootPath.resolve(String.valueOf(attachmentsDirId));
+			Path attachmentsDirPath = rootPath.resolve(attachmentsDirId);
 			if (!Files.exists(attachmentsDirPath)) {
 				if (!createIfDoesNotExists)
 					return null;

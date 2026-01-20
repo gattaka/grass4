@@ -109,6 +109,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     private Long existingDraftId;
     private Integer partNumber;
 
+    private Span autosaveLabel;
+
     private Result parts;
     private Registration articleTextAreaFocusRegistration;
 
@@ -449,8 +451,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     }
 
     private Button createCancelButton() {
-        Button cancelButton = new ImageButton("Zrušit", ImageIcon.DELETE_16_ICON, event -> new ConfirmDialog(
-                "Opravdu si přejete zavřít editor článku ? Veškeré neuložené změny budou ztraceny.", e -> {
+        Button cancelButton = new ImageButton("Storno", ImageIcon.DELETE_16_ICON, event -> new ConfirmDialog(
+                "Opravdu si přejete zavřít editor článku? Veškeré neuložené změny budou ztraceny.", e -> {
             // ruším úpravu existujícího článku (vracím se na
             // článek), nebo nového (vracím se do kategorie) ?
             if (existingArticleId != null) {
@@ -486,38 +488,31 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         return draftName;
     }
 
+    @ClientCallable
+    private void autosaveCallback() {
+        try {
+            saveArticleDraft(false);
+            autosaveLabel.setText(
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " Automaticky uloženo");
+            autosaveLabel.setClassName("label-ok");
+        } catch (Exception e) {
+            autosaveLabel.setText(
+                    LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " Chyba uložení");
+            autosaveLabel.setClassName("label-err");
+        }
+    }
+
     private Span createAutosaveLabel() {
-        final Span autosaveLabel = new Span();
-        Div autosaveJsDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
-
-            @ClientCallable
-            private void autosaveCallback() {
-                try {
-                    saveArticleDraft(false);
-                    autosaveLabel.setText(LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) +
-                            " Automaticky uloženo");
-                    autosaveLabel.setClassName("label-ok");
-                } catch (Exception e) {
-                    autosaveLabel.setText(
-                            LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " Chyba uložení");
-                    autosaveLabel.setClassName("label-err");
-                }
-            }
-        };
-
-        String autosaveJsDivId = "autosave-js-div";
-        autosaveJsDiv.setId(autosaveJsDivId);
-        add(autosaveJsDiv);
-
+        autosaveLabel = new Span();
+        int backupTimeout = articleService.getBackupTimeout() * 1000;
         UI.getCurrent().getPage().executeJs("window.autosaveInterval = setInterval(function(){"
-                /*		*/ + "let callbackDiv = document.getElementById('" + autosaveJsDivId + "');"
+                /*		*/ + "let callbackDiv = $0;"
                 /*		*/ + "if (callbackDiv) {"
                 /*			*/ + "callbackDiv.$server.autosaveCallback()"
                 /*		*/ + "} else {"
                 /*			*/ + "clearInterval(window.autosaveInterval); "
                 /*		*/ + "}"
-                /*		*/ + "}, 10000);");
+                /*		*/ + "}, " + backupTimeout + ");", getElement());
 
         return autosaveLabel;
     }
@@ -592,7 +587,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         grid.addColumn(new ComponentRenderer<>(to -> new InlineButton("Smazat", e -> handleDeleteAction(to))))
                 .setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-        grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d.MM.yyyy HH:mm"))
+        grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d. MM. yyyy HH:mm"))
                 .setHeader("Upraveno").setAutoWidth(true).setTextAlign(ColumnTextAlign.END)
                 .setSortProperty("lastModified");
 
@@ -740,9 +735,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         // smaž draft, ponechej přílohy, pokud k draftu existuje článek
         if (existingDraftId != null) articleService.deleteArticle(existingDraftId, existingArticleId == null);
 
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = null; $0.$server.returnToArticleCallback()",
-                getElement());
+        UI.getCurrent().getPage()
+                .executeJs("window.onbeforeunload = null; $0.$server.returnToArticleCallback()", getElement());
     }
 
     /**
@@ -753,8 +747,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         if (existingDraftId != null) articleService.deleteArticle(existingDraftId, existingArticleId == null);
 
         UI.getCurrent().getPage()
-                .executeJs("window.onbeforeunload = null; $0.$server.returnToNodeCallback()",
-                        getElement());
+                .executeJs("window.onbeforeunload = null; $0.$server.returnToNodeCallback()", getElement());
     }
 
     @Override
