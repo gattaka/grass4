@@ -26,7 +26,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 public class LoginDialog extends WebDialog {
 
     public LoginDialog() {
-        setHeaderTitle("Přihlášení");
+        super("Přihlášení");
 
         setWidth(300, Unit.PIXELS);
 

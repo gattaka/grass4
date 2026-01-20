@@ -1,6 +1,7 @@
 package cz.gattserver.grass.core.ui.dialogs;
 
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 
@@ -31,6 +32,7 @@ public abstract class ContentMoveDialog extends WebDialog {
 
 		moveBtn = new Button("Přesunout");
 		moveBtn.setEnabled(false);
+        moveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
 		moveBtn.addClickListener(event -> {
 			NodeOverviewTO nodeDTO = tree.getGrid().getSelectedItems().iterator().next();
 			SpringContextHelper.getBean(ContentNodeService.class).moveContent(nodeDTO.getId(), contentNodeDTO.getId());
@@ -44,8 +46,8 @@ public abstract class ContentMoveDialog extends WebDialog {
 		layout.setHorizontalComponentAlignment(Alignment.END, stornoBtn);
 
 		HorizontalLayout btnLayout = new HorizontalLayout(moveBtn, stornoBtn);
-		btnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.BETWEEN);
 		btnLayout.setSizeFull();
+        btnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
 		layout.add(btnLayout);
 		layout.setHorizontalComponentAlignment(Alignment.END, moveBtn);
 

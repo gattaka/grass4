@@ -14,7 +14,7 @@ public class WebDialog extends Dialog {
 
     public WebDialog(String caption) {
         init();
-        layout.add(new Span(caption));
+        setHeaderTitle(caption);
     }
 
     public WebDialog() {
@@ -25,6 +25,7 @@ public class WebDialog extends Dialog {
         add(layout);
         setCloseOnOutsideClick(false);
         setCloseOnEsc(false);
+        setDraggable(true);
 
         layout.setSpacing(true);
         layout.setPadding(false);
