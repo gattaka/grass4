@@ -6,7 +6,6 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.interfaces.QuoteTO;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 
 public class QuoteDialog extends EditWebDialog {
 
@@ -41,7 +40,7 @@ public class QuoteDialog extends EditWebDialog {
 		if (quote != null)
 			binder.readBean(quote);
 
-		addComponent(new SaveCloseLayout(e -> {
+		addComponent(componentFactory.createDialogSubmitOrCloseLayout(e -> {
 			QuoteTO targetTO = quote == null ? new QuoteTO() : quote;
 			if (binder.writeBeanIfValid(targetTO)) {
 				saveAction.onSave(targetTO);

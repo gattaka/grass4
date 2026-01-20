@@ -6,7 +6,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,7 +88,7 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
 		recordsComboBox.setWidthFull();
 		binder.forField(recordsComboBox).bind(ScheduledVisitTO::getRecord, ScheduledVisitTO::setRecord);
 
-		add(new SaveCloseLayout(e -> {
+		add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
 			ScheduledVisitTO writeTO = originalTO == null ? formTO : originalTO;
 			if (binder.writeBeanIfValid(writeTO)) {
 				try {

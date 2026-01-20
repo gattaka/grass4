@@ -12,6 +12,8 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -23,6 +25,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
 import cz.gattserver.grass.core.events.EventBus;
@@ -40,7 +43,6 @@ import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
@@ -133,6 +135,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         photogalleryKeywords = new TokenField(fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = new Button("Kopírovat z obsahu");
+        copyFromContentButton.setIcon(VaadinIcon.COPY.create());
         copyFromContentButton.addClickListener(
                 e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(photogalleryKeywords::addToken)).open());
         photogalleryKeywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
@@ -297,7 +300,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
     private void populateButtonsLayout(ButtonLayout buttonLayout) {
         // Uložit
-        SaveButton saveButton = new SaveButton(event -> {
+        Button saveButton = componentFactory.createSaveButton(event -> {
             if (!isFormValid()) return;
             stayInEditor = true;
             saveOrUpdatePhotogallery();
@@ -305,7 +308,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         buttonLayout.add(saveButton);
 
         // Uložit a zavřít
-        SaveButton saveAndCloseButton = new SaveButton("Uložit a zavřít", event -> {
+        Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
             if (!isFormValid()) return;
             stayInEditor = false;
             saveOrUpdatePhotogallery();
@@ -313,8 +316,8 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         buttonLayout.add(saveAndCloseButton);
         saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
 
-        // Zrušit
-        CloseButton cancelButton = new CloseButton("Zrušit", ev -> new ConfirmDialog(
+        // Storno
+        CloseButton cancelButton = new CloseButton("Storno", ev -> new ConfirmDialog(
                 "Opravdu si přejete zavřít editor galerie ? Veškeré neuložené změny budou ztraceny.", e -> {
             cleanAfterCancelEdit();
             if (editMode) returnToPhotogallery();
@@ -346,7 +349,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
     }
 
     private void saveOrUpdatePhotogallery() {
-        logger.info("saveOrUpdatePhotogallery thread: " + Thread.currentThread().getId());
+        logger.info("saveOrUpdatePhotogallery thread: " + Thread.currentThread().threadId());
         PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(photogalleryNameField.getValue(), galleryDir,
                 photogalleryKeywords.getValues(), publicatedCheckBox.getValue(),
                 reprocessSlideshowAndMiniCheckBox.getValue());

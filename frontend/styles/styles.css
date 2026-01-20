@@ -1,8 +1,9 @@
 @import "header.css";
 @import "layout.css";
 @import "content.css";
-@import "pg.css";
 @import "tag-menu.css";
+/* moduly */
+@import "pg.css";
 
 /* https://vaadin.com/docs/latest/styling/themes/aura/other */
 /* https://vaadin.com/docs/latest/styling/themes/base */
@@ -13,6 +14,11 @@ html {
     --vaadin-grid-background: #f9f9f9;
     --vaadin-grid-border-color: #ddd;
     --vaadin-button-background: #fdfaf2;
+}
+
+/* Pokud je v dialogu, může být při focusu oříznut horní okraj */
+vaadin-text-field {
+    padding-top: 1px;
 }
 
 vaadin-dialog::part(overlay) {

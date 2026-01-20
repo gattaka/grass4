@@ -1,5 +1,6 @@
 package cz.gattserver.grass.articles.plugins.favlink.settings;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -7,6 +8,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -17,10 +19,9 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import com.vaadin.flow.server.StreamResource;
-import com.vaadin.flow.server.streams.DownloadEvent;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
@@ -28,7 +29,6 @@ import cz.gattserver.grass.articles.plugins.favlink.config.FavlinkConfiguration;
 import cz.gattserver.grass.articles.plugins.favlink.strategies.CombinedFaviconObtainStrategy;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -89,9 +89,10 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
         layout.add(btnLayout);
 
         // Save tlačítko
-        SaveButton saveButton = new SaveButton(event -> {
+        ComponentFactory  componentFactory = new ComponentFactory();
+        Button saveButton = componentFactory.createSaveButton(event -> {
             if (binder.validate().isOk()) {
-                configuration.setOutputPath((String) outputPathField.getValue());
+                configuration.setOutputPath( outputPathField.getValue());
                 storeConfiguration(configuration);
             }
         });

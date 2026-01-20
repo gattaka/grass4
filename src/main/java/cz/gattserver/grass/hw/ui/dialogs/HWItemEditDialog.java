@@ -1,8 +1,6 @@
 package cz.gattserver.grass.hw.ui.dialogs;
 
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,14 +10,11 @@ import java.util.function.Consumer;
 
 import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.data.binder.ValidationException;
-import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.exception.GrassException;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -148,7 +143,7 @@ public class HWItemEditDialog extends EditWebDialog {
 			keywords.setValues(originalTO.getTypes());
 		add(keywords);
 
-		SaveCloseLayout buttons = new SaveCloseLayout(e -> {
+		HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
 			try {
 				HWItemTO writeTO = originalTO == null ? new HWItemTO() : originalTO;
 				try {
@@ -167,7 +162,6 @@ public class HWItemEditDialog extends EditWebDialog {
 				throw new GrassException("Uložení se nezdařilo", ve);
 			}
 		}, e -> close());
-
 		add(buttons);
 
 		if (originalTO != null)

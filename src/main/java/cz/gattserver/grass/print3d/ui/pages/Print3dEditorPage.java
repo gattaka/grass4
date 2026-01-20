@@ -4,6 +4,7 @@ import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -18,6 +19,8 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.Breakline;
@@ -30,7 +33,6 @@ import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
@@ -58,347 +60,342 @@ import java.util.Set;
 @PageTitle("Editor 3D projektu")
 public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<String>, BeforeLeaveObserver {
 
-	private static final long serialVersionUID = 8685208356478891386L;
+    private static final long serialVersionUID = 8685208356478891386L;
 
-	private static final Logger logger = LoggerFactory.getLogger(Print3dEditorPage.class);
+    private static final Logger logger = LoggerFactory.getLogger(Print3dEditorPage.class);
 
-	private static final String CLOSE_JS_DIV_ID = "close-js-div";
+    private static final String CLOSE_JS_DIV_ID = "close-js-div";
 
-	@Autowired
-	private Print3dService print3dService;
+    @Autowired
+    private Print3dService print3dService;
 
-	@Autowired
-	private ContentTagService contentTagFacade;
+    @Autowired
+    private ContentTagService contentTagFacade;
 
-	@Resource(name = "print3dViewerPageFactory")
-	private PageFactory print3dViewerPageFactory;
+    @Resource(name = "print3dViewerPageFactory")
+    private PageFactory print3dViewerPageFactory;
 
-	@Autowired
-	private EventBus eventBus;
+    @Autowired
+    private EventBus eventBus;
 
-	private NodeOverviewTO node;
-	private Print3dTO project;
+    private NodeOverviewTO node;
+    private Print3dTO project;
 
-	private TokenField keywords;
-	private TextField nameField;
-	private Checkbox publicatedCheckBox;
+    private TokenField keywords;
+    private TextField nameField;
+    private Checkbox publicatedCheckBox;
 
-	private String projectDir;
-	private boolean editMode;
-	private boolean stayInEditor = false;
+    private String projectDir;
+    private boolean editMode;
+    private boolean stayInEditor = false;
 
-	/**
-	 * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
-	 * smazat.
-	 */
-	private Set<Print3dViewItemTO> newFiles = new HashSet<>();
+    /**
+     * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
+     * smazat.
+     */
+    private Set<Print3dViewItemTO> newFiles = new HashSet<>();
 
-	private String operationToken;
-	private String identifierToken;
+    private String operationToken;
+    private String identifierToken;
 
-	@Override
-	public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
-		String[] chunks = parameter.split("/");
-		if (chunks.length > 0)
-			operationToken = chunks[0];
-		if (chunks.length > 1)
-			identifierToken = chunks[1];
+    @Override
+    public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
+        String[] chunks = parameter.split("/");
+        if (chunks.length > 0) operationToken = chunks[0];
+        if (chunks.length > 1) identifierToken = chunks[1];
 
-		init();
+        init();
 
-		UI.getCurrent().getPage().executeJs(
-				"window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - "
-						+ "rozpracovaná data nejsou uložena ?\" };");
-	}
+        UI.getCurrent().getPage().executeJs(
+                "window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
+                        "rozpracovaná data nejsou uložena ?\" };");
+    }
 
-	@Override
-	protected void createColumnContent(Div editorLayout) {
-		URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
-		if (identifier == null) {
-			logger.debug("Nezdařilo se vytěžit URL identifikátor z řetězce: '{}'", identifierToken);
-			throw new GrassPageException(404);
-		}
+    @Override
+    protected void createColumnContent(Div editorLayout) {
+        URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
+        if (identifier == null) {
+            logger.debug("Nezdařilo se vytěžit URL identifikátor z řetězce: '{}'", identifierToken);
+            throw new GrassPageException(404);
+        }
 
-		CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback = q -> contentTagFacade.findByFilter(
-				q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
-		CallbackDataProvider.CountCallback<String, String> serializableFunction = q -> contentTagFacade.countByFilter(
-				q.getFilter().get());
-		keywords = new TokenField(fetchItemsCallback, serializableFunction);
+        CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
+                q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+        CallbackDataProvider.CountCallback<String, String> serializableFunction =
+                q -> contentTagFacade.countByFilter(q.getFilter().get());
+        keywords = new TokenField(fetchItemsCallback, serializableFunction);
 
-		nameField = new TextField();
-		nameField.setValueChangeMode(ValueChangeMode.EAGER);
-		publicatedCheckBox = new Checkbox();
+        nameField = new TextField();
+        nameField.setValueChangeMode(ValueChangeMode.EAGER);
+        publicatedCheckBox = new Checkbox();
 
-		// operace ?
-		if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
-			editMode = false;
-			node = nodeFacade.getNodeByIdForOverview(identifier.getId());
-			nameField.setValue("");
-			publicatedCheckBox.setValue(true);
-		} else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
-			editMode = true;
-			project = print3dService.getProjectForDetail(identifier.getId());
+        // operace ?
+        if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
+            editMode = false;
+            node = nodeFacade.getNodeByIdForOverview(identifier.getId());
+            nameField.setValue("");
+            publicatedCheckBox.setValue(true);
+        } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
+            editMode = true;
+            project = print3dService.getProjectForDetail(identifier.getId());
 
-			if (project == null)
-				throw new GrassPageException(404);
+            if (project == null) throw new GrassPageException(404);
 
-			nameField.setValue(project.getContentNode().getName());
-			for (ContentTagOverviewTO tagDTO : project.getContentNode().getContentTags())
-				keywords.addToken(tagDTO.getName());
+            nameField.setValue(project.getContentNode().getName());
+            for (ContentTagOverviewTO tagDTO : project.getContentNode().getContentTags())
+                keywords.addToken(tagDTO.getName());
 
-			publicatedCheckBox.setValue(project.getContentNode().isPublicated());
+            publicatedCheckBox.setValue(project.getContentNode().isPublicated());
 
-			// nemá oprávnění upravovat tento obsah
-			if (!project.getContentNode().getAuthor().getName().equals(getUser().getName()) && !getUser().isAdmin())
-				throw new GrassPageException(403);
-		} else {
-			logger.debug("Neznámá operace: '{}'", operationToken);
-			throw new GrassPageException(404);
-		}
+            // nemá oprávnění upravovat tento obsah
+            if (!project.getContentNode().getAuthor().getName().equals(getUser().getName()) && !getUser().isAdmin())
+                throw new GrassPageException(403);
+        } else {
+            logger.debug("Neznámá operace: '{}'", operationToken);
+            throw new GrassPageException(404);
+        }
 
-		try {
-			projectDir = editMode ? project.getPrint3dProjectPath() : print3dService.createProjectDir();
-		} catch (IOException e) {
-			throw new GrassPageException(500);
-		}
+        try {
+            projectDir = editMode ? project.getPrint3dProjectPath() : print3dService.createProjectDir();
+        } catch (IOException e) {
+            throw new GrassPageException(500);
+        }
 
-		editorLayout.add(new H2("Název projektu"));
-		editorLayout.add(nameField);
-		nameField.setWidthFull();
+        editorLayout.add(new H2("Název projektu"));
+        editorLayout.add(nameField);
+        nameField.setWidthFull();
 
-		// label
-		editorLayout.add(new H2("Klíčová slova"));
+        // label
+        editorLayout.add(new H2("Klíčová slova"));
 
-		// menu tagů + textfield tagů
-		keywords.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
-		editorLayout.add(keywords);
+        // menu tagů + textfield tagů
+        keywords.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
+        editorLayout.add(keywords);
 
-		keywords.isEnabled();
-		keywords.setAllowNewItems(true);
-		keywords.getInputField().setPlaceholder("klíčové slovo");
+        keywords.isEnabled();
+        keywords.setAllowNewItems(true);
+        keywords.getInputField().setPlaceholder("klíčové slovo");
 
-		HorizontalLayout gridLayout = new HorizontalLayout();
-		gridLayout.setPadding(false);
-		gridLayout.setSpacing(true);
-		gridLayout.setWidthFull();
-		gridLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-		editorLayout.add(gridLayout);
+        HorizontalLayout gridLayout = new HorizontalLayout();
+        gridLayout.setPadding(false);
+        gridLayout.setSpacing(true);
+        gridLayout.setWidthFull();
+        gridLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        editorLayout.add(gridLayout);
 
-		final Grid<Print3dViewItemTO> grid = new Grid<>();
-		final List<Print3dViewItemTO> items;
-		if (editMode) {
-			try {
-				items = print3dService.getItems(projectDir);
-			} catch (IOException e) {
-				throw new GrassPageException(500, e);
-			}
-		} else {
-			items = new ArrayList<>();
-		}
-		UIUtils.applyGrassDefaultStyle(grid);
-		grid.setItems(items);
+        final Grid<Print3dViewItemTO> grid = new Grid<>();
+        final List<Print3dViewItemTO> items;
+        if (editMode) {
+            try {
+                items = print3dService.getItems(projectDir);
+            } catch (IOException e) {
+                throw new GrassPageException(500, e);
+            }
+        } else {
+            items = new ArrayList<>();
+        }
+        UIUtils.applyGrassDefaultStyle(grid);
+        grid.setItems(items);
 
-		grid.setWidthFull();
-		grid.setHeight("400px");
+        grid.setWidthFull();
+        grid.setHeight("400px");
 
-		grid.addColumn(new TextRenderer<Print3dViewItemTO>(p -> p.getFile().getFileName().toString()))
-				.setHeader("Název").setFlexGrow(100);
+        grid.addColumn(new TextRenderer<>(p -> p.getFile().getFileName().toString()))
+                .setHeader("Název").setFlexGrow(100);
 
-		grid.addColumn(new TextRenderer<Print3dViewItemTO>(p -> p.getSize())).setHeader("Velikost").setWidth("80px")
-				.setTextAlign(ColumnTextAlign.END).setFlexGrow(0);
+        grid.addColumn(new TextRenderer<>(p -> p.getSize())).setHeader("Velikost").setWidth("80px")
+                .setTextAlign(ColumnTextAlign.END).setFlexGrow(0);
 
-		grid.addColumn(new ComponentRenderer<Anchor, Print3dViewItemTO>(itemTO -> {
-			String file = itemTO.getFile().getFileName().toString();
-			Anchor anchor = new Anchor(new StreamResource(file, () -> {
-				try {
-					return Files.newInputStream(print3dService.getFullImage(projectDir, file));
-				} catch (IOException e1) {
-					UIUtils.showWarning("Obrázek nelze zobrazit");
-					return null;
-				}
-			}), "Zobrazit");
-			anchor.setTarget("_blank");
-			return anchor;
-		})).setHeader("Zobrazit").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
+        grid.addColumn(new ComponentRenderer<>(itemTO -> {
+            String file = itemTO.getFile().getFileName().toString();
+            Anchor anchor = new Anchor(DownloadHandler.fromInputStream(e -> {
+                try {
+                    return new DownloadResponse(Files.newInputStream(print3dService.getFullImage(projectDir, file)),
+                            file, null, -1);
+                } catch (IOException e1) {
+                    UIUtils.showWarning("Obrázek nelze zobrazit");
+                    return null;
+                }
+            }), "Zobrazit");
+            anchor.setTarget("_blank");
+            return anchor;
+        })).setHeader("Zobrazit").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-		grid.addColumn(new ComponentRenderer<InlineButton, Print3dViewItemTO>(itemTO -> new InlineButton("Smazat", be -> {
-			new ConfirmDialog("Opravdu smazat?", e -> {
-				try {
-					print3dService.deleteFile(itemTO, projectDir);
-					items.remove(itemTO);
-				} catch (Exception ex) {
-					UIUtils.showWarning("Nezdařilo se smazat některé soubory");
-				}
-				grid.getDataProvider().refreshAll();
-			}).open();
-		}))).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
+        grid.addColumn(new ComponentRenderer<>(itemTO -> new InlineButton("Smazat", be -> {
+            new ConfirmDialog("Opravdu smazat?", e -> {
+                try {
+                    print3dService.deleteFile(itemTO, projectDir);
+                    items.remove(itemTO);
+                } catch (Exception ex) {
+                    UIUtils.showWarning("Nezdařilo se smazat některé soubory");
+                }
+                grid.getDataProvider().refreshAll();
+            }).open();
+        }))).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-		gridLayout.add(grid);
+        gridLayout.add(grid);
 
-		Print3dMultiUpload upload = new Print3dMultiUpload(projectDir) {
-			private static final long serialVersionUID = 8317049226635860025L;
+        Print3dMultiUpload upload = new Print3dMultiUpload(projectDir) {
+            private static final long serialVersionUID = 8317049226635860025L;
 
-			@Override
-			protected void fileUploadSuccess(String fileName, long size) {
-				Print3dViewItemTO itemTO = new Print3dViewItemTO();
-				String sizeText = null;
-				sizeText = HumanBytesSizeFormatter.format(size);
-				itemTO.setSize(sizeText);
-				itemTO.setFile(Paths.get(fileName));
-				newFiles.add(itemTO);
-				items.add(itemTO);
-				grid.setItems(items);
-			}
-		};
-		upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-		editorLayout.add(upload);
+            @Override
+            protected void fileUploadSuccess(String fileName, long size) {
+                Print3dViewItemTO itemTO = new Print3dViewItemTO();
+                String sizeText = null;
+                sizeText = HumanBytesSizeFormatter.format(size);
+                itemTO.setSize(sizeText);
+                itemTO.setFile(Paths.get(fileName));
+                newFiles.add(itemTO);
+                items.add(itemTO);
+                grid.setItems(items);
+            }
+        };
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        editorLayout.add(upload);
 
-		editorLayout.add(new H2("Nastavení"));
+        editorLayout.add(new H2("Nastavení"));
 
-		publicatedCheckBox.setLabel("Publikovat projekt");
-		editorLayout.add(publicatedCheckBox);
-		editorLayout.add(new Breakline());
+        publicatedCheckBox.setLabel("Publikovat projekt");
+        editorLayout.add(publicatedCheckBox);
+        editorLayout.add(new Breakline());
 
-		ButtonLayout buttonsLayout = new ButtonLayout();
-		editorLayout.add(buttonsLayout);
+        ButtonLayout buttonsLayout = new ButtonLayout();
+        editorLayout.add(buttonsLayout);
 
-		populateButtonsLayout(buttonsLayout);
-	}
+        populateButtonsLayout(buttonsLayout);
+    }
 
-	private void populateButtonsLayout(ButtonLayout buttonLayout) {
-		Div closeJsDiv = new Div() {
-			private static final long serialVersionUID = -7319482130016598549L;
+    private void populateButtonsLayout(ButtonLayout buttonLayout) {
+        Div closeJsDiv = new Div() {
+            private static final long serialVersionUID = -7319482130016598549L;
 
-			@ClientCallable
-			private void returnToProjectCallback() {
-				UIUtils.redirect(getPageURL(print3dViewerPageFactory,
-						URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
-			}
+            @ClientCallable
+            private void returnToProjectCallback() {
+                UIUtils.redirect(getPageURL(print3dViewerPageFactory,
+                        URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
+            }
 
-			@ClientCallable
-			private void returnToNodeCallback() {
-				UIUtils.redirect(getPageURL(nodePageFactory,
-						URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
-			}
-		};
-		closeJsDiv.setId(CLOSE_JS_DIV_ID);
-		add(closeJsDiv);
+            @ClientCallable
+            private void returnToNodeCallback() {
+                UIUtils.redirect(getPageURL(nodePageFactory,
+                        URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
+            }
+        };
+        closeJsDiv.setId(CLOSE_JS_DIV_ID);
+        add(closeJsDiv);
 
-		// Uložit
-		SaveButton saveButton = new SaveButton(event -> {
-			if (!isFormValid())
-				return;
-			stayInEditor = true;
-			saveOrUpdateProject();
-		});
-		buttonLayout.add(saveButton);
+        // Uložit
 
-		// Uložit a zavřít
-		SaveButton saveAndCloseButton = new SaveButton("Uložit a zavřít", event -> {
-			if (!isFormValid())
-				return;
-			stayInEditor = false;
-			saveOrUpdateProject();
-		});
-		buttonLayout.add(saveAndCloseButton);
-		saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
+        Button saveButton = componentFactory.createSaveButton(event -> {
+            if (!isFormValid()) return;
+            stayInEditor = true;
+            saveOrUpdateProject();
+        });
+        buttonLayout.add(saveButton);
 
-		// Zrušit
-		CloseButton cancelButton = new CloseButton("Zrušit", ev -> new ConfirmDialog(
-				"Opravdu si přejete zavřít editor projektu ? Veškeré neuložené změny budou ztraceny.", e -> {
-			cleanAfterCancelEdit();
-			if (editMode)
-				returnToProject();
-			else
-				returnToNode();
-		}).open());
-		buttonLayout.add(cancelButton);
-	}
+        // Uložit a zavřít
+        Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
+            if (!isFormValid()) return;
+            stayInEditor = false;
+            saveOrUpdateProject();
+        });
+        buttonLayout.add(saveAndCloseButton);
+        saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
 
-	private void cleanAfterCancelEdit() {
-		if (editMode) {
-			print3dService.deleteFiles(newFiles, projectDir);
-		} else {
-			try {
-				print3dService.deleteDraft(projectDir);
-			} catch (Exception e) {
-				logger.error("Nezdařilo se smazat zrušený rozpracovaný projekt", e);
-				throw new GrassPageException(500, e);
-			}
-		}
-	}
+        // Zrušit
+        CloseButton cancelButton = new CloseButton("Zrušit", ev -> new ConfirmDialog(
+                "Opravdu si přejete zavřít editor projektu ? Veškeré neuložené změny budou ztraceny.", e -> {
+            cleanAfterCancelEdit();
+            if (editMode) returnToProject();
+            else returnToNode();
+        }).open());
+        buttonLayout.add(cancelButton);
+    }
 
-	private boolean isFormValid() {
-		String name = nameField.getValue();
-		if (name == null || name.isEmpty()) {
-			UIUtils.showWarning("Název projektu nemůže být prázdný");
-			return false;
-		}
-		return true;
-	}
+    private void cleanAfterCancelEdit() {
+        if (editMode) {
+            print3dService.deleteFiles(newFiles, projectDir);
+        } else {
+            try {
+                print3dService.deleteDraft(projectDir);
+            } catch (Exception e) {
+                logger.error("Nezdařilo se smazat zrušený rozpracovaný projekt", e);
+                throw new GrassPageException(500, e);
+            }
+        }
+    }
 
-	private void saveOrUpdateProject() {
-		Print3dPayloadTO payloadTO = new Print3dPayloadTO(nameField.getValue(), projectDir, keywords.getValues(),
-				publicatedCheckBox.getValue());
+    private boolean isFormValid() {
+        String name = nameField.getValue();
+        if (name == null || name.isEmpty()) {
+            UIUtils.showWarning("Název projektu nemůže být prázdný");
+            return false;
+        }
+        return true;
+    }
 
-		eventBus.subscribe(Print3dEditorPage.this);
+    private void saveOrUpdateProject() {
+        Print3dPayloadTO payloadTO = new Print3dPayloadTO(nameField.getValue(), projectDir, keywords.getValues(),
+                publicatedCheckBox.getValue());
 
-		if (editMode) {
-			print3dService.modifyProject(project.getId(), payloadTO);
-			onModifyResult(project.getId());
-		} else {
-			onSaveResult(print3dService.saveProject(payloadTO, node.getId(), getUser().getId()));
-		}
-	}
+        eventBus.subscribe(Print3dEditorPage.this);
 
-	/**
-	 * Zavolá vrácení se na obsah
-	 */
-	private void returnToProject() {
-		UI.getCurrent().getPage().executeJs("window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID
-				+ "').$server.returnToProjectCallback();");
-	}
+        if (editMode) {
+            print3dService.modifyProject(project.getId(), payloadTO);
+            onModifyResult(project.getId());
+        } else {
+            onSaveResult(print3dService.saveProject(payloadTO, node.getId(), getUser().getId()));
+        }
+    }
 
-	/**
-	 * zavolání vrácení se na kategorii
-	 */
-	private void returnToNode() {
-		UI.getCurrent().getPage().executeJs("window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID
-				+ "').$server.returnToNodeCallback();");
-	}
+    /**
+     * Zavolá vrácení se na obsah
+     */
+    private void returnToProject() {
+        UI.getCurrent().getPage().executeJs(
+                "window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID +
+                        "').$server.returnToProjectCallback();");
+    }
 
-	private void onSaveResult(Long id) {
-		if (id != null) {
-			project = print3dService.getProjectForDetail(id);
-			// soubory byly uloženy a nepodléhají
-			// podmíněnému smazání
-			newFiles.clear();
-			if (!stayInEditor)
-				returnToProject();
-			// odteď budeme editovat
-			editMode = true;
-		} else {
-			UIUtils.showWarning("Uložení projektu se nezdařilo");
-		}
-	}
+    /**
+     * zavolání vrácení se na kategorii
+     */
+    private void returnToNode() {
+        UI.getCurrent().getPage().executeJs(
+                "window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID +
+                        "').$server.returnToNodeCallback();");
+    }
 
-	private void onModifyResult(Long id) {
-		if (id != null) {
-			// soubory byly uloženy a nepodléhají
-			// podmíněnému smazání
-			newFiles.clear();
-			if (!stayInEditor)
-				returnToProject();
-		} else {
-			UIUtils.showWarning("Úprava projektu se nezdařila");
-		}
-	}
+    private void onSaveResult(Long id) {
+        if (id != null) {
+            project = print3dService.getProjectForDetail(id);
+            // soubory byly uloženy a nepodléhají
+            // podmíněnému smazání
+            newFiles.clear();
+            if (!stayInEditor) returnToProject();
+            // odteď budeme editovat
+            editMode = true;
+        } else {
+            UIUtils.showWarning("Uložení projektu se nezdařilo");
+        }
+    }
 
-	@Override
-	public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
-		beforeLeaveEvent.postpone();
-		new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
-			beforeLeaveEvent.getContinueNavigationAction().proceed();
-		}).open();
-	}
+    private void onModifyResult(Long id) {
+        if (id != null) {
+            // soubory byly uloženy a nepodléhají
+            // podmíněnému smazání
+            newFiles.clear();
+            if (!stayInEditor) returnToProject();
+        } else {
+            UIUtils.showWarning("Úprava projektu se nezdařila");
+        }
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+        beforeLeaveEvent.postpone();
+        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
+            beforeLeaveEvent.getContinueNavigationAction().proceed();
+        }).open();
+    }
 }

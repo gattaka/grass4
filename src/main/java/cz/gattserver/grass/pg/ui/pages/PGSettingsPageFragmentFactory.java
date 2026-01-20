@@ -22,14 +22,13 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
-import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.InfoDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.events.EventBus;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
@@ -43,7 +42,6 @@ import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
@@ -123,7 +121,8 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 		}).bind(PGConfiguration::getRootDir, PGConfiguration::setRootDir);
 
 		// Save tlačítko
-		SaveButton saveButton = new SaveButton(event -> {
+        ComponentFactory  componentFactory = new ComponentFactory();
+		Button saveButton = componentFactory.createSaveButton(event -> {
 			if (binder.validate().isOk()) {
 				configuration.setRootDir(rootDirField.getValue());
 				configuration.setMiniaturesDir(miniaturesDirField.getValue());

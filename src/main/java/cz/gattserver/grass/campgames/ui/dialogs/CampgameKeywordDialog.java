@@ -12,7 +12,6 @@ import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.interfaces.CampgameKeywordTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.common.spring.SpringContextHelper;
 
 public abstract class CampgameKeywordDialog extends EditWebDialog {
@@ -59,7 +58,7 @@ public abstract class CampgameKeywordDialog extends EditWebDialog {
 		btnLayout.setSizeFull();
 		winLayout.add(btnLayout);
 
-		btnLayout.add(new SaveButton(e -> {
+		btnLayout.add(componentFactory.createSaveButton(e -> {
 			try {
 				CampgameKeywordTO writeDTO = originalDTO == null ? new CampgameKeywordTO() : originalDTO;
 				binder.writeBean(writeDTO);

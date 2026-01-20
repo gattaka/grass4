@@ -3,20 +3,15 @@ package cz.gattserver.grass.hw.ui.pages;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
-import java.util.UUID;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
-import cz.gattserver.grass.articles.ui.pages.settings.ArticlesSettingsPageFragmentFactory;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
-import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
-import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.service.HWService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -74,7 +69,8 @@ public class HWSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
         ButtonLayout buttonLayout = new ButtonLayout();
         layout.add(buttonLayout);
 
-        Button saveButton = new SaveButton(e -> {
+        ComponentFactory componentFactory = new ComponentFactory();
+        Button saveButton = componentFactory.createSaveButton(e -> {
             configuration.setRootDir(outputPathField.getValue());
             storeConfiguration(configuration);
         });

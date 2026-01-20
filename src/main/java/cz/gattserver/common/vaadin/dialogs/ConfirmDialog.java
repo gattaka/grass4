@@ -1,9 +1,7 @@
 package cz.gattserver.common.vaadin.dialogs;
 
 import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.Unit;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -42,23 +40,19 @@ public class ConfirmDialog extends WebDialog {
      * @param content obsah okna
      */
     public ConfirmDialog(Div content, ConfirmAction confirmAction) {
+        super("Potvrzení operace");
         this.confirmAction = confirmAction;
 
         content.setWidth(350, Unit.PIXELS);
 
         addComponent(content, Alignment.STRETCH);
         HorizontalLayout btnLayout = new HorizontalLayout();
-        addComponent(btnLayout, Alignment.CENTER);
+        addComponent(btnLayout, Alignment.END);
 
-        Button confirm = new Button("Ano", (ComponentEventListener<ClickEvent<Button>>) event -> {
-            ConfirmDialog.this.confirmAction.onConfirm(event);
+        btnLayout.add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
+            ConfirmDialog.this.confirmAction.onConfirm(e);
             close();
-        });
-        btnLayout.add(confirm);
-
-        Button close = new Button("Ne", (ComponentEventListener<ClickEvent<Button>>) event -> close());
-        btnLayout.add(close);
-
+        }, e -> close()));
     }
 
     public ConfirmAction getConfirmAction() {

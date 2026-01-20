@@ -1,13 +1,13 @@
 package cz.gattserver.grass.hw.ui.dialogs;
 
 import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 
@@ -44,7 +44,7 @@ public abstract class HWItemTypeEditDialog extends EditWebDialog {
 
 		add(nameField);
 
-		SaveCloseLayout buttons = new SaveCloseLayout(e -> {
+		HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
 			try {
 				HWItemTypeTO writeDTO = originalDTO == null ? new HWItemTypeTO() : originalDTO;
 				binder.writeBean(writeDTO);
@@ -54,9 +54,8 @@ public abstract class HWItemTypeEditDialog extends EditWebDialog {
 			} catch (Exception ex) {
 				new ErrorDialog("Uložení se nezdařilo").open();
 			}
-		}, e -> close());
+		}, e -> close(), saveButton -> saveButton.addClickShortcut(Key.ENTER));
 		buttons.setMinWidth("200px");
-		buttons.getSaveButton().addClickShortcut(Key.ENTER);
 		add(buttons);
 
 		if (originalDTO != null)

@@ -2,7 +2,6 @@ package cz.gattserver.grass.recipes.web;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.textfield.TextArea;
@@ -41,7 +40,7 @@ public abstract class RecipeDialog extends EditWebDialog {
 			desc.setValue(recipesFacade.breaklineToEol(to.getDescription()));
 		add(desc);
 
-		add(new SaveCloseLayout(event -> {
+		add(componentFactory.createDialogSubmitOrCloseLayout(event -> {
 			onSave(name.getValue(), desc.getValue(), to == null ? null : to.getId());
 			close();
 		}, e -> close()));

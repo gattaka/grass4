@@ -3,11 +3,11 @@ package cz.gattserver.grass.hw.ui.tabs;
 import java.io.IOException;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.OperationsLayout;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
@@ -21,7 +21,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -133,14 +132,15 @@ public class HWDetailsPrint3dTab extends Div {
             stlViewer.show(getFileURL(to));
         });
 
-        OperationsLayout operationsLayout = new OperationsLayout(e -> hwItemDetailDialog.close());
+        ComponentFactory  componentFactory = new ComponentFactory();
+        HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
         add(operationsLayout);
 
         GridButton<HWItemFileTO> downloadBtn =
                 new GridButton<>("Stáhnout", set -> downloadPrint3d(set.iterator().next()), print3dGrid);
         downloadBtn.setEnableResolver(set -> set.size() == 1);
         downloadBtn.setIcon(ImageIcon.DOWN_16_ICON.createImage("Stáhnout"));
-        operationsLayout.add(downloadBtn);
+        operationsLayout.addToStart(downloadBtn);
 
         if (getUser().isAdmin()) {
             Button deleteBtn = new DeleteGridButton<>("Smazat záznam", items -> {

@@ -7,13 +7,13 @@ import java.util.Locale;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
@@ -91,7 +91,7 @@ public abstract class HWServiceNoteEditDialog extends EditWebDialog {
 		binder.forField(descriptionField).bind(HWServiceNoteTO::getDescription, HWServiceNoteTO::setDescription);
 		winLayout.add(descriptionField, 2);
 
-		SaveCloseLayout buttons = new SaveCloseLayout(e -> {
+		HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
 			try {
 				HWServiceNoteTO writeDTO = originalTO == null ? new HWServiceNoteTO() : originalTO;
 				binder.writeBean(writeDTO);

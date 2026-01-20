@@ -6,7 +6,6 @@ import com.vaadin.flow.data.binder.Binder;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
@@ -31,7 +30,7 @@ public abstract class PhysicianCreateDialog extends EditWebDialog {
 		nameField.setWidthFull();
 		binder.forField(nameField).bind("name");
 
-		add(new SaveCloseLayout(e -> {
+		add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
 			PhysicianTO writeTO = originalTO == null ? new PhysicianTO() : originalTO;
 			if (binder.writeBeanIfValid(writeTO)) {
 				try {

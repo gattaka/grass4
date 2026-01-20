@@ -15,7 +15,6 @@ import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.OperationsLayout;
 import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.ContainerDiv;
@@ -36,7 +35,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
@@ -237,11 +235,9 @@ public class HWDetailsInfoTab extends Div {
         descriptionDiv.setText(hwItem.getDescription());
         add(descriptionDiv);
 
-        OperationsLayout operationsLayout = new OperationsLayout(e -> hwItemDetailDialog.close());
-        operationsLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        operationsLayout.setSpacing(false);
-        operationsLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        add(operationsLayout);
+        ComponentFactory componentFactory = new ComponentFactory();
+        HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
+        add();
 
         if (getUser().isAdmin()) {
             final Button fixBtn = new ModifyButton(e -> new HWItemEditDialog(hwItem, to -> {
@@ -250,7 +246,6 @@ public class HWDetailsInfoTab extends Div {
             }).open());
             operationsLayout.add(fixBtn);
 
-            ComponentFactory componentFactory = new ComponentFactory();
             final Button deleteBtn = componentFactory.createDeleteButton(ev -> {
                 try {
                     hwService.deleteHWItem(hwItem.getId());

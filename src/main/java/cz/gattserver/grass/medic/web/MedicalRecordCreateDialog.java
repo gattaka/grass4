@@ -16,7 +16,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
@@ -106,7 +105,7 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 				tokenField.addToken(m.getName());
 		add(tokenField);
 
-		add(new SaveCloseLayout(e -> {
+		add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
 			MedicalRecordTO writeDTO = originalDTO == null ? new MedicalRecordTO() : originalDTO;
 			if (binder.writeBeanIfValid(writeDTO)) {
 				try {

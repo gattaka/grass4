@@ -23,7 +23,6 @@ import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.OperationsLayout;
 import cz.gattserver.grass.core.ui.components.button.DetailButton;
 import cz.gattserver.grass.core.ui.util.ContainerDiv;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
@@ -86,8 +85,8 @@ public class HWDetailsPhotosTab extends Div {
         }
         populateImages();
 
-        OperationsLayout operationsLayout = new OperationsLayout(e -> hwItemDetailDialog.close());
-        add(operationsLayout);
+        ComponentFactory componentFactory = new ComponentFactory();
+        add(componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close()));
     }
 
     private void populateImages() {

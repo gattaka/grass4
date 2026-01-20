@@ -2,8 +2,10 @@ package cz.gattserver.grass.core.ui.components.button;
 
 import java.util.Set;
 
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 
@@ -36,6 +38,7 @@ public class DeleteGridButton<T> extends GridButton<T> {
         super(caption, grid);
         setClickListener(items -> new ConfirmDialog(confirmMsgFactory.create(items),
                 ev -> confirmAction.onConfirm(items)).open());
-        setIcon(ImageIcon.DELETE_16_ICON.createImage(DEFAULT_CAPTION));
+        setIcon(VaadinIcon.TRASH.create());
+        addThemeVariants(ButtonVariant.LUMO_ERROR);
     }
 }

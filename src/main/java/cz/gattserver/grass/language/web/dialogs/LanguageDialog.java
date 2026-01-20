@@ -4,7 +4,6 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.language.model.dto.LanguageTO;
 
 public class LanguageDialog extends WebDialog {
@@ -36,7 +35,7 @@ public class LanguageDialog extends WebDialog {
 
 		binder.readBean(targetTO);
 
-		add(new SaveCloseLayout(event -> {
+		add(componentFactory.createDialogSubmitOrCloseLayout(event -> {
 			if (binder.writeBeanIfValid(targetTO)) {
 				saveAction.onSave(targetTO);
 				close();

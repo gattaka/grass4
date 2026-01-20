@@ -1,19 +1,18 @@
 package cz.gattserver.grass.print3d.ui.pages;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
-import cz.gattserver.common.vaadin.Breakline;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.services.FileSystemService;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
-import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.print3d.config.Print3dConfiguration;
 import cz.gattserver.grass.print3d.service.Print3dService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +65,8 @@ public class Print3dSettingsPageFragmentFactory extends AbstractPageFragmentFact
 
 		// Save tlačítko
 		ButtonLayout btnLayout = new ButtonLayout();
-		SaveButton saveButton = new SaveButton(event -> {
+        ComponentFactory componentFactory  = new ComponentFactory();
+		Button saveButton = componentFactory.createSaveButton(event -> {
 			if (binder.validate().isOk()) {
 				configuration.setRootDir(rootDirField.getValue());
 				pgService.storeConfiguration(configuration);

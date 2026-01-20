@@ -112,12 +112,6 @@ public abstract class ContentViewerPage extends TwoColumnPage {
             operationsListLayout.add(modBtn);
         }
 
-        // Smazat
-        if (coreACL.canDeleteContent(content, getUser())) {
-            Button delBtn = componentFactory.createDeleteButton(event -> onDeleteOperation());
-            operationsListLayout.add(delBtn);
-        }
-
         // Oblíbené
         removeFromFavouritesButton = new ImageButton("Odebrat z oblíbených", ImageIcon.BROKEN_HEART_16_ICON, event -> {
             // zdařilo se ? Pokud ano, otevři info okno
@@ -160,6 +154,12 @@ public abstract class ContentViewerPage extends TwoColumnPage {
                         }
                     }.open());
             operationsListLayout.add(moveBtn);
+        }
+
+        // Smazat
+        if (coreACL.canDeleteContent(content, getUser())) {
+            Button delBtn = componentFactory.createDeleteButtonWithIcon(event -> onDeleteOperation());
+            operationsListLayout.add(delBtn);
         }
     }
 

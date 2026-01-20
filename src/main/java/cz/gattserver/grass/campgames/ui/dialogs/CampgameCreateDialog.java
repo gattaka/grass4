@@ -1,5 +1,6 @@
 package cz.gattserver.grass.campgames.ui.dialogs;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -13,7 +14,6 @@ import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.ui.components.button.CloseButton;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -105,7 +105,7 @@ public abstract class CampgameCreateDialog extends EditWebDialog {
 		buttonLayout.setWidthFull();
 		layout.add(buttonLayout);
 
-		SaveButton createBtn = new SaveButton(e -> {
+		Button createBtn = componentFactory.createSaveButton(e -> {
 			try {
 				CampgameTO writeDTO = originalDTO == null ? new CampgameTO() : originalDTO;
 				binder.writeBean(writeDTO);

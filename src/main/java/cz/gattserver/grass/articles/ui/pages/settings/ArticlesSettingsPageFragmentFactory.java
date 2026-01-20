@@ -7,6 +7,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.articles.config.ArticlesConfiguration;
@@ -17,13 +18,11 @@ import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
-import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.DoubleToIntegerConverter;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.common.vaadin.Breakline;
 import net.engio.mbassy.listener.Handler;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -89,7 +88,8 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
         ButtonLayout buttonLayout = new ButtonLayout();
         layout.add(buttonLayout);
 
-        SaveButton saveButton = new SaveButton(event -> {
+        ComponentFactory componentFactory = new ComponentFactory();
+        Button saveButton = componentFactory.createSaveButton(event -> {
             if (binder.writeBeanIfValid(configuration)) storeConfiguration(configuration);
         });
 

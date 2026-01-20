@@ -7,7 +7,6 @@ import com.vaadin.flow.data.binder.Binder;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.core.ui.components.SaveCloseLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
@@ -41,7 +40,7 @@ public abstract class MedicamentCreateDialog extends EditWebDialog {
 		toleranceField.setWidthFull();
 		binder.forField(toleranceField).bind("tolerance");
 
-		add(new SaveCloseLayout(e -> {
+		add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
 			MedicamentTO writeDTO = originalDTO == null ? new MedicamentTO() : originalDTO;
 			if (binder.writeBeanIfValid(writeDTO)) {
 				try {
