@@ -2,6 +2,7 @@ package cz.gattserver.grass.fm.web;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -10,6 +11,7 @@ import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.fm.config.FMConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,11 +28,17 @@ public class FMSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 	private FileSystemService fileSystemService;
 
 	@Override
-	public void createFragment(Div layout) {
+	public void createFragment(Div div) {
 		final FMConfiguration configuration = loadConfiguration();
 		final FileSystem fs = fileSystemService.getFileSystem();
 
-		layout.add(new H2("Nastavení správce souborů"));
+        div.add(new H2("Nastavení správce souborů"));
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setWidthFull();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        div.add(layout);
 
 		// Kořenový adresář
 		final TextField outputPathField = new TextField("Nastavení kořenového adresáře");

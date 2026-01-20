@@ -1,5 +1,8 @@
 #center-content h2, #right-content h2 {
     margin-top: 8px;
+}
+
+#center-content h2 {
     margin-bottom: 5px;
 }
 

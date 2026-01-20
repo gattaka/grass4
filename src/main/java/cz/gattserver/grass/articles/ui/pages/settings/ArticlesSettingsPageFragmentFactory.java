@@ -3,6 +3,7 @@ package cz.gattserver.grass.articles.ui.pages.settings;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -30,132 +31,120 @@ import java.util.UUID;
 
 public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
-	@Autowired
-	private ArticleService articleFacade;
+    @Autowired
+    private ArticleService articleFacade;
 
-	@Autowired
-	private ConfigurationService configurationService;
+    @Autowired
+    private ConfigurationService configurationService;
 
-	@Autowired
-	private EventBus eventBus;
+    @Autowired
+    private EventBus eventBus;
 
-	private ProgressDialog progressIndicatorDialog;
-	private UUID uuid;
+    private ProgressDialog progressIndicatorDialog;
+    private UUID uuid;
 
-	private Button reprocessButton;
+    private Button reprocessButton;
 
-	@Override
-	public void createFragment(Div layout) {
-		final ArticlesConfiguration configuration = loadConfiguration();
+    @Override
+    public void createFragment(Div div) {
+        final ArticlesConfiguration configuration = loadConfiguration();
 
-		layout.add(new H2("Nastavení článků"));
+        div.add(new H2("Nastavení článků"));
 
-		Binder<ArticlesConfiguration> binder = new Binder<>();
-		binder.setBean(new ArticlesConfiguration());
-		binder.readBean(configuration);
+        Binder<ArticlesConfiguration> binder = new Binder<>();
+        binder.setBean(new ArticlesConfiguration());
+        binder.readBean(configuration);
 
-		// Délka tabulátoru ve znacích
-		final NumberField tabLengthField = new NumberField("Délka tabulátoru");
-		tabLengthField.setStep(1);
-		tabLengthField.setWidth("200px");
-		binder.forField(tabLengthField).withConverter(new DoubleToIntegerConverter())
-				.bind(ArticlesConfiguration::getTabLength, ArticlesConfiguration::setTabLength);
-		tabLengthField.setValue((double) configuration.getTabLength());
-		layout.add(tabLengthField);
-		
-		layout.add(new Breakline());
+        VerticalLayout layout = new VerticalLayout();
+        layout.setWidthFull();
+        layout.setPadding(false);
+        div.add(layout);
 
-		// Prodleva mezi průběžnými zálohami článku
-		final NumberField backupTimeoutField = new NumberField("Prodleva mezi zálohami");
-		backupTimeoutField.setStep(1);
-		backupTimeoutField.setWidth("200px");
-		binder.forField(backupTimeoutField).withConverter(new DoubleToIntegerConverter())
-				.bind(ArticlesConfiguration::getBackupTimeout, ArticlesConfiguration::setBackupTimeout);
-		backupTimeoutField.setValue((double) configuration.getTabLength());
-		layout.add(backupTimeoutField);
-		
-		layout.add(new Breakline());
+        // Délka tabulátoru ve znacích
+        final NumberField tabLengthField = new NumberField("Délka tabulátoru");
+        tabLengthField.setStep(1);
+        tabLengthField.setWidth("200px");
+        binder.forField(tabLengthField).withConverter(new DoubleToIntegerConverter())
+                .bind(ArticlesConfiguration::getTabLength, ArticlesConfiguration::setTabLength);
+        tabLengthField.setValue((double) configuration.getTabLength());
+        layout.add(tabLengthField);
 
-		// Kořenový adresář
-		final TextField outputPathField = new TextField("Nastavení adresáře příloh");
-		outputPathField.setWidth("300px");
-		binder.forField(outputPathField).bind(ArticlesConfiguration::getAttachmentsDir,
-				ArticlesConfiguration::setAttachmentsDir);
-		outputPathField.setValue(configuration.getAttachmentsDir());
-		layout.add(outputPathField);
-		
-		layout.add(new Breakline());
-		
-		ButtonLayout buttonLayout = new ButtonLayout();
-		layout.add(buttonLayout);
+        // Prodleva mezi průběžnými zálohami článku
+        final NumberField backupTimeoutField = new NumberField("Prodleva mezi zálohami (minuty)");
+        backupTimeoutField.setStep(1);
+        backupTimeoutField.setWidth("250px");
+        binder.forField(backupTimeoutField).withConverter(new DoubleToIntegerConverter())
+                .bind(ArticlesConfiguration::getBackupTimeout, ArticlesConfiguration::setBackupTimeout);
+        backupTimeoutField.setValue((double) configuration.getTabLength());
+        layout.add(backupTimeoutField);
 
-		/**
-		 * Save tlačítko
-		 */
-		SaveButton saveButton = new SaveButton(event -> {
-			if (binder.writeBeanIfValid(configuration))
-				storeConfiguration(configuration);
-		});
-		buttonLayout.add(saveButton);
+        // Kořenový adresář
+        final TextField outputPathField = new TextField("Nastavení adresáře příloh");
+        outputPathField.setWidth("300px");
+        binder.forField(outputPathField)
+                .bind(ArticlesConfiguration::getAttachmentsDir, ArticlesConfiguration::setAttachmentsDir);
+        outputPathField.setValue(configuration.getAttachmentsDir());
+        layout.add(outputPathField);
 
-		/**
-		 * Reprocess tlačítko
-		 */
-		layout.add(new H2("Přegenerování obsahů"));
+        ButtonLayout buttonLayout = new ButtonLayout();
+        layout.add(buttonLayout);
 
-		reprocessButton = new ImageButton("Přegenerovat všechny články", ImageIcon.GEAR2_16_ICON, event -> {
-			ConfirmDialog dialog = new ConfirmDialog(
-					"Přegenerování všech článků může zabrat delší čas a dojde během něj zřejmě k mnoha drobným změnám - opravdu přegenerovat ?",
-					e -> {
-						eventBus.subscribe(ArticlesSettingsPageFragmentFactory.this);
-						progressIndicatorDialog = new ProgressDialog();
-						uuid = UUID.randomUUID();
-						articleFacade.reprocessAllArticles(uuid, UIUtils.getContextPath());
-					});
-			dialog.setWidth("460px");
-			dialog.setHeight("230px");
-			dialog.open();
-		});
-		layout.add(reprocessButton);
-	}
+        SaveButton saveButton = new SaveButton(event -> {
+            if (binder.writeBeanIfValid(configuration)) storeConfiguration(configuration);
+        });
 
-	private ArticlesConfiguration loadConfiguration() {
-		ArticlesConfiguration configuration = new ArticlesConfiguration();
-		configurationService.loadConfiguration(configuration);
-		return configuration;
-	}
+        reprocessButton = new ImageButton("Přegenerovat všechny články", ImageIcon.GEAR2_16_ICON, event -> {
+            ConfirmDialog dialog = new ConfirmDialog(
+                    "Přegenerování všech článků může zabrat delší čas a dojde během něj zřejmě k mnoha drobným změnám - opravdu přegenerovat ?",
+                    e -> {
+                        eventBus.subscribe(ArticlesSettingsPageFragmentFactory.this);
+                        progressIndicatorDialog = new ProgressDialog();
+                        uuid = UUID.randomUUID();
+                        articleFacade.reprocessAllArticles(uuid, UIUtils.getContextPath());
+                    });
+            dialog.setWidth("460px");
+            dialog.setHeight("230px");
+            dialog.open();
+        });
+        buttonLayout.add(saveButton, reprocessButton);
+    }
 
-	private void storeConfiguration(ArticlesConfiguration configuration) {
-		configurationService.saveConfiguration(configuration);
-	}
+    private ArticlesConfiguration loadConfiguration() {
+        ArticlesConfiguration configuration = new ArticlesConfiguration();
+        configurationService.loadConfiguration(configuration);
+        return configuration;
+    }
 
-	@Handler
-	protected void onProcessStart(final ArticlesProcessStartEvent event) {
-		progressIndicatorDialog.runInUI(() -> {
-			progressIndicatorDialog.setTotal(event.getCountOfStepsToDo());
-			progressIndicatorDialog.open();
-		});
-	}
+    private void storeConfiguration(ArticlesConfiguration configuration) {
+        configurationService.saveConfiguration(configuration);
+    }
 
-	@Handler
-	protected void onProcessProgress(ArticlesProcessProgressEvent event) {
-		progressIndicatorDialog.runInUI(() -> progressIndicatorDialog.indicateProgress(event.getStepDescription()));
-	}
+    @Handler
+    protected void onProcessStart(final ArticlesProcessStartEvent event) {
+        progressIndicatorDialog.runInUI(() -> {
+            progressIndicatorDialog.setTotal(event.getCountOfStepsToDo());
+            progressIndicatorDialog.open();
+        });
+    }
 
-	@Handler
-	protected void onProcessResult(final ArticlesProcessResultEvent event) {
-		progressIndicatorDialog.runInUI(() -> {
-			if (progressIndicatorDialog != null)
-				progressIndicatorDialog.close();
-			reprocessButton.setEnabled(true);
+    @Handler
+    protected void onProcessProgress(ArticlesProcessProgressEvent event) {
+        progressIndicatorDialog.runInUI(() -> progressIndicatorDialog.indicateProgress(event.getStepDescription()));
+    }
 
-			if (event.isSuccess()) {
-				UIUtils.showInfo("Přegenerování článků proběhlo úspěšně");
-			} else {
-				UIUtils.showWarning("Přegenerování článků se nezdařilo");
-			}
-		});
-		eventBus.unsubscribe(ArticlesSettingsPageFragmentFactory.this);
-	}
+    @Handler
+    protected void onProcessResult(final ArticlesProcessResultEvent event) {
+        progressIndicatorDialog.runInUI(() -> {
+            if (progressIndicatorDialog != null) progressIndicatorDialog.close();
+            reprocessButton.setEnabled(true);
+
+            if (event.isSuccess()) {
+                UIUtils.showInfo("Přegenerování článků proběhlo úspěšně");
+            } else {
+                UIUtils.showWarning("Přegenerování článků se nezdařilo");
+            }
+        });
+        eventBus.unsubscribe(ArticlesSettingsPageFragmentFactory.this);
+    }
 
 }

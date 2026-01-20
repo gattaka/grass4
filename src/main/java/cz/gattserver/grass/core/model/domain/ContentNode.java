@@ -3,18 +3,17 @@ package cz.gattserver.grass.core.model.domain;
 import java.time.LocalDateTime;
 import java.util.Set;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 
 @Entity(name = "CONTENTNODE")
 public class ContentNode {
+
+    /**
+     * DB identifikátor
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     /**
      * ID služby, která daný obsah umí číst
@@ -75,14 +74,6 @@ public class ContentNode {
      */
     @ManyToOne(fetch = FetchType.EAGER)
     private User author;
-
-    /**
-     * DB identifikátor
-     */
-    @Id
-    @GeneratedValue(generator = "increment")
-    @GenericGenerator(name = "increment", strategy = "increment")
-    private Long id;
 
     public Boolean getDraft() {
         // Zpětná kompatibilita s null záznamy

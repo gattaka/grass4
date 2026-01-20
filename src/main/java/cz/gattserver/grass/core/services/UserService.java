@@ -22,7 +22,7 @@ public interface UserService {
 	 *            heslo uživatele
 	 * @return db id, které bylo nového uživateli přiděleno
 	 */
-	public long registrateNewUser(String email, String username, String password);
+	long registrateNewUser(String email, String username, String password);
 
 	/**
 	 * Aktivuje uživatele
@@ -30,7 +30,7 @@ public interface UserService {
 	 * @param userId
 	 *            id uživatele
 	 */
-	public void activateUser(long userId);
+	void activateUser(long userId);
 
 	/**
 	 * Zablokuje uživatele
@@ -38,7 +38,7 @@ public interface UserService {
 	 * @param userId
 	 *            id uživatele
 	 */
-	public void banUser(long userId);
+	void banUser(long userId);
 
 	/**
 	 * Upraví role uživatele
@@ -49,14 +49,14 @@ public interface UserService {
 	 *            role, které mu budou nastaveny (nejedná se o přidání ale
 	 *            pevnou změnu výčtu rolí)
 	 */
-	public void changeUserRoles(long userId, Set<? extends Role> roles);
+	void changeUserRoles(long userId, Set<? extends Role> roles);
 
 	/**
 	 * Vrátí všechny uživatele
 	 * 
 	 * @return list uživatelů
 	 */
-	public List<UserInfoTO> getUserInfoFromAllUsers();
+	List<UserInfoTO> getUserInfoFromAllUsers();
 
 	/**
 	 * Vrátí uživatele dle jména
@@ -65,7 +65,7 @@ public interface UserService {
 	 *            jméno uživatele
 	 * @return nalezný uživatel
 	 */
-	public UserInfoTO getUser(String username);
+	UserInfoTO getUser(String username);
 
 	/**
 	 * Vrátí uživatele dle id
@@ -74,7 +74,7 @@ public interface UserService {
 	 *            id hledaného uživatele
 	 * @return nalezený uživatel
 	 */
-	public UserInfoTO getUserById(long userId);
+	UserInfoTO getUserById(long userId);
 
 	/**
 	 * Zjistí zda daný obsah je v oblíbených daného uživatele
@@ -85,7 +85,7 @@ public interface UserService {
 	 *            id uživatele, kterému bude prohledán seznam oblíbených
 	 * @return <code>true</code>, pokud má daný uživatel v oblíbených daný obsah
 	 */
-	public boolean hasInFavourites(long contentNodeId, long userId);
+	boolean hasInFavourites(long contentNodeId, long userId);
 
 	/**
 	 * Přidá obsah do oblíbených uživatele
@@ -95,7 +95,7 @@ public interface UserService {
 	 * @param userId
 	 *            id uživatele, kterému bude obsah přidán do oblíbených
 	 */
-	public void addContentToFavourites(long contentNodeId, long userId);
+	void addContentToFavourites(long contentNodeId, long userId);
 
 	/**
 	 * Odebere obsah z oblíbených uživatele
@@ -105,7 +105,7 @@ public interface UserService {
 	 * @param userId
 	 *            id uživatele, kterému bude obsah odebrán z oblíbených
 	 */
-	public void removeContentFromFavourites(long contentNodeId, long userId);
+	void removeContentFromFavourites(long contentNodeId, long userId);
 
 	/**
 	 * Odebere obsah z oblíbených všech uživatelů
@@ -113,6 +113,6 @@ public interface UserService {
 	 * @param contentNodeId
 	 *            id obsahu, který bude odebrán z oblíbených
 	 */
-	public void removeContentFromAllUsersFavourites(long content);
+	void removeContentFromAllUsersFavourites(long contentNodeId);
 
 }

@@ -4,6 +4,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.html.Div;
@@ -30,11 +32,17 @@ public class CampgamesSettingsPageFragmentFactory extends AbstractPageFragmentFa
 	private FileSystemService fileSystemService;
 
 	@Override
-	public void createFragment(Div layout) {
+	public void createFragment(Div div) {
 		final CampgamesConfiguration configuration = loadConfiguration();
 		final FileSystem fs = fileSystemService.getFileSystem();
 
-		layout.add(new H2("Nastavení evidence táborových her"));
+		div.add(new H2("Nastavení evidence táborových her"));
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setWidthFull();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        div.add(layout);
 
 		/**
 		 * Kořenový adresář
@@ -54,9 +62,6 @@ public class CampgamesSettingsPageFragmentFactory extends AbstractPageFragmentFa
 			}
 		}).bind(CampgamesConfiguration::getRootDir, CampgamesConfiguration::setRootDir);
 
-		ButtonLayout buttonLayout = new ButtonLayout();
-		layout.add(buttonLayout);
-
 		// Save tlačítko
 		SaveButton saveButton = new SaveButton(e -> {
 			configuration.setRootDir((String) outputPathField.getValue());
@@ -64,7 +69,10 @@ public class CampgamesSettingsPageFragmentFactory extends AbstractPageFragmentFa
 			Notification.show("Uložení proběhlo úspěšně", 1000, Position.MIDDLE);
 		});
 		binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
-		buttonLayout.add(saveButton);
+
+        ButtonLayout buttonLayout = new ButtonLayout();
+        layout.add(buttonLayout);
+        buttonLayout.add(saveButton);
 	}
 
 	private CampgamesConfiguration loadConfiguration() {

@@ -3,6 +3,7 @@ package cz.gattserver.grass.print3d.ui.pages;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -12,6 +13,7 @@ import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.print3d.config.Print3dConfiguration;
 import cz.gattserver.grass.print3d.service.Print3dService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,21 +35,25 @@ public class Print3dSettingsPageFragmentFactory extends AbstractPageFragmentFact
 	private PageFactory print3dViewerPageFactory;
 
 	@Override
-	public void createFragment(Div layout) {
+	public void createFragment(Div div) {
 		final Print3dConfiguration configuration = pgService.loadConfiguration();
 		final FileSystem fs = fileSystemService.getFileSystem();
 
-		layout.add(new H2("Nastavení knihovny 3D modelů"));
+        div.add(new H2("Nastavení knihovny 3D modelů"));
 
 		Binder<Print3dConfiguration> binder = new Binder<>();
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setWidthFull();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        div.add(layout);
 
 		// Kořenový adresář projektů
 		final TextField rootDirField = new TextField("Kořenový adresář 3d projektů");
 		rootDirField.setValue(String.valueOf(configuration.getRootDir()));
 		rootDirField.setWidth("300px");
 		layout.add(rootDirField);
-
-		layout.add(new Breakline());
 
 		binder.forField(rootDirField).asRequired("Kořenový adresář je povinný").withValidator((val, c) -> {
 			try {

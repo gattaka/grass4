@@ -11,6 +11,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
@@ -82,13 +83,19 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 	private ProgressDialog progressIndicatorWindow;
 
 	@Override
-	public void createFragment(Div layout) {
+	public void createFragment(Div div) {
 		final PGConfiguration configuration = pgService.loadConfiguration();
 		final FileSystem fs = fileSystemService.getFileSystem();
 
-		layout.add(new H2("Nastavení fotogalerie"));
+        div.add(new H2("Nastavení fotogalerie"));
 
 		Binder<PGConfiguration> binder = new Binder<>();
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setWidthFull();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        div.add(layout);
 
 		// Název adresářů miniatur
 		final TextField miniaturesDirField = new TextField("Název adresářů miniatur");
@@ -100,15 +107,11 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 				.withValidator(new StringLengthValidator("Neodpovídá povolené délce", 1, 1024))
 				.bind(PGConfiguration::getMiniaturesDir, PGConfiguration::setMiniaturesDir);
 
-		layout.add(new Breakline());
-
 		// Kořenový adresář fotogalerií
 		final TextField rootDirField = new TextField("Kořenový adresář fotogalerií");
 		rootDirField.setValue(String.valueOf(configuration.getRootDir()));
 		rootDirField.setWidth("300px");
 		layout.add(rootDirField);
-
-		layout.add(new Breakline());
 
 		binder.forField(rootDirField).asRequired("Kořenový adresář je povinný").withValidator((val, c) -> {
 			try {
@@ -120,7 +123,6 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 		}).bind(PGConfiguration::getRootDir, PGConfiguration::setRootDir);
 
 		// Save tlačítko
-		ButtonLayout btnLayout = new ButtonLayout();
 		SaveButton saveButton = new SaveButton(event -> {
 			if (binder.validate().isOk()) {
 				configuration.setRootDir(rootDirField.getValue());
@@ -130,20 +132,18 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 			}
 		});
 		binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
-		btnLayout.add(saveButton);
-		layout.add(btnLayout);
+		layout.add(saveButton);
 
 		Path path = fileSystemService.getFileSystem().getPath(configuration.getRootDir());
 
 		if (Files.exists(path)) {
-			layout.add(new H2("Přehled adresářů"));
+			div.add(new H2("Přehled adresářů"));
 
 			Grid<PGSettingsItemTO> grid = new Grid<>();
 			UIUtils.applyGrassDefaultStyle(grid);
 			grid.setWidthFull();
 			grid.setHeight("500px");
-
-			layout.add(grid);
+            div.add(grid);
 
 			Column<PGSettingsItemTO> nameColumn = grid
 					.addColumn(new TextRenderer<>(to -> to.getPath().getFileName().toString())).setHeader("Název")
@@ -160,7 +160,7 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 					a.setTarget("_blank");
 					return a;
 				}
-			})).setHeader("Odkaz");
+			})).setHeader("Odkaz").setWidth("50px");
 
 			grid.addColumn(p -> p.getSize() == null ? "N/A" : HumanBytesSizeFormatter.format(p.getSize()))
 					.setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0)
@@ -169,9 +169,9 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 			grid.addColumn(p -> p.getFilesCount() == null ? "N/A" : p.getFilesCount()).setHeader("Soubory")
 					.setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0).setSortable(true);
 
-			SimpleDateFormat sdf = new SimpleDateFormat("d.M.yyyy");
+			SimpleDateFormat sdf = new SimpleDateFormat("d. M. yyyy");
 			grid.addColumn(p -> sdf.format(p.getDate())).setHeader("Datum").setTextAlign(ColumnTextAlign.END)
-					.setWidth("70px").setFlexGrow(0).setSortable(true);
+					.setWidth("80px").setFlexGrow(0).setSortable(true);
 
 			grid.addColumn(new ComponentRenderer<>(item -> {
                 InlineButton button = new InlineButton("Přegenerovat", be -> {

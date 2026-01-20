@@ -102,3 +102,16 @@ h2, h3 {
 h2 {
     font-size: 15pt;
 }
+
+/* Inline button */
+.inline-button {
+    cursor: pointer;
+}
+
+.inline-button:hover {
+    text-decoration: underline;
+}
+
+vaadin-grid .inline-button {
+    color: #045491;
+}

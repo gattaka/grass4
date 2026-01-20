@@ -4,6 +4,7 @@ import cz.gattserver.grass.core.config.CoreConfiguration;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.checkbox.Checkbox;

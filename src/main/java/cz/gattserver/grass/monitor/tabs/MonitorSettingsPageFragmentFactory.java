@@ -4,10 +4,12 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.components.button.SaveButton;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.html.Div;
@@ -28,11 +30,17 @@ public class MonitorSettingsPageFragmentFactory extends AbstractPageFragmentFact
 	private FileSystemService fileSystemService;
 
 	@Override
-	public void createFragment(Div layout) {
+	public void createFragment(Div div) {
 		final MonitorConfiguration configuration = monitorFacade.getConfiguration();
 		final FileSystem fs = fileSystemService.getFileSystem();
 
-		layout.add(new H2("Nastavení system monitoru"));
+        div.add(new H2("Nastavení system monitoru"));
+
+        VerticalLayout layout = new VerticalLayout();
+        layout.setWidthFull();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        div.add(layout);
 
 		/**
 		 * Adresář skriptů

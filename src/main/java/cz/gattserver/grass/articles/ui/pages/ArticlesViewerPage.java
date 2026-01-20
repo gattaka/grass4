@@ -2,7 +2,6 @@ package cz.gattserver.grass.articles.ui.pages;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dependency.JavaScript;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.*;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
@@ -75,7 +74,7 @@ public class ArticlesViewerPage extends ContentViewerPage implements HasUrlParam
 			// obejít problém se závislosí pluginů na úložišti theme apod. a
 			// přitom umožnit aby se CSS odkazovali na externí zdroje
 			if (!css.toLowerCase().startsWith("http://") || !css.toLowerCase().startsWith("https://"))
-				css = getContextPath() + "/VAADIN/" + css;
+				css = getContextPath() + "/" + css;
 			loadCSS(css);
 		}
 
