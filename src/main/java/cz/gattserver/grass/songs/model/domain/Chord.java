@@ -1,6 +1,6 @@
 package cz.gattserver.grass.songs.model.domain;
 
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.GenerationType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -8,6 +8,13 @@ import jakarta.persistence.Id;
 
 @Entity(name = "CHORD")
 public class Chord {
+
+    /**
+     * DB id
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 	/**
 	 * Název
@@ -18,14 +25,6 @@ public class Chord {
 	 * Konfigurace
 	 */
 	private Long configuration;
-
-	/**
-	 * DB id
-	 */
-	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
-	private Long id;
 
 	@Override
 	public boolean equals(Object obj) {

@@ -1,6 +1,6 @@
 package cz.gattserver.grass.drinks.model.domain;
 
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.GenerationType;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -13,8 +13,7 @@ public class WineInfo {
 	 * DB id
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

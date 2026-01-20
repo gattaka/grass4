@@ -1,7 +1,5 @@
 package cz.gattserver.grass.drinks.model.domain;
 
-import org.hibernate.annotations.GenericGenerator;
-
 import jakarta.persistence.*;
 
 @Entity(name = "DRINKS_DRINK")
@@ -11,8 +9,7 @@ public class Drink {
 	 * DB id
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

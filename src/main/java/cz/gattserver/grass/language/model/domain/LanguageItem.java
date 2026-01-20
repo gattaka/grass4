@@ -2,12 +2,7 @@ package cz.gattserver.grass.language.model.domain;
 
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 
 @Entity(name = "LANGUAGEITEM")
 public class LanguageItem {
@@ -16,8 +11,7 @@ public class LanguageItem {
 	 * DB identifikátor
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

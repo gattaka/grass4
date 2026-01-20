@@ -1,11 +1,6 @@
 package cz.gattserver.grass.core.model.domain;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 
 @Entity(name = "NODE")
 public class Node {
@@ -25,8 +20,7 @@ public class Node {
 	 * DB identifikátor
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@Override

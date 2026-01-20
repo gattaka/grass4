@@ -2,12 +2,7 @@ package cz.gattserver.grass.hw.model.domain;
 
 import java.util.Date;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 
 import cz.gattserver.grass.hw.interfaces.HWItemState;
 
@@ -21,8 +16,7 @@ public class HWServiceNote {
 	 * Identifikátor změny
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

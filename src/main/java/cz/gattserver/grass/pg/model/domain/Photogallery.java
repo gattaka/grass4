@@ -1,34 +1,29 @@
 package cz.gattserver.grass.pg.model.domain;
 
 import cz.gattserver.grass.core.model.domain.ContentNode;
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 @Entity(name = "PHOTOGALLERY")
 public class Photogallery {
 
-	/**
+    /**
+     * DB identifikátor
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
 	 * Meta-informace o obsahu
 	 */
 	@OneToOne
 	private ContentNode contentNode;
 
-	/**
+    /**
 	 * Relativní cesta (od kořene fotogalerie) k adresáři s fotografiemi
 	 */
 	private String photogalleryPath;
 
-	/**
-	 * DB identifikátor
-	 */
-	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
-	private Long id;
 
 	public Long getId() {
 		return id;

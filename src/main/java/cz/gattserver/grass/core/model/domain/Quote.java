@@ -2,9 +2,8 @@ package cz.gattserver.grass.core.model.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity(name = "QUOTE")
 public class Quote {
@@ -13,8 +12,7 @@ public class Quote {
 	 * DB identifikátor
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

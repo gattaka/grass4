@@ -1,34 +1,29 @@
 package cz.gattserver.grass.print3d.model.domain;
 
 import cz.gattserver.grass.core.model.domain.ContentNode;
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 
 @Entity(name = "PRINT3D")
 public class Print3d {
 
-	/**
+    /**
+     * DB identifikátor
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    /**
 	 * Meta-informace o obsahu
 	 */
 	@OneToOne
 	private ContentNode contentNode;
 
-	/**
+    /**
 	 * Relativní cesta (od kořene 3d projektů) k adresáři s 3d projektem
 	 */
 	private String projectPath;
 
-	/**
-	 * DB identifikátor
-	 */
-	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
-	private Long id;
 
 	public Long getId() {
 		return id;

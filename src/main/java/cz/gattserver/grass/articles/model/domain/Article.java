@@ -1,7 +1,6 @@
 package cz.gattserver.grass.articles.model.domain;
 
 import cz.gattserver.grass.core.model.domain.ContentNode;
-import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.SortComparator;
 
 import jakarta.persistence.*;
@@ -10,6 +9,13 @@ import java.util.SortedSet;
 
 @Entity(name = "ARTICLE")
 public class Article {
+
+    /**
+     * DB identifikátor
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 	/**
 	 * Obsah článku
@@ -56,14 +62,6 @@ public class Article {
 	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@SortComparator(ArticleJSCodeComparator.class)
 	private SortedSet<ArticleJSCode> pluginJSCodes;
-
-	/**
-	 * DB identifikátor
-	 */
-	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
-	private Long id;
 
 	/**
 	 * Je-li draft a má-li rozpracovanou pouze část článku, pak kterou

@@ -5,18 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
-
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 
 import cz.gattserver.grass.hw.interfaces.HWItemState;
 
@@ -30,8 +19,7 @@ public class HWItem {
 	 * Identifikátor hw
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

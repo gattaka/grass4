@@ -1,18 +1,12 @@
 package cz.gattserver.grass.medic.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 
 @Entity(name = "MEDICAL_MEDICAMENT")
 public class Medicament {
 
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

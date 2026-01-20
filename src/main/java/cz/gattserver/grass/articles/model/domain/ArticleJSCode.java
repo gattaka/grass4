@@ -1,11 +1,6 @@
 package cz.gattserver.grass.articles.model.domain;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity(name = "ARTICLE_JS_CODE")
 public class ArticleJSCode implements ExecutedInOrder, Comparable<ArticleJSCode> {
@@ -14,8 +9,7 @@ public class ArticleJSCode implements ExecutedInOrder, Comparable<ArticleJSCode>
 	 * DB identifikátor
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

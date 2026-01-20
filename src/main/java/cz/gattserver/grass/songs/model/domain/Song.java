@@ -1,14 +1,16 @@
 package cz.gattserver.grass.songs.model.domain;
 
-import org.hibernate.annotations.GenericGenerator;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 @Entity(name = "SONG")
 public class Song {
+
+    /**
+     * DB id
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
 	/**
 	 * Název
@@ -30,14 +32,6 @@ public class Song {
 	 */
 	@Column(columnDefinition = "TEXT")
 	private String text;
-
-	/**
-	 * DB id
-	 */
-	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
-	private Long id;
 
 	/**
 	 * Je písnička určena k publikování?

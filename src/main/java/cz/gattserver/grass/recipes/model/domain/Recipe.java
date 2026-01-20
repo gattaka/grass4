@@ -1,68 +1,62 @@
 package cz.gattserver.grass.recipes.model.domain;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 
 @Entity(name = "RECIPE")
 public class Recipe {
 
-	/**
-	 * Název receptu
-	 */
-	private String name;
+    /**
+     * DB identifikátor
+     */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	/**
-	 * Popis receptu
-	 */
-	@Column(columnDefinition = "TEXT")
-	private String description;
+    /**
+     * Název receptu
+     */
+    private String name;
 
-	/**
-	 * DB identifikátor
-	 */
-	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
-	private Long id;
+    /**
+     * Popis receptu
+     */
+    @Column(columnDefinition = "TEXT")
+    private String description;
 
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof Recipe))
-			return false;
-		return ((Recipe) obj).getId() == getId();
-	}
 
-	@Override
-	public int hashCode() {
-		return getId().hashCode();
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Recipe)) return false;
+        return ((Recipe) obj).getId() == getId();
+    }
 
-	public Long getId() {
-		return id;
-	}
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 
 }

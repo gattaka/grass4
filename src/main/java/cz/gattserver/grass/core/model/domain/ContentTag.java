@@ -2,12 +2,7 @@ package cz.gattserver.grass.core.model.domain;
 
 import java.util.Set;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToMany;
-
-import org.hibernate.annotations.GenericGenerator;
+import jakarta.persistence.*;
 
 @Entity(name = "CONTENT_TAG")
 public class ContentTag {
@@ -16,8 +11,7 @@ public class ContentTag {
 	 * DB identifikátor
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**

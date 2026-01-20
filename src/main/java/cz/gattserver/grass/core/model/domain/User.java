@@ -4,21 +4,10 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
-import jakarta.persistence.Table;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.security.Role;
-import org.hibernate.annotations.GenericGenerator;
 
 @Entity(name = "USER_ACCOUNTS")
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }) })
@@ -28,8 +17,7 @@ public class User {
 	 * DB identifikátor
 	 */
 	@Id
-	@GeneratedValue(generator = "increment")
-	@GenericGenerator(name = "increment", strategy = "increment")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	/**
