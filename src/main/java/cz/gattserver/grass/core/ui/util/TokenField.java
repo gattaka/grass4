@@ -47,7 +47,6 @@ public class TokenField extends Div {
 	private void init() {
 		tokensLayout = new ButtonLayout();
 		add(tokensLayout);
-		tokensLayout.getElement().getStyle().set("display", "inline-block");
 
 		comboBox.addCustomValueSetListener(e -> {
 			if (allowNewItems)

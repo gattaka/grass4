@@ -393,7 +393,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 									photogallery.getContentNode().getCreationDate());
 						}).open();
 					});
-					deleteButton.getStyle().set("margin-left", "20px").set("color", "red");
+					deleteButton.getStyle().set("color", "red");
                     buttonLayout.add(deleteButton);
 				}
 

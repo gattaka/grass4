@@ -1,5 +1,9 @@
-#center-content h2, #right-content h2 {
+#center-content h2 {
     margin-top: 8px;
+}
+
+#right-content h2 {
+    margin-top: 10px;
 }
 
 #center-content h2 {

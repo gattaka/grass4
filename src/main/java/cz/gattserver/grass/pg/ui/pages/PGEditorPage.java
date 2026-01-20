@@ -13,12 +13,15 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.ComponentFactory;
@@ -144,7 +147,8 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 		ComponentFactory componentFactory = new ComponentFactory();
 
 		photogalleryDateField = componentFactory.createDatePicker("Přepsat datum vytvoření galerie");
-		photogalleryDateField.setWidth("200px");
+		photogalleryDateField.setWidth("250px");
+        photogalleryDateField.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		publicatedCheckBox = new Checkbox();
 		reprocessSlideshowAndMiniCheckBox = new Checkbox();
 
@@ -226,9 +230,9 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
 		grid.addColumn(new ComponentRenderer<>(itemTO -> {
 			String file = itemTO.getName();
-			Anchor anchor = new Anchor(new StreamResource(file, () -> {
+			Anchor anchor = new Anchor(DownloadHandler.fromInputStream(e-> {
 				try {
-					return Files.newInputStream(pgService.getFullImage(galleryDir, file));
+					return new DownloadResponse(Files.newInputStream(pgService.getFullImage(galleryDir, file)),file,null,-1);
 				} catch (IOException e1) {
 					UIUtils.showWarning("Obrázek nelze zobrazit");
 					return null;
@@ -260,6 +264,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 				},
 				grid);
 		deleteBtn.setEnabled(false);
+        deleteBtn.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		buttonLayout.add(deleteBtn);
 
 		PGMultiUpload upload = new PGMultiUpload(galleryDir) {
@@ -279,18 +284,20 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
 		editorLayout.add(new H2("Nastavení"));
 
-		publicatedCheckBox.setLabel("Publikovat galerii");
-		editorLayout.add(publicatedCheckBox);
-		editorLayout.add(new Breakline());
+        VerticalLayout chekboxLayout = new VerticalLayout();
+        chekboxLayout.setSpacing(true);
+        chekboxLayout.setPadding(false);
+        editorLayout.add(chekboxLayout);
 
+		publicatedCheckBox.setLabel("Publikovat galerii");
+        chekboxLayout.add(publicatedCheckBox);
 		reprocessSlideshowAndMiniCheckBox.setLabel("Přegenerovat slideshow a miniatury");
-		editorLayout.add(reprocessSlideshowAndMiniCheckBox);
-		editorLayout.add(new Breakline());
+        chekboxLayout.add(reprocessSlideshowAndMiniCheckBox);
 
 		editorLayout.add(photogalleryDateField);
-		editorLayout.add(new Breakline());
 
 		ButtonLayout buttonsLayout = new ButtonLayout();
+        buttonsLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		editorLayout.add(buttonsLayout);
 
 		populateButtonsLayout(buttonsLayout);
