@@ -6,6 +6,8 @@ import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.streams.DownloadHandler;
+import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.grass.pg.interfaces.ExifInfoTO;
@@ -80,6 +82,22 @@ public abstract class PGSlideshow extends Div {
         };
         itemLayout.setId(jsDivId);
         wrapperDiv.add(itemLayout);
+
+        Div prevItemButton = new Div("<");
+        prevItemButton.addClickListener(e -> {
+            prevItem();
+            preventClose();
+        });
+        prevItemButton.setId("pg-slideshow-prev-item-button");
+        wrapperDiv.add(prevItemButton);
+
+        Div nextItemButton = new Div(">");
+        nextItemButton.addClickListener(e -> {
+            nextItem();
+            preventClose();
+        });
+        nextItemButton.setId("pg-slideshow-next-item-button");
+        wrapperDiv.add(nextItemButton);
 
         UI.getCurrent().getPage()
                 .executeJs("let cont = document.querySelector('#pg-slideshow-item-div');"/*		*/ + "let NF = 30;"
@@ -250,11 +268,11 @@ public abstract class PGSlideshow extends Div {
         } else if (itemTO.getName().toLowerCase().endsWith(".otf") || itemTO.getName().toLowerCase().endsWith(".ttf")) {
             embedded = new Image("img/font.png", "Font file");
         } else {
-            embedded = new Image(new StreamResource(itemTO.getName(), () -> {
+            embedded = new Image(DownloadHandler.fromInputStream(e -> {
                 try {
-                    return Files.newInputStream(itemTO.getFile());
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    return new DownloadResponse(Files.newInputStream(itemTO.getFile()), itemTO.getName(), null, -1);
+                } catch (IOException ex) {
+                    ex.printStackTrace();
                     return null;
                 }
             }), itemTO.getName());
