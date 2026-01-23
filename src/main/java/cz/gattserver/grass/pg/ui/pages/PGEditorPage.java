@@ -110,8 +110,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         init();
 
         // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena\" };");
+        UIUtils.addOnbeforeunloadWarning();
     }
 
     @Override
@@ -432,7 +431,6 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         beforeLeaveEvent.postpone();
-        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.",
-                e -> beforeLeaveEvent.getContinueNavigationAction().proceed()).open();
+        componentFactory.createBeforeLeaveConfirmDialog(beforeLeaveEvent).open();
     }
 }

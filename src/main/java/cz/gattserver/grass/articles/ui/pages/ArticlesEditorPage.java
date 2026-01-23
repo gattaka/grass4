@@ -78,8 +78,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     private static final Logger logger = LoggerFactory.getLogger(ArticlesEditorPage.class);
 
-    private static final String HANDLER_JS_DIV_ID = "handler-js-div";
-
     @Autowired
     private ArticleService articleService;
 
@@ -131,9 +129,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
         init();
 
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
-                        "rozpracovaná data nejsou uložena?\" };");
+        // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
+        UIUtils.addOnbeforeunloadWarning();
     }
 
     private void populateByExistingArticle(ArticleTO article, String partNumberToken) {
@@ -282,12 +279,11 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
                     /*				*/ + "if (keyCode == 9) {"
                     /*					*/ + "e.preventDefault();"
                     /*					*/ + createTextareaGetSelectionJS()
-                    /*					*/ + "document.getElementById('" + HANDLER_JS_DIV_ID +
-                    "').$server.handleTab(start, finish, ta.value);"
+                    /*					*/ + "$0.$server.handleTab(start, finish, ta.value);"
                     /*				*/ + "}"
                     /*			*/ + "}, false);";
-            UI.getCurrent().getPage().executeJs(js);
-            // je potřeba jenom jedno pro registraci
+            UI.getCurrent().getPage().executeJs(js,getElement());
+            // je potřeba jenom jednou pro registraci
             articleTextAreaFocusRegistration.remove();
         });
         // aby se zaregistroval JS listener
@@ -341,67 +337,22 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
             Collections.sort(resourcesBundles);
 
             for (EditorButtonResourcesTO resourceBundle : resourcesBundles) {
-                String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "document.getElementById('" +
-                        HANDLER_JS_DIV_ID + "').$server.handleSelection(\"" + resourceBundle.getPrefix() + "\", \"" +
-                        resourceBundle.getSuffix() + "\", start, finish)";
+                String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "$0.$server.handleSelection(\"" +
+                        resourceBundle.getPrefix() + "\", \"" + resourceBundle.getSuffix() + "\", start, finish)";
 
                 if (resourceBundle.getImage() != null) {
                     ImageButton btn = new ImageButton(resourceBundle.getDescription(), resourceBundle.getImage(),
-                            event -> UI.getCurrent().getPage().executeJs(js));
+                            event -> UI.getCurrent().getPage().executeJs(js, getElement()));
                     btn.setTooltip(resourceBundle.getTag());
                     familyToolsLayout.add(btn);
                 } else {
                     Button btn = new Button(resourceBundle.getDescription(),
-                            event -> UI.getCurrent().getPage().executeJs(js));
+                            event -> UI.getCurrent().getPage().executeJs(js, getElement()));
                     btn.getElement().setProperty("title", resourceBundle.getTag());
                     familyToolsLayout.add(btn);
                 }
             }
         }
-
-        // JS handler
-        Div handlerJsDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
-
-            @ClientCallable
-            private void handleSelection(String prefix, String suffix, int start, int end) {
-                String origtext = articleTextArea.getValue();
-                String text = origtext.substring(0, start) + prefix;
-                int pos = text.length();
-                text = text + origtext.substring(start, end) + suffix;
-                if (end < origtext.length()) text += origtext.substring(end);
-                articleTextArea.setValue(text);
-                focusOnPosition(pos, pos);
-            }
-
-            @ClientCallable
-            private void handleTab(int start, int finish, String origtext) {
-                String preText = origtext.substring(0, start);
-                String tabbedText = origtext.substring(start, finish);
-                String postText = origtext.substring(finish);
-                String result = preText + '\t';
-                int finishShift = 1;
-                for (int i = 0; i < tabbedText.length(); i++) {
-                    char c = tabbedText.charAt(i);
-                    result += c;
-                    if (c == '\n' && i != tabbedText.length() - 1) {
-                        result += '\t';
-                        finishShift++;
-                    }
-                }
-                result += postText;
-                articleTextArea.setValue(result);
-                focusOnPosition(start + 1, finish + finishShift);
-            }
-
-            private void focusOnPosition(int start, int finish) {
-                articleTextArea.focus();
-                UI.getCurrent().getPage().executeJs(
-                        createTextareaGetJS() + "$(ta).get(0).setSelectionRange(" + start + "," + finish + ");");
-            }
-        };
-        handlerJsDiv.setId(HANDLER_JS_DIV_ID);
-        layout.add(handlerJsDiv);
 
         layout.getStyle().set("width", "420px").set("margin-left", "-200px");
     }
@@ -488,6 +439,43 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     }
 
     @ClientCallable
+    private void handleSelection(String prefix, String suffix, int start, int end) {
+        String origtext = articleTextArea.getValue();
+        String text = origtext.substring(0, start) + prefix;
+        int pos = text.length();
+        text = text + origtext.substring(start, end) + suffix;
+        if (end < origtext.length()) text += origtext.substring(end);
+        articleTextArea.setValue(text);
+        focusOnPosition(pos, pos);
+    }
+
+    @ClientCallable
+    private void handleTab(int start, int finish, String origtext) {
+        String preText = origtext.substring(0, start);
+        String tabbedText = origtext.substring(start, finish);
+        String postText = origtext.substring(finish);
+        String result = preText + '\t';
+        int finishShift = 1;
+        for (int i = 0; i < tabbedText.length(); i++) {
+            char c = tabbedText.charAt(i);
+            result += c;
+            if (c == '\n' && i != tabbedText.length() - 1) {
+                result += '\t';
+                finishShift++;
+            }
+        }
+        result += postText;
+        articleTextArea.setValue(result);
+        focusOnPosition(start + 1, finish + finishShift);
+    }
+
+    private void focusOnPosition(int start, int finish) {
+        articleTextArea.focus();
+        UI.getCurrent().getPage()
+                .executeJs(createTextareaGetJS() + "$(ta).get(0).setSelectionRange(" + start + "," + finish + ");");
+    }
+
+    @ClientCallable
     private void autosaveCallback() {
         try {
             saveArticleDraft(false);
@@ -503,15 +491,15 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     private Span createAutosaveLabel() {
         autosaveLabel = new Span();
-//        int backupTimeout = articleService.getBackupTimeout() * 1000;
-//        UI.getCurrent().getPage().executeJs("window.autosaveInterval = setInterval(function(){"
-//                /*		*/ + "let callbackDiv = $0;"
-//                /*		*/ + "if (callbackDiv) {"
-//                /*			*/ + "callbackDiv.$server.autosaveCallback()"
-//                /*		*/ + "} else {"
-//                /*			*/ + "clearInterval(window.autosaveInterval); "
-//                /*		*/ + "}"
-//                /*		*/ + "}, " + backupTimeout + ");", getElement());
+        int backupTimeout = articleService.getBackupTimeout() * 1000;
+        UI.getCurrent().getPage().executeJs("window.autosaveInterval = setInterval(function(){"
+                /*		*/ + "let callbackDiv = $0;"
+                /*		*/ + "if (callbackDiv) {"
+                /*			*/ + "callbackDiv.$server.autosaveCallback()"
+                /*		*/ + "} else {"
+                /*			*/ + "clearInterval(window.autosaveInterval); "
+                /*		*/ + "}"
+                /*		*/ + "}, " + backupTimeout + ");", getElement());
 
         return autosaveLabel;
     }
@@ -557,9 +545,9 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     private void handleInsertAction(AttachmentTO to) {
         String url = getDownloadLink(to);
-        String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "document.getElementById('" +
-                HANDLER_JS_DIV_ID + "').$server.handleSelection(\"" + url + "\", \"\", start, finish)";
-        UI.getCurrent().getPage().executeJs(js);
+        String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "$0.$server.handleSelection(\"" + url +
+                "\", \"\", start, finish)";
+        UI.getCurrent().getPage().executeJs(js, getElement());
     }
 
     private void createAttachmentsGrid(Div layout) {
@@ -754,7 +742,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         beforeLeaveEvent.postpone();
-        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.",
-                e -> beforeLeaveEvent.getContinueNavigationAction().proceed()).open();
+        componentFactory.createBeforeLeaveConfirmDialog(beforeLeaveEvent).open();
     }
 }

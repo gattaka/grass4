@@ -1,15 +1,18 @@
 package cz.gattserver.common.ui;
 
+import com.lowagie.text.DocListener;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.router.BeforeLeaveEvent;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
@@ -189,5 +192,14 @@ public class ComponentFactory {
             ComponentEventListener<ClickEvent<Button>> saveClickListener,
             ComponentEventListener<ClickEvent<Button>> closeClickListener) {
         return createDialogSubmitOrCloseLayout(saveClickListener, closeClickListener, null);
+    }
+
+    /*
+     * Dialogy
+     */
+
+    public Dialog createBeforeLeaveConfirmDialog(BeforeLeaveEvent beforeLeaveEvent) {
+        return new ConfirmDialog(UIUtils.ON_BEFORE_UNLOAD_WARNING,
+                e -> beforeLeaveEvent.getContinueNavigationAction().proceed());
     }
 }
