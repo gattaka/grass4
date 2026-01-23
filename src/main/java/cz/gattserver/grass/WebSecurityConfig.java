@@ -1,6 +1,7 @@
 package cz.gattserver.grass;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -23,6 +24,9 @@ import java.util.List;
  */
 @EnableWebSecurity
 public class WebSecurityConfig {
+
+    @Value("${remember.me.key}")
+    private String REMEMBER_ME_KEY;
 
     @Autowired
     private RememberMeServices rememberMeServices;
@@ -60,8 +64,9 @@ public class WebSecurityConfig {
         http.securityContext((securityContext) -> securityContext.requireExplicitSave(true)
                 .securityContextRepository(securityContextRepository));
         // https://www.mkyong.com/spring-security/spring-security-remember-me-example/
-        http.rememberMe(c -> c.rememberMeServices(rememberMeServices).key(SecurityConfig.REMEMBER_ME_KEY));
-        http.csrf(c -> c.disable());
+        http.rememberMe(c -> c.rememberMeServices(rememberMeServices).key(REMEMBER_ME_KEY)
+                .tokenValiditySeconds(30 * 24 * 60 * 60));
+        http.csrf(c -> c.disable()); 
 
         return http.build();
     }

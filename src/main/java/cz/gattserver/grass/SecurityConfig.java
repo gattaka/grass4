@@ -2,6 +2,7 @@ package cz.gattserver.grass;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -11,7 +12,8 @@ import org.springframework.security.web.authentication.rememberme.TokenBasedReme
 
 public class SecurityConfig {
 
-    public static final String REMEMBER_ME_KEY = "grass4-d1b3395b306b568d2fd977109c08540b";
+    @Value("${remember.me.key}")
+    private String REMEMBER_ME_KEY;
 
     @Autowired
     private UserDetailsService userDetailService;
@@ -25,8 +27,8 @@ public class SecurityConfig {
 
     @Bean("rememberMeServices")
     public TokenBasedRememberMeServices rememberMeServices() {
-        TokenBasedRememberMeServices rememberMeServices = new TokenBasedRememberMeServices(REMEMBER_ME_KEY,
-                userDetailService);
+        TokenBasedRememberMeServices rememberMeServices =
+                new TokenBasedRememberMeServices(REMEMBER_ME_KEY, userDetailService);
         return rememberMeServices;
     }
 
