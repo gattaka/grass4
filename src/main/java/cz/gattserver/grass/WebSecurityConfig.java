@@ -66,7 +66,7 @@ public class WebSecurityConfig {
         // https://www.mkyong.com/spring-security/spring-security-remember-me-example/
         http.rememberMe(c -> c.rememberMeServices(rememberMeServices).key(REMEMBER_ME_KEY)
                 .tokenValiditySeconds(30 * 24 * 60 * 60));
-        http.csrf(c -> c.disable()); 
+        http.csrf(c -> c.disable());
 
         return http.build();
     }
