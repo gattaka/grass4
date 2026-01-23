@@ -5,12 +5,9 @@ import java.io.IOException;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
-import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
@@ -113,14 +110,11 @@ public class HWDetailsDocsTab extends Div {
         HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
         add(operationsLayout);
 
-        GridButton<HWItemFileTO> downloadBtn =
-                new GridButton<>("Stáhnout", set -> downloadDocument(set.iterator().next()), docsGrid);
-        downloadBtn.setEnableResolver(set -> set.size() == 1);
-        downloadBtn.setIcon(ImageIcon.DOWN_16_ICON.createImage("Stáhnout"));
-        operationsLayout.add(downloadBtn);
+        operationsLayout.add(
+                componentFactory.createDownloadGridButton(set -> downloadDocument(set.iterator().next()), docsGrid));
 
         if (getUser().isAdmin()) {
-            Button deleteBtn = new DeleteGridButton<>("Smazat záznam", items -> {
+            Button deleteBtn = componentFactory.createDeleteGridButton(items -> {
                 HWItemFileTO item = items.iterator().next();
                 getHWService().deleteHWItemDocumentsFile(hwItem.getId(), item.getName());
                 populateDocsGrid();

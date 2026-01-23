@@ -13,7 +13,7 @@ public class SubPluginTest {
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
 		assertEquals("Sub", to.getDescription());
-		assertNull(to.getImage());
+		assertNull(to.getImagePath());
 		assertEquals("[SUB]", to.getPrefix());
 		assertEquals("[/SUB]", to.getSuffix());
 		assertEquals("SUB", to.getTag());

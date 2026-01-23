@@ -7,7 +7,6 @@ import java.util.List;
 import com.vaadin.flow.component.button.Button;
 import jakarta.annotation.Resource;
 
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;

@@ -13,7 +13,6 @@ import cz.gattserver.grass.campgames.interfaces.CampgameKeywordTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.campgames.ui.dialogs.CampgameKeywordDialog;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;

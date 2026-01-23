@@ -15,7 +15,7 @@ public class GreenPluginTest {
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
 		assertEquals("Zeleně", to.getDescription());
-		assertNull(to.getImage());
+		assertNull(to.getImagePath());
 		assertEquals("[GRN]", to.getPrefix());
 		assertEquals("[/GRN]", to.getSuffix());
 		assertEquals("GRN", to.getTag());

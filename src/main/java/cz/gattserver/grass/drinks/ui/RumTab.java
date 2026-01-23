@@ -9,8 +9,6 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import cz.gattserver.grass.drinks.model.domain.RumType;
 import cz.gattserver.grass.drinks.model.interfaces.RumOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.RumTO;
-import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;

@@ -15,17 +15,16 @@ public class EditorButtonResourcesTO implements Comparable<EditorButtonResources
     private final String description;
     private final String prefix;
     private final String suffix;
-    private final Image image;
+    private final String imagePath;
 
     protected EditorButtonResourcesTO(String tag, String tagFamily, String description, String prefix, String suffix,
-                                      Image image) {
+                                      String imagePath) {
         this.tag = tag;
         this.tagFamily = tagFamily;
         this.description = description;
         this.prefix = prefix;
         this.suffix = suffix;
-        this.image = image;
-        if (image != null) image.setAlt(tag);
+        this.imagePath = imagePath;
     }
 
     /**
@@ -69,8 +68,8 @@ public class EditorButtonResourcesTO implements Comparable<EditorButtonResources
      *
      * @return resource obrázku
      */
-    public Image getImage() {
-        return image;
+    public String getImagePath() {
+        return imagePath;
     }
 
     /**

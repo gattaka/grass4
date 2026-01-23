@@ -11,9 +11,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import cz.gattserver.grass.core.interfaces.QuoteTO;
-import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.dialogs.QuoteDialog;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
@@ -23,67 +20,62 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 @PageTitle("Hlášky")
 public class QuotesPage extends OneColumnPage {
 
-	private static final long serialVersionUID = 6209768531464272839L;
+    private static final long serialVersionUID = 6209768531464272839L;
 
-	private List<QuoteTO> data;
-	private Grid<QuoteTO> grid;
+    private List<QuoteTO> data;
+    private Grid<QuoteTO> grid;
 
-	public QuotesPage() {
-		init();
-	}
+    public QuotesPage() {
+        init();
+    }
 
-	private void populateData(String filter) {
-		data = quotesFacade.getQuotes(filter);
-		grid.setItems(data);
-	}
+    private void populateData(String filter) {
+        data = quotesFacade.getQuotes(filter);
+        grid.setItems(data);
+    }
 
-	@Override
-	protected void createColumnContent(Div layout) {
-		layout.add(new H2("Vyhledávání"));
+    @Override
+    protected void createColumnContent(Div layout) {
+        layout.add(new H2("Vyhledávání"));
 
-		TextField searchField = new TextField();
-		searchField.setPlaceholder("Obsah hlášky");
-		searchField.setWidthFull();
-		layout.add(searchField);
+        TextField searchField = new TextField();
+        searchField.setPlaceholder("Obsah hlášky");
+        searchField.setWidthFull();
+        layout.add(searchField);
 
-		searchField.addValueChangeListener(e -> populateData(e.getValue()));
-		searchField.setValueChangeMode(ValueChangeMode.EAGER);
+        searchField.addValueChangeListener(e -> populateData(e.getValue()));
+        searchField.setValueChangeMode(ValueChangeMode.EAGER);
 
-		layout.add(new H2("Seznam hlášek"));
+        layout.add(new H2("Seznam hlášek"));
 
-		grid = new Grid<>();
-		UIUtils.applyGrassDefaultStyle(grid);
-		layout.add(grid);
+        grid = new Grid<>();
+        UIUtils.applyGrassDefaultStyle(grid);
+        layout.add(grid);
 
-		populateData(null);
+        populateData(null);
 
-		grid.addColumn(QuoteTO::getId).setHeader("Id").setFlexGrow(0).setWidth("50px");
-		grid.addColumn(QuoteTO::getName).setHeader("Obsah");
+        grid.addColumn(QuoteTO::getId).setHeader("Id").setFlexGrow(0).setWidth("50px");
+        grid.addColumn(QuoteTO::getName).setHeader("Obsah");
 
-		ButtonLayout btnLayout = new ButtonLayout();
-		layout.add(btnLayout);
-		btnLayout.setVisible(coreACL.canModifyQuotes(getUser()));
+        ButtonLayout btnLayout = new ButtonLayout();
+        layout.add(btnLayout);
+        btnLayout.setVisible(coreACL.canModifyQuotes(getUser()));
 
-		CreateGridButton createGridButton = new CreateGridButton("Přidat hlášku", e -> new QuoteDialog(q -> {
-			quotesFacade.createQuote(q.getName());
-			populateData(searchField.getValue());
-		}).open());
-		btnLayout.add(createGridButton);
+        btnLayout.add(componentFactory.createCreateButton(e -> new QuoteDialog(q -> {
+            quotesFacade.createQuote(q.getName());
+            populateData(searchField.getValue());
+        }).open()));
 
-		ModifyGridButton<QuoteTO> modifyGridButton = new ModifyGridButton<>("Upravit hlášku",
-				originQuote -> new QuoteDialog(originQuote, q -> {
-					quotesFacade.modifyQuote(q.getId(), q.getName());
-					grid.getDataProvider().refreshItem(q);
-					grid.select(q);
-				}).open(), grid);
-		btnLayout.add(modifyGridButton);
+        btnLayout.add(componentFactory.createEditGridButton(originQuote -> new QuoteDialog(originQuote, q -> {
+            quotesFacade.modifyQuote(q.getId(), q.getName());
+            grid.getDataProvider().refreshItem(q);
+            grid.select(q);
+        }).open(), grid));
 
-		DeleteGridButton<QuoteTO> deleteGridButton = new DeleteGridButton<>("Odstranit hlášky",
-				items -> items.forEach(q -> {
-					quotesFacade.deleteQuote(q.getId());
-					data.remove(q);
-					grid.getDataProvider().refreshAll();
-				}), grid);
-		btnLayout.add(deleteGridButton);
-	}
+        btnLayout.add(componentFactory.createDeleteGridButton(items -> items.forEach(q -> {
+            quotesFacade.deleteQuote(q.getId());
+            data.remove(q);
+            grid.getDataProvider().refreshAll();
+        }), grid));
+    }
 }

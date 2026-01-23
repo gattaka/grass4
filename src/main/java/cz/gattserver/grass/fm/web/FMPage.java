@@ -12,6 +12,7 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
@@ -32,10 +33,6 @@ import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.components.Breadcrumb;
-import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
-import cz.gattserver.grass.core.ui.components.button.GridButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
@@ -277,9 +274,8 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
             return button;
         })).setHeader("URL").setTextAlign(ColumnTextAlign.CENTER).setWidth("50px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(
-                        to -> new InlineButton("Stáhnout", e -> handleDownloadAction(to)))).setHeader("Stažení")
-                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new ComponentRenderer<>(to -> new InlineButton("Stáhnout", e -> handleDownloadAction(to))))
+                .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new ComponentRenderer<>(to -> {
             String link = explorer.getDownloadLink(urlBase, to.getName());
@@ -356,20 +352,13 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 
     private void createButtonsLayout(Div layout) {
         ButtonLayout buttonsLayout = new ButtonLayout();
-        buttonsLayout.add(new CreateGridButton("Vytvořit nový adresář", e -> handleNewDirectory()));
-
-        GridButton<FMItemTO> downloadButton = new GridButton<>("Stáhnout", this::handleDownloadAction, grid);
-        downloadButton.setIcon(ImageIcon.DOWN_16_ICON.createImage("Stáhnout"));
-        buttonsLayout.add(downloadButton);
-
-        GridButton<FMItemTO> gotoButton =
-                new GridButton<>("Přejít", items -> handleGotoDirFromCurrentDirAction(items.iterator().next()), grid);
-        gotoButton.setIcon(ImageIcon.RIGHT_16_ICON.createImage("Přejít"));
-        gotoButton.setEnableResolver(items -> items.size() == 1 && items.iterator().next().isDirectory());
-
-        buttonsLayout.add(gotoButton);
-        buttonsLayout.add(new ModifyGridButton<>("Přejmenovat", this::handleRenameAction, grid));
-        buttonsLayout.add(new DeleteGridButton<>("Smazat", this::handleDeleteAction, grid));
+        buttonsLayout.add(componentFactory.createCreateDirButton(e -> handleNewDirectory()));
+        buttonsLayout.add(componentFactory.createDownloadGridButton(this::handleDownloadAction, grid));
+        buttonsLayout.add(componentFactory.createGridButton("Otevřít", VaadinIcon.FOLDER_OPEN.create(),
+                items -> handleGotoDirFromCurrentDirAction(items.iterator().next()), grid,
+                items -> items.size() == 1 && items.iterator().next().isDirectory()));
+        buttonsLayout.add(componentFactory.createEditGridButton(this::handleRenameAction, grid));
+        buttonsLayout.add(componentFactory.createDeleteGridSetButton(this::handleDeleteAction, grid));
 
         layout.add(buttonsLayout);
     }
@@ -487,8 +476,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
                 Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
                     try {
                         String fileName = "fm_" + System.currentTimeMillis() + ".zip";
-                        return new DownloadResponse(Files.newInputStream(event.getZipFile()),
-                                fileName, null, -1);
+                        return new DownloadResponse(Files.newInputStream(event.getZipFile()), fileName, null, -1);
                     } catch (IOException e1) {
                         e1.printStackTrace();
                         return null;
@@ -504,7 +492,8 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
             } else {
                 UIUtils.showWarning(event.getResultDetails());
             }
-        }); eventBus.unsubscribe(FMPage.this);
+        });
+        eventBus.unsubscribe(FMPage.this);
     }
 
     @Override

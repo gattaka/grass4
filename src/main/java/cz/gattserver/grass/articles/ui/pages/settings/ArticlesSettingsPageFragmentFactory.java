@@ -3,12 +3,12 @@ package cz.gattserver.grass.articles.ui.pages.settings;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.articles.config.ArticlesConfiguration;
 import cz.gattserver.grass.articles.events.impl.ArticlesProcessProgressEvent;
@@ -17,7 +17,6 @@ import cz.gattserver.grass.articles.events.impl.ArticlesProcessStartEvent;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.services.ConfigurationService;
-import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
@@ -93,7 +92,7 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
             if (binder.writeBeanIfValid(configuration)) storeConfiguration(configuration);
         });
 
-        reprocessButton = new ImageButton("Přegenerovat všechny články", ImageIcon.GEAR2_16_ICON, event -> {
+        reprocessButton = new Button("Přegenerovat všechny články", VaadinIcon.COG_O.create(), event -> {
             ConfirmDialog dialog = new ConfirmDialog(
                     "Přegenerování všech článků může zabrat delší čas a dojde během něj zřejmě k mnoha drobným změnám - opravdu přegenerovat ?",
                     e -> {

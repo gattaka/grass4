@@ -15,7 +15,7 @@ public class BluePluginTest {
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
 		assertEquals("Modře", to.getDescription());
-		assertNull(to.getImage());
+		assertNull(to.getImagePath());
 		assertEquals("[BLU]", to.getPrefix());
 		assertEquals("[/BLU]", to.getSuffix());
 		assertEquals("BLU", to.getTag());

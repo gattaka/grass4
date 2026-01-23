@@ -1,5 +1,6 @@
 package cz.gattserver.common.vaadin.dialogs;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -30,7 +31,7 @@ public class MessageDialog extends WebDialog {
 	 * @param image
      * 	 *            ikona okna
 	 */
-	public MessageDialog(String labelCaption, String details, Image image) {
+	public MessageDialog(String labelCaption, String details, Component image) {
 		HorizontalLayout horizontalLayout = new HorizontalLayout();
 		horizontalLayout.setSpacing(true);
 		addComponent(horizontalLayout);

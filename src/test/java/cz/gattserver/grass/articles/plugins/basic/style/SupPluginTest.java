@@ -13,7 +13,7 @@ public class SupPluginTest {
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
 		assertEquals("Sup", to.getDescription());
-		assertNull(to.getImage());
+		assertNull(to.getImagePath());
 		assertEquals("[SUP]", to.getPrefix());
 		assertEquals("[/SUP]", to.getSuffix());
 		assertEquals("SUP", to.getTag());

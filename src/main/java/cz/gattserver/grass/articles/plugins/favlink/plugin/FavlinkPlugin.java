@@ -1,6 +1,5 @@
 package cz.gattserver.grass.articles.plugins.favlink.plugin;
 
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.articles.plugins.favlink.strategies.CombinedFaviconObtainStrategy;
 import cz.gattserver.grass.articles.editor.parser.Parser;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTO;
@@ -29,6 +28,6 @@ public class FavlinkPlugin implements Plugin {
 	@Override
 	public EditorButtonResourcesTO getEditorButtonResources() {
 		return new EditorButtonResourcesTOBuilder(TAG, "HTML").setDescription("Odkaz")
-				.setImage(ImageIcon.GLOBE_16_ICON.createImage()).build();
+				.setImage("basic/img/globe_16.png").build();
 	}
 }

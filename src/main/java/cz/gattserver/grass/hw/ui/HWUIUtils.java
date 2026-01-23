@@ -1,5 +1,6 @@
 package cz.gattserver.grass.hw.ui;
 
+import com.vaadin.flow.component.html.Image;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;

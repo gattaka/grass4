@@ -15,7 +15,7 @@ public class RedPluginTest {
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
 		assertEquals("Červeně", to.getDescription());
-		assertNull(to.getImage());
+		assertNull(to.getImagePath());
 		assertEquals("[RED]", to.getPrefix());
 		assertEquals("[/RED]", to.getSuffix());
 		assertEquals("RED", to.getTag());

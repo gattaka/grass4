@@ -10,7 +10,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemChooseDialog;

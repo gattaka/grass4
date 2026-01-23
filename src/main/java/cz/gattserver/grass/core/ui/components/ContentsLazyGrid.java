@@ -17,12 +17,10 @@ import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.pages.template.MenuPage;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.ImageIcon;
 
 public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 

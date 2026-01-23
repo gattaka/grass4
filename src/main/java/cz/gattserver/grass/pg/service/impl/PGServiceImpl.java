@@ -275,7 +275,7 @@ public class PGServiceImpl implements PGService {
 	protected Photogallery transactionSavePhotogallery(
 			UUID operationId, String galleryDir,
 			PhotogalleryPayloadTO payloadTO, Long existingId, Long nodeId, Long authorId, LocalDateTime date) {
-		logger.info("modifyPhotogallery thread: " + Thread.currentThread().getId());
+		logger.info("modifyPhotogallery thread: " + Thread.currentThread().threadId());
 
 		Photogallery photogallery = existingId == null ? new Photogallery()
 				: photogalleryRepository.findById(existingId).orElse(null);
@@ -547,7 +547,7 @@ public class PGServiceImpl implements PGService {
 	public void zipGallery(String galleryDir) {
 		Path galleryPath = getGalleryPath(galleryDir);
 
-		logger.info("zipPhotogallery thread: " + Thread.currentThread().getId());
+		logger.info("zipPhotogallery thread: " + Thread.currentThread().threadId());
 
 		final ReferenceHolder<Integer> total = new ReferenceHolder<>();
 		final ReferenceHolder<Integer> progress = new ReferenceHolder<>();

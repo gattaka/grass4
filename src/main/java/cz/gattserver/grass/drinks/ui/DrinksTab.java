@@ -9,7 +9,6 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -26,7 +25,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.Strong;
-import cz.gattserver.common.vaadin.ImageIcon;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;

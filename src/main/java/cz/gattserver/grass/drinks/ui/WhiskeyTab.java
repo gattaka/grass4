@@ -9,8 +9,6 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import cz.gattserver.grass.drinks.model.domain.WhiskeyType;
 import cz.gattserver.grass.drinks.model.interfaces.WhiskeyOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.WhiskeyTO;
-import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;

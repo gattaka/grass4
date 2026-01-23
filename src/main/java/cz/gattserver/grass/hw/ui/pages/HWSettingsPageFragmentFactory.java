@@ -6,10 +6,8 @@ import java.nio.file.InvalidPathException;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
-import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.hw.service.HWService;

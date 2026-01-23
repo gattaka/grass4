@@ -1,7 +1,6 @@
 package cz.gattserver.grass.modules;
 
 import com.vaadin.flow.component.html.Image;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import org.springframework.stereotype.Component;

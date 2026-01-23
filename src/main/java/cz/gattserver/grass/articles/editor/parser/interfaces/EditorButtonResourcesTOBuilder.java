@@ -1,6 +1,5 @@
 package cz.gattserver.grass.articles.editor.parser.interfaces;
 
-import com.vaadin.flow.component.html.Image;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
@@ -21,7 +20,7 @@ public class EditorButtonResourcesTOBuilder {
     private String description;
     private String prefix;
     private String suffix;
-    private Image image;
+    private String imagePath;
 
     /**
      * @param tag         název tagu, použitý v tagové značce
@@ -31,16 +30,16 @@ public class EditorButtonResourcesTOBuilder {
      *                    před označený text
      * @param suffix      koncový tag + (nepovinné) nějaké věci, které se mají vložit za
      *                    označený text
-     * @param image       ikona pluginu
+     * @param imagePath   cesta k ikoně pluginu
      */
     public EditorButtonResourcesTOBuilder(String tag, String tagFamily, String description, String prefix,
-                                          String suffix, Image image) {
+                                          String suffix, String imagePath) {
         this.tag = tag;
         this.tagFamily = tagFamily;
         this.description = description;
         this.prefix = prefix;
         this.suffix = suffix;
-        this.image = image;
+        this.imagePath = imagePath;
     }
 
     /**
@@ -54,7 +53,7 @@ public class EditorButtonResourcesTOBuilder {
     public EditorButtonResourcesTOBuilder(String tag, String tagFamily) {
         this.tag = tag;
         this.tagFamily = tagFamily;
-        this.image = null;
+        this.imagePath = null;
     }
 
     /**
@@ -74,12 +73,12 @@ public class EditorButtonResourcesTOBuilder {
         // Pokud nemá ani text tlačítka, ani obrázek, dej jako text tlačítka
         // jméno tagu
         String dsc = this.description;
-        if (StringUtils.isBlank(dsc) && image == null) dsc = tag;
+        if (StringUtils.isBlank(dsc) && imagePath == null) dsc = tag;
 
         if (!pfx.startsWith(defaultPrefix)) throw new IllegalArgumentException("Prefix musí začínat: " + defaultPrefix);
         if (!sfx.endsWith(defaultSuffix)) throw new IllegalArgumentException("Suffix musí končit: " + defaultSuffix);
 
-        return new EditorButtonResourcesTO(tag, tagFamily, dsc, pfx, sfx, image);
+        return new EditorButtonResourcesTO(tag, tagFamily, dsc, pfx, sfx, imagePath);
     }
 
     public EditorButtonResourcesTOBuilder setDescription(String description) {
@@ -100,16 +99,12 @@ public class EditorButtonResourcesTOBuilder {
     /**
      * Nastaví zdroj obrázku
      *
-     * @param image zdroj
+     * @param imagePath zdroj
      * @return <code>this</code> pro řetězení
      */
-    public EditorButtonResourcesTOBuilder setImage(Image image) {
-        this.image = image;
-        return this;
-    }
-
     public EditorButtonResourcesTOBuilder setImage(String imagePath) {
-        return setImage(new Image("articles/" + imagePath, ""));
+        this.imagePath = "articles/" + imagePath;
+        return this;
     }
 
 }

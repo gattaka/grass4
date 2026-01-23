@@ -2,7 +2,6 @@ package cz.gattserver.grass.articles.ui.pages;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -20,7 +19,6 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.shared.Registration;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
@@ -44,7 +42,6 @@ import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
-import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.TwoColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
@@ -282,7 +279,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
                     /*					*/ + "$0.$server.handleTab(start, finish, ta.value);"
                     /*				*/ + "}"
                     /*			*/ + "}, false);";
-            UI.getCurrent().getPage().executeJs(js,getElement());
+            UI.getCurrent().getPage().executeJs(js, getElement());
             // je potřeba jenom jednou pro registraci
             articleTextAreaFocusRegistration.remove();
         });
@@ -339,15 +336,16 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
             for (EditorButtonResourcesTO resourceBundle : resourcesBundles) {
                 String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "$0.$server.handleSelection(\"" +
                         resourceBundle.getPrefix() + "\", \"" + resourceBundle.getSuffix() + "\", start, finish)";
+                ComponentEventListener<ClickEvent<Button>> clickListener =
+                        event -> UI.getCurrent().getPage().executeJs(js, getElement());
 
-                if (resourceBundle.getImage() != null) {
-                    ImageButton btn = new ImageButton(resourceBundle.getDescription(), resourceBundle.getImage(),
-                            event -> UI.getCurrent().getPage().executeJs(js, getElement()));
+                if (resourceBundle.getImagePath() != null) {
+                    ImageButton btn = new ImageButton(resourceBundle.getDescription(),
+                            new Image(resourceBundle.getImagePath(), resourceBundle.getDescription()), clickListener);
                     btn.setTooltip(resourceBundle.getTag());
                     familyToolsLayout.add(btn);
                 } else {
-                    Button btn = new Button(resourceBundle.getDescription(),
-                            event -> UI.getCurrent().getPage().executeJs(js, getElement()));
+                    Button btn = new Button(resourceBundle.getDescription(), clickListener);
                     btn.getElement().setProperty("title", resourceBundle.getTag());
                     familyToolsLayout.add(btn);
                 }

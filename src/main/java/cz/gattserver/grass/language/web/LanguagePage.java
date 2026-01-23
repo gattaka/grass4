@@ -6,12 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import cz.gattserver.common.vaadin.ImageIcon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -22,7 +20,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
@@ -124,14 +121,14 @@ public class LanguagePage extends OneColumnPage {
             langLayout.add(tabs);
         }));
 
-        btnLayout.add(new CreateGridButton("Přidat", event -> new LanguageDialog(to -> {
+        btnLayout.add(componentFactory.createCreateButton(event -> new LanguageDialog(to -> {
             languageFacade.saveLanguage(to);
             langs.clear();
             langs.addAll(languageFacade.getLanguages());
             grid.getDataProvider().refreshAll();
         }).open()));
 
-        btnLayout.add(new ModifyGridButton<LanguageTO>("Upravit", item -> new LanguageDialog(item, to -> {
+        btnLayout.add(componentFactory.createEditGridButton(item -> new LanguageDialog(item, to -> {
             languageFacade.saveLanguage(to);
             langs.clear();
             langs.addAll(languageFacade.getLanguages());
@@ -148,21 +145,21 @@ public class LanguagePage extends OneColumnPage {
         tabLayout.add(buttonLayout);
 
         Button allTestBtn = new Button("Spustit test všeho", event -> startTest(langId, null));
-        allTestBtn.setIcon(ImageIcon.RIGHT_16_ICON.createImage("run"));
+        allTestBtn.setIcon(VaadinIcon.PLAY_CIRCLE.create());
         buttonLayout.add(allTestBtn);
 
         Float wordsProgress = languageFacade.getSuccessRateOfLanguageAndType(ItemType.WORD, langId);
         String wordsProgressLabel = (int) (wordsProgress * 100) + "%";
         Button wordsTestBtn = new Button("Spustit test slovíček (" + wordsProgressLabel + ")",
                 event -> startTest(langId, ItemType.WORD));
-        wordsTestBtn.setIcon(ImageIcon.RIGHT_16_ICON.createImage("run"));
+        wordsTestBtn.setIcon(VaadinIcon.PLAY_CIRCLE_O.create());
         buttonLayout.add(wordsTestBtn);
 
         Float phrasesProgress = languageFacade.getSuccessRateOfLanguageAndType(ItemType.PHRASE, langId);
         String phrasesProgressLabel = (int) (phrasesProgress * 100) + "%";
         Button phrasesTestBtn = new Button("Spustit test frází (" + phrasesProgressLabel + ")",
                 event -> startTest(langId, ItemType.PHRASE));
-        phrasesTestBtn.setIcon(ImageIcon.RIGHT_16_ICON.createImage("run"));
+        phrasesTestBtn.setIcon(VaadinIcon.PLAY_CIRCLE_O.create());
         buttonLayout.add(phrasesTestBtn);
 
         testLayout = new VerticalLayout();

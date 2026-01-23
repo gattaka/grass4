@@ -4,15 +4,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
-import cz.gattserver.grass.core.ui.components.button.GridButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,13 +105,14 @@ public class ItemsTab extends Div {
     private ButtonLayout createButtonLayout(Grid<LanguageItemTO> grid, long langId, ItemType type) {
         ButtonLayout btnLayout = new ButtonLayout();
 
-        btnLayout.add(new CreateGridButton("Přidat", event -> new LanguageItemDialog(to -> {
+        ComponentFactory componentFactory = new ComponentFactory();
+        btnLayout.add(componentFactory.createCreateButton(event -> new LanguageItemDialog(to -> {
             to.setLanguage(langId);
             languageFacade.saveLanguageItem(to);
             grid.getDataProvider().refreshAll();
         }, langId, type).open()));
 
-        btnLayout.add(new ModifyGridButton<LanguageItemTO>("Upravit", item -> {
+        btnLayout.add(componentFactory.createEditGridButton(item -> {
             ItemType oldType = item.getType();
             new LanguageItemDialog(item, to -> {
                 languageFacade.saveLanguageItem(to);
@@ -123,14 +121,12 @@ public class ItemsTab extends Div {
             }, langId, type).open();
         }, grid));
 
-        btnLayout.add(new DeleteGridButton<LanguageItemTO>("Odstranit", items -> items.forEach(item -> {
+        btnLayout.add(componentFactory.createDeleteGridButton(items -> items.forEach(item -> {
             languageFacade.deleteLanguageItem(item);
             grid.getDataProvider().refreshAll();
         }), grid));
 
-        GridButton<LanguageItemTO> moveBtn =
-                new GridButton<>("Změnit jazyk", items -> changeLangOfItems(items, grid), grid);
-        moveBtn.setIcon(ImageIcon.MOVE_16_ICON.createImage("move"));
+        Button moveBtn = componentFactory.createMoveGridButton(items -> changeLangOfItems(items, grid), grid);
         btnLayout.add(moveBtn);
 
         String caption;
@@ -142,7 +138,7 @@ public class ItemsTab extends Div {
             languagePage.getTabs().setSelectedIndex(3);
             languagePage.startTest(langId, type);
         });
-        testBtn.setIcon(ImageIcon.RIGHT_16_ICON.createImage("test"));
+        testBtn.setIcon(VaadinIcon.PLAY.create());
         btnLayout.add(testBtn);
 
         return btnLayout;

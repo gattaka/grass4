@@ -1,6 +1,5 @@
 package cz.gattserver.grass.articles.plugins.templates.sources;
 
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.articles.editor.parser.Parser;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTOBuilder;
@@ -29,6 +28,6 @@ public class LinksPlugin implements Plugin {
     @Override
     public EditorButtonResourcesTO getEditorButtonResources() {
         return new EditorButtonResourcesTOBuilder(TAG, "Šablony").setDescription("Odkazy")
-                .setImage(ImageIcon.GLOBE_16_ICON.createImage()).build();
+                .setImage("basic/img/globe_16.png").build();
     }
 }

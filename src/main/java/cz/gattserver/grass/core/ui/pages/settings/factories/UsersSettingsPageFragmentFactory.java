@@ -9,7 +9,6 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
 import cz.gattserver.grass.core.security.Role;
 import cz.gattserver.grass.core.services.UserService;
-import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -20,12 +19,10 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.common.vaadin.ImageIcon;
 
 public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 

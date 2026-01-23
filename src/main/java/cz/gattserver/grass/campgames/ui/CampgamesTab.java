@@ -5,7 +5,6 @@ import java.util.Set;
 
 import com.vaadin.flow.component.button.Button;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.CampgamesRole;
 import cz.gattserver.grass.campgames.interfaces.CampgameFilterTO;
@@ -29,9 +28,6 @@ import com.vaadin.flow.data.provider.SortDirection;
 
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
-import cz.gattserver.grass.core.ui.components.button.GridButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -134,23 +130,19 @@ public class CampgamesTab extends Div {
         newCampgameBtn.setVisible(editor);
 
         // Zobrazení detailů hry
-        GridButton<CampgameOverviewTO> detailsBtn =
-                new GridButton<>("Detail", e -> openDetailWindow(grid.getSelectedItems().iterator().next().getId()),
-                        grid);
-        detailsBtn.setIcon(ImageIcon.CLIPBOARD_16_ICON.createImage("Detail"));
-        buttonLayout.add(detailsBtn);
+        buttonLayout.add(componentFactory.createDetailGridButton(
+                e -> openDetailWindow(grid.getSelectedItems().iterator().next().getId()), grid));
 
         // Oprava údajů existující hry
-        ModifyGridButton<CampgameOverviewTO> fixBtn = new ModifyGridButton<>("Upravit", e -> openItemWindow(e), grid);
-        buttonLayout.add(fixBtn);
+        Button fixBtn = componentFactory.createEditGridButton(e -> openItemWindow(e), grid);
         fixBtn.setVisible(editor);
+        buttonLayout.add(fixBtn);
 
         // Smazání hry
-        DeleteGridButton<CampgameOverviewTO> deleteBtn =
-                new DeleteGridButton<>("Smazat", e -> openDeleteWindow(), grid);
+        Button deleteBtn = componentFactory.createDeleteGridButton(e -> openDeleteWindow(), grid);
         deleteBtn.setEnabled(false);
-        buttonLayout.add(deleteBtn);
         deleteBtn.setVisible(editor);
+        buttonLayout.add(deleteBtn);
     }
 
     private void populate() {
@@ -212,5 +204,4 @@ public class CampgamesTab extends Div {
             new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
         }
     }
-
 }

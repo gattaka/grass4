@@ -1,6 +1,5 @@
 package cz.gattserver.grass.articles.plugins.basic.image;
 
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.articles.editor.parser.Parser;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTOBuilder;
@@ -27,6 +26,6 @@ public class ImagePlugin implements Plugin {
 
     @Override
     public EditorButtonResourcesTO getEditorButtonResources() {
-        return new EditorButtonResourcesTOBuilder(TAG, "HTML").setImage(ImageIcon.IMG_16_ICON.createImage()).build();
+        return new EditorButtonResourcesTOBuilder(TAG, "HTML").setImage("basic/img/img_16.png").build();
     }
 }

@@ -10,14 +10,9 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
-import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.grass.core.ui.components.button.CreateGridButton;
-import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
-import cz.gattserver.grass.core.ui.components.button.GridButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -135,31 +130,26 @@ public class ChordsPage extends OneColumnPage implements HasUrlParameter<String>
 
         btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-        btnLayout.add(new CreateGridButton("Přidat", event -> new ChordDialog(to -> {
+        ComponentFactory componentFactory = new ComponentFactory();
+        btnLayout.add(componentFactory.createCreateButton("Přidat", event -> new ChordDialog(to -> {
             to = songsService.saveChord(to);
             loadChords();
             selectChord(to);
         }).open()));
 
-        btnLayout.add(new ModifyGridButton<>("Upravit", event -> {
-            new ChordDialog(choosenChord, to -> {
-                to = songsService.saveChord(to);
-                loadChords();
-                selectChord(to);
-            }).open();
-        }, grid));
+        btnLayout.add(componentFactory.createEditGridButton(event -> new ChordDialog(choosenChord, to -> {
+            to = songsService.saveChord(to);
+            loadChords();
+            selectChord(to);
+        }).open(), grid));
 
-        GridButton<ChordTO> copyBtn = new GridButton<>("Kopie", event -> {
-            new ChordDialog(choosenChord, true, to -> {
-                to = songsService.saveChord(to);
-                loadChords();
-                selectChord(to);
-            }).open();
-        }, grid);
-        copyBtn.setIcon(ImageIcon.QUICKEDIT_16_ICON.createImage("Kopie"));
-        btnLayout.add(copyBtn);
+        btnLayout.add(componentFactory.createCopyGridButton(event -> new ChordDialog(choosenChord, true, to -> {
+            to = songsService.saveChord(to);
+            loadChords();
+            selectChord(to);
+        }).open(), grid));
 
-        btnLayout.add(new DeleteGridButton<>("Smazat", items -> {
+        btnLayout.add(componentFactory.createDeleteGridButton(items -> {
             for (ChordTO c : items)
                 songsService.deleteChord(c.getId());
             loadChords();

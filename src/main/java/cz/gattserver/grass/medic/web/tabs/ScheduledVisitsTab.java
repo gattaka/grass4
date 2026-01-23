@@ -14,6 +14,7 @@ import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
@@ -25,7 +26,6 @@ import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.core.ui.components.button.*;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
@@ -131,32 +131,26 @@ public class ScheduledVisitsTab extends Div {
         /**
          * Úprava návštěvy
          */
-        final Button modifyBtn = new ModifyGridButton<ScheduledVisitTO>(to -> openCreateWindow(true, to), plannedGrid);
-        buttonLayout.add(modifyBtn);
+        buttonLayout.add(componentFactory.createEditGridButton(to -> openCreateWindow(true, to), plannedGrid));
 
         /**
          * Smazání návštěvy
          */
-        final Button deleteBtn =
-                new DeleteGridButton<ScheduledVisitTO>(set -> openDeleteWindow(set.iterator().next(), true),
-                        plannedGrid);
-        buttonLayout.add(deleteBtn);
+        buttonLayout.add(componentFactory.createDeleteGridButton(item -> openDeleteWindow(item, true), plannedGrid));
 
         /**
          * Absolvování návštěvy
          */
-        final Button completedBtn =
-                new GridButton<ScheduledVisitTO>("Absolvováno", set -> openCompletedWindow(set.iterator().next()),
-                        plannedGrid);
-        completedBtn.setIcon(ImageIcon.RIGHT_16_ICON.createImage("Upravit"));
+        final Button completedBtn = componentFactory.createGridButton("Absolvováno", VaadinIcon.ARCHIVE.create(),
+                set -> openCompletedWindow(set.iterator().next()), plannedGrid, set -> set.size() == 1);
         buttonLayout.add(completedBtn);
 
         /**
          * Detail
          */
-        final Button detailBtn =
-                new DetailGridButton<>(item -> new SchuduledVisitDetailDialog(item.getId()).open(), plannedGrid);
-        buttonLayout.add(detailBtn);
+        buttonLayout.add(
+                componentFactory.createDetailGridButton(item -> new SchuduledVisitDetailDialog(item.getId()).open(),
+                        plannedGrid));
 
         populateContainer(true);
     }
@@ -217,16 +211,14 @@ public class ScheduledVisitsTab extends Div {
         /**
          * Detail
          */
-        final Button detailBtn =
-                new DetailGridButton<>(item -> new SchuduledVisitDetailDialog(item.getId()).open(), toBePlannedGrid);
-        buttonLayout.add(detailBtn);
+        buttonLayout.add(
+                componentFactory.createDetailGridButton(item -> new SchuduledVisitDetailDialog(item.getId()).open(),
+                        toBePlannedGrid));
 
         /**
          * Objednat návštěvy
          */
-        final Button planBtn = new GridButton<>("Objednáno", toBePlannedGrid);
-        planBtn.setIcon(ImageIcon.CALENDAR_16_ICON.createImage("Objednáno"));
-        planBtn.addClickListener(event -> {
+        final Button planBtn = componentFactory.createGridButton("Objednáno", VaadinIcon.CALENDAR.create(), event -> {
             final ScheduledVisitTO toBePlannedVisitDTO = toBePlannedGrid.getSelectedItems().iterator().next();
 
             ScheduledVisitTO newDto = getMedicFacade().createPlannedScheduledVisitFromToBePlanned(toBePlannedVisitDTO);
@@ -254,21 +246,19 @@ public class ScheduledVisitsTab extends Div {
                     }
                 }
             }.open();
-        });
+        }, toBePlannedGrid, set -> set.size() == 1);
         buttonLayout.add(planBtn);
 
         /**
          * Úprava naplánování
          */
-        final Button modifyBtn = new ModifyGridButton<>(to -> openCreateWindow(false, to), toBePlannedGrid);
-        buttonLayout.add(modifyBtn);
+        buttonLayout.add(componentFactory.createEditGridButton(to -> openCreateWindow(false, to), toBePlannedGrid));
 
         /**
          * Smazání naplánování
          */
-        final Button deleteBtn = new DeleteGridButton<>("Smazat", set -> openDeleteWindow(set.iterator().next(), false),
-                set -> "Opravdu smazat '" + set.iterator().next().getPurpose() + "' ?", toBePlannedGrid);
-        buttonLayout.add(deleteBtn);
+        buttonLayout.add(
+                componentFactory.createDeleteGridButton(item -> openDeleteWindow(item, false), toBePlannedGrid));
 
         populateContainer(false);
     }

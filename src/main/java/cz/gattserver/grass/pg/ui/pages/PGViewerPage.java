@@ -18,7 +18,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Breakline;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
@@ -33,7 +32,6 @@ import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
 import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
-import cz.gattserver.grass.core.ui.components.button.ImageButton;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.ContentViewerPage;
@@ -108,7 +106,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
     protected void createContentOperations(Div operationsListLayout) {
         Button downloadZip =
                 componentFactory.createZipButton(event -> new ConfirmDialog("Přejete si vytvořit ZIP galerie?", e -> {
-                    logger.info("zipPhotogallery thread: {}", Thread.currentThread().getId());
+                    logger.info("zipPhotogallery thread: {}", Thread.currentThread().threadId());
                     progressIndicatorWindow = new ProgressDialog();
                     eventBus.subscribe(PGViewerPage.this);
                     pgService.zipGallery(galleryDir);
