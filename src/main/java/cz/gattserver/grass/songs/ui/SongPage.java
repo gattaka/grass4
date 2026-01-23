@@ -22,7 +22,6 @@ import cz.gattserver.grass.core.export.PagedDataSource;
 import cz.gattserver.grass.core.server.ExportRequestHandler;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.button.ImageButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -129,7 +128,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
         ButtonLayout btnLayout = new ButtonLayout();
         layout.add(btnLayout);
 
-        ModifyButton modifyButton = new ModifyButton("Upravit", event -> new SongDialog(choosenSong, to -> {
+        Button modifyButton = componentFactory.createEditButton(event -> new SongDialog(choosenSong, to -> {
             to = songsFacade.saveSong(to);
             showDetail(to);
         }).open());

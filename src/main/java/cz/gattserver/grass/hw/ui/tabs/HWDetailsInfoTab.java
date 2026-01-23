@@ -15,7 +15,6 @@ import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.ContainerDiv;
 import cz.gattserver.grass.core.ui.util.TableLayout;
@@ -240,7 +239,7 @@ public class HWDetailsInfoTab extends Div {
         add();
 
         if (getUser().isAdmin()) {
-            final Button fixBtn = new ModifyButton(e -> new HWItemEditDialog(hwItem, to -> {
+            final Button fixBtn = componentFactory.createEditButton(e -> new HWItemEditDialog(hwItem, to -> {
                 hwItemDetailDialog.refreshItem();
                 hwItemDetailDialog.switchInfoTab();
             }).open());

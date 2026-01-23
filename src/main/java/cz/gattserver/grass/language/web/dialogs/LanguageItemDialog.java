@@ -5,10 +5,6 @@ import java.util.Arrays;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.grass.campgames.service.CampgamesService;
-import cz.gattserver.grass.core.ui.components.button.CloseButton;
-import cz.gattserver.grass.core.ui.components.button.CreateButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.language.model.dto.LanguageItemTO;
@@ -111,17 +107,17 @@ public class LanguageItemDialog extends EditWebDialog {
 		add(btnLayout);
 
 		if (to != null) {
-			btnLayout.add(new ModifyButton(e -> onSave(action, binder, targetTO)));
+			btnLayout.add(componentFactory.createEditButton(e -> onSave(action, binder, targetTO)));
 		} else {
 			ButtonLayout buttonLayout = new ButtonLayout();
 			btnLayout.add(buttonLayout);
-			buttonLayout.add(new CreateButton(e -> onSave(action, binder, targetTO)));
-			Button createAndContinueBtn = new CreateButton("Vytvořit a pokračovat",
+			buttonLayout.add(componentFactory.createCreateButton(e -> onSave(action, binder, targetTO)));
+			Button createAndContinueBtn = componentFactory.createCreateButton("Vytvořit a pokračovat",
 					e -> onSaveAndContinue(action, binder, targetTO, langId, typeRadio.getValue()));
 			buttonLayout.add(createAndContinueBtn);
 		}
 
-		btnLayout.add(new CloseButton(e -> close()));
+		btnLayout.add(componentFactory.createStornoButton(e -> close()));
 	}
 
 	private void onSave(SaveAction action, Binder<LanguageItemTO> binder, LanguageItemTO targetTO) {

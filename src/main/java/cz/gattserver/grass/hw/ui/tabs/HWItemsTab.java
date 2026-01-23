@@ -3,23 +3,20 @@ package cz.gattserver.grass.hw.ui.tabs;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.router.QueryParameters;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.pages.HWPage;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
@@ -28,7 +25,6 @@ import cz.gattserver.grass.hw.ui.HWItemsGrid;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemEditDialog;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class HWItemsTab extends Div {
@@ -56,7 +52,8 @@ public class HWItemsTab extends Div {
         if (securityFacade.getCurrentUser().isAdmin()) {
 
             // Založení nové položky HW
-            Button newHWBtn = new CreateButton("Přidat", e -> openItemWindow(null));
+            ComponentFactory componentFactory = new ComponentFactory();
+            Button newHWBtn = componentFactory.createCreateButton(e -> openItemWindow(null));
             buttonLayout.add(newHWBtn);
 
             // Kopie položky HW

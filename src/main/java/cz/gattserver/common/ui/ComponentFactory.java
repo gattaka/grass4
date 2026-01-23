@@ -6,11 +6,14 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.grass.core.ui.components.button.ImageButton;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 
 import java.util.Arrays;
 import java.util.Locale;
@@ -18,11 +21,65 @@ import java.util.function.Consumer;
 
 public class ComponentFactory {
 
+    // https://vaadin.com/docs/latest/components/icons/default-icons
+
     /* Tlačítka */
+
+    public Button createZipButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Zabalit do ZIP", clickListener);
+        btn.setIcon(VaadinIcon.FILE_ZIP.create());
+        return btn;
+    }
+
+    public Button createUnmarkFavouriteButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Odebrat z oblíbených", clickListener);
+        btn.setIcon(VaadinIcon.HEART_O.create());
+        return btn;
+    }
+
+    public Button createMarkFavouriteButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Přidat do oblíbených", clickListener);
+        btn.setIcon(VaadinIcon.HEART.create());
+        return btn;
+    }
+
+    public Button createEditButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Upravit", clickListener);
+        btn.setIcon(VaadinIcon.EDIT.create());
+        return btn;
+    }
+
+    public Button createCreateButton(String caption, ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button(caption, clickListener);
+        btn.setIcon(VaadinIcon.FILE_ADD.create());
+        return btn;
+    }
+
+    public Button createCreateButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        return createCreateButton("Vytvořit", clickListener);
+    }
+
+    public Button createMoveButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Přesunout", clickListener);
+        btn.setIcon(VaadinIcon.RECORDS.create());
+        return btn;
+    }
+
+    public Button createPreviewButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Náhled", clickListener);
+        btn.setIcon(VaadinIcon.PRESENTATION.create());
+        return btn;
+    }
+
+    public Button createCopyFromContentButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Kopírovat z obsahu", clickListener);
+        btn.setIcon(VaadinIcon.COPY.create());
+        return btn;
+    }
 
     public Button createSaveButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button btn = new Button("Uložit", clickListener);
-        btn.setIcon(ImageIcon.SAVE_16_ICON.createImage());
+        btn.setIcon(VaadinIcon.CLIPBOARD_CHECK.create());
         return btn;
     }
 
@@ -34,26 +91,22 @@ public class ComponentFactory {
 
     public Button createSubmitButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button btn = new Button("Potvrdit", clickListener);
+        btn.setIcon(VaadinIcon.CHECK.create());
         btn.addThemeVariants(ButtonVariant.AURA_PRIMARY);
         return btn;
     }
 
     public Button createStornoButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button btn = new Button("Storno", clickListener);
+        btn.setIcon(VaadinIcon.CLOSE.create());
         return btn;
     }
 
     public Button createDeleteButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
-        Button btn = new Button();
-        btn.setText("Smazat");
+        Button btn = new Button("Smazat",
+                e -> new ConfirmDialog("Smazat záznam?", ee -> clickListener.onComponentEvent(e)).open());
         btn.addThemeVariants(ButtonVariant.LUMO_ERROR);
-        btn.addClickListener(e -> new ConfirmDialog("Smazat záznam?", ee -> clickListener.onComponentEvent(e)).open());
-        return btn;
-    }
-
-    public Button createDeleteButtonWithIcon(ComponentEventListener<ClickEvent<Button>> clickListener) {
-        Button btn = createDeleteButton(clickListener);
-        btn.setIcon(ImageIcon.TRASH_16_ICON.createImage());
+        btn.setIcon(VaadinIcon.TRASH.create());
         return btn;
     }
 
@@ -104,7 +157,8 @@ public class ComponentFactory {
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         horizontalLayout.setSpacing(true);
-        horizontalLayout.setSizeFull();
+        horizontalLayout.setWidthFull();
+        horizontalLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         return horizontalLayout;
     }
 
@@ -117,9 +171,9 @@ public class ComponentFactory {
         return layout;
     }
 
-    public HorizontalLayout createDialogSubmitOrCloseLayout(ComponentEventListener<ClickEvent<Button>> saveClickListener,
-                                                            ComponentEventListener<ClickEvent<Button>> closeClickListener,
-                                                            Consumer<Button> submitButtonDecorator) {
+    public HorizontalLayout createDialogSubmitOrCloseLayout(
+            ComponentEventListener<ClickEvent<Button>> saveClickListener,
+            ComponentEventListener<ClickEvent<Button>> closeClickListener, Consumer<Button> submitButtonDecorator) {
         HorizontalLayout layout = createDialogButtonLayout();
 
         Button submitButton = createSubmitButton(saveClickListener);
@@ -131,8 +185,9 @@ public class ComponentFactory {
         return layout;
     }
 
-    public HorizontalLayout createDialogSubmitOrCloseLayout(ComponentEventListener<ClickEvent<Button>> saveClickListener,
-                                                            ComponentEventListener<ClickEvent<Button>> closeClickListener) {
+    public HorizontalLayout createDialogSubmitOrCloseLayout(
+            ComponentEventListener<ClickEvent<Button>> saveClickListener,
+            ComponentEventListener<ClickEvent<Button>> closeClickListener) {
         return createDialogSubmitOrCloseLayout(saveClickListener, closeClickListener, null);
     }
 }

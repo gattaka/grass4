@@ -18,7 +18,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ContainerDiv;
@@ -106,7 +105,7 @@ public class HWDetailsServiceNotesTab extends Div {
                     componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
             add(operationsLayout);
 
-            Button newNoteBtn = new CreateButton(e -> new HWServiceNoteEditDialog(hwItem) {
+            Button newNoteBtn = componentFactory.createCreateButton(e -> new HWServiceNoteEditDialog(hwItem) {
                 private static final long serialVersionUID = -5582822648042555576L;
 
                 @Override

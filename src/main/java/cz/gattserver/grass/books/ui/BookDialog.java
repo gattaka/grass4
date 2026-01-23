@@ -18,9 +18,6 @@ import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.common.ImageUtils;
-import cz.gattserver.grass.core.ui.components.button.CloseButton;
-import cz.gattserver.grass.core.ui.components.button.CreateButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
@@ -97,11 +94,11 @@ public abstract class BookDialog extends EditWebDialog {
 		addComponent(btnsLayout);
 
 		if (originalTO != null)
-			btnsLayout.add(new ModifyButton(event -> save(originalTO, binder)));
+			btnsLayout.add(componentFactory.createEditButton(event -> save(originalTO, binder)));
 		else
-			btnsLayout.add(new CreateButton(event -> save(originalTO, binder)));
+			btnsLayout.add(componentFactory.createCreateButton(event -> save(originalTO, binder)));
 
-		btnsLayout.add(new CloseButton(e -> close()));
+		btnsLayout.add(componentFactory.createStornoButton(e -> close()));
 
 		VerticalLayout fieldsLayout = createForm(binder);
 		fieldsLayout.setPadding(false);

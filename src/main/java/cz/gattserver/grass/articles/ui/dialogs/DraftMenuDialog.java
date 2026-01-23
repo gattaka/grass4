@@ -12,7 +12,6 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
 import cz.gattserver.grass.articles.services.ArticleService;
-import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -77,7 +76,7 @@ public abstract class DraftMenuDialog extends WebDialog {
         btnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
         add(btnLayout);
 
-        final Button confirmBtn = new Button("Vybrat", e -> {
+        final Button confirmBtn = componentFactory.createSubmitButton(e -> {
             innerChoose(grid.getSelectedItems().iterator().next());
             close();
         });
@@ -93,11 +92,10 @@ public abstract class DraftMenuDialog extends WebDialog {
             grid.getDataProvider().refreshAll();
             grid.deselectAll();
         });
-        deleteBtn.setIcon(null);
         btnLayout.add(deleteBtn);
         deleteBtn.setEnabled(false);
 
-        Button closeBtn = new Button("Storno", e -> close());
+        Button closeBtn = componentFactory.createStornoButton(e -> close());
         btnLayout.add(closeBtn);
 
         grid.addSelectionListener(e -> {

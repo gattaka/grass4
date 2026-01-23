@@ -20,6 +20,7 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.Strong;
@@ -123,7 +124,8 @@ public class ScheduledVisitsTab extends Div {
         /**
          * Založení nové návštěvy
          */
-        final Button newTypeBtn = new CreateButton("Naplánovat návštěvu", event -> openCreateWindow(true, null));
+        ComponentFactory componentFactory = new ComponentFactory();
+        final Button newTypeBtn = componentFactory.createCreateButton(event -> openCreateWindow(true, null));
         buttonLayout.add(newTypeBtn);
 
         /**
@@ -207,7 +209,9 @@ public class ScheduledVisitsTab extends Div {
         /**
          * Naplánovat objednání
          */
-        final Button newBtn = new CreateButton("Naplánovat objednání", e -> openCreateWindow(false, null));
+        ComponentFactory componentFactory = new ComponentFactory();
+        final Button newBtn =
+                componentFactory.createCreateButton("Naplánovat objednání", e -> openCreateWindow(false, null));
         buttonLayout.add(newBtn);
 
         /**

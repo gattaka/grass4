@@ -21,10 +21,10 @@ import com.vaadin.flow.data.provider.SortDirection;
 
 import com.vaadin.flow.router.QueryParameters;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
-import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
@@ -113,20 +113,21 @@ public class HWTypesTab extends Div {
 		/**
 		 * Založení nového typu
 		 */
-		Button newTypeBtn = new CreateButton("Založit nový typ", e -> openNewTypeWindow(null));
+        ComponentFactory componentFactory = new ComponentFactory();
+		Button newTypeBtn = componentFactory.createCreateButton(e -> openNewTypeWindow(null));
 		buttonLayout.add(newTypeBtn);
 
 		/**
 		 * Úprava typu
 		 */
-		Button fixBtn = new ModifyGridButton<HWItemTypeTO>(
+		Button fixBtn = new ModifyGridButton<>(
 				set -> openNewTypeWindow(grid.getSelectedItems().iterator().next()), grid);
 		buttonLayout.add(fixBtn);
 
 		/**
 		 * Smazání typu
 		 */
-		Button deleteBtn = new DeleteGridButton<HWItemTypeTO>(set -> {
+		Button deleteBtn = new DeleteGridButton<>(set -> {
 			HWItemTypeTO item = set.iterator().next();
 			try {
 				getHWService().deleteHWItemType(item.getId());

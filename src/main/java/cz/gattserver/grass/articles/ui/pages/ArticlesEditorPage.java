@@ -2,6 +2,7 @@ package cz.gattserver.grass.articles.ui.pages;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -260,7 +261,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         articleNameField = new TextField();
         articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
 
-
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
                 q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
@@ -407,7 +407,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     }
 
     private Button createPreviewButton() {
-        Button previewButton = new ImageButton("Náhled", ImageIcon.DOCUMENT_16_ICON, event -> {
+        Button previewButton = componentFactory.createPreviewButton(event -> {
             try {
                 String draftName = saveArticleDraft(true);
                 UI.getCurrent().getPage().open(getPageURL(articlesViewerPageFactory,
@@ -420,7 +420,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     }
 
     private Button createSaveButton() {
-        Button saveButton = new ImageButton("Uložit", ImageIcon.SAVE_16_ICON, event -> {
+        Button saveButton = componentFactory.createSaveButton(event -> {
             if (!isFormValid()) return;
             if (saveOrUpdateArticle()) {
                 UIUtils.showSilentInfo(
@@ -435,8 +435,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     }
 
     private Button createSaveAndCloseButton() {
-        Button saveAndCloseButton = new ImageButton("Uložit a zavřít", ImageIcon.SAVE_16_ICON);
-        saveAndCloseButton.addClickListener(event -> {
+        Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
             if (!isFormValid()) return;
             if (saveOrUpdateArticle()) {
                 // Tady nemá cena dávat infowindow
@@ -451,7 +450,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     }
 
     private Button createCancelButton() {
-        Button cancelButton = new ImageButton("Storno", ImageIcon.DELETE_16_ICON, event -> new ConfirmDialog(
+        Button cancelButton = componentFactory.createStornoButton(event -> new ConfirmDialog(
                 "Opravdu si přejete zavřít editor článku? Veškeré neuložené změny budou ztraceny.", e -> {
             // ruším úpravu existujícího článku (vracím se na
             // článek), nebo nového (vracím se do kategorie) ?
@@ -504,15 +503,15 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     private Span createAutosaveLabel() {
         autosaveLabel = new Span();
-        int backupTimeout = articleService.getBackupTimeout() * 1000;
-        UI.getCurrent().getPage().executeJs("window.autosaveInterval = setInterval(function(){"
-                /*		*/ + "let callbackDiv = $0;"
-                /*		*/ + "if (callbackDiv) {"
-                /*			*/ + "callbackDiv.$server.autosaveCallback()"
-                /*		*/ + "} else {"
-                /*			*/ + "clearInterval(window.autosaveInterval); "
-                /*		*/ + "}"
-                /*		*/ + "}, " + backupTimeout + ");", getElement());
+//        int backupTimeout = articleService.getBackupTimeout() * 1000;
+//        UI.getCurrent().getPage().executeJs("window.autosaveInterval = setInterval(function(){"
+//                /*		*/ + "let callbackDiv = $0;"
+//                /*		*/ + "if (callbackDiv) {"
+//                /*			*/ + "callbackDiv.$server.autosaveCallback()"
+//                /*		*/ + "} else {"
+//                /*			*/ + "clearInterval(window.autosaveInterval); "
+//                /*		*/ + "}"
+//                /*		*/ + "}, " + backupTimeout + ");", getElement());
 
         return autosaveLabel;
     }
@@ -634,8 +633,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         layout.add(articleKeywords);
         articleKeywords.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
 
-        Button copyFromContentButton = new Button("Kopírovat z obsahu");
-        copyFromContentButton.addClickListener(
+        Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(articleKeywords::addToken)).open());
         articleKeywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
 
@@ -734,9 +732,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     private void returnToArticle() {
         // smaž draft, ponechej přílohy, pokud k draftu existuje článek
         if (existingDraftId != null) articleService.deleteArticle(existingDraftId, existingArticleId == null);
-
-        UI.getCurrent().getPage()
-                .executeJs("window.onbeforeunload = null; $0.$server.returnToArticleCallback()", getElement());
+        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> returnToArticleCallback());
     }
 
     /**
@@ -745,16 +741,20 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     private void returnToNode() {
         // smaž draft, ponechej přílohy, pokud k draftu existuje článek
         if (existingDraftId != null) articleService.deleteArticle(existingDraftId, existingArticleId == null);
-
-        UI.getCurrent().getPage()
-                .executeJs("window.onbeforeunload = null; $0.$server.returnToNodeCallback()", getElement());
+        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> returnToNodeCallback());
     }
 
+    /**
+     * Odchod přes Vaadin routing lze odchytit tímhle -- nejde ale o 100% řešení,
+     * protože všechny ostatní cesty (tab close, refresh, obecně browser manuální URL navigace) tímhle není možné
+     * odchytit, takže jediná možnost -- je tedy potřeba doplnit ještě native browser JS onbeforeunload listenerem
+     *
+     * @param beforeLeaveEvent before navigation event with event details
+     */
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         beforeLeaveEvent.postpone();
-        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
-            beforeLeaveEvent.getContinueNavigationAction().proceed();
-        }).open();
+        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.",
+                e -> beforeLeaveEvent.getContinueNavigationAction().proceed()).open();
     }
 }

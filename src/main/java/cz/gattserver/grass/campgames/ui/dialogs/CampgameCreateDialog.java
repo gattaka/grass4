@@ -13,7 +13,6 @@ import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
-import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -120,8 +119,7 @@ public abstract class CampgameCreateDialog extends EditWebDialog {
 		});
 		buttonLayout.add(createBtn);
 
-		CloseButton closeBtn = new CloseButton(e -> close());
-		buttonLayout.add(closeBtn);
+		buttonLayout.add(componentFactory.createStornoButton(e -> close()));
 
 		if (originalDTO != null)
 			binder.readBean(originalDTO);

@@ -1,7 +1,6 @@
 package cz.gattserver.common.vaadin;
 
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.server.streams.DownloadHandler;
 
 public enum ImageIcon {
 

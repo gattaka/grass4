@@ -3,6 +3,8 @@ package cz.gattserver.grass.campgames.ui;
 import java.util.Arrays;
 import java.util.Set;
 
+import com.vaadin.flow.component.button.Button;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.campgames.CampgamesRole;
@@ -20,7 +22,6 @@ import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -28,7 +29,6 @@ import com.vaadin.flow.data.provider.SortDirection;
 
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.CreateButton;
 import cz.gattserver.grass.core.ui.components.button.DeleteGridButton;
 import cz.gattserver.grass.core.ui.components.button.GridButton;
 import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
@@ -128,7 +128,8 @@ public class CampgamesTab extends Div {
                 .contains(CampgamesRole.CAMPGAME_EDITOR);
 
         // Založení nové hry
-        CreateButton newCampgameBtn = new CreateButton("Založit novou hru", e -> openItemWindow(null));
+        ComponentFactory componentFactory = new ComponentFactory();
+        Button newCampgameBtn = componentFactory.createCreateButton(e -> openItemWindow(null));
         buttonLayout.add(newCampgameBtn);
         newCampgameBtn.setVisible(editor);
 

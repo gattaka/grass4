@@ -1,6 +1,5 @@
 package cz.gattserver.grass.pg.ui.pages;
 
-import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.KeyModifier;
 import com.vaadin.flow.component.UI;
@@ -12,8 +11,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
@@ -25,7 +22,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
 import cz.gattserver.grass.core.events.EventBus;
@@ -42,7 +38,6 @@ import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
 import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
-import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
@@ -60,6 +55,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.List;
 
 @Route("pg-editor")
 @PageTitle("Editor fotogalerie")
@@ -68,8 +64,6 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
     private static final long serialVersionUID = 8685208356478891386L;
 
     private static final Logger logger = LoggerFactory.getLogger(PGEditorPage.class);
-
-    private static final String CLOSE_JS_DIV_ID = "close-js-div";
 
     @Autowired
     private PGService pgService;
@@ -115,9 +109,9 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
         init();
 
+        // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
         UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
-                        "rozpracovaná data nejsou uložena ?\" };");
+                "window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena\" };");
     }
 
     @Override
@@ -134,9 +128,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
                 q -> contentTagFacade.countByFilter(q.getFilter().get());
         photogalleryKeywords = new TokenField(fetchItemsCallback, serializableFunction);
 
-        Button copyFromContentButton = new Button("Kopírovat z obsahu");
-        copyFromContentButton.setIcon(VaadinIcon.COPY.create());
-        copyFromContentButton.addClickListener(
+        Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(photogalleryKeywords::addToken)).open());
         photogalleryKeywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
 
@@ -316,14 +308,12 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         buttonLayout.add(saveAndCloseButton);
         saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
 
-        // Storno
-        CloseButton cancelButton = new CloseButton("Storno", ev -> new ConfirmDialog(
+        buttonLayout.add(componentFactory.createStornoButton(ev -> new ConfirmDialog(
                 "Opravdu si přejete zavřít editor galerie ? Veškeré neuložené změny budou ztraceny.", e -> {
             cleanAfterCancelEdit();
             if (editMode) returnToPhotogallery();
             else returnToNode();
-        }).open());
-        buttonLayout.add(cancelButton);
+        }).open()));
     }
 
     private void cleanAfterCancelEdit() {
@@ -370,43 +360,17 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
      * Zavolá vrácení se na galerii
      */
     private void returnToPhotogallery() {
-        Div closeJsDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
-
-            @ClientCallable
-            private void closeCallback() {
-                UIUtils.redirect(getPageURL(photogalleryViewerPageFactory,
-                        URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
-                                photogallery.getContentNode().getName())));
-            }
-        };
-        closeJsDiv.setId(CLOSE_JS_DIV_ID);
-        add(closeJsDiv);
-
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID +
-                        "').$server.closeCallback();");
+        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UIUtils.redirect(
+                getPageURL(photogalleryViewerPageFactory, URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
+                        photogallery.getContentNode().getName()))));
     }
 
     /**
      * zavolání vrácení se na kategorii
      */
     private void returnToNode() {
-        Div closeJsDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
-
-            @ClientCallable
-            private void closeCallback() {
-                UIUtils.redirect(getPageURL(nodePageFactory,
-                        URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
-            }
-        };
-        closeJsDiv.setId(CLOSE_JS_DIV_ID);
-        add(closeJsDiv);
-
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID +
-                        "').$server.closeCallback();");
+        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UIUtils.redirect(
+                getPageURL(nodePageFactory, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()))));
     }
 
     @Handler
@@ -458,11 +422,17 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         }
     }
 
+    /**
+     * Odchod přes Vaadin routing lze odchytit tímhle -- nejde ale o 100% řešení,
+     * protože všechny ostatní cesty (tab close, refresh, obecně browser manuální URL navigace) tímhle není možné
+     * odchytit, takže jediná možnost -- je tedy potřeba doplnit ještě native browser JS onbeforeunload listenerem
+     *
+     * @param beforeLeaveEvent before navigation event with event details
+     */
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         beforeLeaveEvent.postpone();
-        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
-            beforeLeaveEvent.getContinueNavigationAction().proceed();
-        }).open();
+        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.",
+                e -> beforeLeaveEvent.getContinueNavigationAction().proceed()).open();
     }
 }

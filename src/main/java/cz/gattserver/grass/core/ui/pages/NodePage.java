@@ -98,6 +98,7 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
 
     private void createNewNodePanel(Div layout, final NodeTO node) {
         ButtonLayout buttonLayout = new ButtonLayout();
+        buttonLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(buttonLayout);
         Button createButton = new ImageButton("Vytvořit novou kategorii", ImageIcon.BRIEFCASE_PLUS_16_ICON,
                 e -> createNodeAction(node));
@@ -105,7 +106,7 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
     }
 
     public void createNodeAction(NodeOverviewTO parentNode) {
-        final WebDialog dialog = new WebDialog();
+        final WebDialog dialog = new WebDialog("Vytvořit kategorii");
 
         final TextField newNameField = new TextField();
         newNameField.setPlaceholder("Nová kategorie do " + parentNode.getName());
@@ -118,9 +119,6 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
                 .bind(NodeOverviewTO::getName, NodeOverviewTO::setName);
         binder.setBean(to);
 
-        HorizontalLayout btnLayout = new HorizontalLayout();
-        dialog.addComponent(btnLayout);
-
         HorizontalLayout saveCloseLayout = componentFactory.createDialogSubmitOrCloseLayout(event -> {
             if (binder.validate().isOk()) {
                 Long newNodeId = nodeFacade.createNewNode(parentNode.getId(), to.getName());
@@ -130,7 +128,6 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
             }
         }, event -> dialog.close());
         dialog.add(saveCloseLayout);
-
         dialog.setWidth("300px");
 
         dialog.open();

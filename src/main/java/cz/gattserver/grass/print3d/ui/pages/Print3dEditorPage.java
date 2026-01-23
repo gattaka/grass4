@@ -18,7 +18,6 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
@@ -32,7 +31,6 @@ import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
-import cz.gattserver.grass.core.ui.components.button.CloseButton;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
@@ -302,14 +300,12 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
         buttonLayout.add(saveAndCloseButton);
         saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
 
-        // Zrušit
-        CloseButton cancelButton = new CloseButton("Zrušit", ev -> new ConfirmDialog(
+        buttonLayout.add(componentFactory.createStornoButton(ev -> new ConfirmDialog(
                 "Opravdu si přejete zavřít editor projektu ? Veškeré neuložené změny budou ztraceny.", e -> {
             cleanAfterCancelEdit();
             if (editMode) returnToProject();
             else returnToNode();
-        }).open());
-        buttonLayout.add(cancelButton);
+        }).open()));
     }
 
     private void cleanAfterCancelEdit() {

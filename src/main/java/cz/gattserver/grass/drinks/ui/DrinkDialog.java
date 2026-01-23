@@ -17,9 +17,6 @@ import cz.gattserver.common.ImageUtils;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.drinks.model.interfaces.DrinkTO;
-import cz.gattserver.grass.core.ui.components.button.CloseButton;
-import cz.gattserver.grass.core.ui.components.button.CreateButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,10 +102,10 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
         btnsLayout.setWidthFull();
         rightPartLayout.add(btnsLayout);
 
-        if (originalTO != null) btnsLayout.add(new ModifyButton(event -> save(originalTO, binder)));
-        else btnsLayout.add(new CreateButton(event -> save(originalTO, binder)));
+        if (originalTO != null) btnsLayout.add(componentFactory.createEditButton(e -> save(originalTO, binder)));
+        else btnsLayout.add(componentFactory.createCreateButton(event -> save(originalTO, binder)));
 
-        btnsLayout.add(new CloseButton(e -> close()));
+        btnsLayout.add(componentFactory.createStornoButton(e -> close()));
 
         HorizontalLayout mainLayout = new HorizontalLayout(imageLayout, rightPartLayout);
         mainLayout.expand(rightPartLayout);

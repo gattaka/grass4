@@ -12,8 +12,6 @@ import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.CloseButton;
-import cz.gattserver.grass.core.ui.components.button.ModifyButton;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.GridLayout;
@@ -163,7 +161,7 @@ public class CampgameDetailDialog extends WebDialog {
         /**
          * Oprava údajů existující hry
          */
-        final ModifyButton fixBtn = new ModifyButton(e -> new CampgameCreateDialog(campgameTO) {
+        final Button fixBtn = componentFactory.createEditButton(e -> new CampgameCreateDialog(campgameTO) {
             private static final long serialVersionUID = -1397391593801030584L;
 
             @Override
@@ -188,8 +186,7 @@ public class CampgameDetailDialog extends WebDialog {
         });
         operationsLayout.add(deleteBtn);
 
-        CloseButton closeBtn = new CloseButton(e -> close());
-        btnLayout.add(closeBtn);
+        btnLayout.add(componentFactory.createStornoButton(e -> close()));
 
         return layout;
     }
