@@ -106,7 +106,19 @@ vaadin-grid img {
 h2, h3 {
     border-bottom: 1px solid;
     margin-bottom: 10px;
-    border-color: #888;
+    border-color: #aaa;
+}
+
+h2 {
+    margin-left: 2px;
+}
+
+h3 {
+    margin-top: 10px;
+}
+
+h3:first-child {
+    margin-top: 0;
 }
 
 h2 {
