@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
@@ -24,7 +25,6 @@ import com.vaadin.flow.component.treegrid.TreeGrid;
 import com.vaadin.flow.data.provider.hierarchy.TreeData;
 import com.vaadin.flow.data.provider.hierarchy.TreeDataProvider;
 
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 
@@ -135,21 +135,15 @@ public class NodeTree extends VerticalLayout {
         btnLayout.setSpacing(true);
         add(btnLayout);
 
-        CreateGridButton createBtn = new CreateGridButton("Vytvořit", e -> createNodeAction(
+        ComponentFactory componentFactory = new ComponentFactory();
+        btnLayout.add(componentFactory.createCreateButton(e -> createNodeAction(
                 grid.getSelectedItems().isEmpty() ? Optional.empty() :
-                        Optional.of(grid.getSelectedItems().iterator().next())));
-        btnLayout.add(createBtn);
+                        Optional.of(grid.getSelectedItems().iterator().next()))));
 
-        ModifyGridButton<NodeOverviewTO> modifyBtn =
-                new ModifyGridButton<>(PREJMENOVAT_LABEL, this::renameAction, grid);
-        btnLayout.add(modifyBtn);
+        btnLayout.add(componentFactory.createEditGridButton(this::renameAction, grid));
 
         // mazání chci po jednom
-        GridButton<NodeOverviewTO> deleteBtn =
-                new GridButton<>("Smazat", nodes -> askAndDelete(nodes.iterator().next()), grid);
-        deleteBtn.setIcon(ImageIcon.DELETE_16_ICON.createImage("Smazat"));
-        deleteBtn.setEnableResolver(items -> items.size() == 1);
-        btnLayout.add(deleteBtn);
+        btnLayout.add(componentFactory.createDeleteGridButton(node -> askAndDelete(node), grid));
 
     }
 
@@ -203,12 +197,10 @@ public class NodeTree extends VerticalLayout {
         if (!getNodeService().isNodeEmpty(node.getId())) {
             UIUtils.showWarning("Kategorie musí být prázdná");
         } else {
-            new ConfirmDialog("Opravdu smazat kategorii '" + node.getName() + "' ?", e -> {
-                getNodeService().deleteNode(node.getId());
-                grid.getTreeData().removeItem(node);
-                grid.getDataProvider().refreshAll();
-                if (node.getParentId() != null) expandTo(node.getParentId());
-            }).open();
+            getNodeService().deleteNode(node.getId());
+            grid.getTreeData().removeItem(node);
+            grid.getDataProvider().refreshAll();
+            if (node.getParentId() != null) expandTo(node.getParentId());
         }
     }
 

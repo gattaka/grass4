@@ -178,13 +178,13 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
 
         btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-        btnLayout.add(new CreateGridButton("Přidat", event -> new SongDialog(to -> {
+        btnLayout.add(componentFactory.createCreateButton(event -> new SongDialog(to -> {
             to = songsService.saveSong(to);
             populate();
             selectSong(to, true);
         }).open()));
 
-        btnLayout.add(new ModifyGridButton<>("Upravit",
+        btnLayout.add(componentFactory.createEditGridButton(
                 event -> new SongDialog(songsService.getSongById(grid.getSelectedItems().iterator().next().getId()),
                         to -> {
                             to = songsService.saveSong(to);
@@ -192,7 +192,7 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
                             selectSong(to, false);
                         }).open(), grid));
 
-        btnLayout.add(new DeleteGridButton<>("Smazat", items -> {
+        btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (SongOverviewTO s : items)
                 songsService.deleteSong(s.getId());
             populate();

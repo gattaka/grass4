@@ -18,7 +18,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.util.ContainerDiv;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
@@ -117,7 +116,7 @@ public class HWDetailsServiceNotesTab extends Div {
                 }
             }.open());
 
-            Button fixNoteBtn = new ModifyGridButton<>("Opravit záznam", event -> {
+            Button fixNoteBtn = componentFactory.createEditGridButton(event -> {
                 if (serviceNotesGrid.getSelectedItems().isEmpty()) return;
                 new HWServiceNoteEditDialog(hwItem, serviceNotesGrid.getSelectedItems().iterator().next()) {
                     private static final long serialVersionUID = -5582822648042555576L;
@@ -129,8 +128,7 @@ public class HWDetailsServiceNotesTab extends Div {
                 }.open();
             }, serviceNotesGrid);
 
-            Button deleteNoteBtn = new DeleteGridButton<>("Smazat záznam", items -> {
-                HWServiceNoteTO item = items.iterator().next();
+            Button deleteNoteBtn = componentFactory.createDeleteGridButton(item -> {
                 getHWService().deleteServiceNote(item, hwItem.getId());
                 hwItem.getServiceNotes().remove(item);
                 populateServiceNotesGrid();

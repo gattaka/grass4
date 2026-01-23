@@ -46,38 +46,29 @@ public class HWItemsTab extends Div {
         ButtonLayout buttonLayout = new ButtonLayout();
         add(buttonLayout);
 
+        ComponentFactory componentFactory = new ComponentFactory();
+
         if (securityFacade.getCurrentUser().isAdmin()) {
 
             // Založení nové položky HW
-            ComponentFactory componentFactory = new ComponentFactory();
             Button newHWBtn = componentFactory.createCreateButton(e -> openItemWindow(null));
             buttonLayout.add(newHWBtn);
 
             // Kopie položky HW
-            Button copyHWBtn = new GridButton<>("Zkopírovat", set -> copyItemWindow(set.iterator().next().getId()),
-                    itemsGrid.getGrid());
-            copyHWBtn.setIcon(ImageIcon.PLUS_16_ICON.createImage("image"));
-            buttonLayout.add(copyHWBtn);
+            buttonLayout.add(
+                    componentFactory.createCopyGridButton(item -> copyItemWindow(item.getId()), itemsGrid.getGrid()));
         }
 
         // Zobrazení detailů položky HW
-        Button detailsBtn =
-                new GridButton<>("Detail", set -> navigateToDetail(set.iterator().next().getId()), itemsGrid.getGrid());
-        detailsBtn.setIcon(ImageIcon.CLIPBOARD_16_ICON.createImage("image"));
-        buttonLayout.add(detailsBtn);
+        buttonLayout.add(
+                componentFactory.createDetailGridButton(item -> navigateToDetail(item.getId()), itemsGrid.getGrid()));
 
         if (securityFacade.getCurrentUser().isAdmin()) {
             // Oprava údajů existující položky HW
-            Button fixBtn =
-                    new GridButton<>("Upravit", set -> openItemWindow(set.iterator().next()), itemsGrid.getGrid());
-            fixBtn.setIcon(ImageIcon.QUICKEDIT_16_ICON.createImage("image"));
-            buttonLayout.add(fixBtn);
+            buttonLayout.add(componentFactory.createEditGridButton(item -> openItemWindow(item), itemsGrid.getGrid()));
 
             // Smazání položky HW
-            Button deleteBtn = new DeleteGridButton<>("Smazat", set -> {
-                HWItemOverviewTO item = set.iterator().next();
-                deleteItem(item);
-            }, itemsGrid.getGrid());
+            Button deleteBtn = componentFactory.createDeleteGridButton(item -> deleteItem(item), itemsGrid.getGrid());
             buttonLayout.add(deleteBtn);
         }
     }

@@ -235,7 +235,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         ButtonLayout buttonLayout = new ButtonLayout();
         editorLayout.add(buttonLayout);
 
-        DeleteGridButton<PhotogalleryViewItemTO> deleteBtn = new DeleteGridButton<>("Smazat", selectedItems -> {
+        Button deleteBtn = componentFactory.createDeleteGridSetButton(selectedItems -> {
             boolean failures = false;
             for (PhotogalleryViewItemTO itemTO : selectedItems) {
                 try {

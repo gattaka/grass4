@@ -110,12 +110,10 @@ public class HWDetailsDocsTab extends Div {
         HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
         add(operationsLayout);
 
-        operationsLayout.add(
-                componentFactory.createDownloadGridButton(set -> downloadDocument(set.iterator().next()), docsGrid));
+        operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadDocument(item), docsGrid));
 
         if (getUser().isAdmin()) {
-            Button deleteBtn = componentFactory.createDeleteGridButton(items -> {
-                HWItemFileTO item = items.iterator().next();
+            Button deleteBtn = componentFactory.createDeleteGridButton(item -> {
                 getHWService().deleteHWItemDocumentsFile(hwItem.getId(), item.getName());
                 populateDocsGrid();
                 hwItemDetailDialog.refreshTabLabels();

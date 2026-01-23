@@ -13,6 +13,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
+import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;

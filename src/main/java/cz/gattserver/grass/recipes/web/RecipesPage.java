@@ -3,7 +3,6 @@ package cz.gattserver.grass.recipes.web;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -28,120 +27,119 @@ import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 @PageTitle("Recepty")
 public class RecipesPage extends OneColumnPage {
 
-	private static final long serialVersionUID = 1214280599196303350L;
+    private static final long serialVersionUID = 1214280599196303350L;
 
-	@Autowired
-	private SecurityService securityService;
+    @Autowired
+    private SecurityService securityService;
 
-	@Autowired
-	private RecipesService recipesService;
+    @Autowired
+    private RecipesService recipesService;
 
-	private Grid<RecipeOverviewTO> grid;
-	private H2 nameLabel;
-	private HtmlDiv contentLabel;
-	private RecipeDTO choosenRecipe;
-	private RecipeOverviewTO filterTO;
+    private Grid<RecipeOverviewTO> grid;
+    private H2 nameLabel;
+    private HtmlDiv contentLabel;
+    private RecipeDTO choosenRecipe;
+    private RecipeOverviewTO filterTO;
 
-	public RecipesPage() {
-		init();
-		loadCSS(getContextPath() + "/VAADIN/recipes/style.css");
-	}
+    public RecipesPage() {
+        init();
+        loadCSS(getContextPath() + "/VAADIN/recipes/style.css");
+    }
 
-	private void showDetail(RecipeDTO choosenRecipe) {
-		nameLabel.setVisible(true);
-		nameLabel.setText(choosenRecipe.getName());
-		String value = recipesService.eolToBreakline(choosenRecipe.getDescription());
-		contentLabel.setValue(value);
-		this.choosenRecipe = choosenRecipe;
-	}
+    private void showDetail(RecipeDTO choosenRecipe) {
+        nameLabel.setVisible(true);
+        nameLabel.setText(choosenRecipe.getName());
+        String value = recipesService.eolToBreakline(choosenRecipe.getDescription());
+        contentLabel.setValue(value);
+        this.choosenRecipe = choosenRecipe;
+    }
 
-	@Override
-	protected void createColumnContent(Div layout) {
-		Div recipesLayout = new Div();
-		recipesLayout.setId("recipes-div");
-		layout.add(recipesLayout);
+    @Override
+    protected void createColumnContent(Div layout) {
+        Div recipesLayout = new Div();
+        recipesLayout.setId("recipes-div");
+        layout.add(recipesLayout);
 
-		filterTO = new RecipeOverviewTO();
+        filterTO = new RecipeOverviewTO();
 
-		grid = new Grid<>();
-		UIUtils.applyGrassDefaultStyle(grid);
-		grid.setHeightFull();
-		Div gridDiv = new Div(grid);
-		gridDiv.setId("recipes-grid-div");
-		recipesLayout.add(gridDiv);
+        grid = new Grid<>();
+        UIUtils.applyGrassDefaultStyle(grid);
+        grid.setHeightFull();
+        Div gridDiv = new Div(grid);
+        gridDiv.setId("recipes-grid-div");
+        recipesLayout.add(gridDiv);
 
-		Column<RecipeOverviewTO> nazevColumn = grid.addColumn(RecipeOverviewTO::getName).setHeader("Název");
+        Column<RecipeOverviewTO> nazevColumn = grid.addColumn(RecipeOverviewTO::getName).setHeader("Název");
 
-		grid.addSelectionListener((e) -> e.getFirstSelectedItem()
-				.ifPresent((v) -> showDetail(recipesService.getRecipeById(v.getId()))));
+        grid.addSelectionListener(
+                (e) -> e.getFirstSelectedItem().ifPresent((v) -> showDetail(recipesService.getRecipeById(v.getId()))));
 
-		HeaderRow filteringHeader = grid.appendHeaderRow();
+        HeaderRow filteringHeader = grid.appendHeaderRow();
 
-		// Název
-		UIUtils.addHeaderTextField(filteringHeader.getCell(nazevColumn), e -> {
-			filterTO.setName(e.getValue());
-			populate();
-		});
+        // Název
+        UIUtils.addHeaderTextField(filteringHeader.getCell(nazevColumn), e -> {
+            filterTO.setName(e.getValue());
+            populate();
+        });
 
-		populate();
+        populate();
 
-		Div contentLayout = new Div();
-		contentLayout.setId("recipes-content-div");
-		recipesLayout.add(contentLayout);
+        Div contentLayout = new Div();
+        contentLayout.setId("recipes-content-div");
+        recipesLayout.add(contentLayout);
 
-		nameLabel = new H2();
-		contentLayout.add(nameLabel);
-		nameLabel.setVisible(false);
+        nameLabel = new H2();
+        contentLayout.add(nameLabel);
+        nameLabel.setVisible(false);
 
-		contentLabel = new HtmlDiv();
-		contentLabel.setWidthFull();
-		contentLayout.add(contentLabel);
+        contentLabel = new HtmlDiv();
+        contentLabel.setWidthFull();
+        contentLayout.add(contentLabel);
 
-		ButtonLayout btnLayout = new ButtonLayout();
-		layout.add(btnLayout);
+        ButtonLayout btnLayout = new ButtonLayout();
+        layout.add(btnLayout);
 
-		btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(CoreRole.ADMIN));
+        btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(CoreRole.ADMIN));
 
-		btnLayout.add(new CreateGridButton("Přidat", event -> {
-			new RecipeDialog() {
-				private static final long serialVersionUID = -4863260002363608014L;
+        btnLayout.add(componentFactory.createCreateButton(event -> {
+            new RecipeDialog() {
+                private static final long serialVersionUID = -4863260002363608014L;
 
-				@Override
-				protected void onSave(String name, String desc, Long id) {
-					id = recipesService.saveRecipe(name, desc);
-					RecipeDTO to = new RecipeDTO(id, name, desc);
-					showDetail(to);
-					populate();
-				}
-			}.open();
-		}));
+                @Override
+                protected void onSave(String name, String desc, Long id) {
+                    id = recipesService.saveRecipe(name, desc);
+                    RecipeDTO to = new RecipeDTO(id, name, desc);
+                    showDetail(to);
+                    populate();
+                }
+            }.open();
+        }));
 
-		btnLayout.add(new ModifyGridButton<>("Upravit", event -> {
-			new RecipeDialog(choosenRecipe) {
-				private static final long serialVersionUID = 5264621441522056786L;
+        btnLayout.add(componentFactory.createEditGridButton(event -> {
+            new RecipeDialog(choosenRecipe) {
+                private static final long serialVersionUID = 5264621441522056786L;
 
-				@Override
-				protected void onSave(String name, String desc, Long id) {
-					recipesService.saveRecipe(name, desc, id);
-					RecipeDTO to = new RecipeDTO(id, name, desc);
-					showDetail(to);
-					populate();
-				}
-			}.open();
-		}, grid));
+                @Override
+                protected void onSave(String name, String desc, Long id) {
+                    recipesService.saveRecipe(name, desc, id);
+                    RecipeDTO to = new RecipeDTO(id, name, desc);
+                    showDetail(to);
+                    populate();
+                }
+            }.open();
+        }, grid));
 
-		btnLayout.add(new DeleteGridButton<>("Odstranit", event -> {
-			for (RecipeOverviewTO e : event)
-				recipesService.deleteRecipe(e.getId());
-			populate();
-		}, grid));
-	}
+        btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
+            for (RecipeOverviewTO item : items)
+                recipesService.deleteRecipe(item.getId());
+            populate();
+        }, grid));
+    }
 
-	private void populate() {
-		FetchCallback<RecipeOverviewTO, Void> fetchCallback = q -> recipesService
-				.getRecipes(filterTO.getName(), q.getOffset(), q.getLimit()).stream();
-		CountCallback<RecipeOverviewTO, Void> countCallback = q -> recipesService
-				.getRecipesCount(filterTO.getName());
-		grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
-	}
+    private void populate() {
+        FetchCallback<RecipeOverviewTO, Void> fetchCallback =
+                q -> recipesService.getRecipes(filterTO.getName(), q.getOffset(), q.getLimit()).stream();
+        CountCallback<RecipeOverviewTO, Void> countCallback = q -> recipesService.getRecipesCount(filterTO.getName());
+        grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
+    }
 }

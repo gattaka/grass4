@@ -14,12 +14,12 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.books.facades.BooksFacade;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.button.ModifyGridButton;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.ButtonLayout;
@@ -167,7 +167,7 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
     }
 
     protected void populateBtnLayout(ButtonLayout btnLayout) {
-        btnLayout.add(new CreateGridButton("Přidat", event -> new BookDialog() {
+        btnLayout.add(componentFactory.createCreateButton(event -> new BookDialog() {
             private static final long serialVersionUID = -4863260002363608014L;
 
             @Override
@@ -178,7 +178,7 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
             }
         }.open()));
 
-        btnLayout.add(new ModifyGridButton<BookOverviewTO>("Upravit", event -> new BookDialog(choosenBook) {
+        btnLayout.add(componentFactory.createEditGridButton(event -> new BookDialog(choosenBook) {
             private static final long serialVersionUID = 5264621441522056786L;
 
             @Override
@@ -189,7 +189,7 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
             }
         }.open(), grid));
 
-        btnLayout.add(new DeleteGridButton<BookOverviewTO>("Smazat", items -> {
+        btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (BookOverviewTO s : items)
                 getBooksFacade().deleteBook(s.getId());
             dataProvider.refreshAll();

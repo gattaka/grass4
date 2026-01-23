@@ -98,7 +98,7 @@ public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
             }
         }.open(), grid));
 
-        btnLayout.add(componentFactory.createDeleteGridButton(items -> {
+        btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (WineOverviewTO s : items)
                 getDrinksFacade().deleteDrink(s.getId());
             populate();

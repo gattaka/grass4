@@ -4,8 +4,10 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
@@ -74,8 +76,8 @@ public class HWSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
         });
         binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
 
-        ImageButton reprocessButton =
-                new ImageButton("Přegenerovat miniatury", ImageIcon.GEAR2_16_ICON, e -> hwService.processMiniatures());
+        Button reprocessButton = new Button("Přegenerovat miniatury", VaadinIcon.REFRESH.create(),
+                e -> hwService.processMiniatures());
 
         buttonLayout.add(saveButton, reprocessButton);
     }

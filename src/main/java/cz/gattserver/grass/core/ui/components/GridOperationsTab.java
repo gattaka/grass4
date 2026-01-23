@@ -88,7 +88,7 @@ public abstract class GridOperationsTab<T extends Identifiable, F, C extends Col
         Button detailBtn =
                 componentFactory.createDetailGridButton(item -> createDetailDialog(item.getId()).open(), grid);
         Button modifyBtn = componentFactory.createEditGridButton(item -> createModifyDialog(item).open(), grid);
-        Button deleteBtn = componentFactory.createDeleteGridButton(items -> {
+        Button deleteBtn = componentFactory.createDeleteGridSetButton(items -> {
             items.forEach(this::deleteEntity);
             data.removeAll(items);
             grid.getDataProvider().refreshAll();

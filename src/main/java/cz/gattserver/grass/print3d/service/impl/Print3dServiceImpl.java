@@ -206,7 +206,7 @@ public class Print3dServiceImpl implements Print3dService {
 	public void zipProject(String projectDir) {
 		Path projectPath = getProjectPath(projectDir);
 
-		logger.info("zip3dProject thread: " + Thread.currentThread().getId());
+		logger.info("zip3dProject thread: " + Thread.currentThread().threadId());
 
 		final ReferenceHolder<Integer> total = new ReferenceHolder<>();
 		final ReferenceHolder<Integer> progress = new ReferenceHolder<>();

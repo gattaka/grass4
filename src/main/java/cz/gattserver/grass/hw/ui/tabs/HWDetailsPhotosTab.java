@@ -113,13 +113,13 @@ public class HWDetailsPhotosTab extends Div {
             Div buttonLayout = new Div();
             itemDiv.add(buttonLayout);
 
-            DetailButton detailButton = new DetailButton(e -> UI.getCurrent().getPage()
+            ComponentFactory componentFactory = new ComponentFactory();
+            Button detailButton = componentFactory.createDetailButton(e -> UI.getCurrent().getPage()
                     .open(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName()));
             detailButton.getStyle().set("margin-right", "var(--lumo-space-m)");
             buttonLayout.add(detailButton);
 
             if (getUser().isAdmin()) {
-                ComponentFactory componentFactory = new ComponentFactory();
                 Button delBtn = componentFactory.createDeleteButton(ev -> {
                     getHWService().deleteHWItemImagesFile(hwItem.getId(), item.getName());
                     populateImages();

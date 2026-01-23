@@ -340,9 +340,9 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
                         event -> UI.getCurrent().getPage().executeJs(js, getElement());
 
                 if (resourceBundle.getImagePath() != null) {
-                    ImageButton btn = new ImageButton(resourceBundle.getDescription(),
+                    Button btn = new Button(resourceBundle.getDescription(),
                             new Image(resourceBundle.getImagePath(), resourceBundle.getDescription()), clickListener);
-                    btn.setTooltip(resourceBundle.getTag());
+                    btn.setTooltipText(resourceBundle.getTag());
                     familyToolsLayout.add(btn);
                 } else {
                     Button btn = new Button(resourceBundle.getDescription(), clickListener);

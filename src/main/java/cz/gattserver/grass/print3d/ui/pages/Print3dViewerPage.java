@@ -19,6 +19,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
@@ -98,14 +99,13 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
     protected void createContentOperations(Div operationsListLayout) {
         super.createContentOperations(operationsListLayout);
 
-        ImageButton downloadZip = new ImageButton("Zabalit do ZIP", ImageIcon.PRESENT_16_ICON,
-                event -> new ConfirmDialog("Přejete si vytvořit ZIP projektu?", e -> {
-                    logger.info("zipPrint3dProject thread: {}", Thread.currentThread().getId());
+        operationsListLayout.add(
+                componentFactory.createZipButton(event -> new ConfirmDialog("Přejete si vytvořit ZIP projektu?", e -> {
+                    logger.info("zipPrint3dProject thread: {}", Thread.currentThread().threadId());
                     progressIndicatorWindow = new ProgressDialog();
                     eventBus.subscribe(Print3dViewerPage.this);
                     print3dService.zipProject(projectDir);
-                }).open());
-        operationsListLayout.add(downloadZip);
+                }).open()));
     }
 
     @Override

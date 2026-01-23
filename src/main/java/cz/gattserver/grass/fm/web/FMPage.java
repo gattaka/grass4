@@ -445,7 +445,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
         if (items.size() == 1 && !item.isDirectory()) {
             UI.getCurrent().getPage().open(getDownloadLink(item));
         } else {
-            logger.info("zipFMthread: {}", Thread.currentThread().getId());
+            logger.info("zipFMthread: {}", Thread.currentThread().threadId());
             progressIndicatorWindow = new ProgressDialog();
             eventBus.subscribe(FMPage.this);
             explorer.zipFiles(items);

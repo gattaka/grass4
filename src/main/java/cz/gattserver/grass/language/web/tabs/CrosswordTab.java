@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -45,12 +46,10 @@ public class CrosswordTab extends Div {
 
         Map<Input, String> fieldMap = new HashMap<>();
 
-        Button giveUpTestBtn = new Button("Vzdát to", event -> {
+        btnLayout.add(new Button("Vzdát to", VaadinIcon.FLAG.create(), event -> {
             for (Map.Entry<Input, String> entry : fieldMap.entrySet())
                 entry.getKey().setValue(entry.getValue());
-        });
-        giveUpTestBtn.setIcon(ImageIcon.FLAG_16_ICON.createImage("giveup"));
-        btnLayout.add(giveUpTestBtn);
+        }));
 
         NumberField numberField = new NumberField();
         // TODO v24
@@ -62,11 +61,9 @@ public class CrosswordTab extends Div {
         VerticalLayout mainLayout = new VerticalLayout();
         add(mainLayout);
 
-        Button newCrosswordBtn = new Button("",
+        Button newCrosswordBtn = new Button("",VaadinIcon.PLAY.create(),
                 event -> generateNewCrossword(numberField.getValue().intValue(), langId, fieldMap, mainLayout));
-        newCrosswordBtn.setIcon(ImageIcon.RIGHT_16_ICON.createImage("start"));
         btnLayout.add(newCrosswordBtn);
-
         numberField.addValueChangeListener(e -> newCrosswordBtn.setText(
                 "Nová křížovka " + e.getValue().intValue() + "x" + e.getValue().intValue()));
 

@@ -149,7 +149,7 @@ public class ChordsPage extends OneColumnPage implements HasUrlParameter<String>
             selectChord(to);
         }).open(), grid));
 
-        btnLayout.add(componentFactory.createDeleteGridButton(items -> {
+        btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (ChordTO c : items)
                 songsService.deleteChord(c.getId());
             loadChords();

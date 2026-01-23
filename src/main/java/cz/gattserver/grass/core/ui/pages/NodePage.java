@@ -98,8 +98,7 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
         ButtonLayout buttonLayout = new ButtonLayout();
         buttonLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(buttonLayout);
-        Button createButton = new ImageButton("Vytvořit novou kategorii", ImageIcon.BRIEFCASE_PLUS_16_ICON,
-                e -> createNodeAction(node));
+        Button createButton = componentFactory.createCreateButton(e -> createNodeAction(node));
         buttonLayout.add(createButton);
     }
 

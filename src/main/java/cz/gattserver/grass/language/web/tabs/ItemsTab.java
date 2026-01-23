@@ -121,7 +121,7 @@ public class ItemsTab extends Div {
             }, langId, type).open();
         }, grid));
 
-        btnLayout.add(componentFactory.createDeleteGridButton(items -> items.forEach(item -> {
+        btnLayout.add(componentFactory.createDeleteGridSetButton(items -> items.forEach(item -> {
             languageFacade.deleteLanguageItem(item);
             grid.getDataProvider().refreshAll();
         }), grid));

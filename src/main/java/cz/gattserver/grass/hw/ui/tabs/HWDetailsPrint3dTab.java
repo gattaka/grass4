@@ -129,19 +129,15 @@ public class HWDetailsPrint3dTab extends Div {
             stlViewer.show(getFileURL(to));
         });
 
-        ComponentFactory  componentFactory = new ComponentFactory();
+        ComponentFactory componentFactory = new ComponentFactory();
         HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
         add(operationsLayout);
 
-        GridButton<HWItemFileTO> downloadBtn =
-                new GridButton<>("Stáhnout", set -> downloadPrint3d(set.iterator().next()), print3dGrid);
-        downloadBtn.setEnableResolver(set -> set.size() == 1);
-        downloadBtn.setIcon(ImageIcon.DOWN_16_ICON.createImage("Stáhnout"));
-        operationsLayout.addToStart(downloadBtn);
+        operationsLayout.addToStart(
+                componentFactory.createDownloadGridButton(item -> downloadPrint3d(item), print3dGrid));
 
         if (getUser().isAdmin()) {
-            Button deleteBtn = new DeleteGridButton<>("Smazat záznam", items -> {
-                HWItemFileTO item = items.iterator().next();
+            Button deleteBtn = componentFactory.createDeleteGridButton(item -> {
                 getHWService().deleteHWItemPrint3dFile(hwItem.getId(), item.getName());
                 populatePrint3dGrid();
                 hwItemDetailDialog.refreshTabLabels();

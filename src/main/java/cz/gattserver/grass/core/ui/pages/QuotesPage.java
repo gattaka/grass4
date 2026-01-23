@@ -72,7 +72,7 @@ public class QuotesPage extends OneColumnPage {
             grid.select(q);
         }).open(), grid));
 
-        btnLayout.add(componentFactory.createDeleteGridButton(items -> items.forEach(q -> {
+        btnLayout.add(componentFactory.createDeleteGridSetButton(items -> items.forEach(q -> {
             quotesFacade.deleteQuote(q.getId());
             data.remove(q);
             grid.getDataProvider().refreshAll();

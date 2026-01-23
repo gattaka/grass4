@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
@@ -35,7 +36,8 @@ public class UsedInChooser extends Div {
             usedInText.removeAll();
         });
         usedIdLayout.add(clearBtn);
-        Button chooseUsedInBtn = new ImageButton("Vybrat", ImageIcon.SEARCH_16_ICON, e -> {
+        ComponentFactory componentFactory = new ComponentFactory();
+        Button chooseUsedInBtn = componentFactory.createSubmitButton(e -> {
             new HWItemChooseDialog(originalTO == null ? null : originalTO.getId(), to -> {
                 usedInText.setText(to.getName());
                 onSelect.accept(to);

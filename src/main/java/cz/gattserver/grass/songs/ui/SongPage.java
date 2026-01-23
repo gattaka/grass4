@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.PageTitle;
@@ -137,7 +138,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
         btnLayout.add(deleteButton);
         deleteButton.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-        ImageButton printButton = new ImageButton("Tisk", ImageIcon.PRINT_16_ICON, e -> {
+        Button printButton = new Button("Tisk", VaadinIcon.PRINT.create(), e -> {
             Path path = createReportPath(choosenSong, false);
             String uuid = UUID.randomUUID().toString();
             VaadinSession.getCurrent().getSession().setAttribute(ExportRequestHandler.ATTR_PREFIX + uuid, path);
@@ -145,7 +146,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
         });
         btnLayout.add(printButton);
 
-        ImageButton printButton2 = new ImageButton("Tisk (dva sloupce)", ImageIcon.PRINT_16_ICON, e -> {
+        Button printButton2 = new Button("Tisk (dva sloupce)", VaadinIcon.PRINT.create(), e -> {
             Path path = createReportPath(choosenSong, true);
             String uuid = UUID.randomUUID().toString();
             VaadinSession.getCurrent().getSession().setAttribute(ExportRequestHandler.ATTR_PREFIX + uuid, path);

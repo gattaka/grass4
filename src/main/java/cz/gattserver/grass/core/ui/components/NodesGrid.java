@@ -9,6 +9,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 
+import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
