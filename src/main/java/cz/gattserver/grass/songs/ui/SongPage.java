@@ -125,6 +125,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
         layout.add(embeddedLabel);
 
         ButtonLayout btnLayout = new ButtonLayout();
+        btnLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(btnLayout);
 
         Button modifyButton = componentFactory.createEditButton(event -> new SongDialog(choosenSong, to -> {

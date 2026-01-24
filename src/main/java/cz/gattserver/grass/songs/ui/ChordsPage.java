@@ -126,6 +126,7 @@ public class ChordsPage extends OneColumnPage implements HasUrlParameter<String>
         panel.add(chordDescriptionLayout);
 
         ButtonLayout btnLayout = new ButtonLayout();
+        btnLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(btnLayout);
 
         btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));

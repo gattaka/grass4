@@ -174,6 +174,7 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
         upload.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
         ButtonLayout btnLayout = new ButtonLayout();
+        btnLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(btnLayout);
 
         btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
