@@ -34,6 +34,7 @@ public abstract class RumDialog extends DrinkDialog<RumTO> {
 		RumTO formTO = new RumTO();
 		formTO.setRumType(RumType.DARK);
 		formTO.setAlcohol(0d);
+        formTO.setRating(2.5);
 		return formTO;
 	}
 

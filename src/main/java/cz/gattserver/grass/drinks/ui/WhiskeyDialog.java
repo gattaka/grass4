@@ -35,6 +35,7 @@ public abstract class WhiskeyDialog extends DrinkDialog<WhiskeyTO> {
 		WhiskeyTO formTO = new WhiskeyTO();
 		formTO.setAlcohol(0d);
 		formTO.setYears(0);
+        formTO.setRating(2.5);
 		return formTO;
 	}
 

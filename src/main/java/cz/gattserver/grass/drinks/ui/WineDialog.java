@@ -33,6 +33,7 @@ public abstract class WineDialog extends DrinkDialog<WineTO> {
 	protected WineTO createNewInstance() {
 		WineTO formTO = new WineTO();
 		formTO.setYear(0);
+        formTO.setRating(2.5);
 		return formTO;
 	}
 

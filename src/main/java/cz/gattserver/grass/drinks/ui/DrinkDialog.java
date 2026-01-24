@@ -126,8 +126,6 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
         } catch (ValidationException ve) {
             new ErrorDialog(
                     "Chybná vstupní data\n\n   " + ve.getValidationErrors().iterator().next().getErrorMessage()).open();
-        } catch (Exception ve) {
-            new ErrorDialog("Uložení se nezdařilo").open();
         }
     }
 

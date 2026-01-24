@@ -27,6 +27,7 @@ public abstract class OtherDialog extends DrinkDialog<OtherTO> {
 	@Override
 	protected OtherTO createNewInstance() {
 		OtherTO formTO = new OtherTO();
+        formTO.setRating(2.5);
 		return formTO;
 	}
 

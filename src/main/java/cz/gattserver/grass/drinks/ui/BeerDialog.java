@@ -32,6 +32,7 @@ public abstract class BeerDialog extends DrinkDialog<BeerTO> {
 	protected BeerTO createNewInstance() {
 		BeerTO formTO = new BeerTO();
 		formTO.setCountry("ČR");
+        formTO.setRating(2.5);
 		formTO.setMaltType(MaltType.BARLEY);
 		return formTO;
 	}
@@ -132,5 +133,4 @@ public abstract class BeerDialog extends DrinkDialog<BeerTO> {
 
 		return layout;
 	}
-
 }
