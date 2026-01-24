@@ -16,6 +16,11 @@ html {
     --vaadin-button-background: #fdfaf2;
 }
 
+vaadin-progress-bar::part(bar) {
+    border: 1px solid lightgrey;
+    box-sizing: content-box;
+}
+
 vaadin-text-area::part(label) {
     font-size: 14px;
     font-family: var(--aura-font-family);
@@ -112,6 +117,7 @@ h2, h3 {
     border-bottom: 1px solid;
     margin-bottom: 10px;
     border-color: #aaa;
+    width: 100%;
 }
 
 h3 {
@@ -158,4 +164,9 @@ span.label-err {
 
 .error-label {
     text-align: center;
+}
+
+/* monitor */
+#center-content .monitor-content h2 {
+    margin-bottom: 5px;
 }
