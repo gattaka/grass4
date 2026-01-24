@@ -84,7 +84,7 @@ public class HWItemsTab extends Div {
     private void openItemWindow(HWItemOverviewTO hwItemOverviewTO) {
         HWItemTO hwItem = null;
         if (hwItemOverviewTO != null) hwItem = hwService.getHWItem(hwItemOverviewTO.getId());
-        new HWItemEditDialog(hwItem == null ? null : hwItem.getId(), to -> {
+        new HWItemEditDialog(hwItem == null ? null : hwService.getHWItem(hwItem.getId()), to -> {
             populate();
             HWItemOverviewTO filterTO = new HWItemOverviewTO();
             filterTO.setId(to.getId());

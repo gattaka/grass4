@@ -11,6 +11,6 @@ public class WarnDialog extends MessageDialog {
     }
 
     public WarnDialog(String labelCaption, String details) {
-        super(labelCaption, details, VaadinIcon.WARNING.create());
+        super("Upozornění", labelCaption, details, VaadinIcon.WARNING.create());
     }
 }

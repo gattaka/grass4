@@ -19,6 +19,7 @@ public abstract class PhysicianCreateDialog extends EditWebDialog {
 	}
 
 	public PhysicianCreateDialog(PhysicianTO originalTO) {
+        super("Lékař");
 		setWidth("300px");
 
 		Binder<PhysicianTO> binder = new Binder<>(PhysicianTO.class);

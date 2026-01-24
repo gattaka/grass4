@@ -62,6 +62,7 @@ public class ProgressDialog extends WebDialog {
 	}
 
 	public ProgressDialog() {
+        super("Průběh operace");
 		this.ui = UI.getCurrent();
 
 		ui.setPollInterval(200);

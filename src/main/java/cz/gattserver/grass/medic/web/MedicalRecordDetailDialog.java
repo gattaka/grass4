@@ -23,6 +23,7 @@ public class MedicalRecordDetailDialog extends WebDialog {
 	private transient MedicService medicService;
 
 	public MedicalRecordDetailDialog(Long id) {
+        super("Záznam");
 		VerticalLayout layout = new VerticalLayout();
 		layout.setSpacing(true);
 		layout.setPadding(false);

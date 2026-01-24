@@ -279,7 +279,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
             if (progressIndicatorWindow != null) progressIndicatorWindow.close();
 
             if (event.isSuccess()) {
-                WebDialog win = new WebDialog();
+                WebDialog win = new WebDialog("Komprese");
                 win.addDialogCloseActionListener(e -> pgService.deleteZipFile(event.getZipFile()));
                 Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
                     try {

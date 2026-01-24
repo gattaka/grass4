@@ -22,6 +22,7 @@ public abstract class MedicamentCreateDialog extends EditWebDialog {
 	}
 
 	public MedicamentCreateDialog(MedicamentTO originalDTO) {
+        super("Medikament");
 		setWidth("300px");
 
 		MedicamentTO formDTO = new MedicamentTO();

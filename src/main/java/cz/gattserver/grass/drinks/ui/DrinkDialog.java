@@ -42,6 +42,7 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
     }
 
     public DrinkDialog(final T originalTO) {
+        super("Nápoj");
         T formTO = createNewInstance();
 
         Binder<T> binder = new Binder<>();

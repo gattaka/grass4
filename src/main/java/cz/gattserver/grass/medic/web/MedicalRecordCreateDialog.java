@@ -42,6 +42,7 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 	}
 
 	private MedicalRecordCreateDialog(ScheduledVisitTO scheduledVisitDTO, MedicalRecordTO originalDTO) {
+        super("Záznam");
 		setWidth("800px");
 
 		MedicService medicService = SpringContextHelper.getBean(MedicService.class);

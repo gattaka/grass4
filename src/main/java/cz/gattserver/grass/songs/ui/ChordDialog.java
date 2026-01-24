@@ -26,6 +26,7 @@ public class ChordDialog extends EditWebDialog {
     }
 
     public ChordDialog(final ChordTO originalDTO, boolean copy, Consumer<ChordTO> onSaveAction) {
+        super("Akord");
         setWidth("300px");
 
         ChordTO formTO = new ChordTO();

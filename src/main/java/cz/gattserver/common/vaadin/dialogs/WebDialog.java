@@ -19,10 +19,6 @@ public class WebDialog extends Dialog {
         init();
     }
 
-    public WebDialog() {
-        init();
-    }
-
     protected void init() {
         add(layout);
         setCloseOnOutsideClick(false);

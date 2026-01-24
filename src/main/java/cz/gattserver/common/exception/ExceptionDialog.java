@@ -9,7 +9,8 @@ public class ExceptionDialog extends MessageDialog {
     private static final long serialVersionUID = -2077736292967107272L;
 
     public ExceptionDialog(Throwable throwable) {
-        super("Neočekávaná systémová chyba", ExceptionUtils.getStackTrace(throwable), VaadinIcon.CLOSE_CIRCLE.create());
+        super("Chyba", "Neočekávaná systémová chyba", ExceptionUtils.getStackTrace(throwable),
+                VaadinIcon.CLOSE_CIRCLE.create());
         layout.addClassName("error-layout");
         detailsArea.addClassName("error-text-field");
         detailsArea.setHeight("500px");

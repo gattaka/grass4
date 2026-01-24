@@ -16,10 +16,11 @@ public class QuoteDialog extends EditWebDialog {
 	}
 
 	public QuoteDialog(SaveAction saveAction) {
-		init(null, saveAction);
+		this(null, saveAction);
 	}
 
 	public QuoteDialog(QuoteTO quote, SaveAction saveAction) {
+        super("Hláška");
 		init(quote, saveAction);
 	}
 

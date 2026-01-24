@@ -323,15 +323,15 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
             if (progressIndicatorWindow != null) progressIndicatorWindow.close();
 
             if (event.isSuccess()) {
-                WebDialog win = new WebDialog();
+                WebDialog win = new WebDialog("Komprese");
                 win.addDialogCloseActionListener(e -> print3dService.deleteZipFile(event.getZipFile()));
 
                 Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
                     try {
                         String zipName = print3dTO.getPrint3dProjectPath() + ".zip";
                         return new DownloadResponse(Files.newInputStream(event.getZipFile()), zipName, null, -1);
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
+                    } catch (IOException ex) {
+                        logger.error("Během komprese souborů 3D projektu došlo k chybě", ex);
                         return null;
                     }
                 }), "Stáhnout ZIP souboru");

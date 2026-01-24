@@ -33,6 +33,7 @@ public abstract class HWServiceNoteEditDialog extends EditWebDialog {
 	}
 
 	public HWServiceNoteEditDialog(final HWItemTO hwItem, HWServiceNoteTO originalTO) {
+        super("Záznam");
 		HWServiceNoteTO formTO = new HWServiceNoteTO();
 		formTO.setDate(LocalDate.now());
 		formTO.setDescription("");

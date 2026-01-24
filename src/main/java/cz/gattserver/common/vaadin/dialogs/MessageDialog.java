@@ -11,55 +11,53 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 
 public class MessageDialog extends WebDialog {
 
-	private static final long serialVersionUID = 4123506060675738841L;
+    private static final long serialVersionUID = 4123506060675738841L;
 
-	protected TextArea detailsArea;
+    protected TextArea detailsArea;
 
-	/**
-	 * @param labelCaption
-	 *            obsah zprávy v okně
-	 * @param image
-	 *            ikona okna
-	 */
-	public MessageDialog(String labelCaption, Image image) {
-		this(labelCaption, null, image);
-	}
+    /**
+     * @param labelCaption obsah zprávy v okně
+     * @param image        ikona okna
+     */
+    public MessageDialog(String title, String labelCaption, Image image) {
+        this(title, labelCaption, null, image);
+    }
 
-	/**
-	 * @param labelCaption
-	 *            obsah zprávy v okně
-	 * @param image
-     * 	 *            ikona okna
-	 */
-	public MessageDialog(String labelCaption, String details, Component image) {
-		HorizontalLayout horizontalLayout = new HorizontalLayout();
-		horizontalLayout.setSpacing(true);
-		addComponent(horizontalLayout);
+    /**
+     * @param title        nadpis dle události
+     * @param labelCaption obsah zprávy v okně
+     * @param image        *            ikona okna
+     */
+    public MessageDialog(String title, String labelCaption, String details, Component image) {
+        super(title);
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setSpacing(true);
+        addComponent(horizontalLayout);
 
-		horizontalLayout.add(image);
-		horizontalLayout.setVerticalComponentAlignment(Alignment.CENTER, image);
+        horizontalLayout.add(image);
+        horizontalLayout.setVerticalComponentAlignment(Alignment.CENTER, image);
 
-		Div msgLabel = new Div(labelCaption);
-		msgLabel.setSizeUndefined();
-		horizontalLayout.add(msgLabel);
+        Div msgLabel = new Div(labelCaption);
+        msgLabel.setSizeUndefined();
+        horizontalLayout.add(msgLabel);
 
-		createDetails(details);
+        createDetails(details);
 
-		Button proceedButton = new Button("OK", event -> close());
+        Button proceedButton = new Button("OK", event -> close());
 
-		addComponent(proceedButton);
-		setComponentAlignment(proceedButton, Alignment.END);
-	}
+        addComponent(proceedButton);
+        setComponentAlignment(proceedButton, Alignment.END);
+    }
 
-	protected void createDetails(String details) {
-		if (details != null) {
-			detailsArea = new TextArea();
-			detailsArea.setValue(details);
-			detailsArea.setEnabled(true);
-			detailsArea.setReadOnly(true);
-			detailsArea.setWidthFull();
-			detailsArea.setHeight("200px");
-			addComponent(detailsArea);
-		}
-	}
+    protected void createDetails(String details) {
+        if (details != null) {
+            detailsArea = new TextArea();
+            detailsArea.setValue(details);
+            detailsArea.setEnabled(true);
+            detailsArea.setReadOnly(true);
+            detailsArea.setWidthFull();
+            detailsArea.setHeight("200px");
+            addComponent(detailsArea);
+        }
+    }
 }

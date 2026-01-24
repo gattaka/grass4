@@ -41,6 +41,7 @@ public class LanguageItemDialog extends EditWebDialog {
     }
 
     public LanguageItemDialog(final LanguageItemTO to, SaveAction action, Long langId, ItemType asType) {
+        super("Záznam");
         SpringContextHelper.inject(this);
 
         setWidth("600px");

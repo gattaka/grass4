@@ -34,6 +34,7 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
 	}
 
 	public ScheduledVisitsCreateDialog(Operation operation, ScheduledVisitTO originalTO) {
+        super("Návštěva");
 		boolean planned =
 				operation.equals(Operation.PLANNED) || operation.equals(Operation.PLANNED_FROM_TO_BE_PLANNED);
 

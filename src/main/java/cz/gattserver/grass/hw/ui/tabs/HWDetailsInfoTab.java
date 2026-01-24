@@ -238,7 +238,7 @@ public class HWDetailsInfoTab extends Div {
         add();
 
         if (getUser().isAdmin()) {
-            final Button fixBtn = componentFactory.createEditButton(e -> new HWItemEditDialog(hwItem, to -> {
+            final Button fixBtn = componentFactory.createEditButton(e -> new HWItemEditDialog(hwService.getHWItem(hwItem.getId()), to -> {
                 hwItemDetailDialog.refreshItem();
                 hwItemDetailDialog.switchInfoTab();
             }).open());

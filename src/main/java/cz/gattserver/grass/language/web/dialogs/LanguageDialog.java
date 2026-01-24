@@ -15,10 +15,11 @@ public class LanguageDialog extends WebDialog {
 	}
 
 	public LanguageDialog(SaveAction saveAction) {
-		init(null, saveAction);
+		this(null, saveAction);
 	}
 
 	public LanguageDialog(LanguageTO langTO, SaveAction saveAction) {
+        super("Jazyk");
 		init(langTO, saveAction);
 	}
 

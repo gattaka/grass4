@@ -24,6 +24,7 @@ public abstract class RecipeDialog extends EditWebDialog {
 	protected abstract void onSave(String name, String desc, Long id);
 
 	public RecipeDialog(final RecipeDTO to) {
+        super("Recept");
 		SpringContextHelper.inject(this);
 		setWidth("600px");
 

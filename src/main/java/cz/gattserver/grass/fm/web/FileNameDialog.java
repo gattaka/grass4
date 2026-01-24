@@ -14,10 +14,11 @@ public class FileNameDialog extends WebDialog {
     }
 
     public FileNameDialog(SaveAction saveAction) {
-        init(null, saveAction);
+        this(null, saveAction);
     }
 
     public FileNameDialog(FMItemTO to, SaveAction saveAction) {
+        super("Soubor");
         init(to, saveAction);
     }
 

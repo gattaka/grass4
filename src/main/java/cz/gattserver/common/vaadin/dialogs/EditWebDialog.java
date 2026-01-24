@@ -10,10 +10,6 @@ public class EditWebDialog extends WebDialog {
 		super(caption);
 	}
 
-	public EditWebDialog() {
-		super();
-	}
-
 	@Override
 	protected void init() {
 		super.init();

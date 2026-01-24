@@ -33,138 +33,133 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 public class HWItemEditDialog extends EditWebDialog {
 
-	private static final long serialVersionUID = -6773027334692911384L;
+    private static final long serialVersionUID = -6773027334692911384L;
 
-	@Autowired
-	private HWService hwService;
+    @Autowired
+    private HWService hwService;
 
-	private Consumer<HWItemTO> onSuccessConsumer;
+    private Consumer<HWItemTO> onSuccessConsumer;
 
-	public HWItemEditDialog(Long originalId, Consumer<HWItemTO> onSuccessConsumer) {
-		init(originalId == null ? null : hwService.getHWItem(originalId), onSuccessConsumer);
-	}
+    public HWItemEditDialog(HWItemTO originalTO, Consumer<HWItemTO> onSuccessConsumer) {
+        super("Záznam");
+        init(originalTO, onSuccessConsumer);
+    }
 
-	public HWItemEditDialog(HWItemTO originalTO, Consumer<HWItemTO> onSuccessConsumer) {
-		init(originalTO, onSuccessConsumer);
-	}
+    /**
+     * @param originalTO opravuji údaje existující položky, nebo vytvářím novou (
+     *                   {@code null}) ?
+     */
+    private void init(HWItemTO originalTO, Consumer<HWItemTO> onSuccessConsumer) {
+        SpringContextHelper.inject(this);
+        setWidth("900px");
 
-	/**
-	 * @param originalTO opravuji údaje existující položky, nebo vytvářím novou (
-	 *                   {@code null}) ?
-	 */
-	private void init(HWItemTO originalTO, Consumer<HWItemTO> onSuccessConsumer) {
-		SpringContextHelper.inject(this);
-		setWidth("900px");
+        HWItemTO formTO = new HWItemTO();
+        formTO.setName("");
+        formTO.setPrice(new BigDecimal(0));
+        formTO.setWarrantyYears(0);
+        formTO.setState(HWItemState.NEW);
+        formTO.setPurchaseDate(LocalDate.now());
+        if (originalTO != null) {
+            formTO.setUsedIn(originalTO.getUsedIn());
+            formTO.setUsedInName(originalTO.getUsedInName());
+        }
 
-		HWItemTO formTO = new HWItemTO();
-		formTO.setName("");
-		formTO.setPrice(new BigDecimal(0));
-		formTO.setWarrantyYears(0);
-		formTO.setState(HWItemState.NEW);
-		formTO.setPurchaseDate(LocalDate.now());
-		if (originalTO != null) {
-			formTO.setUsedIn(originalTO.getUsedIn());
-			formTO.setUsedInName(originalTO.getUsedInName());
-		}
+        Binder<HWItemTO> binder = new Binder<>(HWItemTO.class);
+        binder.setBean(formTO);
 
-		Binder<HWItemTO> binder = new Binder<>(HWItemTO.class);
-		binder.setBean(formTO);
+        TextField nameField = new TextField("Název");
+        nameField.setWidthFull();
+        nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
+        binder.forField(nameField).asRequired("Název položky je povinný").bind(HWItemTO::getName, HWItemTO::setName);
+        add(nameField);
 
-		TextField nameField = new TextField("Název");
-		nameField.setWidthFull();
-		nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
-		binder.forField(nameField).asRequired("Název položky je povinný").bind(HWItemTO::getName, HWItemTO::setName);
-		add(nameField);
+        HorizontalLayout baseLayout = new HorizontalLayout();
+        baseLayout.setPadding(false);
+        add(baseLayout);
 
-		HorizontalLayout baseLayout = new HorizontalLayout();
-		baseLayout.setPadding(false);
-		add(baseLayout);
+        DatePicker purchaseDateField = new DatePicker("Získáno");
+        purchaseDateField.setLocale(Locale.forLanguageTag("CS"));
+        purchaseDateField.setWidth("130px");
+        binder.bind(purchaseDateField, HWItemTO::getPurchaseDate, HWItemTO::setPurchaseDate);
+        baseLayout.add(purchaseDateField);
 
-		DatePicker purchaseDateField = new DatePicker("Získáno");
-		purchaseDateField.setLocale(Locale.forLanguageTag("CS"));
-		purchaseDateField.setWidth("130px");
-		binder.bind(purchaseDateField, HWItemTO::getPurchaseDate, HWItemTO::setPurchaseDate);
-		baseLayout.add(purchaseDateField);
+        BigDecimalField priceField = new BigDecimalField("Cena");
+        priceField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
+        priceField.setWidth("100px");
+        priceField.setLocale(new Locale("cs", "CZ"));
+        binder.forField(priceField).withNullRepresentation(BigDecimal.ZERO)
+                .bind(HWItemTO::getPrice, HWItemTO::setPrice);
+        baseLayout.add(priceField);
 
-		BigDecimalField priceField = new BigDecimalField("Cena");
-		priceField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
-		priceField.setWidth("100px");
-		priceField.setLocale(new Locale("cs", "CZ"));
-		binder.forField(priceField).withNullRepresentation(BigDecimal.ZERO).bind(HWItemTO::getPrice,
-				HWItemTO::setPrice);
-		baseLayout.add(priceField);
+        ComboBox<HWItemState> stateComboBox = new ComboBox<>("Stav", Arrays.asList(HWItemState.values()));
+        stateComboBox.setWidth("150px");
+        stateComboBox.setItemLabelGenerator(HWItemState::getName);
+        binder.forField(stateComboBox).asRequired("Stav položky je povinný")
+                .bind(HWItemTO::getState, HWItemTO::setState);
+        baseLayout.add(stateComboBox);
 
-		ComboBox<HWItemState> stateComboBox = new ComboBox<>("Stav", Arrays.asList(HWItemState.values()));
-		stateComboBox.setWidth("150px");
-		stateComboBox.setItemLabelGenerator(HWItemState::getName);
-		binder.forField(stateComboBox).asRequired("Stav položky je povinný").bind(HWItemTO::getState,
-				HWItemTO::setState);
-		baseLayout.add(stateComboBox);
+        TextField warrantyYearsField = new TextField("Záruka (roky)");
+        binder.forField(warrantyYearsField).withNullRepresentation("")
+                .withConverter(new StringToIntegerConverter(null, "Záruka musí být celé číslo"))
+                .bind(HWItemTO::getWarrantyYears, HWItemTO::setWarrantyYears);
+        warrantyYearsField.setWidth("100px");
+        baseLayout.add(warrantyYearsField);
 
-		TextField warrantyYearsField = new TextField("Záruka (roky)");
-		binder.forField(warrantyYearsField).withNullRepresentation("")
-				.withConverter(new StringToIntegerConverter(null, "Záruka musí být celé číslo"))
-				.bind(HWItemTO::getWarrantyYears, HWItemTO::setWarrantyYears);
-		warrantyYearsField.setWidth("100px");
-		baseLayout.add(warrantyYearsField);
+        TextField supervizedForField = new TextField("Spravováno pro");
+        supervizedForField.setWidthFull();
+        binder.bind(supervizedForField, HWItemTO::getSupervizedFor, HWItemTO::setSupervizedFor);
+        baseLayout.add(supervizedForField);
 
-		TextField supervizedForField = new TextField("Spravováno pro");
-		supervizedForField.setWidthFull();
-		binder.bind(supervizedForField, HWItemTO::getSupervizedFor, HWItemTO::setSupervizedFor);
-		baseLayout.add(supervizedForField);
+        Checkbox publicItemCheckBox = new Checkbox("Veřejné");
+        binder.bind(publicItemCheckBox, HWItemTO::getPublicItem, HWItemTO::setPublicItem);
+        baseLayout.add(publicItemCheckBox);
+        baseLayout.setWidth(null);
+        baseLayout.setVerticalComponentAlignment(Alignment.END, publicItemCheckBox);
 
-		Checkbox publicItemCheckBox = new Checkbox("Veřejné");
-		binder.bind(publicItemCheckBox, HWItemTO::getPublicItem, HWItemTO::setPublicItem);
-		baseLayout.add(publicItemCheckBox);
-		baseLayout.setWidth(null);
-		baseLayout.setVerticalComponentAlignment(Alignment.END, publicItemCheckBox);
+        add(new UsedInChooser(originalTO, to -> {
+            formTO.setUsedIn(to);
+            formTO.setUsedInName(to == null ? null : to.getName());
+        }));
 
-		add(new UsedInChooser(originalTO, to -> {
-			formTO.setUsedIn(to);
-			formTO.setUsedInName(to == null ? null : to.getName());
-		}));
+        TextArea descriptionArea = new TextArea("Popis");
+        descriptionArea.setTabIndex(-1);
+        descriptionArea.setWidthFull();
+        descriptionArea.getStyle().set("font-family", "monospace").set("tab-size", "4").set("font-size", "12px");
+        binder.bind(descriptionArea, HWItemTO::getDescription, HWItemTO::setDescription);
+        add(descriptionArea);
+        descriptionArea.setHeight("300px");
 
-		TextArea descriptionArea = new TextArea("Popis");
-		descriptionArea.setTabIndex(-1);
-		descriptionArea.setWidthFull();
-		descriptionArea.getStyle().set("font-family", "monospace").set("tab-size", "4").set("font-size", "12px");
-		binder.bind(descriptionArea, HWItemTO::getDescription, HWItemTO::setDescription);
-		add(descriptionArea);
-		descriptionArea.setHeight("300px");
+        Map<String, HWItemTypeTO> tokens = new HashMap<>();
+        hwService.getAllHWTypes().forEach(to -> tokens.put(to.getName(), to));
 
-		Map<String, HWItemTypeTO> tokens = new HashMap<>();
-		hwService.getAllHWTypes().forEach(to -> tokens.put(to.getName(), to));
+        TokenField keywords = new TokenField(tokens.keySet());
+        keywords.setAllowNewItems(true);
+        keywords.getInputField().setPlaceholder("klíčové slovo");
 
-		TokenField keywords = new TokenField(tokens.keySet());
-		keywords.setAllowNewItems(true);
-		keywords.getInputField().setPlaceholder("klíčové slovo");
+        if (originalTO != null) keywords.setValues(originalTO.getTypes());
+        add(keywords);
 
-		if (originalTO != null)
-			keywords.setValues(originalTO.getTypes());
-		add(keywords);
+        HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
+            try {
+                HWItemTO writeTO = originalTO == null ? new HWItemTO() : originalTO;
+                try {
+                    binder.writeBean(writeTO);
+                } catch (ValidationException ve) {
+                    UIUtils.showError("V údajích jsou chyby");
+                    return;
+                }
+                writeTO.setUsedIn(binder.getBean().getUsedIn());
+                writeTO.setUsedInName(binder.getBean().getUsedInName());
+                writeTO.setTypes(keywords.getValues());
+                writeTO.setId(hwService.saveHWItem(writeTO));
+                onSuccessConsumer.accept(writeTO);
+                close();
+            } catch (Exception ve) {
+                throw new GrassException("Uložení se nezdařilo", ve);
+            }
+        }, e -> close());
+        add(buttons);
 
-		HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
-			try {
-				HWItemTO writeTO = originalTO == null ? new HWItemTO() : originalTO;
-				try {
-					binder.writeBean(writeTO);
-				} catch (ValidationException ve) {
-					UIUtils.showError("V údajích jsou chyby");
-					return;
-				}
-				writeTO.setUsedIn(binder.getBean().getUsedIn());
-				writeTO.setUsedInName(binder.getBean().getUsedInName());
-				writeTO.setTypes(keywords.getValues());
-				writeTO.setId(hwService.saveHWItem(writeTO));
-				onSuccessConsumer.accept(writeTO);
-				close();
-			} catch (Exception ve) {
-				throw new GrassException("Uložení se nezdařilo", ve);
-			}
-		}, e -> close());
-		add(buttons);
-
-		if (originalTO != null)
-			binder.readBean(originalTO);
-	}
+        if (originalTO != null) binder.readBean(originalTO);
+    }
 }

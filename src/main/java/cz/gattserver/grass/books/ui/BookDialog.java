@@ -46,7 +46,7 @@ public abstract class BookDialog extends EditWebDialog {
 	}
 
 	public BookDialog(final BookTO originalTO) {
-		super();
+		super("Kniha");
 
 		BookTO formTO = new BookTO();
 

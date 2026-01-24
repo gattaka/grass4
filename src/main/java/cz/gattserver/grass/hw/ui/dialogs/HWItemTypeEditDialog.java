@@ -18,11 +18,8 @@ public abstract class HWItemTypeEditDialog extends EditWebDialog {
 	private transient HWService hwService;
 
 	public HWItemTypeEditDialog(HWItemTypeTO originalDTO) {
+        super("Typ");
 		init(originalDTO);
-	}
-
-	public HWItemTypeEditDialog() {
-		init(null);
 	}
 
 	private HWService getHWService() {

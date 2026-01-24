@@ -22,6 +22,7 @@ public abstract class MedicalInstitutionCreateDialog extends EditWebDialog {
     }
 
     public MedicalInstitutionCreateDialog(MedicalInstitutionTO modifiedMedicalInstitutionDTO) {
+        super("Instituce");
         setWidth("500px");
 
         MedicalInstitutionTO formDTO = new MedicalInstitutionTO();

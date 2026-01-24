@@ -23,16 +23,9 @@ public abstract class CampgameCreateDialog extends EditWebDialog {
 
 	private transient CampgamesService campgamesService;
 
-	public CampgameCreateDialog(Long originalId) {
-		init(originalId == null ? null : getCampgameService().getCampgame(originalId));
-	}
-
-	public CampgameCreateDialog() {
-		init(null);
-	}
-
 	public CampgameCreateDialog(CampgameTO originalDTO) {
-		init(originalDTO);
+        super("Hra");
+        init(originalDTO);
 	}
 
 	private CampgamesService getCampgameService() {

@@ -57,6 +57,7 @@ public class CampgameDetailDialog extends WebDialog {
     private Div pageLayout;
 
     public CampgameDetailDialog(Long campgameId) {
+        super("Hra");
         this.campgameId = campgameId;
         this.campgameTO = getCampgamesService().getCampgame(campgameId);
 

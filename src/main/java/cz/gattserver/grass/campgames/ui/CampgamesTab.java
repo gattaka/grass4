@@ -175,7 +175,7 @@ public class CampgamesTab extends Div {
             if (grid.getSelectedItems().isEmpty()) return;
             campgame = campgamesService.getCampgame(to.getId());
         }
-        new CampgameCreateDialog(campgame == null ? null : campgame.getId()) {
+        new CampgameCreateDialog(campgame == null ? null : campgamesService.getCampgame(campgame.getId())) {
             private static final long serialVersionUID = -1397391593801030584L;
 
             @Override

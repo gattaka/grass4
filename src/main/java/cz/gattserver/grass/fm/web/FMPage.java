@@ -279,7 +279,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
         grid.addColumn(new ComponentRenderer<>(to -> {
             String link = explorer.getDownloadLink(urlBase, to.getName());
             InlineButton button = new InlineButton("QR", e -> {
-                WebDialog ww = new WebDialog();
+                WebDialog ww = new WebDialog("QR kód");
                 ww.setCloseOnEsc(true);
                 ww.setCloseOnOutsideClick(true);
                 Image image = new Image(DownloadHandler.fromInputStream(de -> {
@@ -470,7 +470,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
             if (progressIndicatorWindow != null) progressIndicatorWindow.close();
 
             if (event.isSuccess()) {
-                WebDialog win = new WebDialog();
+                WebDialog win = new WebDialog("Komprese");
                 win.addDialogCloseActionListener(e -> fmService.deleteZipFile(event.getZipFile()));
                 Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
                     try {
