@@ -12,6 +12,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 
+import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
@@ -27,110 +28,108 @@ import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
 public abstract class MedicalRecordCreateDialog extends EditWebDialog {
 
-	private static final long serialVersionUID = -6773027334692911384L;
+    private static final long serialVersionUID = -6773027334692911384L;
 
-	public MedicalRecordCreateDialog() {
-		this(null, null);
-	}
+    public MedicalRecordCreateDialog() {
+        this(null, null);
+    }
 
-	public MedicalRecordCreateDialog(ScheduledVisitTO scheduledVisitDTO) {
-		this(scheduledVisitDTO, null);
-	}
+    public MedicalRecordCreateDialog(ScheduledVisitTO scheduledVisitDTO) {
+        this(scheduledVisitDTO, null);
+    }
 
-	public MedicalRecordCreateDialog(MedicalRecordTO recordDTO) {
-		this(null, recordDTO);
-	}
+    public MedicalRecordCreateDialog(MedicalRecordTO recordDTO) {
+        this(null, recordDTO);
+    }
 
-	private MedicalRecordCreateDialog(ScheduledVisitTO scheduledVisitDTO, MedicalRecordTO originalDTO) {
+    private MedicalRecordCreateDialog(ScheduledVisitTO scheduledVisitDTO, MedicalRecordTO originalDTO) {
         super("Záznam");
-		setWidth("800px");
+        setWidth("800px");
 
-		MedicService medicService = SpringContextHelper.getBean(MedicService.class);
+        MedicService medicService = SpringContextHelper.getBean(MedicService.class);
 
-		Binder<MedicalRecordTO> binder = new Binder<>(MedicalRecordTO.class);
-		binder.setBean(new MedicalRecordTO());
+        Binder<MedicalRecordTO> binder = new Binder<>(MedicalRecordTO.class);
+        binder.setBean(new MedicalRecordTO());
 
-		final ComboBox<MedicalInstitutionTO> institutionComboBox = new ComboBox<>("Instituce",
-				medicService.getMedicalInstitutions());
-		institutionComboBox.setWidthFull();
-		binder.forField(institutionComboBox).asRequired().bind(MedicalRecordTO::getInstitution,
-				MedicalRecordTO::setInstitution);
+        final ComboBox<MedicalInstitutionTO> institutionComboBox =
+                new ComboBox<>("Instituce", medicService.getMedicalInstitutions());
+        institutionComboBox.setWidthFull();
+        binder.forField(institutionComboBox).asRequired(componentFactory.createRequiredLabel())
+                .bind(MedicalRecordTO::getInstitution, MedicalRecordTO::setInstitution);
 
-		Set<PhysicianTO> physicians = medicService.getPhysicians();
-		final ComboBox<PhysicianTO> physicianComboBox = new ComboBox<>("Ošetřující lékař", physicians);
-		physicianComboBox.setWidthFull();
-		binder.forField(physicianComboBox).bind(MedicalRecordTO::getPhysician,
-				MedicalRecordTO::setPhysician);
+        Set<PhysicianTO> physicians = medicService.getPhysicians();
+        final ComboBox<PhysicianTO> physicianComboBox = new ComboBox<>("Ošetřující lékař", physicians);
+        physicianComboBox.setWidthFull();
+        binder.forField(physicianComboBox).bind(MedicalRecordTO::getPhysician, MedicalRecordTO::setPhysician);
 
-		institutionComboBox.addValueChangeListener(e -> {
-			if (institutionComboBox.getValue() == null || physicianComboBox.getValue() != null)
-				return;
-			MedicalInstitutionTO to = institutionComboBox.getValue();
-			PhysicianTO pTO = medicService.getPhysicianByLastVisit(to.getId());
-			if (pTO != null)
-				physicianComboBox.setValue(pTO);
-		});
+        institutionComboBox.addValueChangeListener(e -> {
+            if (institutionComboBox.getValue() == null || physicianComboBox.getValue() != null) return;
+            MedicalInstitutionTO to = institutionComboBox.getValue();
+            PhysicianTO pTO = medicService.getPhysicianByLastVisit(to.getId());
+            if (pTO != null) physicianComboBox.setValue(pTO);
+        });
 
-		HorizontalLayout line1 = new HorizontalLayout(institutionComboBox, physicianComboBox);
-		line1.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
-		line1.setPadding(false);
-		add(line1);
+        HorizontalLayout line1 = new HorizontalLayout(institutionComboBox, physicianComboBox);
+        line1.setWidthFull();
+        line1.setPadding(false);
+        layout.add(line1);
 
-		ComponentFactory componentFactory = new ComponentFactory();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-		final DatePicker dateField = componentFactory.createDatePicker("Datum návštěvy");
-		binder.forField(dateField).asRequired().bind(MedicalRecordTO::getDate, MedicalRecordTO::setDate);
+        final DatePicker dateField = componentFactory.createDatePicker("Datum návštěvy");
+        binder.forField(dateField).asRequired(componentFactory.createRequiredLabel())
+                .bind(MedicalRecordTO::getDate, MedicalRecordTO::setDate);
 
-		final TimePicker timeField = componentFactory.createTimePicker("Čas návštěvy");
-		binder.forField(timeField).bind(MedicalRecordTO::getTime, MedicalRecordTO::setTime);
+        final TimePicker timeField = componentFactory.createTimePicker("Čas návštěvy");
+        binder.forField(timeField).asRequired(componentFactory.createRequiredLabel())
+                .bind(MedicalRecordTO::getTime, MedicalRecordTO::setTime);
 
-		HorizontalLayout line2 = new HorizontalLayout(dateField, timeField);
-		line2.setPadding(false);
-		add(line2);
+        HorizontalLayout line2 = new HorizontalLayout(dateField, timeField);
+        line2.setWidthFull();
+        line2.setPadding(false);
+        layout.add(line2);
 
-		final TextArea recordField = new TextArea("Záznam");
-		add(recordField);
-		recordField.setWidthFull();
-		recordField.setHeight("200px");
-		binder.forField(recordField).asRequired().bind(MedicalRecordTO::getRecord, MedicalRecordTO::setRecord);
+        final TextArea recordField = new TextArea("Záznam");
+        layout.add(recordField);
+        recordField.setWidthFull();
+        recordField.setHeight("200px");
+        binder.forField(recordField).asRequired(componentFactory.createRequiredLabel())
+                .bind(MedicalRecordTO::getRecord, MedicalRecordTO::setRecord);
 
-		Map<String, MedicamentTO> medicaments = new HashMap<>();
-		for (MedicamentTO mto : medicService.getMedicaments())
-			medicaments.put(mto.getName(), mto);
+        Map<String, MedicamentTO> medicaments = new HashMap<>();
+        for (MedicamentTO mto : medicService.getMedicaments())
+            medicaments.put(mto.getName(), mto);
 
-		TokenField tokenField = new TokenField(medicaments.keySet());
-		tokenField.setAllowNewItems(false);
-		tokenField.setPlaceholder("Medikamenty");
-		if (originalDTO != null)
-			for (MedicamentTO m : originalDTO.getMedicaments())
-				tokenField.addToken(m.getName());
-		add(tokenField);
+        TokenField tokenField = new TokenField(medicaments.keySet());
+        tokenField.setAllowNewItems(false);
+        tokenField.setPlaceholder("Medikamenty");
+        if (originalDTO != null) for (MedicamentTO m : originalDTO.getMedicaments())
+            tokenField.addToken(m.getName());
+        layout.add(tokenField);
 
-		add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
-			MedicalRecordTO writeDTO = originalDTO == null ? new MedicalRecordTO() : originalDTO;
-			if (binder.writeBeanIfValid(writeDTO)) {
-				try {
-					writeDTO.setMedicaments(
-							tokenField.getValues().stream().map(medicaments::get).collect(Collectors.toSet()));
-					medicService.saveMedicalRecord(writeDTO);
-					onSuccess();
-					close();
-				} catch (Exception ex) {
-					new ErrorDialog("Nezdařilo se uložit nový záznam").open();
-				}
-			}
-		}, e -> close()));
+        layout.add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
+            MedicalRecordTO writeDTO = originalDTO == null ? new MedicalRecordTO() : originalDTO;
+            try {
+                binder.writeBean(writeDTO);
+                writeDTO.setMedicaments(
+                        tokenField.getValues().stream().map(medicaments::get).collect(Collectors.toSet()));
+                medicService.saveMedicalRecord(writeDTO);
+                onSuccess();
+                close();
+            } catch (ValidationException ex) {
+                // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
+            }
+        }, e -> close()));
 
-		if (originalDTO != null)
-			binder.readBean(originalDTO);
+        if (originalDTO != null) binder.readBean(originalDTO);
 
-		if (scheduledVisitDTO != null) {
-			dateField.setValue(scheduledVisitDTO.getDate());
-			timeField.setValue(scheduledVisitDTO.getTime());
-			institutionComboBox.setValue(scheduledVisitDTO.getInstitution());
-		}
-	}
+        if (scheduledVisitDTO != null) {
+            dateField.setValue(scheduledVisitDTO.getDate());
+            timeField.setValue(scheduledVisitDTO.getTime());
+            institutionComboBox.setValue(scheduledVisitDTO.getInstitution());
+        }
+    }
 
-	protected abstract void onSuccess();
+    protected abstract void onSuccess();
 
 }
