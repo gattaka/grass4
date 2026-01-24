@@ -67,41 +67,6 @@ public abstract class GrassPage extends Div {
 		UI.getCurrent().getPage().addJavaScript("context://js/jquery.js");
 	}
 
-	@AllowInert
-	@ClientCallable
-	private void tabVariableCallback(JsonNode value) {
-		Long val = null;
-		if (value == null) {
-			val = null;
-		} else if (value.isNumber()) {
-			val = value.asLong();
-		} else if (value.isTextual()) {
-			val = Long.parseLong(value.asText());
-		}
-		getTabVariableConsumer.accept(val);
-	}
-
-	protected void getTabVariable(String name, Consumer<Long> consumer) {
-		getTabVariableConsumer = consumer;
-		//String cmd = "$server.tabVariableCallback(sessionStorage.getItem('" + name + "'))";
-		//getElement().callJsFunction(cmd);
-		UI.getCurrent().getPage().executeJs("document.getElementById('main-div').$server.tabVariableCallback" +
-				"(sessionStorage.getItem('" + name + "'))");
-	}
-
-	/**
-	 * Nastaví hodnotu do úložiště browser tabu
-	 */
-	protected void setTabVariable(String name, Long value) {
-		String cmd;
-		if (value == null) {
-			cmd = "sessionStorage.removeItem('" + name + "')";
-		} else {
-			cmd = "sessionStorage.setItem('" + name + "', " + value + ");";
-		}
-		UI.getCurrent().getPage().executeJs(cmd);
-	}
-
 	protected abstract void createPageElements(Div div);
 
 	/**

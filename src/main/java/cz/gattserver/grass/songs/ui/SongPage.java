@@ -83,7 +83,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
         Optional<Long> param = event.getRouteParameters().get("id").map(Long::parseLong);
 
         Long id = param.get();
-        setTabVariable(SongsPage.SONG_ID_TAB_VAR, id);
+        VaadinSession.getCurrent().setAttribute(SongsPage.SONG_ID_TAB_VAR, id);
 
         choosenSong = songsFacade.getSongById(id);
         showDetail(choosenSong);

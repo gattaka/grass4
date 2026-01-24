@@ -57,11 +57,11 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
         if (tabsMenu == null) init();
 
-        getTabVariable(SongsPage.SONG_ID_TAB_VAR, val -> {
-            songId = val;
-
+        Object val = VaadinSession.getCurrent().getAttribute(SongsPage.SONG_ID_TAB_VAR);
+        if (val != null) {
+            songId = (Long) val;
             UI.getCurrent().access(() -> {
-                setTabVariable(SongsPage.SONG_ID_TAB_VAR, null);
+                VaadinSession.getCurrent().setAttribute(SongsPage.SONG_ID_TAB_VAR, null);
                 if (songId != null) {
                     UI.getCurrent().getPage().getHistory().replaceState(null, "songs/" + songId);
                 } else if (parameter != null) songId = Long.parseLong(parameter);
@@ -74,7 +74,7 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
                     selectSong(null, false);
                 }
             });
-        });
+        }
     }
 
     @Override
