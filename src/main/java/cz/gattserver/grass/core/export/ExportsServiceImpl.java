@@ -30,7 +30,7 @@ public class ExportsServiceImpl implements ExportsService {
 			Path tmpPath = Files.createTempFile("grass-jasper-", ".pdf");
 			OutputStream fileOutputStream = Files.newOutputStream(tmpPath);
 
-			String basepath = "/static/jasper";
+			String basepath = "META-INF/resources/jasper";
 			String path = basepath + reportFileName + ".jasper";
 			InputStream jasperReportStream = getClass().getClassLoader().getResourceAsStream(path);
 
