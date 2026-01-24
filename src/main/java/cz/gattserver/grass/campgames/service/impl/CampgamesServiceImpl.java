@@ -106,8 +106,8 @@ public class CampgamesServiceImpl implements CampgamesService {
 	 */
 
 	@Override
-	public CampgameFileTO saveImagesFile(InputStream in, String fileName, CampgameTO item) throws IOException {
-		Path imagesPath = getCampgameImagesPath(item.getId());
+	public CampgameFileTO saveImagesFile(InputStream in, String fileName, Long campgameId) throws IOException {
+		Path imagesPath = getCampgameImagesPath(campgameId);
 		Path imagePath = imagesPath.resolve(fileName);
 		if (!imagePath.normalize().startsWith(imagesPath))
 			throw new IllegalArgumentException(ILLEGAL_PATH_IMGS_ERR);

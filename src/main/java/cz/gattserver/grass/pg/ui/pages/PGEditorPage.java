@@ -237,7 +237,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
         gridLayout.add(grid);
 
-        Div buttonLayout = componentFactory.createButtonLayout();
+        Div buttonLayout = componentFactory.createButtonLayout(false);
         editorLayout.add(buttonLayout);
 
         Button deleteBtn = componentFactory.createDeleteGridSetButton(selectedItems -> {

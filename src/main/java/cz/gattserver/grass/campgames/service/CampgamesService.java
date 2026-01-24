@@ -21,7 +21,7 @@ public interface CampgamesService {
 	 * Images
 	 */
 
-	CampgameFileTO saveImagesFile(InputStream in, String fileName, CampgameTO item) throws IOException;
+	CampgameFileTO saveImagesFile(InputStream in, String fileName, Long campgameId) throws IOException;
 
 	List<CampgameFileTO> getCampgameImagesFiles(Long id);
 

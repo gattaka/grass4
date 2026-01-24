@@ -183,8 +183,6 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 
         layout.add(statusLabel);
 
-        createButtonsLayout(layout);
-
         GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
 
         Upload upload = new Upload(buffer);
@@ -210,6 +208,8 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
             }
         });
         layout.add(upload);
+
+        createButtonsLayout(layout);
     }
 
     private void createBreadcrumb(Div layout) {

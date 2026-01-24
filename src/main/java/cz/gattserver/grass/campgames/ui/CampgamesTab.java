@@ -11,8 +11,9 @@ import cz.gattserver.grass.campgames.interfaces.CampgameFilterTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameOverviewTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
-import cz.gattserver.grass.campgames.ui.dialogs.CampgameCreateDialog;
-import cz.gattserver.grass.campgames.ui.dialogs.CampgameDetailDialog;
+import cz.gattserver.grass.campgames.ui.dialogs.CampgameDialog;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.grid.Grid;
@@ -169,29 +170,32 @@ public class CampgamesTab extends Div {
         grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
     }
 
-    private void openItemWindow(CampgameOverviewTO to) {
+    private void openItemWindow(CampgameOverviewTO selectedTO) {
         CampgameTO campgame = null;
-        if (to != null) {
+        if (selectedTO != null) {
             if (grid.getSelectedItems().isEmpty()) return;
-            campgame = campgamesService.getCampgame(to.getId());
+            campgame = campgamesService.getCampgame(selectedTO.getId());
         }
-        new CampgameCreateDialog(campgame == null ? null : campgamesService.getCampgame(campgame.getId())) {
-            private static final long serialVersionUID = -1397391593801030584L;
+        new CampgameDialog(campgame == null ? null : campgamesService.getCampgame(campgame.getId()),
+                to -> onSave(to)).open();
+    }
 
-            @Override
-            protected void onSuccess(CampgameTO dto) {
-                CampgameOverviewTO filterTO = new CampgameOverviewTO();
-                filterTO.setId(dto.getId());
-                // select musí neintuitivně být dřív než refresh, jinak se do
-                // tabulky zobrazí prázdný řádek
-                grid.select(filterTO);
-                grid.getDataProvider().refreshAll();
-            }
-        }.open();
+    private void refreshGrid() {
+        grid.getDataProvider().refreshAll();
+    }
+
+    private void onSave(CampgameTO to) {
+        campgamesService.saveCampgame(to);
+        CampgameOverviewTO filterTO = new CampgameOverviewTO();
+        filterTO.setId(to.getId());
+        // select musí neintuitivně být dřív než refresh, jinak se do
+        // tabulky zobrazí prázdný řádek
+        grid.select(filterTO);
+        refreshGrid();
     }
 
     private void openDetailWindow(Long id) {
-        new CampgameDetailDialog(id).setChangeListener(this::populate).open();
+        new CampgameDialog(campgamesService.getCampgame(id), to -> onSave(to)).open();
     }
 
     private void openDeleteWindow() {
@@ -199,7 +203,7 @@ public class CampgamesTab extends Div {
         CampgameOverviewTO to = grid.getSelectedItems().iterator().next();
         try {
             campgamesService.deleteCampgame(to.getId());
-            grid.getDataProvider().refreshAll();
+            refreshGrid();
         } catch (Exception ex) {
             new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
         }

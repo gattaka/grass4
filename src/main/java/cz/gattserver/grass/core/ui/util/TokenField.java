@@ -44,7 +44,7 @@ public class TokenField extends Div {
 
     private void init() {
         ComponentFactory componentFactory = new ComponentFactory();
-        tokensLayout = componentFactory.createButtonLayout();
+        tokensLayout = componentFactory.createButtonLayout(false);
         add(tokensLayout);
 
         chooseElementsDiv = new Div();

@@ -278,12 +278,16 @@ public class ComponentFactory {
         return createDialogSubmitOrCloseLayout(saveClickListener, closeClickListener, null);
     }
 
-    public Div createButtonLayout() {
+    public Div createButtonLayout(boolean topMargin) {
         Div div = new Div();
-        div.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        if (topMargin) div.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         div.setWidthFull();
         div.addClassName(UIUtils.FLEX_DIV_CLASS);
         return div;
+    }
+
+    public Div createButtonLayout() {
+        return createButtonLayout(true);
     }
 
     /*
