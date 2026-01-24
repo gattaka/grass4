@@ -299,5 +299,10 @@ public class ComponentFactory {
                 e -> beforeLeaveEvent.getContinueNavigationAction().proceed());
     }
 
-
+    /*
+     * Hlášení, texty
+     */
+    public String createRequiredLabel() {
+        return "Toto pole je povinné";
+    }
 }

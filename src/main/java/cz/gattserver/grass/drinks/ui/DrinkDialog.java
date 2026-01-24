@@ -123,9 +123,8 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
             writeTO.setImage(binder.getBean().getImage());
             onSave(writeTO);
             close();
-        } catch (ValidationException ve) {
-            new ErrorDialog(
-                    "Chybná vstupní data\n\n   " + ve.getValidationErrors().iterator().next().getErrorMessage()).open();
+        } catch (ValidationException ex) {
+            // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
         }
     }
 
