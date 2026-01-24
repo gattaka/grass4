@@ -44,7 +44,6 @@ public abstract class HWServiceNoteEditDialog extends EditWebDialog {
 
 		FormLayout winLayout = new FormLayout();
 		winLayout.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
-		winLayout.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
 		add(winLayout);
 
 		DatePicker eventDateField = new DatePicker("Datum");

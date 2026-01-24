@@ -99,7 +99,6 @@ public class HWDetailsInfoTab extends Div {
     private void init() {
         ComponentFactory componentFactory = new ComponentFactory();
         Div tags = componentFactory.createButtonLayout();
-        tags.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
         hwItem.getTypes().forEach(typeName -> {
             Button token = new Button(typeName);
             tags.add(token);

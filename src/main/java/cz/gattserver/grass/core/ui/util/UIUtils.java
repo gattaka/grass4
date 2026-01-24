@@ -50,7 +50,6 @@ public class UIUtils {
 
     public static final String TOP_MARGIN_CSS_CLASS = "top-margin";
     public static final String TOP_CLEAN_CSS_CLASS = "top-clean";
-    public static final String TOP_PULL_CSS_CLASS = "top-pull";
 
     public static final String GRID_ICON_CSS_CLASS = "grid-icon-img";
     public static final String ON_BEFORE_UNLOAD_WARNING =

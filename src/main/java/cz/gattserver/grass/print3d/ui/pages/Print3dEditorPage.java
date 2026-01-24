@@ -177,7 +177,6 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
         editorLayout.add(new H2("Klíčová slova"));
 
         // menu tagů + textfield tagů
-        keywords.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
         editorLayout.add(keywords);
 
         keywords.isEnabled();

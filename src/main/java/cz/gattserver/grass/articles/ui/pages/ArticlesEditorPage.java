@@ -616,7 +616,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
         // menu tagů + textfield tagů
         layout.add(articleKeywords);
-        articleKeywords.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(articleKeywords::addToken)).open());

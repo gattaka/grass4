@@ -187,7 +187,6 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         editorLayout.add(new H2("Klíčová slova"));
 
         // menu tagů + textfield tagů
-        photogalleryKeywords.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
         editorLayout.add(photogalleryKeywords);
 
         photogalleryKeywords.isEnabled();
