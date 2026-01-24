@@ -97,8 +97,6 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
 
     @Override
     protected void createContentOperations(Div operationsListLayout) {
-        super.createContentOperations(operationsListLayout);
-
         operationsListLayout.add(
                 componentFactory.createZipButton(event -> new ConfirmDialog("Přejete si vytvořit ZIP projektu?", e -> {
                     logger.info("zipPrint3dProject thread: {}", Thread.currentThread().threadId());
@@ -106,6 +104,7 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
                     eventBus.subscribe(Print3dViewerPage.this);
                     print3dService.zipProject(projectDir);
                 }).open()));
+        super.createContentOperations(operationsListLayout);
     }
 
     @Override
@@ -248,7 +247,6 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
         grid.addColumn(new ComponentRenderer<>(item -> {
             String url = getItemURL(item.getName());
             Anchor link = new Anchor(url, "Stáhnout");
-            link.addClassName(UIUtils.BUTTON_LINK_CSS_CLASS);
             link.setTarget("_blank");
             return link;
         })).setHeader("Stáhnout").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
