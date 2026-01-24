@@ -31,7 +31,6 @@ public class CampgameKeywordsTab extends Div {
     }
 
     public CampgameKeywordsTab() {
-
         grid = new Grid<>();
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         UIUtils.applyGrassDefaultStyle(grid);

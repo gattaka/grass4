@@ -1,5 +1,6 @@
 package cz.gattserver.grass.campgames.ui.dialogs;
 
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
@@ -20,13 +21,8 @@ public abstract class CampgameKeywordDialog extends EditWebDialog {
     private transient CampgamesService campgamesService;
 
     public CampgameKeywordDialog(CampgameKeywordTO originalDTO) {
-        super("Úprava klíčového slova");
+        super("Klíčové slovo");
         init(originalDTO);
-    }
-
-    public CampgameKeywordDialog() {
-        super("Nové klíčové slovo");
-        init(null);
     }
 
     private CampgamesService getCampgamesService() {
@@ -50,13 +46,7 @@ public abstract class CampgameKeywordDialog extends EditWebDialog {
         binder.bind(nameField, "name");
         winLayout.add(nameField);
 
-        HorizontalLayout btnLayout = new HorizontalLayout();
-        btnLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        btnLayout.setSpacing(false);
-        btnLayout.setSizeFull();
-        winLayout.add(btnLayout);
-
-        btnLayout.add(componentFactory.createSaveButton(e -> {
+        winLayout.add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
             try {
                 CampgameKeywordTO writeDTO = originalDTO == null ? new CampgameKeywordTO() : originalDTO;
                 binder.writeBean(writeDTO);
@@ -68,9 +58,7 @@ public abstract class CampgameKeywordDialog extends EditWebDialog {
             } catch (Exception ex) {
                 new ErrorDialog("Uložení se nezdařilo").open();
             }
-        }));
-
-        btnLayout.add(componentFactory.createStornoButton(e -> close()));
+        }, e -> close()));
 
         if (originalDTO != null) binder.readBean(originalDTO);
 

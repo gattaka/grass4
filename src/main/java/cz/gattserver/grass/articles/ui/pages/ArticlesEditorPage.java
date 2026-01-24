@@ -632,8 +632,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         publicatedCheckBox.setLabel("Publikovat článek");
         layout.add(publicatedCheckBox);
 
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        Div buttonLayout = componentFactory.createButtonLayout();
         layout.add(buttonLayout);
 
         // Náhled
