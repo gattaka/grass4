@@ -12,7 +12,6 @@ import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.GridLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -121,7 +120,7 @@ public class CampgameDetailDialog extends WebDialog {
         /**
          * Keywords
          */
-        ButtonLayout tags = new ButtonLayout();
+        Div tags = componentFactory.createButtonLayout();
         campgameTO.getKeywords().forEach(keyword -> {
             Button token = new Button(keyword);
             tags.add(token);
@@ -153,7 +152,7 @@ public class CampgameDetailDialog extends WebDialog {
         btnLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
         layout.add(btnLayout);
 
-        ButtonLayout operationsLayout = new ButtonLayout();
+        Div operationsLayout = componentFactory.createButtonLayout();
         btnLayout.add(operationsLayout);
         operationsLayout.setVisible(SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
                 .contains(CoreRole.ADMIN));

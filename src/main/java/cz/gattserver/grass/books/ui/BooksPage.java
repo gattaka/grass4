@@ -22,7 +22,6 @@ import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
@@ -110,7 +109,7 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
         dataDiv.setId("books-data-div");
         contentLayout.add(dataDiv);
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        Div btnLayout = componentFactory.createButtonLayout();
         btnLayout.setVisible(getSecurityService().getCurrentUser().getRoles().contains(CoreRole.ADMIN));
         layout.add(btnLayout);
 
@@ -166,7 +165,7 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
         return grid;
     }
 
-    protected void populateBtnLayout(ButtonLayout btnLayout) {
+    protected void populateBtnLayout(Div btnLayout) {
         btnLayout.add(componentFactory.createCreateButton(event -> new BookDialog() {
             private static final long serialVersionUID = -4863260002363608014L;
 

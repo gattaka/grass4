@@ -14,7 +14,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.facades.SongsService;
@@ -125,7 +124,7 @@ public class ChordsPage extends OneColumnPage implements HasUrlParameter<String>
         chordDescriptionLayout = new VerticalLayout();
         panel.add(chordDescriptionLayout);
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        Div btnLayout = componentFactory.createButtonLayout();
         btnLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(btnLayout);
 

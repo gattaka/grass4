@@ -15,7 +15,6 @@ import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.ContainerDiv;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -98,7 +97,8 @@ public class HWDetailsInfoTab extends Div {
     }
 
     private void init() {
-        ButtonLayout tags = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+        Div tags = componentFactory.createButtonLayout();
         tags.addClassName(UIUtils.TOP_PULL_CSS_CLASS);
         hwItem.getTypes().forEach(typeName -> {
             Button token = new Button(typeName);
@@ -234,7 +234,6 @@ public class HWDetailsInfoTab extends Div {
         descriptionDiv.setText(hwItem.getDescription());
         add(descriptionDiv);
 
-        ComponentFactory componentFactory = new ComponentFactory();
         HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
         add();
 

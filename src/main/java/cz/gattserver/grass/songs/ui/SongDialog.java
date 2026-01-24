@@ -3,6 +3,7 @@ package cz.gattserver.grass.songs.ui;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -29,28 +30,28 @@ public class SongDialog extends EditWebDialog {
     }
 
     public SongDialog(final SongTO originalTO, Consumer<SongTO> onSave) {
+        super("Píseň");
         SpringContextHelper.inject(this);
         setWidth("600px");
 
-        SongTO formTO = new SongTO();
-        formTO.setYear(0);
-        formTO.setPublicated(true);
+        SongTO songTO = new SongTO();
+        songTO.setYear(0);
+        songTO.setPublicated(true);
 
         Binder<SongTO> binder = new Binder<>(SongTO.class);
-        binder.setBean(formTO);
+        binder.setBean(songTO);
 
         final TextField nameField = new TextField("Název");
         binder.forField(nameField).asRequired().bind(SongTO::getName, SongTO::setName);
         nameField.setWidthFull();
-        add(nameField);
+        layout.add(nameField);
 
         final TextField authorField = new TextField("Autor");
         binder.forField(authorField).bind(SongTO::getAuthor, SongTO::setAuthor);
         authorField.setWidthFull();
 
-        final TextField yearField = new TextField("Rok");
-        binder.forField(yearField).withConverter(new StringToIntegerConverter(null, "Rok musí být celé číslo"))
-                .bind(SongTO::getYear, SongTO::setYear);
+        final IntegerField yearField = new IntegerField("Rok");
+        binder.forField(yearField).bind(SongTO::getYear, SongTO::setYear);
         yearField.setWidthFull();
 
         final Checkbox publicatedCheckBox = new Checkbox("Veřejný text");
@@ -59,15 +60,15 @@ public class SongDialog extends EditWebDialog {
         publicatedCheckBox.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 
         HorizontalLayout authorYearLayout = new HorizontalLayout(authorField, yearField, publicatedCheckBox);
-        authorYearLayout.setDefaultVerticalComponentAlignment(Alignment.CENTER);
-        add(authorYearLayout);
+        authorYearLayout.setDefaultVerticalComponentAlignment(Alignment.BASELINE);
+        layout.add(authorYearLayout);
 
         final TextArea textField = new TextArea("Text");
         binder.forField(textField).asRequired().bind(SongTO::getText, SongTO::setText);
         textField.setWidthFull();
         textField.setHeight("500px");
         textField.getStyle().set("font-family", "monospace").set("tab-size", "4").set("font-size", "12px");
-        add(textField);
+        layout.add(textField);
 
         final TextArea embeddedField = new TextArea("Embedded");
         binder.forField(embeddedField).bind(SongTO::getEmbedded, SongTO::setEmbedded);
@@ -75,7 +76,7 @@ public class SongDialog extends EditWebDialog {
         embeddedField.setHeight("100px");
         embeddedField.getStyle().set("font-family", "monospace").set("tab-size", "4").set("font-size", "12px");
         embeddedField.setPlaceholder("YouTube video ID (tZtPcQJkEcU,...)");
-        add(embeddedField);
+        layout.add(embeddedField);
 
         add(componentFactory.createDialogSubmitOrCloseLayout(event -> save(originalTO, binder, onSave), e -> close()));
 

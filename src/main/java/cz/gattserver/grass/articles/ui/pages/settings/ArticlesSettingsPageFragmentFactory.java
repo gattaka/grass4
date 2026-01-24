@@ -19,7 +19,6 @@ import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.DoubleToIntegerConverter;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;
@@ -84,10 +83,11 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
         outputPathField.setValue(configuration.getAttachmentsDir());
         layout.add(outputPathField);
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div buttonLayout = componentFactory.createButtonLayout();
         layout.add(buttonLayout);
 
-        ComponentFactory componentFactory = new ComponentFactory();
         Button saveButton = componentFactory.createSaveButton(event -> {
             if (binder.writeBeanIfValid(configuration)) storeConfiguration(configuration);
         });

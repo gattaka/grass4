@@ -26,7 +26,6 @@ import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitState;
@@ -118,13 +117,14 @@ public class ScheduledVisitsTab extends Div {
         add(plannedGrid);
         plannedGrid.addItemDoubleClickListener(e -> new SchuduledVisitDetailDialog(e.getItem().getId()).open());
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
         /**
          * Založení nové návštěvy
          */
-        ComponentFactory componentFactory = new ComponentFactory();
         final Button newTypeBtn = componentFactory.createCreateButton(event -> openCreateWindow(true, null));
         buttonLayout.add(newTypeBtn);
 
@@ -197,13 +197,13 @@ public class ScheduledVisitsTab extends Div {
         add(toBePlannedGrid);
         toBePlannedGrid.addItemDoubleClickListener(e -> new SchuduledVisitDetailDialog(e.getItem().getId()).open());
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+        Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
         /**
          * Naplánovat objednání
          */
-        ComponentFactory componentFactory = new ComponentFactory();
         final Button newBtn =
                 componentFactory.createCreateButton("Naplánovat objednání", e -> openCreateWindow(false, null));
         buttonLayout.add(newBtn);

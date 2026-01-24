@@ -15,46 +15,43 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public abstract class ContentMoveDialog extends WebDialog {
 
-	private static final long serialVersionUID = -2550619983411515006L;
+    private static final long serialVersionUID = -2550619983411515006L;
 
-	private Button moveBtn;
-	private NodeTree tree;
+    private Button moveBtn;
+    private NodeTree tree;
 
-	public ContentMoveDialog(final ContentNodeTO contentNodeDTO) {
-		super("Přesunout obsah");
+    public ContentMoveDialog(final ContentNodeTO contentNodeDTO) {
+        super("Přesunout obsah");
 
-		setWidth("500px");
+        setWidth("500px");
 
-		tree = new NodeTree();
-		tree.getGrid().addSelectionListener(event -> moveBtn.setEnabled(!event.getAllSelectedItems().isEmpty()));
-		tree.setHeight("300px");
-		layout.add(tree);
+        tree = new NodeTree();
+        tree.getGrid().addSelectionListener(event -> moveBtn.setEnabled(!event.getAllSelectedItems().isEmpty()));
+        tree.setHeight("300px");
+        layout.add(tree);
 
-		moveBtn = new Button("Přesunout");
-		moveBtn.setEnabled(false);
-        moveBtn.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-		moveBtn.addClickListener(event -> {
-			NodeOverviewTO nodeDTO = tree.getGrid().getSelectedItems().iterator().next();
-			SpringContextHelper.getBean(ContentNodeService.class).moveContent(nodeDTO.getId(), contentNodeDTO.getId());
-			close();
-			onMove();
-		});
+        moveBtn = componentFactory.createSubmitButton(event -> {
+            NodeOverviewTO nodeDTO = tree.getGrid().getSelectedItems().iterator().next();
+            SpringContextHelper.getBean(ContentNodeService.class).moveContent(nodeDTO.getId(), contentNodeDTO.getId());
+            close();
+            onMove();
+        });
+        moveBtn.setEnabled(false);
 
-		Button stornoBtn = new Button("Storno");
-		stornoBtn.addClickListener(event -> close());
+        Button stornoBtn = componentFactory.createStornoButton(event -> close());
 
-		layout.setHorizontalComponentAlignment(Alignment.END, stornoBtn);
+        layout.setHorizontalComponentAlignment(Alignment.END, stornoBtn);
 
-		HorizontalLayout btnLayout = new HorizontalLayout(moveBtn, stornoBtn);
-		btnLayout.setSizeFull();
+        HorizontalLayout btnLayout = new HorizontalLayout(moveBtn, stornoBtn);
+        btnLayout.setSizeFull();
         btnLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.END);
-		layout.add(btnLayout);
-		layout.setHorizontalComponentAlignment(Alignment.END, moveBtn);
+        layout.add(btnLayout);
+        layout.setHorizontalComponentAlignment(Alignment.END, moveBtn);
 
-		NodeOverviewTO to = contentNodeDTO.getParent();
-		tree.expandTo(to.getId());
-	}
+        NodeOverviewTO to = contentNodeDTO.getParent();
+        tree.expandTo(to.getId());
+    }
 
-	protected abstract void onMove();
+    protected abstract void onMove();
 
 }

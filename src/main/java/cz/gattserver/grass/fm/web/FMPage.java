@@ -36,7 +36,6 @@ import cz.gattserver.grass.core.ui.components.Breadcrumb;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.fm.FMExplorer;
@@ -351,7 +350,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
     }
 
     private void createButtonsLayout(Div layout) {
-        ButtonLayout buttonsLayout = new ButtonLayout();
+        Div buttonsLayout = componentFactory.createButtonLayout();
         buttonsLayout.add(componentFactory.createCreateDirButton(e -> handleNewDirectory()));
         buttonsLayout.add(componentFactory.createDownloadGridButton(this::handleDownloadAction, grid));
         buttonsLayout.add(componentFactory.createGridButton("Otevřít", VaadinIcon.FOLDER_OPEN.create(),

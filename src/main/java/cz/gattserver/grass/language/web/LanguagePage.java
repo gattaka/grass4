@@ -11,7 +11,6 @@ import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,7 +79,7 @@ public class LanguagePage extends OneColumnPage {
         grid.addColumn(LanguageTO::getName).setHeader("Název");
         layout.add(grid);
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        Div btnLayout = componentFactory.createButtonLayout();
         if (securityService.getCurrentUser().getRoles().contains(CoreRole.ADMIN)) layout.add(btnLayout);
 
         Div langLayout = new Div();
@@ -141,7 +140,7 @@ public class LanguagePage extends OneColumnPage {
     }
 
     private void createTestTab(Long langId) {
-        ButtonLayout buttonLayout = new ButtonLayout();
+        Div buttonLayout = componentFactory.createButtonLayout();
         tabLayout.add(buttonLayout);
 
         Button allTestBtn = new Button("Spustit test všeho", event -> startTest(langId, null));

@@ -6,7 +6,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.pages.HWPage;
@@ -43,10 +42,10 @@ public class HWItemsTab extends Div {
 
         add(itemsGrid);
 
-        ButtonLayout buttonLayout = new ButtonLayout();
-        add(buttonLayout);
-
         ComponentFactory componentFactory = new ComponentFactory();
+
+        Div buttonLayout = componentFactory.createButtonLayout();
+        add(buttonLayout);
 
         if (securityFacade.getCurrentUser().isAdmin()) {
 

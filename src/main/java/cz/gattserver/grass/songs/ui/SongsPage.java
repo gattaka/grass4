@@ -16,7 +16,6 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
@@ -173,7 +172,7 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
         layout.add(upload);
         upload.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        Div btnLayout = componentFactory.createButtonLayout();
         btnLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(btnLayout);
 

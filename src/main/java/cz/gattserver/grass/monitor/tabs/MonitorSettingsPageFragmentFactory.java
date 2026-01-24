@@ -9,7 +9,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.html.Div;
@@ -63,8 +62,8 @@ public class MonitorSettingsPageFragmentFactory extends AbstractPageFragmentFact
         /**
          * Save tlačítko
          */
-        ButtonLayout buttonLayout = new ButtonLayout();
         ComponentFactory componentFactory = new ComponentFactory();
+        Div buttonLayout = componentFactory.createButtonLayout();
         Button saveButton = componentFactory.createSaveButton(event -> {
             if (binder.validate().isOk()) {
                 configuration.setScriptsDir(scriptsDirField.getValue());

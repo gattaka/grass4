@@ -11,7 +11,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.fm.config.FMConfiguration;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -56,11 +55,12 @@ public class FMSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
             }
         }).bind(FMConfiguration::getRootDir, FMConfiguration::setRootDir);
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div buttonLayout = componentFactory.createButtonLayout();
         layout.add(buttonLayout);
 
         // Save tlačítko
-        ComponentFactory componentFactory = new ComponentFactory();
         Button saveButton = componentFactory.createSaveButton(e -> {
             configuration.setRootDir(outputPathField.getValue());
             storeConfiguration(configuration);

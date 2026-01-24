@@ -11,6 +11,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.NumberRenderer;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.drinks.facades.DrinksFacade;
@@ -19,7 +20,6 @@ import cz.gattserver.grass.drinks.model.interfaces.DrinkTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -90,8 +90,9 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
         dataLayout.setId("drinks-data-div");
         contentLayout.add(dataLayout);
 
+        ComponentFactory componentFactory = new ComponentFactory();
         if (getSecurityService().getCurrentUser().getRoles().contains(CoreRole.ADMIN)) {
-            ButtonLayout btnLayout = new ButtonLayout();
+            Div btnLayout = componentFactory.createButtonLayout();
             add(btnLayout);
             populateBtnLayout(btnLayout);
         }
@@ -247,7 +248,7 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
 
     protected abstract void populate();
 
-    protected abstract void populateBtnLayout(ButtonLayout btnLayout);
+    protected abstract void populateBtnLayout(Div btnLayout);
 
     protected abstract String getURLPath();
 

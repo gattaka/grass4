@@ -7,11 +7,9 @@ import java.nio.file.InvalidPathException;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.hw.service.HWService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -66,18 +64,19 @@ public class HWSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
             }
         }).bind(HWConfiguration::getRootDir, HWConfiguration::setRootDir);
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div buttonLayout = componentFactory.createButtonLayout();
         layout.add(buttonLayout);
 
-        ComponentFactory componentFactory = new ComponentFactory();
         Button saveButton = componentFactory.createSaveButton(e -> {
             configuration.setRootDir(outputPathField.getValue());
             storeConfiguration(configuration);
         });
         binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
 
-        Button reprocessButton = new Button("Přegenerovat miniatury", VaadinIcon.REFRESH.create(),
-                e -> hwService.processMiniatures());
+        Button reprocessButton =
+                new Button("Přegenerovat miniatury", VaadinIcon.REFRESH.create(), e -> hwService.processMiniatures());
 
         buttonLayout.add(saveButton, reprocessButton);
     }

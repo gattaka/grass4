@@ -25,7 +25,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
@@ -104,13 +103,13 @@ public class HWTypesTab extends Div {
 
         add(grid);
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+        Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
         /**
          * Založení nového typu
          */
-        ComponentFactory componentFactory = new ComponentFactory();
         Button newTypeBtn = componentFactory.createCreateButton(e -> openNewTypeWindow(null));
         buttonLayout.add(newTypeBtn);
 

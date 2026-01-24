@@ -11,12 +11,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.Strong;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 
-public class MedicalRecordDetailDialog extends Dialog {
+public class MedicalRecordDetailDialog extends WebDialog {
 
 	private static final long serialVersionUID = -1240133390770972624L;
 
@@ -63,7 +63,7 @@ public class MedicalRecordDetailDialog extends Dialog {
 
 		layout.add(new Strong("Medikamenty"));
 
-		ButtonLayout tags = new ButtonLayout();
+		Div tags = componentFactory.createButtonLayout();
 		tags.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
 		medicalRecordDTO.getMedicaments().forEach(med -> {
 			Button token = new Button(med.getName());

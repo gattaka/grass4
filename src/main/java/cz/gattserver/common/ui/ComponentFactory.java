@@ -9,6 +9,7 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -277,6 +278,14 @@ public class ComponentFactory {
         return createDialogSubmitOrCloseLayout(saveClickListener, closeClickListener, null);
     }
 
+    public Div createButtonLayout() {
+        Div div = new Div();
+        div.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        div.setWidthFull();
+        div.addClassName(UIUtils.FLEX_DIV_CLASS);
+        return div;
+    }
+
     /*
      * Dialogy
      */
@@ -285,5 +294,6 @@ public class ComponentFactory {
         return new ConfirmDialog(UIUtils.ON_BEFORE_UNLOAD_WARNING,
                 e -> beforeLeaveEvent.getContinueNavigationAction().proceed());
     }
+
 
 }

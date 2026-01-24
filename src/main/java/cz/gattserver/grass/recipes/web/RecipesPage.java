@@ -4,7 +4,6 @@ import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -96,7 +95,7 @@ public class RecipesPage extends OneColumnPage {
         contentLabel.setWidthFull();
         contentLayout.add(contentLabel);
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        Div btnLayout = componentFactory.createButtonLayout();
         layout.add(btnLayout);
 
         btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(CoreRole.ADMIN));

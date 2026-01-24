@@ -28,7 +28,6 @@ import com.vaadin.flow.data.provider.SortDirection;
 
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -117,14 +116,15 @@ public class CampgamesTab extends Div {
         });
         add(grid);
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
         boolean editor = SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
                 .contains(CampgamesRole.CAMPGAME_EDITOR);
 
         // Založení nové hry
-        ComponentFactory componentFactory = new ComponentFactory();
         Button newCampgameBtn = componentFactory.createCreateButton(e -> openItemWindow(null));
         buttonLayout.add(newCampgameBtn);
         newCampgameBtn.setVisible(editor);

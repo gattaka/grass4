@@ -2,6 +2,7 @@ package cz.gattserver.grass.drinks.ui;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -10,7 +11,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.drinks.model.domain.WhiskeyType;
 import cz.gattserver.grass.drinks.model.interfaces.WhiskeyOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.WhiskeyTO;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
@@ -65,7 +65,7 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
     }
 
     @Override
-    protected void populateBtnLayout(ButtonLayout btnLayout) {
+    protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton(event -> new WhiskeyDialog() {
             private static final long serialVersionUID = -4863260002363608014L;

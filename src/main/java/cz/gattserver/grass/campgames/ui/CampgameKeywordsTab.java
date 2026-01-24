@@ -14,7 +14,6 @@ import cz.gattserver.grass.campgames.interfaces.CampgameKeywordTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.campgames.ui.dialogs.CampgameKeywordDialog;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 
@@ -45,10 +44,10 @@ public class CampgameKeywordsTab extends Div {
 
         add(grid);
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+        Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
-        ComponentFactory componentFactory = new ComponentFactory();
         buttonLayout.setVisible(SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
                 .contains(CampgamesRole.CAMPGAME_EDITOR));
         buttonLayout.add(componentFactory.createEditGridButton(e -> openNewTypeWindow(data, true), grid));

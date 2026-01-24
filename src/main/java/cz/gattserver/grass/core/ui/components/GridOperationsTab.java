@@ -11,7 +11,6 @@ import com.vaadin.flow.component.html.Div;
 import cz.gattserver.common.Identifiable;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 /**
@@ -80,10 +79,11 @@ public abstract class GridOperationsTab<T extends Identifiable, F, C extends Col
             if (e.getClickCount() > 1) createDetailDialog(e.getItem().getId()).open();
         });
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
-        ComponentFactory componentFactory = new ComponentFactory();
         Button createBtn = componentFactory.createCreateButton(e -> createCreateDialog().open());
         Button detailBtn =
                 componentFactory.createDetailGridButton(item -> createDetailDialog(item.getId()).open(), grid);
@@ -97,7 +97,7 @@ public abstract class GridOperationsTab<T extends Identifiable, F, C extends Col
         placeButtons(buttonLayout, createBtn, detailBtn, modifyBtn, deleteBtn);
     }
 
-    protected void placeButtons(ButtonLayout buttonLayout, Button createBtn, Button detailBtn, Button modifyBtn,
+    protected void placeButtons(Div buttonLayout, Button createBtn, Button detailBtn, Button modifyBtn,
                                 Button deleteBtn) {
         buttonLayout.add(createBtn);
         buttonLayout.add(detailBtn);

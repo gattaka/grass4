@@ -10,7 +10,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -102,10 +101,10 @@ public class ItemsTab extends Div {
             add(createButtonLayout(grid, langId, type));
     }
 
-    private ButtonLayout createButtonLayout(Grid<LanguageItemTO> grid, long langId, ItemType type) {
-        ButtonLayout btnLayout = new ButtonLayout();
-
+    private Div createButtonLayout(Grid<LanguageItemTO> grid, long langId, ItemType type) {
         ComponentFactory componentFactory = new ComponentFactory();
+        Div btnLayout = componentFactory.createButtonLayout();
+
         btnLayout.add(componentFactory.createCreateButton(event -> new LanguageItemDialog(to -> {
             to.setLanguage(langId);
             languageFacade.saveLanguageItem(to);

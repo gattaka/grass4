@@ -2,12 +2,9 @@ package cz.gattserver.grass.core.ui.pages;
 
 import java.util.List;
 
-import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.StyleSheet;
 import cz.gattserver.grass.core.ui.components.NodesGrid;
 import jakarta.annotation.Resource;
 
-import com.vaadin.flow.component.dependency.JsModule;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
@@ -35,7 +32,6 @@ import com.vaadin.flow.router.RouteAlias;
 
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 @Route("")
@@ -168,7 +164,7 @@ public class HomePage extends OneColumnPage {
 			return;
 		}
 
-		ButtonLayout tagsMenu = new ButtonLayout();
+		Div tagsMenu = componentFactory.createButtonLayout();
         tagsMenu.setId("tag-menu");
 		tagsMenu.setWidthFull();
 		layout.add(tagsMenu);
@@ -194,7 +190,7 @@ public class HomePage extends OneColumnPage {
 			populateTags(sb, currChar, layout, tagsMenu);
 	}
 
-	private void populateTags(StringBuilder sb, char tag, Div tagCloudLayout, ButtonLayout tagsMenu) {
+	private void populateTags(StringBuilder sb, char tag, Div tagCloudLayout, Div tagsMenu) {
 		Div tagBlock = new Div();
 		tagCloudLayout.add(tagBlock);
 

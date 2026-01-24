@@ -22,7 +22,6 @@ import cz.gattserver.grass.core.export.PagedDataSource;
 import cz.gattserver.grass.core.server.ExportRequestHandler;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.facades.SongsService;
@@ -124,7 +123,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
                 .set("border", "1px solid black");
         layout.add(embeddedLabel);
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        Div btnLayout = componentFactory.createButtonLayout();
         btnLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(btnLayout);
 

@@ -2,13 +2,13 @@ package cz.gattserver.grass.drinks.ui;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.DataProvider;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.drinks.model.interfaces.OtherOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.OtherTO;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
@@ -52,7 +52,7 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
     }
 
     @Override
-    protected void populateBtnLayout(ButtonLayout btnLayout) {
+    protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton(event -> new OtherDialog() {
             private static final long serialVersionUID = -4863260002363608014L;

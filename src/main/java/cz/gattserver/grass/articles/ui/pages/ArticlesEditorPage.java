@@ -44,7 +44,6 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.TwoColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -320,7 +319,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         // Projdi zaregistrované pluginy a vytvoř menu nástrojů
         for (int i = 0; i < families.size(); i++) {
             String family = families.get(i);
-            ButtonLayout familyToolsLayout = new ButtonLayout();
+            Div familyToolsLayout = componentFactory.createButtonLayout();
             Span headerSpan = new Span();
             headerSpan.add(family);
             String desc = pluginRegister.getFamilyDescription(family);
@@ -621,7 +620,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(articleKeywords::addToken)).open());
-        articleKeywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
+        articleKeywords.getChooseElementsDiv().add(copyFromContentButton);
 
         layout.add(new H3("Obsah článku"));
         layout.add(articleTextArea);

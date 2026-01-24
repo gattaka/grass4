@@ -43,7 +43,6 @@ import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;
@@ -134,7 +133,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(photogalleryKeywords::addToken)).open());
-        photogalleryKeywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
+        photogalleryKeywords.getChooseElementsDiv().add(copyFromContentButton);
 
         photogalleryNameField = new TextField();
         photogalleryNameField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -238,7 +237,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
         gridLayout.add(grid);
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        Div buttonLayout = componentFactory.createButtonLayout();
         editorLayout.add(buttonLayout);
 
         Button deleteBtn = componentFactory.createDeleteGridSetButton(selectedItems -> {
@@ -287,14 +286,14 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
         editorLayout.add(photogalleryDateField);
 
-        ButtonLayout buttonsLayout = new ButtonLayout();
+        Div buttonsLayout = componentFactory.createButtonLayout();
         buttonsLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         editorLayout.add(buttonsLayout);
 
         populateButtonsLayout(buttonsLayout);
     }
 
-    private void populateButtonsLayout(ButtonLayout buttonLayout) {
+    private void populateButtonsLayout(Div buttonLayout) {
         // Uložit
         Button saveButton = componentFactory.createSaveButton(event -> {
             if (!isFormValid()) return;

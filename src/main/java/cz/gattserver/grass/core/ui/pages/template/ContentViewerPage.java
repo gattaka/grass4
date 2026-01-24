@@ -26,7 +26,6 @@ import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Strong;
@@ -86,7 +85,7 @@ public abstract class ContentViewerPage extends TwoColumnPage {
             tagsListLayout.add(new Div(tagLink));
         }
 
-        operationsListLayout = new ButtonLayout();
+        operationsListLayout = componentFactory.createButtonLayout();
         if (!content.isDraft()) createContentOperations(operationsListLayout);
 
         UI.getCurrent().getPage()

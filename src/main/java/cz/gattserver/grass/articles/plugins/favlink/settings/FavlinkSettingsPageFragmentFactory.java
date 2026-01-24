@@ -8,7 +8,6 @@ import com.vaadin.flow.component.grid.HeaderRow;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -30,7 +29,6 @@ import cz.gattserver.grass.articles.plugins.favlink.strategies.CombinedFaviconOb
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,14 +83,14 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
             }
         }).bind(FavlinkConfiguration::getOutputPath, FavlinkConfiguration::setOutputPath);
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        ComponentFactory componentFactory = new ComponentFactory();
+        Div btnLayout = componentFactory.createButtonLayout();
         layout.add(btnLayout);
 
         // Save tlačítko
-        ComponentFactory  componentFactory = new ComponentFactory();
         Button saveButton = componentFactory.createSaveButton(event -> {
             if (binder.validate().isOk()) {
-                configuration.setOutputPath( outputPathField.getValue());
+                configuration.setOutputPath(outputPathField.getValue());
                 storeConfiguration(configuration);
             }
         });

@@ -30,7 +30,6 @@ import cz.gattserver.grass.core.ui.components.ContentsLazyGrid;
 import cz.gattserver.grass.core.ui.components.NewContentNodeGrid;
 import cz.gattserver.grass.core.ui.components.NodesGrid;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 @Route("category")
@@ -95,7 +94,7 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
     }
 
     private void createNewNodePanel(Div layout, final NodeTO node) {
-        ButtonLayout buttonLayout = new ButtonLayout();
+        Div buttonLayout = componentFactory.createButtonLayout();
         buttonLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(buttonLayout);
         Button createButton = componentFactory.createCreateButton(e -> createNodeAction(node));

@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.data.provider.CallbackDataProvider;
+import cz.gattserver.common.ui.ComponentFactory;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.button.Button;
@@ -16,113 +17,121 @@ import com.vaadin.flow.component.html.Div;
 
 public class TokenField extends Div {
 
-	private static final long serialVersionUID = -4556540987839489629L;
+    private static final long serialVersionUID = -4556540987839489629L;
 
-	private Map<String, Button> tokens = new HashMap<>();
-	private Div tokensLayout;
-	private boolean allowNewItems = true;
+    private Map<String, Button> tokens = new HashMap<>();
+    private Div tokensLayout;
+    private boolean allowNewItems = true;
 
-	private Consumer<String> addTokenListener;
-	private Consumer<String> removeTokenListener;
+    private Consumer<String> addTokenListener;
+    private Consumer<String> removeTokenListener;
 
-	private ComboBox<String> comboBox;
+    private Div chooseElementsDiv;
+    private ComboBox<String> comboBox;
 
-	public TokenField(
-			CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback,
-			CallbackDataProvider.CountCallback<String, String> countCallback) {
-		comboBox = new ComboBox<>();
-		comboBox.setItems(fetchItemsCallback, countCallback);
-		comboBox.addAttachListener(e -> comboBox.focus());
-		init();
-	}
+    public TokenField(CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback,
+                      CallbackDataProvider.CountCallback<String, String> countCallback) {
+        comboBox = new ComboBox<>();
+        comboBox.setItems(fetchItemsCallback, countCallback);
+        comboBox.addAttachListener(e -> comboBox.focus());
+        init();
+    }
 
-	public TokenField(Collection<String> values) {
-		comboBox = new ComboBox<>(null, values);
-		init();
-	}
+    public TokenField(Collection<String> values) {
+        comboBox = new ComboBox<>(null, values);
+        init();
+    }
 
-	private void init() {
-		tokensLayout = new ButtonLayout();
-		add(tokensLayout);
+    private void init() {
+        ComponentFactory componentFactory = new ComponentFactory();
+        tokensLayout = componentFactory.createButtonLayout();
+        add(tokensLayout);
 
-		comboBox.addCustomValueSetListener(e -> {
-			if (allowNewItems)
-				commitValue(e.getDetail());
-		});
-		comboBox.addValueChangeListener(e -> commitValue(e.getValue()));
-		tokensLayout.add(comboBox);
-	}
+        chooseElementsDiv = new Div();
+        chooseElementsDiv.addClassName(UIUtils.FLEX_DIV_CLASS);
+        tokensLayout.add(chooseElementsDiv);
 
-	public TokenField setPlaceholder(String placeholder) {
-		comboBox.setPlaceholder(placeholder);
-		return this;
-	}
+        comboBox.addCustomValueSetListener(e -> {
+            if (allowNewItems) {
+                commitValue(e.getDetail());
+            }
+        });
+        comboBox.addValueChangeListener(e -> commitValue(e.getValue()));
+        chooseElementsDiv.add(comboBox);
+    }
 
-	private void commitValue(String value) {
-		if (StringUtils.isNotBlank(value)) {
-			value = value.trim();
-			if (!tokens.containsKey(value)) {
-				addToken(value);
-				// tohle funguje i u custom value, narozdíl od clear(),
-				// které dělá nastavení na null, což value u custom-value
-				// stále je, takže se pole nevyčistí, protože nedošlo ke změně
-				// hodnot (null -> null)
-				comboBox.setValue("");
-			}
-		}
-	}
+    public TokenField setPlaceholder(String placeholder) {
+        comboBox.setPlaceholder(placeholder);
+        return this;
+    }
 
-	public void addToken(String token) {
-		if (!tokens.containsKey(token)) {
-			Button tokenComponent = new Button(token, e -> deleteToken(token));
-			tokens.put(token, tokenComponent);
-			tokensLayout.add(tokenComponent);
-			tokensLayout.remove(comboBox);
-			tokensLayout.add(comboBox);
-			comboBox.focus();
-			if (addTokenListener != null)
-				addTokenListener.accept(token);
-		}
-	}
+    private void commitValue(String value) {
+        if (StringUtils.isNotBlank(value)) {
+            value = value.trim();
+            if (!tokens.containsKey(value)) {
+                addToken(value);
+                // tohle funguje i u custom value, narozdíl od clear(),
+                // které dělá nastavení na null, což value u custom-value
+                // stále je, takže se pole nevyčistí, protože nedošlo ke změně
+                // hodnot (null -> null)
+                comboBox.setValue("");
+            }
+        }
+    }
 
-	public void deleteToken(String token) {
-		Button tokenComponent = tokens.get(token);
-		if (tokenComponent != null) {
-			tokensLayout.remove(tokenComponent);
-			tokens.remove(token);
-			if (removeTokenListener != null)
-				removeTokenListener.accept(token);
-		}
-	}
+    public void addToken(String token) {
+        if (!tokens.containsKey(token)) {
+            Button tokenComponent = new Button(token, e -> deleteToken(token));
+            tokens.put(token, tokenComponent);
+            tokensLayout.add(tokenComponent);
+            tokensLayout.remove(chooseElementsDiv);
+            tokensLayout.add(chooseElementsDiv);
+            comboBox.focus();
+            if (addTokenListener != null) addTokenListener.accept(token);
+        }
+    }
 
-	public TokenField setValues(Collection<String> tokens) {
-		for (String s : tokens)
-			addToken(s);
-		return this;
-	}
+    public void deleteToken(String token) {
+        Button tokenComponent = tokens.get(token);
+        if (tokenComponent != null) {
+            tokensLayout.remove(tokenComponent);
+            tokens.remove(token);
+            if (removeTokenListener != null) removeTokenListener.accept(token);
+        }
+    }
 
-	public Set<String> getValues() {
-		return new HashSet<>(tokens.keySet());
-	}
+    public TokenField setValues(Collection<String> tokens) {
+        for (String s : tokens)
+            addToken(s);
+        return this;
+    }
 
-	public void setAllowNewItems(boolean allowNewItems) {
-		this.allowNewItems = allowNewItems;
-	}
+    public Set<String> getValues() {
+        return new HashSet<>(tokens.keySet());
+    }
 
-	public boolean isAllowNewItems() {
-		return allowNewItems;
-	}
+    public void setAllowNewItems(boolean allowNewItems) {
+        this.allowNewItems = allowNewItems;
+    }
 
-	public ComboBox<String> getInputField() {
-		return comboBox;
-	}
+    public boolean isAllowNewItems() {
+        return allowNewItems;
+    }
 
-	public void addTokenAddListener(Consumer<String> addTokenListener) {
-		this.addTokenListener = addTokenListener;
-	}
+    public ComboBox<String> getInputField() {
+        return comboBox;
+    }
 
-	public void addTokenRemoveListener(Consumer<String> removeTokenListener) {
-		this.removeTokenListener = removeTokenListener;
-	}
+    public Div getChooseElementsDiv() {
+        return chooseElementsDiv;
+    }
+
+    public void addTokenAddListener(Consumer<String> addTokenListener) {
+        this.addTokenListener = addTokenListener;
+    }
+
+    public void addTokenRemoveListener(Consumer<String> removeTokenListener) {
+        this.removeTokenListener = removeTokenListener;
+    }
 
 }

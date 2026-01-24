@@ -21,7 +21,6 @@ import cz.gattserver.grass.campgames.CampgamesConfiguration;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 
 public class CampgamesSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
@@ -71,7 +70,7 @@ public class CampgamesSettingsPageFragmentFactory extends AbstractPageFragmentFa
         });
         binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
 
-        ButtonLayout buttonLayout = new ButtonLayout();
+        Div buttonLayout = componentFactory.createButtonLayout();
         layout.add(buttonLayout);
         buttonLayout.add(saveButton);
     }

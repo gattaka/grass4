@@ -43,16 +43,14 @@ public class UIUtils {
 
     private static final Logger logger = LoggerFactory.getLogger(UIUtils.class);
 
+    public static final String FLEX_DIV_CLASS = "flex-div";
+
     public static final String SPACING_CSS_VAR = "var(--lumo-space-m)";
     public static final String BUTTON_SIZE_CSS_VAR = "var(--lumo-button-size)";
-    public static final String FIELD_SIZE_CSS_VAR = "var(--lumo-text-field-size)";
-    public static final String FIELD_CAPTION_SIZE_CSS_VAR = "1.5em";
 
     public static final String TOP_MARGIN_CSS_CLASS = "top-margin";
     public static final String TOP_CLEAN_CSS_CLASS = "top-clean";
     public static final String TOP_PULL_CSS_CLASS = "top-pull";
-    public static final String THUMBNAIL_200_CSS_CLASS = "thumbnail-200";
-    public static final String BUTTON_LINK_CSS_CLASS = "button-link";
 
     public static final String GRID_ICON_CSS_CLASS = "grid-icon-img";
     public static final String ON_BEFORE_UNLOAD_WARNING =

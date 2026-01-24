@@ -2,6 +2,7 @@ package cz.gattserver.grass.drinks.ui;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -10,7 +11,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.drinks.model.domain.RumType;
 import cz.gattserver.grass.drinks.model.interfaces.RumOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.RumTO;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
@@ -64,7 +64,7 @@ public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
     }
 
     @Override
-    protected void populateBtnLayout(ButtonLayout btnLayout) {
+    protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton(event -> new RumDialog() {
             private static final long serialVersionUID = -4863260002363608014L;

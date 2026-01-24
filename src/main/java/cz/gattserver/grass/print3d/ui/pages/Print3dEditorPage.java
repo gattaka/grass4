@@ -24,7 +24,6 @@ import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
-import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
@@ -38,7 +37,6 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.print3d.interfaces.Print3dPayloadTO;
@@ -133,7 +131,7 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(keywords::addToken)).open());
-        keywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
+        keywords.getChooseElementsDiv().add(copyFromContentButton);
 
         nameField = new TextField();
         nameField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -273,14 +271,14 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
         publicatedCheckBox.setLabel("Publikovat projekt");
         chekboxLayout.add(publicatedCheckBox);
 
-        ButtonLayout buttonsLayout = new ButtonLayout();
+        Div buttonsLayout = componentFactory.createButtonLayout();
         buttonsLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         editorLayout.add(buttonsLayout);
 
         populateButtonsLayout(buttonsLayout);
     }
 
-    private void populateButtonsLayout(ButtonLayout buttonLayout) {
+    private void populateButtonsLayout(Div buttonLayout) {
         Div closeJsDiv = new Div() {
             private static final long serialVersionUID = -7319482130016598549L;
 

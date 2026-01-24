@@ -14,9 +14,9 @@ public class WebDialog extends Dialog {
     protected VerticalLayout layout = new VerticalLayout();
 
     public WebDialog(String caption) {
-        init();
         setHeaderTitle(caption);
         componentFactory = new ComponentFactory();
+        init();
     }
 
     public WebDialog() {

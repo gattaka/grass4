@@ -13,7 +13,6 @@ import com.vaadin.flow.router.Route;
 import cz.gattserver.grass.core.interfaces.QuoteTO;
 import cz.gattserver.grass.core.ui.dialogs.QuoteDialog;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
-import cz.gattserver.grass.core.ui.util.ButtonLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 @Route("quotes")
@@ -57,7 +56,7 @@ public class QuotesPage extends OneColumnPage {
         grid.addColumn(QuoteTO::getId).setHeader("Id").setFlexGrow(0).setWidth("50px");
         grid.addColumn(QuoteTO::getName).setHeader("Obsah");
 
-        ButtonLayout btnLayout = new ButtonLayout();
+        Div btnLayout = componentFactory.createButtonLayout();
         layout.add(btnLayout);
         btnLayout.setVisible(coreACL.canModifyQuotes(getUser()));
 
