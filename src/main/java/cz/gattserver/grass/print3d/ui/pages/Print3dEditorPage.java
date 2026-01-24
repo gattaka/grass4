@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -21,15 +22,19 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentTagService;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
@@ -98,6 +103,9 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
+        if (!SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
+            throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
+
         String[] chunks = parameter.split("/");
         if (chunks.length > 0) operationToken = chunks[0];
         if (chunks.length > 1) identifierToken = chunks[1];
@@ -122,6 +130,10 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
                 q -> contentTagFacade.countByFilter(q.getFilter().get());
         keywords = new TokenField(fetchItemsCallback, serializableFunction);
+
+        Button copyFromContentButton = componentFactory.createCopyFromContentButton(
+                e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(keywords::addToken)).open());
+        keywords.getChildren().findFirst().ifPresent(c -> ((Div) c).add(copyFromContentButton));
 
         nameField = new TextField();
         nameField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -198,8 +210,8 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
         grid.setWidthFull();
         grid.setHeight("400px");
 
-        grid.addColumn(new TextRenderer<>(p -> p.getFile().getFileName().toString()))
-                .setHeader("Název").setFlexGrow(100);
+        grid.addColumn(new TextRenderer<>(p -> p.getFile().getFileName().toString())).setHeader("Název")
+                .setFlexGrow(100);
 
         grid.addColumn(new TextRenderer<>(p -> p.getSize())).setHeader("Velikost").setWidth("80px")
                 .setTextAlign(ColumnTextAlign.END).setFlexGrow(0);
@@ -253,11 +265,16 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 
         editorLayout.add(new H2("Nastavení"));
 
+        VerticalLayout chekboxLayout = new VerticalLayout();
+        chekboxLayout.setSpacing(true);
+        chekboxLayout.setPadding(false);
+        editorLayout.add(chekboxLayout);
+
         publicatedCheckBox.setLabel("Publikovat projekt");
-        editorLayout.add(publicatedCheckBox);
-        editorLayout.add(new Breakline());
+        chekboxLayout.add(publicatedCheckBox);
 
         ButtonLayout buttonsLayout = new ButtonLayout();
+        buttonsLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         editorLayout.add(buttonsLayout);
 
         populateButtonsLayout(buttonsLayout);

@@ -21,6 +21,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
@@ -28,6 +29,8 @@ import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.security.CoreRole;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessStartEvent;
@@ -102,6 +105,9 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
 
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
+        if (!SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
+            throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
+
         String[] chunks = parameter.split("/");
         if (chunks.length > 0) operationToken = chunks[0];
         if (chunks.length > 1) identifierToken = chunks[1];
