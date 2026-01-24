@@ -65,7 +65,7 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
 
         if (layout == null) {
             init();
-            loadCSS(getContextPath() + "/VAADIN/books/style.css");
+            loadCSS(getContextPath() + "/books/style.css");
         } else {
             layout.removeAll();
             createContent();

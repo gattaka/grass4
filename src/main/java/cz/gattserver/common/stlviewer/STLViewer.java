@@ -34,7 +34,7 @@ public class STLViewer extends Div {
 				+ "color: \"#286708\", view_edges: false}";
 		String js = null;
 		if (!stlViewerInitialized) {
-			String relativePath = UIUtils.getContextPath() + "/VAADIN/" + JS_PATH;
+			String relativePath = UIUtils.getContextPath() + "/" + JS_PATH;
 			js = STL_VIEWER_INSTANCE_JS_VAR + " = new StlViewer(document.getElementById(\"" + getId().get()
 					+ "\"), { load_three_files: \"" + relativePath + "\", models: [ " + modelDefinition + "] });";
 			stlViewerInitialized = true;

@@ -117,10 +117,6 @@ public abstract class GrassPage extends Div {
 		return UIUtils.loadJS(scripts);
 	}
 
-	public PendingJavaScriptResult loadJS(List<JScriptItem> scripts) {
-		return UIUtils.loadJS(scripts);
-	}
-
 	public String getContextPath() {
 		return UIUtils.getContextPath();
 	}

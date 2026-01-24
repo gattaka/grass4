@@ -37,7 +37,7 @@ public class DrinksPage extends OneColumnPage implements HasUrlParameter<String>
 
 		if (layout == null) {
 			init();
-			loadCSS(getContextPath() + "/VAADIN/drinks/style.css");
+			loadCSS(getContextPath() + "/drinks/style.css");
 		} else {
 			layout.removeAll();
 			createContent();

@@ -43,7 +43,7 @@ public class RecipesPage extends OneColumnPage {
 
     public RecipesPage() {
         init();
-        loadCSS(getContextPath() + "/VAADIN/recipes/style.css");
+        loadCSS(getContextPath() + "/recipes/style.css");
     }
 
     private void showDetail(RecipeDTO choosenRecipe) {

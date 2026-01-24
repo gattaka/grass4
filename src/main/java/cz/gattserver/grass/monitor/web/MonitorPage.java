@@ -75,7 +75,7 @@ public class MonitorPage extends OneColumnPage {
 	public MonitorPage() {
 		if (!SpringContextHelper.getBean(MonitorSection.class).isVisibleForRoles(getUser().getRoles()))
 			throw new GrassPageException(403);
-		loadCSS(getContextPath() + "/VAADIN/monitor/style.css");
+		loadCSS(getContextPath() + "/monitor/style.css");
 		init();
 	}
 

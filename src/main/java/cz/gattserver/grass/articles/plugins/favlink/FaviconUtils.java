@@ -195,7 +195,7 @@ public class FaviconUtils {
 	 * @return URL adresa k favicon souboru
 	 */
 	public static String createDefaultFaviconAddress(String contextRoot) {
-		return contextRoot + "/VAADIN/articles/favlink/default.ico";
+		return contextRoot + "/articles/favlink/default.ico";
 	}
 
 	/**
