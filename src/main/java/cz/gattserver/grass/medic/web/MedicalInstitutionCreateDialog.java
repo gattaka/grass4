@@ -4,6 +4,7 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
+import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -33,12 +34,12 @@ public abstract class MedicalInstitutionCreateDialog extends EditWebDialog {
         add(nameField);
         nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
         nameField.setWidthFull();
-        binder.forField(nameField).bind("name");
+        binder.forField(nameField).asRequired(componentFactory.createRequiredLabel()).bind("name");
 
         final TextField addressField = new TextField("Adresa");
         add(addressField);
         addressField.setWidthFull();
-        binder.forField(addressField).bind("address");
+        binder.forField(addressField).asRequired(componentFactory.createRequiredLabel()).bind("address");
 
         final TextField webField = new TextField("Webové stránky");
         add(webField);
@@ -54,14 +55,13 @@ public abstract class MedicalInstitutionCreateDialog extends EditWebDialog {
         add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
             MedicalInstitutionTO writeDTO =
                     modifiedMedicalInstitutionDTO == null ? new MedicalInstitutionTO() : modifiedMedicalInstitutionDTO;
-            if (binder.writeBeanIfValid(writeDTO)) {
-                try {
-                    getMedicFacade().saveMedicalInstitution(writeDTO);
-                    onSuccess();
-                    close();
-                } catch (Exception ex) {
-                    new ErrorDialog("Nezdařilo se vytvořit nový záznam").open();
-                }
+            try {
+                binder.writeBean(writeDTO);
+                getMedicFacade().saveMedicalInstitution(writeDTO);
+                onSuccess();
+                close();
+            } catch (ValidationException ex) {
+                // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
             }
         }, e -> close()));
 
