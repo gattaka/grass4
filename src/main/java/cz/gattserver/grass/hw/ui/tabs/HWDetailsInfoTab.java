@@ -236,7 +236,7 @@ public class HWDetailsInfoTab extends Div {
         descriptionDiv.setText(hwItem.getDescription());
         add(descriptionDiv);
 
-        HorizontalLayout operationsLayout = componentFactory.createDialogStornoLayout(e -> hwItemDetailDialog.close());
+        HorizontalLayout operationsLayout = componentFactory.createDialogButtonLayout();
         add(operationsLayout);
 
         if (getUser().isAdmin()) {
@@ -258,6 +258,7 @@ public class HWDetailsInfoTab extends Div {
             });
             operationsLayout.add(deleteBtn);
         }
+        operationsLayout.add(componentFactory.createStornoButton(e -> hwItemDetailDialog.close()));
     }
 
     private void createHWImageOrUpload(final HWItemTO hwItem) {

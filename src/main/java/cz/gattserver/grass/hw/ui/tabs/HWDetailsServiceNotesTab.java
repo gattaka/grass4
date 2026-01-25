@@ -99,8 +99,7 @@ public class HWDetailsServiceNotesTab extends Div {
         });
 
         ComponentFactory componentFactory = new ComponentFactory();
-        HorizontalLayout operationsLayout =
-                componentFactory.createDialogStornoLayout(e -> hwItemDetailDialog.close());
+        HorizontalLayout operationsLayout = componentFactory.createDialogButtonLayout();
         add(operationsLayout);
 
         if (getUser().isAdmin()) {
@@ -136,10 +135,11 @@ public class HWDetailsServiceNotesTab extends Div {
                 hwItemDetailDialog.refreshTabLabels();
             }, serviceNotesGrid);
 
-            operationsLayout.addToStart(deleteNoteBtn);
-            operationsLayout.addToStart(fixNoteBtn);
-            operationsLayout.addToStart(newNoteBtn);
+            operationsLayout.add(deleteNoteBtn);
+            operationsLayout.add(fixNoteBtn);
+            operationsLayout.add(newNoteBtn);
         }
+        operationsLayout.add(componentFactory.createStornoButton(e -> hwItemDetailDialog.close()));
     }
 
     private void populateServiceNotesGrid() {

@@ -131,7 +131,7 @@ public class HWDetailsPrint3dTab extends Div {
         });
 
         ComponentFactory componentFactory = new ComponentFactory();
-        HorizontalLayout operationsLayout = componentFactory.createDialogStornoLayout(e -> hwItemDetailDialog.close());
+        HorizontalLayout operationsLayout = componentFactory.createDialogButtonLayout();
         add(operationsLayout);
 
         operationsLayout.addToStart(
@@ -145,6 +145,8 @@ public class HWDetailsPrint3dTab extends Div {
             }, print3dGrid);
             operationsLayout.add(deleteBtn);
         }
+
+        operationsLayout.add(componentFactory.createStornoButton(e -> hwItemDetailDialog.close()));
     }
 
 }
