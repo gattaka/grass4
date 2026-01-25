@@ -5,17 +5,16 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ContainerDiv;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -90,6 +89,7 @@ public class HWDetailsInfoTab extends Div {
         return new CZAmountFormatter("rok", "roky", "let").format(warrantyYears);
     }
 
+    // TODO ellipsis CSS?
     private String createShortName(String name) {
         int maxLength = 100;
         if (name.length() <= maxLength) return name;
@@ -98,12 +98,13 @@ public class HWDetailsInfoTab extends Div {
 
     private void init() {
         ComponentFactory componentFactory = new ComponentFactory();
-        Div tags = componentFactory.createButtonLayout();
+        Div tagsDiv = new Div();
+        tagsDiv.setId("hw-tags-div");
         hwItem.getTypes().forEach(typeName -> {
-            Button token = new Button(typeName);
-            tags.add(token);
+            Div token = new Div(typeName);
+            tagsDiv.add(token);
         });
-        add(tags);
+        add(tagsDiv);
 
         HorizontalLayout outerLayout = new HorizontalLayout();
         outerLayout.setSpacing(true);
@@ -181,9 +182,10 @@ public class HWDetailsInfoTab extends Div {
             tableLayout.add(new Span("-"));
         } else {
             // Samotný button se stále roztahoval, bez ohledu na nastavený width
-            InlineButton usedInBtn = new InlineButton(hwItem.getUsedIn().getName(), e -> {
+            Div usedInBtn = componentFactory.createInlineButton(hwItem.getUsedIn().getName(), e -> {
                 hwItemDetailDialog.close();
-                new HWItemDetailsDialog(itemsTab, hwItem.getUsedIn().getId()).open();
+                new HWItemDetailsDialog(itemsTab,
+                        SpringContextHelper.getBean(HWService.class).getHWItem(hwItem.getUsedIn().getId())).open();
             });
             tableLayout.add(usedInBtn);
         }
@@ -207,11 +209,13 @@ public class HWDetailsInfoTab extends Div {
             }
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addColumn(new ComponentRenderer<>(c -> new InlineButton(createShortName(c.getName()), e -> {
-            hwItemDetailDialog.close();
-            HWItemTO detailTO = hwService.getHWItem(c.getId());
-            new HWItemDetailsDialog(itemsTab, detailTO.getId()).open();
-        }))).setHeader("Název součásti").setFlexGrow(100);
+        grid.addColumn(
+                new ComponentRenderer<>(c -> componentFactory.createInlineButton(createShortName(c.getName()), e -> {
+                    hwItemDetailDialog.close();
+                    HWItemTO detailTO = hwService.getHWItem(c.getId());
+                    new HWItemDetailsDialog(itemsTab,
+                            SpringContextHelper.getBean(HWService.class).getHWItem(detailTO.getId())).open();
+                }))).setHeader("Název součásti").setFlexGrow(100);
 
         // kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
         // nový objekt a dá se mu akorát ID, které se porovnává) aplikace
@@ -223,24 +227,25 @@ public class HWDetailsInfoTab extends Div {
         grid.setItems(hwService.getAllParts(hwItem.getId()));
         itemDetailsLayout.add(grid);
 
-        Div name = new Div(new Strong("Popis"));
-        name.getStyle().set("margin-top", "5px");
-        add(name);
+        H3 descrptionHeader = new H3("Popis");
+        add(descrptionHeader);
 
-        Div descriptionDiv = new ContainerDiv();
+        Div descriptionDiv = new Div();
+        descriptionDiv.setId("hw-description-div");
         descriptionDiv.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         descriptionDiv.setHeight("300px");
         descriptionDiv.setText(hwItem.getDescription());
         add(descriptionDiv);
 
         HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
-        add();
+        add(operationsLayout);
 
         if (getUser().isAdmin()) {
-            final Button fixBtn = componentFactory.createEditButton(e -> new HWItemEditDialog(hwService.getHWItem(hwItem.getId()), to -> {
-                hwItemDetailDialog.refreshItem();
-                hwItemDetailDialog.switchInfoTab();
-            }).open());
+            final Button fixBtn = componentFactory.createEditButton(
+                    e -> new HWItemEditDialog(hwService.getHWItem(hwItem.getId()), to -> {
+                        hwItemDetailDialog.refreshItem();
+                        hwItemDetailDialog.switchInfoTab();
+                    }).open());
             operationsLayout.add(fixBtn);
 
             final Button deleteBtn = componentFactory.createDeleteButton(ev -> {

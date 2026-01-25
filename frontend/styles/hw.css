@@ -1,0 +1,24 @@
+#hw-tags-div {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+    gap: 5px;
+}
+
+#hw-tags-div div {
+    border: 1px solid lightgray;
+    border-radius: 4px;
+    padding: 0px 5px;
+    background: #fdfdfd;
+}
+
+#hw-description-div {
+    padding: 10px;
+    border: 1px solid lightgray;
+    border-radius: 5px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-family: monospace;
+    font-size: 10pt;
+    tab-size: 4
+}

@@ -6,6 +6,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -19,7 +20,6 @@ import com.vaadin.flow.data.binder.ValidationException;
 
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -27,7 +27,6 @@ import cz.gattserver.grass.campgames.CampgamesConfiguration;
 import cz.gattserver.grass.campgames.interfaces.CampgameFileTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
-import cz.gattserver.grass.campgames.ui.CampgamesTab;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
@@ -197,8 +196,9 @@ public class CampgameDialog extends EditWebDialog {
         upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
         upload.addSucceededListener(event -> {
             try {
-                CampgameFileTO to = SpringContextHelper.getBean(CampgamesService.class).saveImagesFile(buffer.getInputStream(event.getFileName()),
-                        event.getFileName(), originalTO.getId());
+                CampgameFileTO to = SpringContextHelper.getBean(CampgamesService.class)
+                        .saveImagesFile(buffer.getInputStream(event.getFileName()), event.getFileName(),
+                                originalTO.getId());
                 tabLayout.removeAll();
                 Grid<CampgameFileTO> grid = createGrid(tabLayout, isAdmin, upload);
                 tabLayout.add(grid);
@@ -222,7 +222,8 @@ public class CampgameDialog extends EditWebDialog {
 
     private Grid<CampgameFileTO> createGrid(VerticalLayout tabLayout, boolean isAdmin, Upload upload) {
         Grid<CampgameFileTO> grid = new Grid<>();
-        List<CampgameFileTO> items = SpringContextHelper.getBean(CampgamesService.class).getCampgameImagesFiles(originalTO.getId());
+        List<CampgameFileTO> items =
+                SpringContextHelper.getBean(CampgamesService.class).getCampgameImagesFiles(originalTO.getId());
         grid.setItems(items);
         grid.setSizeFull();
         UIUtils.applyGrassDefaultStyle(grid);
@@ -231,14 +232,16 @@ public class CampgameDialog extends EditWebDialog {
 
         grid.addColumn(new TextRenderer<>(to -> to.getName())).setHeader("Název").setFlexGrow(100);
 
-        grid.addColumn(new ComponentRenderer<>(to -> new InlineButton("Detail", e -> UI.getCurrent().getPage()
-                        .open(CampgamesConfiguration.CAMPGAMES_PATH + "/" + originalTO.getId() + "/" + to.getName()))))
+        grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton("Detail",
+                        e -> UI.getCurrent().getPage()
+                                .open(CampgamesConfiguration.CAMPGAMES_PATH + "/" + originalTO.getId() + "/" + to.getName()))))
                 .setHeader("Detail").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
         grid.addColumn(new ComponentRenderer<>(to -> {
-            InlineButton button = new InlineButton("Smazat", be -> {
+            Div button = componentFactory.createInlineButton("Smazat", be -> {
                 new ConfirmDialog("Opravdu smazat?", e -> {
-                    SpringContextHelper.getBean(CampgamesService.class).deleteCampgameImagesFile(originalTO.getId(), to.getName());
+                    SpringContextHelper.getBean(CampgamesService.class)
+                            .deleteCampgameImagesFile(originalTO.getId(), to.getName());
                     tabLayout.removeAll();
                     tabLayout.add(createGrid(tabLayout, isAdmin, upload));
                     tabLayout.add(upload);

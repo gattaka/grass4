@@ -8,6 +8,7 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.campgames.CampgamesRole;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.security.CoreRole;
@@ -24,7 +25,7 @@ import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
 
 import java.util.function.Consumer;
 
-public class HWItemDetailsDialog extends Dialog {
+public class HWItemDetailsDialog extends WebDialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
 
@@ -40,30 +41,23 @@ public class HWItemDetailsDialog extends Dialog {
 	private Div tabLayout;
 
 	private HWItemTO hwItem;
-	private Long hwItemId;
 
 	private HWItemsTab itemsTab;
 
 	private Consumer<HWItemTO> onRefreshListener;
 
-	public HWItemDetailsDialog(HWItemsTab itemsTab, Long hwItemId) {
-		setDraggable(true);
-		//setModal(false);
+	public HWItemDetailsDialog(HWItemsTab itemsTab, HWItemTO hwItem) {
+        super(hwItem.getName());
+        this.hwItem = hwItem;
+        this.itemsTab = itemsTab;
 
-		this.itemsTab = itemsTab;
-		this.hwItemId = hwItemId;
-		this.hwItem = getHWService().getHWItem(hwItemId);
+        setDraggable(true);
 
 		if (Boolean.TRUE != hwItem.getPublicItem() && !SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
 				.contains(CoreRole.ADMIN))
 			throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
 
 		setWidth("1120px");
-
-		Div nameDiv = new Div(new Text(hwItem.getName()));
-		nameDiv.getStyle().set("font-size", "15px").set("margin-bottom", "var(--lumo-space-m)")
-				.set("font-weight", "bold").set("margin-top", "calc(var(--lumo-space-m) / -2)");
-		add(nameDiv);
 
 		infoTab = new Tab("Info");
 		serviceNotesTab = new Tab(createServiceNotesTabLabel());
@@ -76,7 +70,6 @@ public class HWItemDetailsDialog extends Dialog {
 		add(tabs);
 
 		tabLayout = new Div();
-		tabLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		add(tabLayout);
 
 		tabs.addSelectedChangeListener(e -> switchToTab(tabs.getSelectedIndex()));
@@ -115,7 +108,7 @@ public class HWItemDetailsDialog extends Dialog {
 	}
 
 	public HWItemTO refreshItem() {
-		hwItem = getHWService().getHWItem(hwItemId);
+		hwItem = getHWService().getHWItem(hwItem.getId());
 		refreshTabLabels();
 		switchToTab(tabs.getSelectedIndex());
 		if (onRefreshListener != null)
@@ -135,15 +128,15 @@ public class HWItemDetailsDialog extends Dialog {
 	}
 
 	private String createPhotosTabLabel() {
-		return "Fotografie (" + getHWService().getHWItemImagesMiniFilesCount(hwItemId) + ")";
+		return "Fotografie (" + getHWService().getHWItemImagesMiniFilesCount(hwItem.getId()) + ")";
 	}
 
 	private String createPrint3dTabLabel() {
-		return "3D Modely (" + getHWService().getHWItemPrint3dFilesCount(hwItemId) + ")";
+		return "3D Modely (" + getHWService().getHWItemPrint3dFilesCount(hwItem.getId()) + ")";
 	}
 
 	private String createDocsTabLabel() {
-		return "Dokumentace (" + getHWService().getHWItemDocumentsFilesCount(hwItemId) + ")";
+		return "Dokumentace (" + getHWService().getHWItemDocumentsFilesCount(hwItem.getId()) + ")";
 	}
 
 	private HWService getHWService() {

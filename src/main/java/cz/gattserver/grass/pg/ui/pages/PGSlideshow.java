@@ -5,11 +5,10 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.grass.pg.interfaces.ExifInfoTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
@@ -190,8 +189,9 @@ public abstract class PGSlideshow extends Div {
                         /*		*/ + "cont.addEventListener('mouseup', move, false);"
                         /*		*/ + "cont.addEventListener('touchend', move, false);");
 
-        InlineButton closeBtn = new InlineButton("Zavřít", e -> close());
-        InlineButton detailButton = new InlineButton("Detail", e -> UI.getCurrent().getPage()
+        ComponentFactory componentFactory = new ComponentFactory();
+        Div closeBtn = componentFactory.createInlineButton("Zavřít", e -> close());
+        Div detailButton = componentFactory.createInlineButton("Detail", e -> UI.getCurrent().getPage()
                 .open(PGUtils.createItemURL(currentItemTO.getFile().getFileName().toString(), photogallery)));
         Div btnDiv = new Div(detailButton, closeBtn);
         btnDiv.setId("pg-slideshow-item-close-div");

@@ -4,21 +4,32 @@
 @import "tag-menu.css";
 /* moduly */
 @import "pg.css";
+@import "hw.css";
 
 /* https://vaadin.com/docs/latest/styling/themes/aura/other */
 /* https://vaadin.com/docs/latest/styling/themes/base */
 
 html {
     --aura-app-background: #d8cda6;
-    --vaadin-radius-m: 4px;
+    --vaadin-radius-m: 5px;
+    --vaadin-grid-border-radius: 5px;
     --vaadin-grid-background: #f9f9f9;
     --vaadin-grid-border-color: #ddd;
     --vaadin-button-background: #fdfaf2;
+    --vaadin-tabs-border-radius: 5px;
+}
+
+vaadin-dialog::part(header) {
+    padding-bottom: 10px;
 }
 
 vaadin-progress-bar::part(bar) {
     border: 1px solid lightgrey;
     box-sizing: content-box;
+}
+
+vaadin-grid-cell-content a:hover {
+    cursor: pointer;
 }
 
 vaadin-text-area::part(label) {
@@ -32,7 +43,7 @@ vaadin-text-field {
 }
 
 vaadin-dialog::part(overlay) {
-    --aura-surface-opacity: 0.8 !important;
+    --aura-surface-opacity: 1 !important;
 }
 
 /* vaadin AURA theme fix -- z nějakého důvodu dělá 2px vertical scroll na dialogu */
@@ -61,6 +72,14 @@ vaadin-grid {
 vaadin-grid img {
     margin-bottom: -3px;
     margin-top: 3px;
+}
+
+img.thumbnail-200 {
+    display: inline-block;
+    max-width: 200px;
+    max-height: 200px;
+    width: auto;
+    height: auto;
 }
 
 /* Top and Bottom margin */

@@ -2,6 +2,8 @@ package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.IOException;
 
+import com.beust.ah.A;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -23,7 +25,6 @@ import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ContainerDiv;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.GridLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -39,7 +40,7 @@ public class HWDetailsPhotosTab extends Div {
 
     private HWItemTO hwItem;
     private HWItemDetailsDialog hwItemDetailDialog;
-    private ContainerDiv containerDiv;
+    private Div containerDiv;
 
     public HWDetailsPhotosTab(HWItemTO hwItem, HWItemDetailsDialog hwItemDetailDialog) {
         SpringContextHelper.inject(this);
@@ -59,7 +60,9 @@ public class HWDetailsPhotosTab extends Div {
     }
 
     private void init() {
-        containerDiv = new ContainerDiv();
+        containerDiv = new Div();
+        containerDiv.setId("hw-description-div");
+        containerDiv.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         containerDiv.setHeight("500px");
         add(containerDiv);
 
@@ -114,10 +117,10 @@ public class HWDetailsPhotosTab extends Div {
             itemDiv.add(buttonLayout);
 
             ComponentFactory componentFactory = new ComponentFactory();
-            Button detailButton = componentFactory.createDetailButton(e -> UI.getCurrent().getPage()
-                    .open(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName()));
-            detailButton.getStyle().set("margin-right", "var(--lumo-space-m)");
-            buttonLayout.add(detailButton);
+            Anchor detailLink =
+                    new Anchor(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName(), "Detail");
+            detailLink.getStyle().set("margin-right", "var(--lumo-space-m)");
+            buttonLayout.add(detailLink);
 
             if (getUser().isAdmin()) {
                 Button delBtn = componentFactory.createDeleteButton(ev -> {

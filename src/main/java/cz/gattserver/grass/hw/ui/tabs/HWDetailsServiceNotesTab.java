@@ -18,7 +18,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.ContainerDiv;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
@@ -63,6 +62,7 @@ public class HWDetailsServiceNotesTab extends Div {
 
         UIUtils.applyGrassDefaultStyle(serviceNotesGrid);
         serviceNotesGrid.setSelectionMode(SelectionMode.SINGLE);
+        serviceNotesGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         Column<HWServiceNoteTO> idColumn =
                 serviceNotesGrid.addColumn(new TextRenderer<HWServiceNoteTO>(to -> String.valueOf(to.getId())));
         serviceDateColumn =
@@ -82,7 +82,8 @@ public class HWDetailsServiceNotesTab extends Div {
 
         populateServiceNotesGrid();
 
-        final Div serviceNoteDescription = new ContainerDiv();
+        final Div serviceNoteDescription = new Div();
+        serviceNoteDescription.setId("hw-description-div");
         serviceNoteDescription.add(DEFAULT_NOTE_LABEL_VALUE);
         serviceNoteDescription.setHeight("300px");
         serviceNoteDescription.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -97,12 +98,12 @@ public class HWDetailsServiceNotesTab extends Div {
             }
         });
 
-        if (getUser().isAdmin()) {
-            ComponentFactory componentFactory = new ComponentFactory();
-            HorizontalLayout operationsLayout =
-                    componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
-            add(operationsLayout);
+        ComponentFactory componentFactory = new ComponentFactory();
+        HorizontalLayout operationsLayout =
+                componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
+        add(operationsLayout);
 
+        if (getUser().isAdmin()) {
             Button newNoteBtn = componentFactory.createCreateButton(e -> new HWServiceNoteEditDialog(hwItem) {
                 private static final long serialVersionUID = -5582822648042555576L;
 

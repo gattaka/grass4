@@ -18,7 +18,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Breakline;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
@@ -361,12 +360,12 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
 
                 // Detail
                 final String urlFinal = PGUtils.createDetailURL(item, photogallery);
-                InlineButton detailButton = new InlineButton("Detail", e -> UI.getCurrent().getPage().open(urlFinal));
+                Div detailButton = componentFactory.createInlineButton("Detail", e -> UI.getCurrent().getPage().open(urlFinal));
                 buttonLayout.add(detailButton);
 
                 // Smazat
                 if (coreACL.canModifyContent(photogallery.getContentNode(), getUser())) {
-                    InlineButton deleteButton = new InlineButton("Smazat", e -> {
+                    Div deleteButton = componentFactory.createInlineButton("Smazat", e -> {
                         new ConfirmDialog(e2 -> {
                             pgService.deleteFile(item, galleryDir);
                             eventBus.subscribe(PGViewerPage.this);

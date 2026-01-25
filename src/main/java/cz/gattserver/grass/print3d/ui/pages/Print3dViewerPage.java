@@ -20,7 +20,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
@@ -252,7 +251,7 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
         })).setHeader("Stáhnout").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
         if (coreACL.canModifyContent(getContentNodeDTO(), getUser())) {
-            grid.addColumn(new ComponentRenderer<>(item -> new InlineButton("Smazat", be -> {
+            grid.addColumn(new ComponentRenderer<>(item -> componentFactory.createInlineButton("Smazat", be -> {
                 new ConfirmDialog("Opravdu smazat soubor?", e -> {
                     print3dService.deleteFile(item, projectDir);
                     UI.getCurrent().getPage().reload();

@@ -3,12 +3,12 @@ package cz.gattserver.grass.medic.web;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.vaadin.InlineButton;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
@@ -37,15 +37,17 @@ public class SchuduledVisitDetailDialog extends Dialog {
 		layout.add(new Strong("Účel"));
 		layout.add(scheduledVisitDTO.getPurpose());
 
+        ComponentFactory  componentFactory = new ComponentFactory();
+
 		layout.add(new Strong("Instituce"));
-		final InlineButton instButton = new InlineButton(scheduledVisitDTO.getInstitution().getName(),
+		final Div instButton = componentFactory.createInlineButton(scheduledVisitDTO.getInstitution().getName(),
 				e -> new MedicalInstitutionDetailDialog(scheduledVisitDTO.getInstitution().getId()).open());
 		instButton.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
 		layout.add(instButton);
 
 		layout.add(new Strong("Navazuje na"));
 		if (scheduledVisitDTO.getRecord() != null) {
-			final InlineButton recordButton = new InlineButton(scheduledVisitDTO.getRecord().toString(),
+			final Div recordButton = componentFactory.createInlineButton(scheduledVisitDTO.getRecord().toString(),
 					e -> new MedicalRecordDetailDialog(scheduledVisitDTO.getRecord().getId()).open());
 			recordButton.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
 			layout.add(recordButton);

@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import cz.gattserver.common.ui.ComponentFactory;
 import org.apache.commons.lang3.StringUtils;
@@ -81,9 +82,10 @@ public class TokenField extends Div {
 
     public void addToken(String token) {
         if (!tokens.containsKey(token)) {
-            Button tokenComponent = new Button(token, e -> deleteToken(token));
-            tokens.put(token, tokenComponent);
-            tokensLayout.add(tokenComponent);
+            Button tokenButton = new Button(token, e -> deleteToken(token));
+            tokenButton.setIcon(VaadinIcon.CLOSE.create());
+            tokens.put(token, tokenButton);
+            tokensLayout.add(tokenButton);
             tokensLayout.remove(chooseElementsDiv);
             tokensLayout.add(chooseElementsDiv);
             comboBox.focus();

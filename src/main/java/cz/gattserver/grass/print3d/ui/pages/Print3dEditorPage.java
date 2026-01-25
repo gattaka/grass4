@@ -24,7 +24,6 @@ import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
 import cz.gattserver.grass.core.events.EventBus;
@@ -228,7 +227,7 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
             return anchor;
         })).setHeader("Zobrazit").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-        grid.addColumn(new ComponentRenderer<>(itemTO -> new InlineButton("Smazat", be -> {
+        grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Smazat", be -> {
             new ConfirmDialog("Opravdu smazat?", e -> {
                 try {
                     print3dService.deleteFile(itemTO, projectDir);

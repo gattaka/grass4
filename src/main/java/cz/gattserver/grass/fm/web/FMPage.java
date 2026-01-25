@@ -27,7 +27,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.util.CZAmountFormatter;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
@@ -250,7 +249,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
                 .setFlexGrow(0).setSortProperty("size");
 
         grid.addColumn(new ComponentRenderer<>(to -> {
-            InlineButton button = new InlineButton("URL", e -> {
+            Div button = componentFactory.createInlineButton("URL", e -> {
                 Dialog ww = new Dialog();
                 String id = UUID.randomUUID().toString();
                 String checkId = "check-" + id;
@@ -273,12 +272,12 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
             return button;
         })).setHeader("URL").setTextAlign(ColumnTextAlign.CENTER).setWidth("50px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(to -> new InlineButton("Stáhnout", e -> handleDownloadAction(to))))
+        grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
                 .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new ComponentRenderer<>(to -> {
             String link = explorer.getDownloadLink(urlBase, to.getName());
-            InlineButton button = new InlineButton("QR", e -> {
+            Div button = componentFactory.createInlineButton("QR", e -> {
                 WebDialog ww = new WebDialog("QR kód");
                 ww.setCloseOnEsc(true);
                 ww.setCloseOnOutsideClick(true);

@@ -6,6 +6,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.pages.HWPage;
@@ -39,6 +40,7 @@ public class HWItemsTab extends Div {
         SpringContextHelper.inject(this);
 
         itemsGrid = new HWItemsGrid(to -> navigateToDetail(to.getId()));
+        itemsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 
         add(itemsGrid);
 
@@ -108,7 +110,8 @@ public class HWItemsTab extends Div {
     }
 
     public void openDetailWindow(Long id) {
-        new HWItemDetailsDialog(HWItemsTab.this, id).setOnRefreshListener(
+        new HWItemDetailsDialog(HWItemsTab.this,
+                SpringContextHelper.getBean(HWService.class).getHWItem(id)).setOnRefreshListener(
                 to -> itemsGrid.getGrid().getSelectedItems().forEach(item -> {
                     if (item.getId().equals(id)) {
                         item.setName(to.getName());

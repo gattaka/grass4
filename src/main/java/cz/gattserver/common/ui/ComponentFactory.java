@@ -30,6 +30,14 @@ public class ComponentFactory {
 
     /* Tlačítka */
 
+    public Div createInlineButton(String caption, ComponentEventListener<ClickEvent<Div>> listener) {
+        Div div = new Div();
+        div.add(caption);
+        div.addClickListener(listener);
+        div.addClassName("inline-button");
+        return div;
+    }
+
     private <T> Button createGridSetButton(Function<ComponentEventListener<ClickEvent<Button>>, Button> buttonFactory,
                                            Consumer<Set<T>> clickListener, Grid<T> grid) {
         Button btn = buttonFactory.apply(e -> clickListener.accept(grid.getSelectedItems()));

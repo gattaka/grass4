@@ -22,7 +22,6 @@ import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.router.QueryParameters;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -75,10 +74,12 @@ public class HWTypesTab extends Div {
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         UIUtils.applyGrassDefaultStyle(grid);
 
+        ComponentFactory componentFactory = new ComponentFactory();
+
         grid.addColumn(HWItemTypeTO::getCount).setHeader("Počet").setSortable(true).setKey(COUNT_BIND).setWidth("100px")
                 .setFlexGrow(0);
         Column<HWItemTypeTO> nameColumn =
-                grid.addColumn(new ComponentRenderer<>(to -> new InlineButton(to.getName(), e -> {
+                grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton(to.getName(), e -> {
                     HWFilterTO filter = new HWFilterTO();
                     List<String> types = new ArrayList<>();
                     types.add(to.getName());
@@ -103,7 +104,6 @@ public class HWTypesTab extends Div {
 
         add(grid);
 
-        ComponentFactory componentFactory = new ComponentFactory();
         Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 

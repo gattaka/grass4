@@ -5,15 +5,18 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -54,8 +57,6 @@ public class HWItemsGrid extends Div {
     private static final String STATE_BIND = "stateBind";
     private static final String PURCHASE_DATE_BIND = "purchaseDateBind";
 
-    private static final String JS_DIV_ID = "js-div";
-
     @Autowired
     private HWService hwService;
 
@@ -74,41 +75,16 @@ public class HWItemsGrid extends Div {
     private TextField soucastField;
     private TextField spravovanField;
 
+    private Div iconDiv;
+
     public HWItemsGrid(Consumer<HWItemOverviewTO> onSelect) {
         SpringContextHelper.inject(this);
 
-        Div iconDiv = new Div();
+        iconDiv = new Div();
         iconDiv.setVisible(false);
         iconDiv.getStyle().set("position", "absolute").set("background", "white").set("padding", "5px")
                 .set("border-radius", "3px").set("border", "1px solid #d5d5d5").set("z-index", "999");
         add(iconDiv);
-
-        Div callbackDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
-
-            @ClientCallable
-            private void imgShowCallback(Long id, double x, double y) {
-                InputStream iconIs = hwService.getHWItemIconMiniFileInputStream(id);
-                if (iconIs == null) return;
-                iconDiv.setVisible(true);
-                iconDiv.removeAll();
-                String name = "hw-item-" + id;
-                Image img =
-                        new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(iconIs, name, null, -1)),
-                                name);
-                iconDiv.add(img);
-                iconDiv.getStyle().set("left", (15 + x) + "px").set("top", y + "px");
-                img.setMaxWidth("200px");
-                img.setMaxHeight("200px");
-            }
-
-            @ClientCallable
-            private void imgHideCallback() {
-                iconDiv.setVisible(false);
-            }
-        };
-        callbackDiv.setId(JS_DIV_ID);
-        add(callbackDiv);
 
         filterTO = new HWFilterTO();
 
@@ -154,17 +130,17 @@ public class HWItemsGrid extends Div {
 
         Column<HWItemOverviewTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
             Long id = to.getId();
-            Button button = new Button(to.getName(), e -> onSelect.accept(hwService.getHWOverviewItem(id)));
-            //<theme-editor-local-classname>
-            button.addClassName("h-w-items-grid-button-1");
-            button.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
-            button.getElement().setAttribute("onmouseover",
-                    "let bound = document.body.getBoundingClientRect(); " + "document.getElementById(\"" + JS_DIV_ID +
-                            "\").$server.imgShowCallback(\"" + id + "\", event.clientX - bound.x, event" +
-                            ".clientY - bound.y)");
-            button.getElement().setAttribute("onmouseout",
-                    "document.getElementById(\"" + JS_DIV_ID + "\").$server" + ".imgHideCallback()");
-            return button;
+            Anchor a = new Anchor();
+            a.getElement().addEventListener("click", event -> onSelect.accept(hwService.getHWOverviewItem(id)));
+            a.setText(to.getName());
+            // addEventListener na mouseover má z nějakého důvodu prázdný event -- Vaadin bug?
+            UI.getCurrent().getPage().executeJs("$0.onmouseover = function(event) {"
+                    /*      */ + "let bound = document.body.getBoundingClientRect(); "
+                    /*      */ + "$1.$server.imgShowCallback(\"" + id
+                    /*      */ + "\", event.clientX - bound.x, event.clientY - bound.y); "
+                    /*  */ + "}", a.getElement(), HWItemsGrid.this.getElement());
+            a.getElement().addEventListener("mouseout", e -> iconDiv.setVisible(false));
+            return a;
         })).setHeader("Název").setSortable(true).setKey(NAME_BIND).setResizable(true);
 
         // kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
@@ -220,6 +196,20 @@ public class HWItemsGrid extends Div {
         grid.sort(Arrays.asList(new GridSortOrder<>(nameColumn, SortDirection.ASCENDING)));
 
         add(grid);
+    }
+
+    @ClientCallable
+    private void imgShowCallback(Long id, double x, double y) {
+        InputStream iconIs = hwService.getHWItemIconMiniFileInputStream(id);
+        if (iconIs == null) return;
+        iconDiv.setVisible(true);
+        iconDiv.removeAll();
+        String name = "hw-item-" + id;
+        Image img = new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(iconIs, name, null, -1)), name);
+        iconDiv.add(img);
+        iconDiv.getStyle().set("left", (15 + x) + "px").set("top", y + "px");
+        img.setMaxWidth("200px");
+        img.setMaxHeight("200px");
     }
 
     public void populate() {

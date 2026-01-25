@@ -22,7 +22,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
-import cz.gattserver.common.vaadin.InlineButton;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.articles.plugins.favlink.config.FavlinkConfiguration;
 import cz.gattserver.grass.articles.plugins.favlink.strategies.CombinedFaviconObtainStrategy;
@@ -135,7 +134,7 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
                 return dotIndex > 0 ? name.substring(dotIndex) : "";
             })).setHeader("Typ").setWidth("40px").setFlexGrow(0);
 
-            grid.addColumn(new ComponentRenderer<>(p -> new InlineButton("Smazat", be -> {
+            grid.addColumn(new ComponentRenderer<>(p -> componentFactory.createInlineButton("Smazat", be -> {
                 new ConfirmDialog("Opravdu smazat favicon?", e -> {
                     try {
                         Files.delete(p);
@@ -146,7 +145,7 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
                 }).open();
             }))).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-            grid.addColumn(new ComponentRenderer<>(p -> new InlineButton("Přegenerovat", be -> {
+            grid.addColumn(new ComponentRenderer<>(p -> componentFactory.createInlineButton("Přegenerovat", be -> {
                 new ConfirmDialog("Opravdu přegenerovat favicon?", e -> {
                     try {
                         Files.delete(p);
