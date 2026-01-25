@@ -45,7 +45,7 @@ public class ChordDialog extends EditWebDialog {
         add(chordDescriptionLayout);
         renderDescriptionLayout(originalDTO, formTO, chordDescriptionLayout);
 
-        add(componentFactory.createDialogSubmitOrCloseLayout(e -> save(binder, onSaveAction), e -> close()));
+        add(componentFactory.createDialogSubmitOrStornoLayout(e -> save(binder, onSaveAction), e -> close()));
 
         if (originalDTO != null) {
             binder.readBean(originalDTO);

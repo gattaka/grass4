@@ -7,7 +7,6 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
@@ -52,7 +51,7 @@ public abstract class MedicalInstitutionCreateDialog extends EditWebDialog {
         hoursField.setHeight("200px");
         binder.forField(hoursField).bind("hours");
 
-        add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
+        add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             MedicalInstitutionTO writeDTO =
                     modifiedMedicalInstitutionDTO == null ? new MedicalInstitutionTO() : modifiedMedicalInstitutionDTO;
             try {

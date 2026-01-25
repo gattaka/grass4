@@ -36,7 +36,7 @@ public class LanguageDialog extends WebDialog {
 
 		binder.readBean(targetTO);
 
-		add(componentFactory.createDialogSubmitOrCloseLayout(event -> {
+		add(componentFactory.createDialogSubmitOrStornoLayout(event -> {
 			if (binder.writeBeanIfValid(targetTO)) {
 				saveAction.onSave(targetTO);
 				close();

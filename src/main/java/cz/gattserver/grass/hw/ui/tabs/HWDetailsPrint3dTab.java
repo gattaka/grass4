@@ -79,10 +79,10 @@ public class HWDetailsPrint3dTab extends Div {
         print3dGrid = new Grid<>();
         print3dGrid.setSizeFull();
         UIUtils.applyGrassDefaultStyle(print3dGrid);
-        print3dGrid.addColumn(new TextRenderer<HWItemFileTO>(HWItemFileTO::getName)).setHeader("Název");
-        print3dGrid.addColumn(new LocalDateTimeRenderer<HWItemFileTO>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
+        print3dGrid.addColumn(new TextRenderer<>(HWItemFileTO::getName)).setHeader("Název");
+        print3dGrid.addColumn(new LocalDateTimeRenderer<>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
                 .setKey("datum").setHeader("Datum");
-        print3dGrid.addColumn(new TextRenderer<HWItemFileTO>(HWItemFileTO::getSize)).setHeader("Velikost")
+        print3dGrid.addColumn(new TextRenderer<>(HWItemFileTO::getSize)).setHeader("Velikost")
                 .setTextAlign(ColumnTextAlign.END);
 
         stlViewer = new STLViewer(null);
@@ -95,6 +95,7 @@ public class HWDetailsPrint3dTab extends Div {
         layout.setPadding(false);
         layout.setSpacing(true);
         layout.setHeight("400px");
+        layout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         add(layout);
 
         populatePrint3dGrid();
@@ -130,7 +131,7 @@ public class HWDetailsPrint3dTab extends Div {
         });
 
         ComponentFactory componentFactory = new ComponentFactory();
-        HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
+        HorizontalLayout operationsLayout = componentFactory.createDialogStornoLayout(e -> hwItemDetailDialog.close());
         add(operationsLayout);
 
         operationsLayout.addToStart(

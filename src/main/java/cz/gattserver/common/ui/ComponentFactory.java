@@ -257,22 +257,20 @@ public class ComponentFactory {
         return horizontalLayout;
     }
 
-    public HorizontalLayout createDialogCloseLayout(ComponentEventListener<ClickEvent<Button>> closeClickListener) {
+    public HorizontalLayout createDialogStornoLayout(ComponentEventListener<ClickEvent<Button>> stornoClickListener) {
         HorizontalLayout layout = createDialogButtonLayout();
-
-        Button stornoButton = createStornoButton(closeClickListener);
+        Button stornoButton = createStornoButton(stornoClickListener);
         layout.add(stornoButton);
-
         return layout;
     }
 
-    public HorizontalLayout createDialogSubmitOrCloseLayout(
+    public HorizontalLayout createDialogSubmitOrStornoLayout(
             ComponentEventListener<ClickEvent<Button>> saveClickListener,
-            ComponentEventListener<ClickEvent<Button>> closeClickListener, Consumer<Button> submitButtonDecorator) {
+            ComponentEventListener<ClickEvent<Button>> stornoClickListener, Consumer<Button> submitButtonDecorator) {
         HorizontalLayout layout = createDialogButtonLayout();
 
         Button submitButton = createSubmitButton(saveClickListener);
-        Button stornoButton = createStornoButton(closeClickListener);
+        Button stornoButton = createStornoButton(stornoClickListener);
         layout.add(submitButton, stornoButton);
 
         if (submitButtonDecorator != null) submitButtonDecorator.accept(submitButton);
@@ -280,10 +278,10 @@ public class ComponentFactory {
         return layout;
     }
 
-    public HorizontalLayout createDialogSubmitOrCloseLayout(
+    public HorizontalLayout createDialogSubmitOrStornoLayout(
             ComponentEventListener<ClickEvent<Button>> saveClickListener,
-            ComponentEventListener<ClickEvent<Button>> closeClickListener) {
-        return createDialogSubmitOrCloseLayout(saveClickListener, closeClickListener, null);
+            ComponentEventListener<ClickEvent<Button>> stornoClickListener) {
+        return createDialogSubmitOrStornoLayout(saveClickListener, stornoClickListener, null);
     }
 
     public Div createButtonLayout(boolean topMargin) {

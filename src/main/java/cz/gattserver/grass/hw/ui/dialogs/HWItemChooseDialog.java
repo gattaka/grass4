@@ -25,7 +25,7 @@ public class HWItemChooseDialog extends EditWebDialog {
         itemsGrid.getFilterTO().setIgnoreId(ignoreId);
         add(itemsGrid);
 
-        HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
+        HorizontalLayout buttons = componentFactory.createDialogSubmitOrStornoLayout(e -> {
             onSelect.accept(itemsGrid.getGrid().getSelectedItems().iterator().next());
             close();
         }, e -> close(), saveButton -> itemsGrid.getGrid()

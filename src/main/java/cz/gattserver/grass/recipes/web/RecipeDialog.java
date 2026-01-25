@@ -41,7 +41,7 @@ public abstract class RecipeDialog extends EditWebDialog {
 			desc.setValue(recipesFacade.breaklineToEol(to.getDescription()));
 		add(desc);
 
-		add(componentFactory.createDialogSubmitOrCloseLayout(event -> {
+		add(componentFactory.createDialogSubmitOrStornoLayout(event -> {
 			onSave(name.getValue(), desc.getValue(), to == null ? null : to.getId());
 			close();
 		}, e -> close()));

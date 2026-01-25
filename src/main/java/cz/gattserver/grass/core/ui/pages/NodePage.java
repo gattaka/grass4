@@ -115,7 +115,7 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
                 .bind(NodeOverviewTO::getName, NodeOverviewTO::setName);
         binder.setBean(to);
 
-        HorizontalLayout saveCloseLayout = componentFactory.createDialogSubmitOrCloseLayout(event -> {
+        HorizontalLayout saveCloseLayout = componentFactory.createDialogSubmitOrStornoLayout(event -> {
             if (binder.validate().isOk()) {
                 Long newNodeId = nodeFacade.createNewNode(parentNode.getId(), to.getName());
                 UIUtils.redirect(

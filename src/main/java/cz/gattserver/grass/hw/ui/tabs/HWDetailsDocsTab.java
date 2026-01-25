@@ -72,11 +72,12 @@ public class HWDetailsDocsTab extends Div {
     private void init() {
         docsGrid = new Grid<>();
         docsGrid.setWidthFull();
+        docsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         UIUtils.applyGrassDefaultStyle(docsGrid);
-        docsGrid.addColumn(new TextRenderer<HWItemFileTO>(HWItemFileTO::getName)).setHeader("Název");
-        docsGrid.addColumn(new LocalDateTimeRenderer<HWItemFileTO>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
+        docsGrid.addColumn(new TextRenderer<>(HWItemFileTO::getName)).setHeader("Název");
+        docsGrid.addColumn(new LocalDateTimeRenderer<>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
                 .setKey("datum").setHeader("Datum");
-        docsGrid.addColumn(new TextRenderer<HWItemFileTO>(HWItemFileTO::getSize)).setHeader("Velikost")
+        docsGrid.addColumn(new TextRenderer<>(HWItemFileTO::getSize)).setHeader("Velikost")
                 .setTextAlign(ColumnTextAlign.END);
         add(docsGrid);
 
@@ -107,7 +108,7 @@ public class HWDetailsDocsTab extends Div {
         });
 
         ComponentFactory componentFactory = new ComponentFactory();
-        HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
+        HorizontalLayout operationsLayout = componentFactory.createDialogButtonLayout();
         add(operationsLayout);
 
         operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadDocument(item), docsGrid));
@@ -120,5 +121,6 @@ public class HWDetailsDocsTab extends Div {
             }, docsGrid);
             operationsLayout.add(deleteBtn);
         }
+        operationsLayout.add(componentFactory.createStornoButton(e -> hwItemDetailDialog.close()));
     }
 }

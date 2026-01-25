@@ -100,7 +100,7 @@ public class HWDetailsServiceNotesTab extends Div {
 
         ComponentFactory componentFactory = new ComponentFactory();
         HorizontalLayout operationsLayout =
-                componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
+                componentFactory.createDialogStornoLayout(e -> hwItemDetailDialog.close());
         add(operationsLayout);
 
         if (getUser().isAdmin()) {

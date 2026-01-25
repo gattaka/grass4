@@ -16,9 +16,7 @@ import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.util.TokenField;
-import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
@@ -107,7 +105,7 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
             tokenField.addToken(m.getName());
         layout.add(tokenField);
 
-        layout.add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
+        layout.add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             MedicalRecordTO writeDTO = originalDTO == null ? new MedicalRecordTO() : originalDTO;
             try {
                 binder.writeBean(writeDTO);

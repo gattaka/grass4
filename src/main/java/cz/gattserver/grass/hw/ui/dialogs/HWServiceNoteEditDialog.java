@@ -91,7 +91,7 @@ public abstract class HWServiceNoteEditDialog extends EditWebDialog {
 		binder.forField(descriptionField).bind(HWServiceNoteTO::getDescription, HWServiceNoteTO::setDescription);
 		winLayout.add(descriptionField, 2);
 
-		HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
+		HorizontalLayout buttons = componentFactory.createDialogSubmitOrStornoLayout(e -> {
 			try {
 				HWServiceNoteTO writeDTO = originalTO == null ? new HWServiceNoteTO() : originalTO;
 				binder.writeBean(writeDTO);

@@ -41,7 +41,7 @@ public abstract class HWItemTypeEditDialog extends EditWebDialog {
 
 		add(nameField);
 
-		HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
+		HorizontalLayout buttons = componentFactory.createDialogSubmitOrStornoLayout(e -> {
 			try {
 				HWItemTypeTO writeDTO = originalDTO == null ? new HWItemTypeTO() : originalDTO;
 				binder.writeBean(writeDTO);

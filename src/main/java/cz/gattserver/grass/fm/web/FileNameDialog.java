@@ -34,7 +34,7 @@ public class FileNameDialog extends WebDialog {
 
         if (existingTO != null) binder.readBean(existingTO);
 
-        addComponent(componentFactory.createDialogSubmitOrCloseLayout(event -> {
+        addComponent(componentFactory.createDialogSubmitOrStornoLayout(event -> {
             if (!binder.validate().isOk()) return;
             FMItemTO to = binder.getBean();
             to.setName(textField.getValue());

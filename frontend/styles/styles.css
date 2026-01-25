@@ -154,6 +154,9 @@ h2 {
 /* Inline button */
 .inline-button {
     cursor: pointer;
+    font-family: var(--aura-font-family);
+    font-size: var(--aura-font-size-m);
+    color: #045491;
 }
 
 .inline-button:hover {

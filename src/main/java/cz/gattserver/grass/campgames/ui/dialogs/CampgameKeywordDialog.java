@@ -1,9 +1,6 @@
 package cz.gattserver.grass.campgames.ui.dialogs;
 
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
@@ -46,7 +43,7 @@ public abstract class CampgameKeywordDialog extends EditWebDialog {
         binder.bind(nameField, "name");
         winLayout.add(nameField);
 
-        winLayout.add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
+        winLayout.add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
                 CampgameKeywordTO writeDTO = originalDTO == null ? new CampgameKeywordTO() : originalDTO;
                 binder.writeBean(writeDTO);

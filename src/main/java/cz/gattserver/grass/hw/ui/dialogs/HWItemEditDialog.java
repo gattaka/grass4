@@ -139,7 +139,7 @@ public class HWItemEditDialog extends EditWebDialog {
         if (originalTO != null) keywords.setValues(originalTO.getTypes());
         add(keywords);
 
-        HorizontalLayout buttons = componentFactory.createDialogSubmitOrCloseLayout(e -> {
+        HorizontalLayout buttons = componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
                 HWItemTO writeTO = originalTO == null ? new HWItemTO() : originalTO;
                 try {

@@ -2,7 +2,7 @@ package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.IOException;
 
-import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -85,7 +85,7 @@ public class HWDetailsPhotosTab extends Div {
         populateImages();
 
         ComponentFactory componentFactory = new ComponentFactory();
-        add(componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close()));
+        add(componentFactory.createDialogStornoLayout(e -> hwItemDetailDialog.close()));
     }
 
     private void populateImages() {
@@ -109,8 +109,8 @@ public class HWDetailsPhotosTab extends Div {
             itemDiv.add(buttonLayout);
 
             ComponentFactory componentFactory = new ComponentFactory();
-            Anchor detailLink =
-                    new Anchor(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName(), "Detail");
+            Div detailLink = componentFactory.createInlineButton("Detail", e -> UI.getCurrent().getPage()
+                    .open(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName(), "_blank"));
             buttonLayout.add(detailLink);
 
             if (getUser().isAdmin()) {

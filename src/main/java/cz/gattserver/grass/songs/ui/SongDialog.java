@@ -7,7 +7,6 @@ import com.vaadin.flow.component.textfield.IntegerField;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -78,7 +77,7 @@ public class SongDialog extends EditWebDialog {
         embeddedField.setPlaceholder("YouTube video ID (tZtPcQJkEcU,...)");
         layout.add(embeddedField);
 
-        add(componentFactory.createDialogSubmitOrCloseLayout(event -> save(originalTO, binder, onSave), e -> close()));
+        add(componentFactory.createDialogSubmitOrStornoLayout(event -> save(originalTO, binder, onSave), e -> close()));
 
         if (originalTO != null) {
             binder.readBean(originalTO);

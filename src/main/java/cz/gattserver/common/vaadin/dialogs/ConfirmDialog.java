@@ -49,7 +49,7 @@ public class ConfirmDialog extends WebDialog {
         HorizontalLayout btnLayout = new HorizontalLayout();
         addComponent(btnLayout, Alignment.END);
 
-        btnLayout.add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
+        btnLayout.add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             ConfirmDialog.this.confirmAction.onConfirm(e);
             close();
         }, e -> close()));

@@ -5,7 +5,6 @@ import java.util.List;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
@@ -92,7 +91,7 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
         recordsComboBox.setWidthFull();
         binder.forField(recordsComboBox).bind(ScheduledVisitTO::getRecord, ScheduledVisitTO::setRecord);
 
-        layout.add(componentFactory.createDialogSubmitOrCloseLayout(e -> {
+        layout.add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             ScheduledVisitTO writeTO = originalTO == null ? formTO : originalTO;
             try {
                 binder.writeBean(writeTO);

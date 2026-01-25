@@ -236,7 +236,7 @@ public class HWDetailsInfoTab extends Div {
         descriptionDiv.setText(hwItem.getDescription());
         add(descriptionDiv);
 
-        HorizontalLayout operationsLayout = componentFactory.createDialogCloseLayout(e -> hwItemDetailDialog.close());
+        HorizontalLayout operationsLayout = componentFactory.createDialogStornoLayout(e -> hwItemDetailDialog.close());
         add(operationsLayout);
 
         if (getUser().isAdmin()) {

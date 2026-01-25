@@ -41,7 +41,7 @@ public class QuoteDialog extends EditWebDialog {
 		if (quote != null)
 			binder.readBean(quote);
 
-		addComponent(componentFactory.createDialogSubmitOrCloseLayout(e -> {
+		addComponent(componentFactory.createDialogSubmitOrStornoLayout(e -> {
 			QuoteTO targetTO = quote == null ? new QuoteTO() : quote;
 			if (binder.writeBeanIfValid(targetTO)) {
 				saveAction.onSave(targetTO);
