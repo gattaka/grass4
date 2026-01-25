@@ -20,7 +20,7 @@ import cz.gattserver.grass.drinks.model.interfaces.DrinkTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.util.RatingStars;
+import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.Breakline;

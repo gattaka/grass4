@@ -20,5 +20,23 @@
     white-space: pre-wrap;
     font-family: monospace;
     font-size: 10pt;
-    tab-size: 4
+    tab-size: 4;
+}
+
+.hw-photos-div {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.hw-photos-div-item {
+    width: 200px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px;
 }

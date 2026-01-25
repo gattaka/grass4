@@ -6,7 +6,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import cz.gattserver.grass.drinks.model.interfaces.OtherTO;
-import cz.gattserver.grass.core.ui.util.RatingStars;
+import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 import java.text.NumberFormat;

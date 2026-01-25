@@ -2,7 +2,6 @@ package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.IOException;
 
-import com.beust.ah.A;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
@@ -12,7 +11,6 @@ import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -26,7 +24,6 @@ import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
-import cz.gattserver.grass.core.ui.util.GridLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class HWDetailsPhotosTab extends Div {
@@ -93,24 +90,19 @@ public class HWDetailsPhotosTab extends Div {
 
     private void populateImages() {
         containerDiv.removeAll();
-        GridLayout gridLayout = new GridLayout();
+        Div gridLayout = new Div();
+        gridLayout.addClassName("hw-photos-div");
         containerDiv.add(gridLayout);
 
-        int counter = 0;
         for (HWItemFileTO item : getHWService().getHWItemImagesMiniFiles(hwItem.getId())) {
-            if (counter == 0) gridLayout.newRow();
-            counter = (counter + 1) % 5;
 
             Div itemDiv = new Div();
-            itemDiv.getStyle().set("text-align", "center");
-            itemDiv.setHeight("calc(" + UIUtils.BUTTON_SIZE_CSS_VAR + " + 200px + " + UIUtils.SPACING_CSS_VAR + ")");
-            itemDiv.setWidth("200px");
+            itemDiv.addClassName("hw-photos-div-item");
             gridLayout.add(itemDiv);
 
             Image img = new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(
                     getHWService().getHWItemImagesMiniFileInputStream(hwItem.getId(), item.getName()), item.getName(),
                     null, -1)), item.getName());
-            img.addClassName("thumbnail-150");
             itemDiv.add(img);
 
             Div buttonLayout = new Div();
@@ -119,7 +111,6 @@ public class HWDetailsPhotosTab extends Div {
             ComponentFactory componentFactory = new ComponentFactory();
             Anchor detailLink =
                     new Anchor(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName(), "Detail");
-            detailLink.getStyle().set("margin-right", "var(--lumo-space-m)");
             buttonLayout.add(detailLink);
 
             if (getUser().isAdmin()) {

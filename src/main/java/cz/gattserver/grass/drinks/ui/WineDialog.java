@@ -10,7 +10,7 @@ import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import com.vaadin.flow.data.validator.IntegerRangeValidator;
 import cz.gattserver.grass.drinks.model.domain.WineType;
 import cz.gattserver.grass.drinks.model.interfaces.WineTO;
-import cz.gattserver.grass.core.ui.util.RatingStars;
+import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 import java.text.NumberFormat;

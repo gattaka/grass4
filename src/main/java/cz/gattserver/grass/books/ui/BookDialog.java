@@ -18,7 +18,7 @@ import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.common.ImageUtils;
-import cz.gattserver.grass.core.ui.util.RatingStars;
+import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -9,7 +9,7 @@ import com.vaadin.flow.data.converter.StringToDoubleConverter;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import cz.gattserver.grass.drinks.model.domain.MaltType;
 import cz.gattserver.grass.drinks.model.interfaces.BeerTO;
-import cz.gattserver.grass.core.ui.util.RatingStars;
+import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 import java.text.NumberFormat;

@@ -11,7 +11,7 @@ import com.vaadin.flow.data.validator.DoubleRangeValidator;
 import com.vaadin.flow.data.validator.IntegerRangeValidator;
 import cz.gattserver.grass.drinks.model.domain.WhiskeyType;
 import cz.gattserver.grass.drinks.model.interfaces.WhiskeyTO;
-import cz.gattserver.grass.core.ui.util.RatingStars;
+import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 import java.text.NumberFormat;

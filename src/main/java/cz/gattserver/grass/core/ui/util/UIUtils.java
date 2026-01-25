@@ -45,9 +45,6 @@ public class UIUtils {
 
     public static final String FLEX_DIV_CLASS = "flex-div";
 
-    public static final String SPACING_CSS_VAR = "var(--lumo-space-m)";
-    public static final String BUTTON_SIZE_CSS_VAR = "var(--lumo-button-size)";
-
     public static final String TOP_MARGIN_CSS_CLASS = "top-margin";
     public static final String TOP_CLEAN_CSS_CLASS = "top-clean";
 

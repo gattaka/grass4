@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
@@ -116,9 +117,7 @@ public class HWDetailsInfoTab extends Div {
         hwImageLayout.setSpacing(true);
         hwImageLayout.setPadding(false);
         hwImageLayout.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
-        hwImageLayout.setWidth("200px");
-        hwImageLayout.getStyle()
-                .set("height", "calc(" + UIUtils.BUTTON_SIZE_CSS_VAR + " + 200px + " + UIUtils.SPACING_CSS_VAR + ")");
+        hwImageLayout.setWidth(200, Unit.PIXELS);
         outerLayout.add(hwImageLayout);
         createHWImageOrUpload(hwItem);
 

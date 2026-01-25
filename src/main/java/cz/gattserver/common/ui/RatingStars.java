@@ -1,4 +1,4 @@
-package cz.gattserver.grass.core.ui.util;
+package cz.gattserver.common.ui;
 
 import java.util.Objects;
 

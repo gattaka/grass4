@@ -1,4 +1,4 @@
-package cz.gattserver.grass.core.ui.util;
+package cz.gattserver.common.ui;
 
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
