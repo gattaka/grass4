@@ -17,6 +17,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.slideshow.ImageSlideshow;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
@@ -45,7 +46,9 @@ import jakarta.annotation.Resource;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @Route("photogallery")
 public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<String>, HasDynamicTitle {
@@ -78,6 +81,9 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
     private int imageCount;
     private int pageCount;
     private int currentPage = 0;
+    private int startIndex;
+
+    private List<PhotogalleryViewItemTO> currentPageItems;
 
     private PGMultiUpload upload;
     private Div galleryLayout;
@@ -311,10 +317,13 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
         }
         if (currentPage < 0) currentPage = 0;
         if (currentPage >= pageCount) currentPage = pageCount - 1;
-        int start = currentPage * PAGE_SIZE;
-        int index = start;
+        startIndex = currentPage * PAGE_SIZE;
+        int index = startIndex;
+        currentPageItems = new ArrayList<>();
         try {
-            for (PhotogalleryViewItemTO item : pgService.getViewItems(galleryDir, start, PAGE_SIZE)) {
+            for (PhotogalleryViewItemTO item : pgService.getViewItems(galleryDir, startIndex, PAGE_SIZE)) {
+                currentPageItems.add(item);
+
                 final int currentIndex = index;
                 Div itemLayout = new Div();
                 itemLayout.getStyle().set("text-align", "center").set("width", "170px").set("display", "inline-block")
@@ -324,7 +333,7 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
                 // Název souboru sice nemusí odpovídat, ale měl by pasovat typem -- takže pokud mám SVG a z něj náhled
                 // jako PNG soubor, je potřeba předat, že jde už o PNG soubor (nikoliv ten původní SVG) jinak se
                 // browser bude snažit číst to PNG jako SVG a nic se nezobrazí
-                String fileName = item.getFile().getFileName().toString();
+                String fileName = item.getName();
 
                 Image embedded;
                 if (fileName.toLowerCase().endsWith(".xcf")) {
@@ -334,14 +343,8 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
                 } else if (fileName.toLowerCase().endsWith(".otf") || fileName.toLowerCase().endsWith(".ttf")) {
                     embedded = new Image("img/font.png", "Font file");
                 } else {
-                    embedded = new Image(DownloadHandler.fromInputStream(e -> {
-                        try {
-                            return new DownloadResponse(Files.newInputStream(item.getFile()), fileName, null, -1);
-                        } catch (IOException ex) {
-                            logger.error("Nezdařilo se získat miniaturu pro " + fileName, ex);
-                            return null;
-                        }
-                    }), fileName);
+                    embedded = new Image(PGUtils.createPhotogalleryBaseURL(photogallery) + item.getMiniaturePath(),
+                            fileName);
                 }
                 itemLayout.add(embedded);
                 itemLayout.add(new Breakline());
@@ -359,25 +362,24 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
                 itemLayout.add(buttonLayout);
 
                 // Detail
-                final String urlFinal = PGUtils.createDetailURL(item, photogallery);
-                Div detailButton = componentFactory.createInlineButton("Detail", e -> UI.getCurrent().getPage().open(urlFinal));
+                final String urlFinal = PGUtils.createPhotogalleryBaseURL(photogallery) + item.getFullPath();
+                Div detailButton =
+                        componentFactory.createInlineButton("Detail", e -> UI.getCurrent().getPage().open(urlFinal));
                 buttonLayout.add(detailButton);
 
                 // Smazat
                 if (coreACL.canModifyContent(photogallery.getContentNode(), getUser())) {
-                    Div deleteButton = componentFactory.createInlineButton("Smazat", e -> {
-                        new ConfirmDialog(e2 -> {
-                            pgService.deleteFile(item, galleryDir);
-                            eventBus.subscribe(PGViewerPage.this);
-                            progressIndicatorWindow = new ProgressDialog();
-                            PhotogalleryPayloadTO payloadTO =
-                                    new PhotogalleryPayloadTO(photogallery.getContentNode().getName(), galleryDir,
-                                            photogallery.getContentNode().getContentTagsAsStrings(),
-                                            photogallery.getContentNode().isPublicated(), false);
-                            pgService.modifyPhotogallery(UUID.randomUUID(), photogallery.getId(), payloadTO,
-                                    photogallery.getContentNode().getCreationDate());
-                        }).open();
-                    });
+                    Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
+                        pgService.deleteFile(item, galleryDir);
+                        eventBus.subscribe(PGViewerPage.this);
+                        progressIndicatorWindow = new ProgressDialog();
+                        PhotogalleryPayloadTO payloadTO =
+                                new PhotogalleryPayloadTO(photogallery.getContentNode().getName(), galleryDir,
+                                        photogallery.getContentNode().getContentTagsAsStrings(),
+                                        photogallery.getContentNode().isPublicated(), false);
+                        pgService.modifyPhotogallery(UUID.randomUUID(), photogallery.getId(), payloadTO,
+                                photogallery.getContentNode().getCreationDate());
+                    }).open());
                     deleteButton.getStyle().set("color", "red");
                     buttonLayout.add(deleteButton);
                 }
@@ -458,24 +460,26 @@ public class PGViewerPage extends ContentViewerPage implements HasUrlParameter<S
     }
 
     private void showItem(final int index) {
-        PGSlideshow slideshow = new PGSlideshow(photogallery, imageCount) {
-            private static final long serialVersionUID = 7926209313704634472L;
-
-            @Override
-            protected void pageUpdate(int currentIndex) {
-                // zajisti posuv přehledu
-                int newPage = currentIndex / PAGE_SIZE;
-                if (newPage != currentPage) {
-                    currentPage = newPage;
-                    refreshGrid();
-                }
-            }
-
-            @Override
-            protected PhotogalleryViewItemTO getItem(int index) throws IOException {
-                return pgService.getSlideshowItem(galleryDir, index);
+        Consumer<Integer> pageUpdateListener = currentIndex -> {
+            // zajisti posuv přehledu
+            int newPage = currentIndex / PAGE_SIZE;
+            if (newPage != currentPage) {
+                currentPage = newPage;
+                refreshGrid();
             }
         };
+
+        Function<Integer, PhotogalleryViewItemTO> itemByIndexProvider = i -> currentPageItems.get(i - startIndex);
+
+        String photogalleryBasePath = PGUtils.createPhotogalleryBaseURL(photogallery);
+        Function<PhotogalleryViewItemTO, String> itemSlideshowURLProvider =
+                item -> photogalleryBasePath + item.getSlideshowPath();
+        Function<PhotogalleryViewItemTO, String> itemDetailURLProvider =
+                item -> photogalleryBasePath + item.getFullPath();
+
+        ImageSlideshow<PhotogalleryViewItemTO> slideshow =
+                new ImageSlideshow<>(imageCount, pageUpdateListener, itemByIndexProvider, itemSlideshowURLProvider,
+                        itemDetailURLProvider);
         add(slideshow);
         slideshow.showItem(index);
     }

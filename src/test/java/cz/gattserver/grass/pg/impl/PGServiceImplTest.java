@@ -1,5 +1,6 @@
 package cz.gattserver.grass.pg.impl;
 
+import cz.gattserver.common.slideshow.MediaType;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
@@ -29,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -968,81 +968,21 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		PhotogalleryViewItemTO to = it.next();
 		assertEquals("02.jpg", to.getName());
-		assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg"), to.getFile());
-		assertEquals(PhotogalleryItemType.IMAGE, to.getType());
+		assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg"), to.getName());
+		assertEquals(MediaType.IMAGE, to.getType());
 		to = it.next();
 		assertEquals("03.jpg", to.getName());
-		assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg"), to.getFile());
-		assertEquals(PhotogalleryItemType.IMAGE, to.getType());
+		assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg"), to.getName());
+		assertEquals(MediaType.IMAGE, to.getType());
 		to = it.next();
 		assertEquals("05.mp4", to.getName());
-		assertEquals(galleryDir.resolve(conf.getPreviewsDir()).resolve("05.mp4.png"), to.getFile());
-		assertEquals(PhotogalleryItemType.VIDEO, to.getType());
-	}
-
-	@Test
-	public void testGetSlideshowItem()
-			throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
-		Path root = prepareFS(fileSystemService.getFileSystem());
-		Path galleryDir = root.resolve("testGallery");
-		Files.createDirectories(galleryDir);
-
-		Path largeFile = galleryDir.resolve("02.jpg");
-		Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
-		assertTrue(Files.exists(largeFile));
-
-		Path smallFile = galleryDir.resolve("03.jpg");
-		Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
-		assertTrue(Files.exists(smallFile));
-
-		Path x264MP4File = galleryDir.resolve("05.mp4");
-		Files.copy(this.getClass().getResourceAsStream("x264.mp4"), x264MP4File);
-		assertTrue(Files.exists(x264MP4File));
-
-		Long userId1 = coreMockService.createMockUser(1);
-		Long nodeId1 = coreMockService.createMockRootNode(1);
-		PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO("Test galerie",
-				galleryDir.getFileName().toString(),
-				null, true, false);
-
-		UUID operationId = UUID.randomUUID();
-
-		PGEventsHandler eventsHandler = new PGEventsHandler();
-		eventBus.subscribe(eventsHandler);
-		CompletableFuture<PGEventsHandler> future = eventsHandler.expectEvent(operationId);
-
-		pgService.savePhotogallery(operationId, payloadTO, nodeId1, userId1, LocalDateTime.now());
-
-		PGEventsHandler mock = future.get();
-		PGProcessResultEvent event = mock.getResultAndDelete(operationId);
-
-		assertTrue(event.isSuccess());
-		assertNotNull(event.getGalleryId());
-
-		eventBus.unsubscribe(eventsHandler);
-
-		PGConfiguration conf = new PGConfiguration();
-		configurationService.loadConfiguration(conf);
-
-		PhotogalleryViewItemTO to = pgService.getSlideshowItem("testGallery", 0);
-		assertEquals("02.jpg", to.getName());
-		assertEquals(galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg"), to.getFile());
-		assertEquals(PhotogalleryItemType.IMAGE, to.getType());
-
-		to = pgService.getSlideshowItem("testGallery", 1);
-		assertEquals("03.jpg", to.getName());
-		assertEquals(galleryDir.resolve("03.jpg"), to.getFile());
-		assertEquals(PhotogalleryItemType.IMAGE, to.getType());
-
-		to = pgService.getSlideshowItem("testGallery", 2);
-		assertEquals("05.mp4", to.getName());
-		assertEquals(galleryDir.resolve("05.mp4"), to.getFile());
-		assertEquals(PhotogalleryItemType.VIDEO, to.getType());
+		assertEquals(galleryDir.resolve(conf.getPreviewsDir()).resolve("05.mp4.png"), to.getName());
+		assertEquals(MediaType.VIDEO, to.getType());
 	}
 
 	@Test
 	public void testCheckGallery()
-			throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+			throws IOException, InterruptedException, ExecutionException {
 		Path root = prepareFS(fileSystemService.getFileSystem());
 		Path galleryDir = root.resolve("testGallery");
 		Files.createDirectories(galleryDir);

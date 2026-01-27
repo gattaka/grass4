@@ -1,4 +1,4 @@
-package cz.gattserver.grass.pg.interfaces;
+package cz.gattserver.common.slideshow;
 
 import java.time.LocalDateTime;
 

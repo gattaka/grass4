@@ -1,48 +1,69 @@
 package cz.gattserver.grass.pg.interfaces;
 
-import java.nio.file.Path;
+import cz.gattserver.common.slideshow.ExifInfoTO;
+import cz.gattserver.common.slideshow.MediaType;
+import cz.gattserver.common.slideshow.SlideshowItem;
 
-public class PhotogalleryViewItemTO {
+public class PhotogalleryViewItemTO implements SlideshowItem {
 
-	private Path file;
-	private String name;
-	private PhotogalleryItemType type;
-	private ExifInfoTO exifInfoTO;
+    private String name;
+    private MediaType type;
+    private ExifInfoTO exifInfoTO;
+    private String slideshowPath;
+    private String fullPath;
+    private String miniaturePath;
 
-	public ExifInfoTO getExifInfoTO() {
-		return exifInfoTO;
-	}
+    @Override
+    public ExifInfoTO getExifInfoTO() {
+        return exifInfoTO;
+    }
 
-	public PhotogalleryViewItemTO setExifInfoTO(ExifInfoTO exifInfoTO) {
-		this.exifInfoTO = exifInfoTO;
-		return this;
-	}
+    public PhotogalleryViewItemTO setExifInfoTO(ExifInfoTO exifInfoTO) {
+        this.exifInfoTO = exifInfoTO;
+        return this;
+    }
 
-	public String getName() {
-		return name;
-	}
+    @Override
+    public String getName() {
+        return name;
+    }
 
-	public PhotogalleryViewItemTO setName(String name) {
-		this.name = name;
-		return this;
-	}
+    public PhotogalleryViewItemTO setName(String name) {
+        this.name = name;
+        return this;
+    }
 
-	public PhotogalleryItemType getType() {
-		return type;
-	}
+    @Override
+    public MediaType getType() {
+        return type;
+    }
 
-	public PhotogalleryViewItemTO setType(PhotogalleryItemType type) {
-		this.type = type;
-		return this;
-	}
+    public PhotogalleryViewItemTO setType(MediaType type) {
+        this.type = type;
+        return this;
+    }
 
-	public Path getFile() {
-		return file;
-	}
+    public String getSlideshowPath() {
+        return slideshowPath;
+    }
 
-	public PhotogalleryViewItemTO setFile(Path file) {
-		this.file = file;
-		return this;
-	}
+    public void setSlideshowPath(String slideshowPath) {
+        this.slideshowPath = slideshowPath;
+    }
 
+    public String getFullPath() {
+        return fullPath;
+    }
+
+    public void setFullPath(String fullPath) {
+        this.fullPath = fullPath;
+    }
+
+    public String getMiniaturePath() {
+        return miniaturePath;
+    }
+
+    public void setMiniaturePath(String miniaturePath) {
+        this.miniaturePath = miniaturePath;
+    }
 }

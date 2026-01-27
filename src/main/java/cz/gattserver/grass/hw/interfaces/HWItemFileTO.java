@@ -1,8 +1,12 @@
 package cz.gattserver.grass.hw.interfaces;
 
+import cz.gattserver.common.slideshow.ExifInfoTO;
+import cz.gattserver.common.slideshow.MediaType;
+import cz.gattserver.common.slideshow.SlideshowItem;
+
 import java.time.LocalDateTime;
 
-public class HWItemFileTO {
+public class HWItemFileTO implements SlideshowItem {
 
 	private String name;
 	private String size;
@@ -17,11 +21,21 @@ public class HWItemFileTO {
 		return this;
 	}
 
-	public String getName() {
+    @Override
+    public MediaType getType() {
+        return MediaType.IMAGE;
+    }
+
+    @Override
+    public ExifInfoTO getExifInfoTO() {
+        return null;
+    }
+
+    public String getName() {
 		return name;
 	}
 
-	public HWItemFileTO setName(String name) {
+    public HWItemFileTO setName(String name) {
 		this.name = name;
 		return this;
 	}

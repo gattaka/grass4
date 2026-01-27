@@ -21,7 +21,7 @@ public interface PGService {
 	/**
 	 * Smaže galerii
 	 * 
-	 * @param photogallery
+	 * @param photogalleryId
 	 *            galerie ke smazání
 	 * @return {@code true} pokud se zdařilo smazat jinak {@code false}
 	 * @return <code>false</code> pokud se nezdaŁří smazat některé soubory
@@ -126,11 +126,11 @@ public interface PGService {
 	 *            idetifikátor galerie
 	 * @param fileName
 	 *            jméno fotografie
-	 * @param photoVersion
+	 * @param version
 	 *            o jakou velikost fotky jde
 	 * @return {@link UnauthorizedAccessException}
 	 */
-	Path getPhotoForREST(Long id, String fileName, PhotoVersion mini) throws UnauthorizedAccessException;
+	Path getPhotoForREST(Long id, String fileName, PhotoVersion version) throws UnauthorizedAccessException;
 
 	/**
 	 * Zazipuje galerii
@@ -260,24 +260,6 @@ public interface PGService {
 	 *             pokud předaný adresář podtéká kořen modulu PG
 	 */
 	List<PhotogalleryViewItemTO> getViewItems(String galleryDir, int skip, int limit) throws IOException;
-
-	/**
-	 * Získá položku obrázku ze slideshow dle indexu
-	 * 
-	 * @param galleryDir
-	 *            adresář galerie
-	 * @param index
-	 *            index obrázku ve slideshow
-	 * @return položka obrázku slideshow
-	 * @throws IOException
-	 *             pokud se nezdařilo číst přehled adresáře galerie
-	 * @throws IllegalStateException
-	 *             pokud neexistuje kořenový adresář galerií -- chyba nastavení
-	 *             modulu PG
-	 * @throws IllegalArgumentException
-	 *             pokud předaný adresář podtéká kořen modulu PG
-	 */
-	PhotogalleryViewItemTO getSlideshowItem(String galleryDir, int index) throws IOException;
 
 	/**
 	 * Ověří, že galerie existuje a má patřičné podadresáře

@@ -1,33 +1,27 @@
-package cz.gattserver.grass.pg.ui.pages;
+package cz.gattserver.common.slideshow;
 
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.AnchorTarget;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
-import cz.gattserver.grass.pg.interfaces.ExifInfoTO;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.pg.util.PGUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.file.Files;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-public abstract class PGSlideshow extends Div {
+public class ImageSlideshow<T extends SlideshowItem> extends Div {
 
     private static final long serialVersionUID = 4928404864735034779L;
 
-    private static final Logger logger = LoggerFactory.getLogger(PGSlideshow.class);
+    private static final Logger logger = LoggerFactory.getLogger(ImageSlideshow.class);
 
     protected int currentIndex;
     protected int totalCount;
@@ -35,37 +29,40 @@ public abstract class PGSlideshow extends Div {
     protected Div itemLayout;
     protected Div itemExifLayout;
 
-    protected PhotogalleryTO photogallery;
-    protected PhotogalleryViewItemTO currentItemTO;
+    private Consumer<Integer> pageUpdateListener;
+    private Function<Integer, T> itemByIndexProvider;
+    private Function<T, String> itemSlideshowURLProvider;
+    private Function<T, String> itemDetailURLProvider;
+    private T currentItemTO;
 
     protected boolean closePrevented = false;
 
     protected List<ShortcutRegistration> regs = new ArrayList<>();
 
-    protected abstract void pageUpdate(int currentIndex);
-
-    protected abstract PhotogalleryViewItemTO getItem(int index) throws IOException;
-
-    public PGSlideshow(PhotogalleryTO photogallery, int count) {
+    public ImageSlideshow(int count, Consumer<Integer> pageUpdateListener, Function<Integer, T> itemByIndexProvider,
+                          Function<T, String> itemSlideshowURLProvider, Function<T, String> itemDetailURLProvider) {
         this.totalCount = count;
-        this.photogallery = photogallery;
+        this.pageUpdateListener = pageUpdateListener;
+        this.itemByIndexProvider = itemByIndexProvider;
+        this.itemSlideshowURLProvider = itemSlideshowURLProvider;
+        this.itemDetailURLProvider = itemDetailURLProvider;
 
-        setId("pg-slideshow-div");
+        setId("image-slideshow-div");
 
         itemLabel = new Div();
-        itemLabel.setId("pg-slideshow-item-label-div");
+        itemLabel.setId("image-slideshow-item-label-div");
         add(itemLabel);
         addClickListener(e -> close());
 
         Div wrapperDiv = new Div();
-        wrapperDiv.setId("pg-slideshow-item-wrapper-div");
+        wrapperDiv.setId("image-slideshow-item-wrapper-div");
         add(wrapperDiv);
 
         itemExifLayout = new Div();
-        itemExifLayout.setId("pg-exif-div");
+        itemExifLayout.setId("image-exif-div");
         add(itemExifLayout);
 
-        String jsDivId = "pg-slideshow-item-div";
+        String jsDivId = "image-slideshow-item-div";
         itemLayout = new Div() {
             private static final long serialVersionUID = -1026900351513446144L;
 
@@ -87,7 +84,7 @@ public abstract class PGSlideshow extends Div {
             prevItem();
             preventClose();
         });
-        prevItemButton.setId("pg-slideshow-prev-item-button");
+        prevItemButton.setId("image-slideshow-prev-item-button");
         wrapperDiv.add(prevItemButton);
 
         Div nextItemButton = new Div(">");
@@ -95,11 +92,11 @@ public abstract class PGSlideshow extends Div {
             nextItem();
             preventClose();
         });
-        nextItemButton.setId("pg-slideshow-next-item-button");
+        nextItemButton.setId("image-slideshow-next-item-button");
         wrapperDiv.add(nextItemButton);
 
-        UI.getCurrent().getPage()
-                .executeJs("let cont = document.querySelector('#pg-slideshow-item-div');"/*		*/ + "let NF = 30;"
+        UI.getCurrent().getPage().executeJs(
+                "let cont = document.querySelector('#image-slideshow-item-div');"/*		*/ + "let NF = 30;"
                         /*		*/ + "let N = 1;"
                         /*		*/ + ""
                         /*		*/ + "let i = 0, x0 = null, locked = false, w, ini, fin, rID = null, anf;"
@@ -191,16 +188,14 @@ public abstract class PGSlideshow extends Div {
 
         ComponentFactory componentFactory = new ComponentFactory();
         Div closeBtn = componentFactory.createInlineButton("Zavřít", e -> close());
-        Div detailButton = componentFactory.createInlineButton("Detail", e -> UI.getCurrent().getPage()
-                .open(PGUtils.createItemURL(currentItemTO.getFile().getFileName().toString(), photogallery)));
+        Div detailButton = componentFactory.createInlineButton("Detail",
+                e -> UI.getCurrent().getPage().open(itemDetailURLProvider.apply(currentItemTO)));
         Div btnDiv = new Div(detailButton, closeBtn);
-        btnDiv.setId("pg-slideshow-item-close-div");
+        btnDiv.setId("image-slideshow-item-close-div");
         add(btnDiv);
     }
 
-    private Component createItemSlide(PhotogalleryViewItemTO itemTO) {
-        pageUpdate(currentIndex);
-
+    private Component createItemSlide(T itemTO) {
         // vytvoř odpovídající komponentu pro zobrazení
         // obrázku nebo videa
         switch (itemTO.getType()) {
@@ -215,7 +210,8 @@ public abstract class PGSlideshow extends Div {
     public void showItem(int index) {
         currentIndex = index;
         try {
-            currentItemTO = getItem(index);
+            pageUpdateListener.accept(currentIndex);
+            currentItemTO = itemByIndexProvider.apply(index);
 
             itemExifLayout.removeAll();
             ExifInfoTO exifInfoTO = currentItemTO.getExifInfoTO();
@@ -251,8 +247,8 @@ public abstract class PGSlideshow extends Div {
         }
     }
 
-    private Component createVideoSlide(PhotogalleryViewItemTO itemTO) {
-        String videoURL = PGUtils.createItemURL(itemTO.getFile().getFileName().toString(), photogallery);
+    private Component createVideoSlide(T itemTO) {
+        String videoURL = itemDetailURLProvider.apply(itemTO);
         String videoString =
                 "<video id=\"video\" preload controls>" + "<source src=\"" + videoURL + "\" type=\"video/mp4\">" +
                         "</video>";
@@ -261,26 +257,19 @@ public abstract class PGSlideshow extends Div {
         return video;
     }
 
-    private Component createImageSlide(PhotogalleryViewItemTO itemTO) {
+    private Component createImageSlide(T itemTO) {
         Image embedded;
         if (itemTO.getName().toLowerCase().endsWith(".xcf")) {
             embedded = new Image("img/gimp.png", "XCF file");
         } else if (itemTO.getName().toLowerCase().endsWith(".otf") || itemTO.getName().toLowerCase().endsWith(".ttf")) {
             embedded = new Image("img/font.png", "Font file");
         } else {
-            embedded = new Image(DownloadHandler.fromInputStream(e -> {
-                try {
-                    return new DownloadResponse(Files.newInputStream(itemTO.getFile()), itemTO.getName(), null, -1);
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                    return null;
-                }
-            }), itemTO.getName());
+            embedded = new Image(itemSlideshowURLProvider.apply(itemTO), itemTO.getName());
         }
 
         embedded.addClickListener(e -> {
             preventClose();
-            UI.getCurrent().getPage().open(PGUtils.createDetailURL(currentItemTO, photogallery));
+            UI.getCurrent().getPage().open(itemDetailURLProvider.apply(itemTO));
         });
         embedded.getStyle().set("cursor", "pointer");
         return embedded;
@@ -309,7 +298,7 @@ public abstract class PGSlideshow extends Div {
     }
 
     protected void close() {
-        if (!closePrevented) ((HasComponents) getParent().get()).remove(PGSlideshow.this);
+        if (!closePrevented) ((HasComponents) getParent().get()).remove(ImageSlideshow.this);
         closePrevented = false;
     }
 

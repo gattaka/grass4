@@ -1,13 +1,21 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import cz.gattserver.common.slideshow.ImageSlideshow;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
+import cz.gattserver.grass.pg.util.PGUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -94,7 +102,10 @@ public class HWDetailsPhotosTab extends Div {
         gridLayout.addClassName("hw-photos-div");
         containerDiv.add(gridLayout);
 
-        for (HWItemFileTO item : getHWService().getHWItemImagesMiniFiles(hwItem.getId())) {
+        List<HWItemFileTO> images = getHWService().getHWItemImagesMiniFiles(hwItem.getId());
+        for (int i = 0; i < images.size(); i++) {
+
+            HWItemFileTO item = images.get(i);
 
             Div itemDiv = new Div();
             itemDiv.addClassName("hw-photos-div-item");
@@ -105,22 +116,47 @@ public class HWDetailsPhotosTab extends Div {
                     null, -1)), item.getName());
             itemDiv.add(img);
 
+            int finalIndex = i;
+            img.addClickListener(e -> showItem(images, finalIndex));
+
             Div buttonLayout = new Div();
             itemDiv.add(buttonLayout);
 
             ComponentFactory componentFactory = new ComponentFactory();
-            Div detailLink = componentFactory.createInlineButton("Detail", e -> UI.getCurrent().getPage()
-                    .open(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName(), "_blank"));
+            Div detailLink = componentFactory.createInlineButton("Detail",
+                    e -> UI.getCurrent().getPage().open(createPhotoItemURL(item), "_blank"));
             buttonLayout.add(detailLink);
 
             if (getUser().isAdmin()) {
-                Button delBtn = componentFactory.createDeleteButton(ev -> {
+                Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
                     getHWService().deleteHWItemImagesFile(hwItem.getId(), item.getName());
                     populateImages();
                     hwItemDetailDialog.refreshTabLabels();
-                });
-                buttonLayout.add(delBtn);
+                }).open());
+                deleteButton.getStyle().set("color", "red");
+                buttonLayout.add(deleteButton);
             }
         }
+    }
+
+    private void showItem(List<HWItemFileTO> images, int index) {
+        // nepoužíváme
+        Consumer<Integer> pageUpdateListener = currentIndex -> {
+        };
+
+        Function<Integer, HWItemFileTO> itemByIndexProvider = i -> images.get(i);
+
+        // Nemáme slideshow verze -- jen miniatury a full
+        Function<HWItemFileTO, String> itemPathProvider = item -> createPhotoItemURL(item);
+
+        ImageSlideshow<HWItemFileTO> slideshow =
+                new ImageSlideshow<>(images.size(), pageUpdateListener, itemByIndexProvider, itemPathProvider,
+                        itemPathProvider);
+        add(slideshow);
+        slideshow.showItem(index);
+    }
+
+    private String createPhotoItemURL(HWItemFileTO item) {
+        return HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName();
     }
 }
