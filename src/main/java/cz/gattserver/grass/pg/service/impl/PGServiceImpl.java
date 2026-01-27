@@ -703,7 +703,6 @@ public class PGServiceImpl implements PGService {
                     .forEach(file -> {
                         PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
                         String fileName = file.getFileName().toString();
-                        itemTO.setExifInfoTO(PGUtils.readMetadata(previewDir.getParent().resolve(fileName)));
                         if (file.startsWith(previewDir)) {
                             itemTO.setType(MediaType.VIDEO);
                             // u videa je potřeba useknout příponu preview obrázku
@@ -730,11 +729,13 @@ public class PGServiceImpl implements PGService {
                                 itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + itemTO.getName());
                                 itemTO.setSlideshowPath(itemTO.getName());
                                 itemTO.setFullPath(itemTO.getName());
+                                itemTO.setExifInfoTO(PGUtils.readMetadata(previewDir.getParent().resolve(fileName)));
                             } else {
                                 itemTO.setName(fileName.substring(0, fileName.length()));
                                 itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + itemTO.getName());
                                 itemTO.setSlideshowPath(configuration.getSlideshowDir() + "/" + itemTO.getName());
                                 itemTO.setFullPath(itemTO.getName());
+                                itemTO.setExifInfoTO(PGUtils.readMetadata(previewDir.getParent().resolve(fileName)));
                             }
                         }
                         list.add(itemTO);

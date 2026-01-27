@@ -215,27 +215,29 @@ public class ImageSlideshow<T extends SlideshowItem> extends Div {
 
             itemExifLayout.removeAll();
             ExifInfoTO exifInfoTO = currentItemTO.getExifInfoTO();
-            if (exifInfoTO.getDate() != null) {
-                Div dateDiv = new Div();
-                itemExifLayout.add(dateDiv);
-                dateDiv.add(new Div("Datum pořízení:"));
-                dateDiv.add(new Div(exifInfoTO.getDate().format(DateTimeFormatter.ofPattern("dd. MM. yyyy HH:mm:ss"))));
+            if (exifInfoTO != null) {
+                if (exifInfoTO.getDate() != null) {
+                    Div dateDiv = new Div();
+                    itemExifLayout.add(dateDiv);
+                    dateDiv.add(new Div("Datum pořízení:"));
+                    dateDiv.add(
+                            new Div(exifInfoTO.getDate().format(DateTimeFormatter.ofPattern("dd. MM. yyyy HH:mm:ss"))));
+                }
+                if (exifInfoTO.getDeviceMaker() != null && exifInfoTO.getDeviceModel() != null) {
+                    Div dateDiv = new Div();
+                    itemExifLayout.add(dateDiv);
+                    dateDiv.add(new Div("Fotoaparát:"));
+                    dateDiv.add(new Div(exifInfoTO.getDeviceMaker() + ", " + exifInfoTO.getDeviceModel()));
+                }
+                if (exifInfoTO.getLongitude() != null && exifInfoTO.getLatitude() != null) {
+                    Div dateDiv = new Div();
+                    itemExifLayout.add(dateDiv);
+                    dateDiv.add(new Div("Místo:"));
+                    dateDiv.add(new Div(exifInfoTO.getLatitude() + " N, " + exifInfoTO.getLongitude() + " E"));
+                    dateDiv.add(new Anchor("https://www.google.com/maps?z=15&t=h&q=" + exifInfoTO.getLatitude() + "+" +
+                            exifInfoTO.getLongitude(), "Google Maps", AnchorTarget.BLANK));
+                }
             }
-            if (exifInfoTO.getDeviceMaker() != null && exifInfoTO.getDeviceModel() != null) {
-                Div dateDiv = new Div();
-                itemExifLayout.add(dateDiv);
-                dateDiv.add(new Div("Fotoaparát:"));
-                dateDiv.add(new Div(exifInfoTO.getDeviceMaker() + ", " + exifInfoTO.getDeviceModel()));
-            }
-            if (exifInfoTO.getLongitude() != null && exifInfoTO.getLatitude() != null) {
-                Div dateDiv = new Div();
-                itemExifLayout.add(dateDiv);
-                dateDiv.add(new Div("Místo:"));
-                dateDiv.add(new Div(exifInfoTO.getLatitude() + " N, " + exifInfoTO.getLongitude() + " E"));
-                dateDiv.add(new Anchor("https://www.google.com/maps?z=15&t=h&q=" + exifInfoTO.getLatitude() + "+" +
-                        exifInfoTO.getLongitude(), "Google Maps", AnchorTarget.BLANK));
-            }
-
             Component slideshowComponent = createItemSlide(currentItemTO);
             itemLayout.removeAll();
             itemLayout.add(slideshowComponent);
