@@ -79,17 +79,18 @@ public class HWDetailsPrint3dTab extends Div {
         print3dGrid = new Grid<>();
         print3dGrid.setSizeFull();
         UIUtils.applyGrassDefaultStyle(print3dGrid);
-        print3dGrid.addColumn(new TextRenderer<>(HWItemFileTO::getName)).setHeader("Název");
-        print3dGrid.addColumn(new LocalDateTimeRenderer<>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
-                .setKey("datum").setHeader("Datum");
+        print3dGrid.addColumn(new TextRenderer<>(HWItemFileTO::getName)).setHeader("Název").setFlexGrow(1)
+                .setResizable(true);
+        print3dGrid.addColumn(new LocalDateTimeRenderer<>(HWItemFileTO::getLastModified, "d. MM. yyyy HH:mm"))
+                .setKey("datum").setHeader("Datum").setWidth("150px").setFlexGrow(0).setResizable(true);
         print3dGrid.addColumn(new TextRenderer<>(HWItemFileTO::getSize)).setHeader("Velikost")
-                .setTextAlign(ColumnTextAlign.END);
+                .setTextAlign(ColumnTextAlign.END).setWidth("100px").setFlexGrow(0).setResizable(true);
 
         stlViewer = new STLViewer(null);
         stlViewer.getStyle().set("border", "1px solid #d1d1d1").set("box-sizing", "border-box")
                 .set("background", "#fefefe");
         stlViewer.setHeightFull();
-        stlViewer.setWidth("400px");
+        stlViewer.setWidth("600px");
 
         HorizontalLayout layout = new HorizontalLayout(print3dGrid, stlViewer);
         layout.setPadding(false);
