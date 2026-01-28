@@ -138,7 +138,7 @@ public class HWDetailsInfoTab extends Div {
         stateValue.setMinWidth("100px");
         tableLayout.add(stateValue);
 
-        DateTimeFormatter format = DateTimeFormatter.ofPattern("d.M.yyyy");
+        DateTimeFormatter format = DateTimeFormatter.ofPattern("d. M. yyyy");
         Div purchDateValue =
                 new Div(new Text(hwItem.getPurchaseDate() == null ? "-" : hwItem.getPurchaseDate().format(format)));
         purchDateValue.setMinWidth("100px");
@@ -203,7 +203,7 @@ public class HWDetailsInfoTab extends Div {
             }
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addColumn(new ComponentRenderer<>(c -> new RouterLink(HWItemPage.class, c.getId())))
+        grid.addColumn(new ComponentRenderer<>(c -> new RouterLink(c.getName(), HWItemPage.class, c.getId())))
                 .setHeader("Název součásti").setFlexGrow(100);
 
         // kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
