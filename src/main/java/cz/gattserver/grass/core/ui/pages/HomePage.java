@@ -63,9 +63,6 @@ public class HomePage extends Div {
 
     private UserInfoTO user;
 
-    @Resource(name = "tagPageFactory")
-    private PageFactory tagPageFactory;
-
     private TextField searchField;
     @Autowired
     private NodeService nodeService;
@@ -185,7 +182,8 @@ public class HomePage extends Div {
                 oldChar = currChar;
             }
 
-            RouterLink tagLink = new RouterLink(TagPage.class, contentTag.getName());
+            RouterLink tagLink = new RouterLink(TagPage.class,
+                    URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()));
             tagLink.setText(contentTag.getName());
             tagLink.getElement().setAttribute("title", contentTag.getContentsCount().toString());
             tagLink.getStyle().set("font-size", contentTag.getFontSize() + "pt");
