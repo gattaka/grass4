@@ -920,7 +920,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
 	@Test
 	public void testGetViewItems()
-			throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+			throws IOException, InterruptedException, ExecutionException {
 		Path root = prepareFS(fileSystemService.getFileSystem());
 		Path galleryDir = root.resolve("testGallery");
 		Files.createDirectories(galleryDir);
@@ -968,15 +968,23 @@ public class PGServiceImplTest extends DBCleanTest {
 
 		PhotogalleryViewItemTO to = it.next();
 		assertEquals("02.jpg", to.getName());
-		assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg"), to.getName());
+        assertEquals("02.jpg", to.getFullPath());
+        assertEquals("foto_slideshow/02.jpg", to.getSlideshowPath());
+        assertEquals("foto_mini/02.jpg", to.getMiniaturePath());
 		assertEquals(MediaType.IMAGE, to.getType());
+
 		to = it.next();
 		assertEquals("03.jpg", to.getName());
-		assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg"), to.getName());
+        assertEquals("03.jpg", to.getFullPath());
+        assertEquals("03.jpg", to.getSlideshowPath());
+        assertEquals("foto_mini/03.jpg", to.getMiniaturePath());
 		assertEquals(MediaType.IMAGE, to.getType());
+
 		to = it.next();
-		assertEquals("05.mp4", to.getName());
-		assertEquals(galleryDir.resolve(conf.getPreviewsDir()).resolve("05.mp4.png"), to.getName());
+        assertEquals("05.mp4", to.getName());
+        assertEquals("05.mp4", to.getFullPath());
+        assertEquals("05.mp4", to.getSlideshowPath());
+        assertEquals("video_preview/05.mp4.png", to.getMiniaturePath());
 		assertEquals(MediaType.VIDEO, to.getType());
 	}
 
