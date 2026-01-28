@@ -35,7 +35,7 @@ public class HWPage extends Div implements HasUrlParameter<Long> {
                 .isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
 
         removeAll();
-        ComponentFactory  componentFactory = new ComponentFactory();
+        ComponentFactory componentFactory = new ComponentFactory();
 
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);

@@ -6,7 +6,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import com.vaadin.flow.component.Unit;
-import com.vaadin.flow.component.html.H3;
+import com.vaadin.flow.component.html.*;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -31,9 +32,6 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
-import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -205,9 +203,8 @@ public class HWDetailsInfoTab extends Div {
             }
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addColumn(new ComponentRenderer<>(c -> componentFactory.createInlineButton(createShortName(c.getName()),
-                        e -> UI.getCurrent().navigate(HWItemPage.class, c.getId())))).setHeader("Název součásti")
-                .setFlexGrow(100);
+        grid.addColumn(new ComponentRenderer<>(c -> new RouterLink(HWItemPage.class, c.getId())))
+                .setHeader("Název součásti").setFlexGrow(100);
 
         // kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
         // nový objekt a dá se mu akorát ID, které se porovnává) aplikace
