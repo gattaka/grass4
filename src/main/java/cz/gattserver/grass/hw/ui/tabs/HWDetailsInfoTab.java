@@ -18,7 +18,7 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
+import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import cz.gattserver.grass.hw.ui.pages.HWPage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;

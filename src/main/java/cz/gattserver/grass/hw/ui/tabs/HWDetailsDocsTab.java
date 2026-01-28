@@ -9,7 +9,7 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
+import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

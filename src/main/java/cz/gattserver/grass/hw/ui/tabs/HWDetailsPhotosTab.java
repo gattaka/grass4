@@ -13,7 +13,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
+import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

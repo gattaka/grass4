@@ -101,7 +101,7 @@ public class URLIdentifierUtils {
 			}
 			name = sb.toString().replaceAll("[-]+", "-");
 
-			String identifier = URLEncoder.encode(String.valueOf(id) + "-" + name, "UTF-8");
+			String identifier = URLEncoder.encode(id + "-" + name, "UTF-8");
 			// Tomcat má default nastavené ignorovat adresy ve kterých je %2F
 			// https://www.assembla.com/spaces/liftweb/wiki/Tomcat/print
 			// http://forum.spring.io/forum/spring-projects/web/97212-url-encoded-in-pathvariable-value-causes-problems

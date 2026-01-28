@@ -9,7 +9,7 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
+import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import cz.gattserver.grass.hw.ui.pages.HWPage;
 import org.springframework.beans.factory.annotation.Autowired;
 

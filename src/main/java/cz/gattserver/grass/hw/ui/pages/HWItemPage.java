@@ -1,17 +1,21 @@
-package cz.gattserver.grass.hw.ui.dialogs;
+package cz.gattserver.grass.hw.ui.pages;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.internal.HasUrlParameterFormat;
+import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.components.Breadcrumb;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
+import cz.gattserver.grass.hw.ui.pages.factories.HWPageFactory;
 import cz.gattserver.grass.hw.ui.tabs.HWDetailsDocsTab;
 import cz.gattserver.grass.hw.ui.tabs.HWDetailsInfoTab;
 import cz.gattserver.grass.hw.ui.tabs.HWDetailsPhotosTab;
@@ -64,6 +68,16 @@ public class HWItemPage extends OneColumnPage implements HasUrlParameter<Long>, 
             throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
 
         init();
+    }
+
+    @Override
+    protected void createColumnContent(Div layout) {
+        this.layout = layout;
+
+        Breadcrumb breadcrumb = new Breadcrumb();
+
+        breadcrumb.resetBreadcrumb(new Breadcrumb.BreadcrumbElement(hwItem.getName(), HWItemPage.class, hwItem.getId()),
+                new Breadcrumb.BreadcrumbElement("HW list", HWPage.class)); layout.add(breadcrumb);
 
         infoTab = new Tab("Info");
         serviceNotesTab = new Tab(createServiceNotesTabLabel());
@@ -81,11 +95,6 @@ public class HWItemPage extends OneColumnPage implements HasUrlParameter<Long>, 
         tabs.addSelectedChangeListener(e -> switchToTab(tabs.getSelectedIndex()));
 
         switchInfoTab();
-    }
-
-    @Override
-    protected void createColumnContent(Div layout) {
-        this.layout = layout;
     }
 
     public Consumer<HWItemTO> getOnRefreshListener() {

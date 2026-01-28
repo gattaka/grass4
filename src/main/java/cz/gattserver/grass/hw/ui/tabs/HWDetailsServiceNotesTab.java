@@ -21,7 +21,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
 import cz.gattserver.grass.hw.service.HWService;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
+import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import cz.gattserver.grass.hw.ui.dialogs.HWServiceNoteEditDialog;
 
 public class HWDetailsServiceNotesTab extends Div {
@@ -63,10 +63,9 @@ public class HWDetailsServiceNotesTab extends Div {
         serviceNotesGrid.setSelectionMode(SelectionMode.SINGLE);
         serviceNotesGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         Column<HWServiceNoteTO> idColumn =
-                serviceNotesGrid.addColumn(new TextRenderer<HWServiceNoteTO>(to -> String.valueOf(to.getId())));
-        serviceDateColumn =
-                serviceNotesGrid.addColumn(new LocalDateRenderer<HWServiceNoteTO>(HWServiceNoteTO::getDate, "d.M.yyyy"))
-                        .setHeader("Datum").setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0);
+                serviceNotesGrid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getId())));
+        serviceDateColumn = serviceNotesGrid.addColumn(new LocalDateRenderer<>(HWServiceNoteTO::getDate, "d.M.yyyy"))
+                .setHeader("Datum").setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0);
         serviceNotesGrid.addColumn(hw -> hw.getState().getName()).setHeader("Stav").setWidth("110px").setFlexGrow(0);
         serviceNotesGrid.addColumn(
                         new TextRenderer<>(to -> to.getUsedInName() == null ? "" : String.valueOf(to.getUsedInName())))
@@ -75,9 +74,8 @@ public class HWDetailsServiceNotesTab extends Div {
         idColumn.setVisible(false);
         serviceNotesGrid.setHeight("300px");
 
-        serviceNotesGrid.sort(
-                Arrays.asList(new GridSortOrder<HWServiceNoteTO>(serviceDateColumn, SortDirection.ASCENDING),
-                        new GridSortOrder<HWServiceNoteTO>(idColumn, SortDirection.ASCENDING)));
+        serviceNotesGrid.sort(Arrays.asList(new GridSortOrder<>(serviceDateColumn, SortDirection.ASCENDING),
+                new GridSortOrder<>(idColumn, SortDirection.ASCENDING)));
 
         populateServiceNotesGrid();
 
@@ -115,7 +113,7 @@ public class HWDetailsServiceNotesTab extends Div {
                 }
             }.open());
 
-            Button fixNoteBtn = componentFactory.createEditGridButton(event -> {
+            Button editNoteBtn = componentFactory.createEditGridButton(event -> {
                 if (serviceNotesGrid.getSelectedItems().isEmpty()) return;
                 new HWServiceNoteEditDialog(hwItem, serviceNotesGrid.getSelectedItems().iterator().next()) {
                     private static final long serialVersionUID = -5582822648042555576L;
@@ -134,9 +132,9 @@ public class HWDetailsServiceNotesTab extends Div {
                 hwItemPage.refreshTabLabels();
             }, serviceNotesGrid);
 
-            operationsLayout.add(deleteNoteBtn);
-            operationsLayout.add(fixNoteBtn);
             operationsLayout.add(newNoteBtn);
+            operationsLayout.add(editNoteBtn);
+            operationsLayout.add(deleteNoteBtn);
         }
     }
 
