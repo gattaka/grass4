@@ -9,7 +9,6 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridSortOrder;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -22,7 +21,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
 import cz.gattserver.grass.hw.service.HWService;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
 import cz.gattserver.grass.hw.ui.dialogs.HWServiceNoteEditDialog;
 
 public class HWDetailsServiceNotesTab extends Div {
@@ -37,12 +36,12 @@ public class HWDetailsServiceNotesTab extends Div {
     private Column<HWServiceNoteTO> serviceDateColumn;
     private Grid<HWServiceNoteTO> serviceNotesGrid;
     private HWItemTO hwItem;
-    private HWItemDetailsDialog hwItemDetailDialog;
+    private HWItemPage hwItemPage;
 
-    public HWDetailsServiceNotesTab(HWItemTO hwItem, HWItemDetailsDialog hwItemDetailDialog) {
+    public HWDetailsServiceNotesTab(HWItemTO hwItem, HWItemPage hwItemPage) {
         SpringContextHelper.inject(this);
         this.hwItem = hwItem;
-        this.hwItemDetailDialog = hwItemDetailDialog;
+        this.hwItemPage = hwItemPage;
         init();
     }
 
@@ -98,11 +97,11 @@ public class HWDetailsServiceNotesTab extends Div {
             }
         });
 
-        ComponentFactory componentFactory = new ComponentFactory();
-        HorizontalLayout operationsLayout = componentFactory.createDialogButtonLayout();
-        add(operationsLayout);
-
         if (getUser().isAdmin()) {
+            ComponentFactory componentFactory = new ComponentFactory();
+            Div operationsLayout = componentFactory.createButtonLayout();
+            add(operationsLayout);
+
             Button newNoteBtn = componentFactory.createCreateButton(e -> new HWServiceNoteEditDialog(hwItem) {
                 private static final long serialVersionUID = -5582822648042555576L;
 
@@ -110,8 +109,8 @@ public class HWDetailsServiceNotesTab extends Div {
                 protected void onSuccess(HWServiceNoteTO noteDTO) {
                     hwItem.getServiceNotes().add(noteDTO);
                     populateServiceNotesGrid();
-                    hwItemDetailDialog.refreshItem();
-                    hwItemDetailDialog.switchServiceNotesTab();
+                    hwItemPage.refreshItem();
+                    hwItemPage.switchServiceNotesTab();
                     serviceNotesGrid.select(noteDTO);
                 }
             }.open());
@@ -132,14 +131,13 @@ public class HWDetailsServiceNotesTab extends Div {
                 getHWService().deleteServiceNote(item, hwItem.getId());
                 hwItem.getServiceNotes().remove(item);
                 populateServiceNotesGrid();
-                hwItemDetailDialog.refreshTabLabels();
+                hwItemPage.refreshTabLabels();
             }, serviceNotesGrid);
 
             operationsLayout.add(deleteNoteBtn);
             operationsLayout.add(fixNoteBtn);
             operationsLayout.add(newNoteBtn);
         }
-        operationsLayout.add(componentFactory.createStornoButton(e -> hwItemDetailDialog.close()));
     }
 
     private void populateServiceNotesGrid() {

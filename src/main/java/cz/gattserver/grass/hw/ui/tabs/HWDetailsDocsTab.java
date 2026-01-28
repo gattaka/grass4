@@ -2,7 +2,6 @@ package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.IOException;
 
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -10,6 +9,7 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,7 +26,6 @@ import cz.gattserver.grass.hw.HWConfiguration;
 import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 
 public class HWDetailsDocsTab extends Div {
 
@@ -38,13 +37,13 @@ public class HWDetailsDocsTab extends Div {
     private transient SecurityService securityFacade;
 
     private HWItemTO hwItem;
-    private HWItemDetailsDialog hwItemDetailDialog;
+    private HWItemPage hwItemPage;
     private Grid<HWItemFileTO> docsGrid;
 
-    public HWDetailsDocsTab(HWItemTO hwItem, HWItemDetailsDialog hwItemDetailDialog) {
+    public HWDetailsDocsTab(HWItemTO hwItem, HWItemPage hwItemPage) {
         SpringContextHelper.inject(this);
         this.hwItem = hwItem;
-        this.hwItemDetailDialog = hwItemDetailDialog;
+        this.hwItemPage = hwItemPage;
         init();
     }
 
@@ -93,7 +92,7 @@ public class HWDetailsDocsTab extends Div {
                             hwItem.getId());
                     // refresh listu
                     populateDocsGrid();
-                    hwItemDetailDialog.refreshTabLabels();
+                    hwItemPage.refreshTabLabels();
                 } catch (IOException e) {
                     String msg = "Nezdařilo se uložit soubor";
                     logger.error(msg, e);
@@ -108,7 +107,7 @@ public class HWDetailsDocsTab extends Div {
         });
 
         ComponentFactory componentFactory = new ComponentFactory();
-        HorizontalLayout operationsLayout = componentFactory.createDialogButtonLayout();
+        Div operationsLayout = componentFactory.createButtonLayout();
         add(operationsLayout);
 
         operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadDocument(item), docsGrid));
@@ -117,10 +116,9 @@ public class HWDetailsDocsTab extends Div {
             Button deleteBtn = componentFactory.createDeleteGridButton(item -> {
                 getHWService().deleteHWItemDocumentsFile(hwItem.getId(), item.getName());
                 populateDocsGrid();
-                hwItemDetailDialog.refreshTabLabels();
+                hwItemPage.refreshTabLabels();
             }, docsGrid);
             operationsLayout.add(deleteBtn);
         }
-        operationsLayout.add(componentFactory.createStornoButton(e -> hwItemDetailDialog.close()));
     }
 }

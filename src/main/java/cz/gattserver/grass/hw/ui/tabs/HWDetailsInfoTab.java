@@ -18,6 +18,8 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
+import cz.gattserver.grass.hw.ui.pages.HWPage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +49,6 @@ import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemEditDialog;
 
 public class HWDetailsInfoTab extends Div {
@@ -64,15 +65,14 @@ public class HWDetailsInfoTab extends Div {
 
     private VerticalLayout hwImageLayout;
     private HWItemTO hwItem;
-    private HWItemDetailsDialog hwItemDetailDialog;
+
     private HWItemsTab itemsTab;
 
-    public HWDetailsInfoTab(HWItemsTab itemsTab, HWItemTO hwItem, HWItemDetailsDialog hwItemDetailDialog) {
+    public HWDetailsInfoTab(HWItemsTab itemsTab, HWItemTO hwItem) {
         SpringContextHelper.inject(this);
         setHeightFull();
         this.itemsTab = itemsTab;
         this.hwItem = hwItem;
-        this.hwItemDetailDialog = hwItemDetailDialog;
         init();
     }
 
@@ -181,11 +181,8 @@ public class HWDetailsInfoTab extends Div {
             tableLayout.add(new Span("-"));
         } else {
             // Samotný button se stále roztahoval, bez ohledu na nastavený width
-            Div usedInBtn = componentFactory.createInlineButton(hwItem.getUsedIn().getName(), e -> {
-                hwItemDetailDialog.close();
-                new HWItemDetailsDialog(itemsTab,
-                        SpringContextHelper.getBean(HWService.class).getHWItem(hwItem.getUsedIn().getId())).open();
-            });
+            Div usedInBtn = componentFactory.createInlineButton(hwItem.getUsedIn().getName(),
+                    e -> UI.getCurrent().navigate(HWItemPage.class, hwItem.getUsedIn().getId()));
             tableLayout.add(usedInBtn);
         }
         tableLayout.setColSpan(5);
@@ -208,13 +205,9 @@ public class HWDetailsInfoTab extends Div {
             }
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
-        grid.addColumn(
-                new ComponentRenderer<>(c -> componentFactory.createInlineButton(createShortName(c.getName()), e -> {
-                    hwItemDetailDialog.close();
-                    HWItemTO detailTO = hwService.getHWItem(c.getId());
-                    new HWItemDetailsDialog(itemsTab,
-                            SpringContextHelper.getBean(HWService.class).getHWItem(detailTO.getId())).open();
-                }))).setHeader("Název součásti").setFlexGrow(100);
+        grid.addColumn(new ComponentRenderer<>(c -> componentFactory.createInlineButton(createShortName(c.getName()),
+                        e -> UI.getCurrent().navigate(HWItemPage.class, c.getId())))).setHeader("Název součásti")
+                .setFlexGrow(100);
 
         // kontrola na null je tady jenom proto, aby při selectu (kdy se udělá
         // nový objekt a dá se mu akorát ID, které se porovnává) aplikace
@@ -236,21 +229,19 @@ public class HWDetailsInfoTab extends Div {
         descriptionDiv.setText(hwItem.getDescription());
         add(descriptionDiv);
 
-        HorizontalLayout operationsLayout = componentFactory.createDialogButtonLayout();
-        add(operationsLayout);
-
         if (getUser().isAdmin()) {
+            Div operationsLayout = componentFactory.createButtonLayout();
+            add(operationsLayout);
+
             final Button fixBtn = componentFactory.createEditButton(
-                    e -> new HWItemEditDialog(hwService.getHWItem(hwItem.getId()), to -> {
-                        hwItemDetailDialog.refreshItem();
-                        hwItemDetailDialog.switchInfoTab();
-                    }).open());
+                    e -> new HWItemEditDialog(hwService.getHWItem(hwItem.getId()),
+                            to -> UI.getCurrent().getPage().reload()).open());
             operationsLayout.add(fixBtn);
 
             final Button deleteBtn = componentFactory.createDeleteButton(ev -> {
                 try {
                     hwService.deleteHWItem(hwItem.getId());
-                    hwItemDetailDialog.close();
+                    UI.getCurrent().navigate(HWPage.class);
                     itemsTab.populate();
                 } catch (Exception ex) {
                     new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
@@ -258,7 +249,6 @@ public class HWDetailsInfoTab extends Div {
             });
             operationsLayout.add(deleteBtn);
         }
-        operationsLayout.add(componentFactory.createStornoButton(e -> hwItemDetailDialog.close()));
     }
 
     private void createHWImageOrUpload(final HWItemTO hwItem) {
@@ -288,13 +278,13 @@ public class HWDetailsInfoTab extends Div {
         btnLayout.setPadding(false);
         hwImageLayout.add(btnLayout);
 
-        Button hwItemImageDetailBtn = new Button("Detail",
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Button hwItemImageDetailBtn = componentFactory.createDetailButton(
                 e -> UI.getCurrent().getPage().open(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/icon/show"));
-        hwItemImageDetailBtn.setIcon(ImageIcon.SEARCH_16_ICON.createImage("detail"));
         btnLayout.add(hwItemImageDetailBtn);
 
         if (getUser().isAdmin()) {
-            ComponentFactory componentFactory = new ComponentFactory();
             Button hwItemImageDeleteBtn = componentFactory.createDeleteButton(e -> {
                 hwService.deleteHWItemIconFile(hwItem.getId());
                 createHWItemImageUpload(hwItem);

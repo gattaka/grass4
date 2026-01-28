@@ -21,13 +21,14 @@
     font-family: monospace;
     font-size: 10pt;
     tab-size: 4;
+    background: #fefefe;
 }
 
 .hw-photos-div {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 45px;
 }
 
 .hw-photos-div-item {

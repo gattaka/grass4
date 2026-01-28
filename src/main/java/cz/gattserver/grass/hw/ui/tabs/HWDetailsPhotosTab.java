@@ -1,7 +1,6 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -14,12 +13,10 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
-import cz.gattserver.grass.pg.util.PGUtils;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.upload.Upload;
@@ -28,7 +25,6 @@ import cz.gattserver.grass.hw.HWConfiguration;
 import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
@@ -44,13 +40,13 @@ public class HWDetailsPhotosTab extends Div {
     private transient SecurityService securityFacade;
 
     private HWItemTO hwItem;
-    private HWItemDetailsDialog hwItemDetailDialog;
     private Div containerDiv;
+    private HWItemPage hwItemPage;
 
-    public HWDetailsPhotosTab(HWItemTO hwItem, HWItemDetailsDialog hwItemDetailDialog) {
+    public HWDetailsPhotosTab(HWItemTO hwItem, HWItemPage hwItemPage) {
         SpringContextHelper.inject(this);
         this.hwItem = hwItem;
-        this.hwItemDetailDialog = hwItemDetailDialog;
+        this.hwItemPage = hwItemPage;
         init();
     }
 
@@ -81,7 +77,7 @@ public class HWDetailsPhotosTab extends Div {
                     getHWService().saveImagesFile(buffer.getInputStream(event.getFileName()), event.getFileName(),
                             hwItem);
                     populateImages();
-                    hwItemDetailDialog.refreshTabLabels();
+                    hwItemPage.refreshTabLabels();
                 } catch (IOException e) {
                     String msg = "Nezdařilo se uložit obrázek";
                     logger.error(msg, e);
@@ -91,9 +87,6 @@ public class HWDetailsPhotosTab extends Div {
             add(upload);
         }
         populateImages();
-
-        ComponentFactory componentFactory = new ComponentFactory();
-        add(componentFactory.createDialogStornoLayout(e -> hwItemDetailDialog.close()));
     }
 
     private void populateImages() {
@@ -131,7 +124,7 @@ public class HWDetailsPhotosTab extends Div {
                 Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
                     getHWService().deleteHWItemImagesFile(hwItem.getId(), item.getName());
                     populateImages();
-                    hwItemDetailDialog.refreshTabLabels();
+                    hwItemPage.refreshTabLabels();
                 }).open());
                 deleteButton.getStyle().set("color", "red");
                 buttonLayout.add(deleteButton);
@@ -152,7 +145,7 @@ public class HWDetailsPhotosTab extends Div {
         ImageSlideshow<HWItemFileTO> slideshow =
                 new ImageSlideshow<>(images.size(), pageUpdateListener, itemByIndexProvider, itemPathProvider,
                         itemPathProvider);
-        add(slideshow);
+        hwItemPage.add(slideshow);
         slideshow.showItem(index);
     }
 

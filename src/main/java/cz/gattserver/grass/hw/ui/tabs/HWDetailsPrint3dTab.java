@@ -10,6 +10,7 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.stlviewer.STLViewer;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +28,6 @@ import cz.gattserver.grass.hw.HWConfiguration;
 import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 
 public class HWDetailsPrint3dTab extends Div {
 
@@ -39,15 +39,15 @@ public class HWDetailsPrint3dTab extends Div {
     private transient SecurityService securityFacade;
 
     private HWItemTO hwItem;
-    private HWItemDetailsDialog hwItemDetailDialog;
+    private HWItemPage hwItemPage;
     private Grid<HWItemFileTO> print3dGrid;
 
     private STLViewer stlViewer;
 
-    public HWDetailsPrint3dTab(HWItemTO hwItem, HWItemDetailsDialog hwItemDetailDialog) {
+    public HWDetailsPrint3dTab(HWItemTO hwItem, HWItemPage hwItemPage) {
         SpringContextHelper.inject(this);
         this.hwItem = hwItem;
-        this.hwItemDetailDialog = hwItemDetailDialog;
+        this.hwItemPage = hwItemPage;
         init();
     }
 
@@ -111,7 +111,7 @@ public class HWDetailsPrint3dTab extends Div {
                             hwItem.getId());
                     // refresh listu
                     populatePrint3dGrid();
-                    hwItemDetailDialog.refreshTabLabels();
+                    hwItemPage.refreshTabLabels();
                 } catch (IOException e) {
                     String msg = "Nezdařilo se uložit soubor";
                     logger.error(msg, e);
@@ -132,22 +132,19 @@ public class HWDetailsPrint3dTab extends Div {
         });
 
         ComponentFactory componentFactory = new ComponentFactory();
-        HorizontalLayout operationsLayout = componentFactory.createDialogButtonLayout();
+        Div operationsLayout = componentFactory.createButtonLayout();
         add(operationsLayout);
 
-        operationsLayout.addToStart(
-                componentFactory.createDownloadGridButton(item -> downloadPrint3d(item), print3dGrid));
+        operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadPrint3d(item), print3dGrid));
 
         if (getUser().isAdmin()) {
             Button deleteBtn = componentFactory.createDeleteGridButton(item -> {
                 getHWService().deleteHWItemPrint3dFile(hwItem.getId(), item.getName());
                 populatePrint3dGrid();
-                hwItemDetailDialog.refreshTabLabels();
+                hwItemPage.refreshTabLabels();
             }, print3dGrid);
             operationsLayout.add(deleteBtn);
         }
-
-        operationsLayout.add(componentFactory.createStornoButton(e -> hwItemDetailDialog.close()));
     }
 
 }

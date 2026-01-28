@@ -9,6 +9,7 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemPage;
 import cz.gattserver.grass.hw.ui.pages.HWPage;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,7 +20,6 @@ import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWItemsGrid;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemDetailsDialog;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemEditDialog;
 
 import java.util.Map;
@@ -35,9 +35,11 @@ public class HWItemsTab extends Div {
     private SecurityService securityFacade;
 
     private HWItemsGrid itemsGrid;
+    private HWPage hwPage;
 
-    public HWItemsTab() {
+    public HWItemsTab(HWPage hwPage) {
         SpringContextHelper.inject(this);
+        this.hwPage = hwPage;
 
         itemsGrid = new HWItemsGrid(to -> navigateToDetail(to.getId()));
         itemsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -106,22 +108,11 @@ public class HWItemsTab extends Div {
 
     public void navigateToDetail(Long id) {
         Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(itemsGrid.getFilterTO());
-        UI.getCurrent().navigate(HWPage.class, id, QueryParameters.simple(filterQuery));
+        UI.getCurrent().navigate(HWItemPage.class, id, QueryParameters.simple(filterQuery));
     }
 
     public void openDetailWindow(Long id) {
-        new HWItemDetailsDialog(HWItemsTab.this,
-                SpringContextHelper.getBean(HWService.class).getHWItem(id)).setOnRefreshListener(
-                to -> itemsGrid.getGrid().getSelectedItems().forEach(item -> {
-                    if (item.getId().equals(id)) {
-                        item.setName(to.getName());
-                        item.setState(to.getState());
-                        item.setUsedInName(to.getUsedInName());
-                        item.setSupervizedFor(to.getSupervizedFor());
-                        item.setPrice(to.getPrice());
-                        item.setPurchaseDate(to.getPurchaseDate());
-                    }
-                })).open();
+        UI.getCurrent().navigate(HWItemPage.class, id);
     }
 
     public void populate() {

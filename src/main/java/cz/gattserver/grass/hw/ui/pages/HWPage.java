@@ -86,7 +86,7 @@ public class HWPage extends OneColumnPage implements HasUrlParameter<Long> {
 		pageLayout = new Div();
 		layout.add(pageLayout);
 
-		itemsTab = new HWItemsTab();
+		itemsTab = new HWItemsTab(this);
 
 		tabSheet.addSelectedChangeListener(e -> {
 			pageLayout.removeAll();
