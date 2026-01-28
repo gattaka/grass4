@@ -16,7 +16,10 @@
 }
 
 .tag-labels a {
+    display: inline-block;
     text-decoration: none;
+    word-wrap: break-word;
+    padding: 0 5px 2px 0;
 }
 
 .tag-labels a:hover {

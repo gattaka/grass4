@@ -28,9 +28,6 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.util.List;
 
-@Route("")
-@RouteAlias("home")
-@PageTitle("Gattserver")
 @JsModule("context://js/jquery.js")
 public class MainView extends Div implements AfterNavigationObserver, RouterLayout {
 
