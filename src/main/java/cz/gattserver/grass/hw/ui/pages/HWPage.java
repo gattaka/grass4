@@ -6,7 +6,10 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.*;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.hw.HWSection;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
@@ -19,102 +22,64 @@ import org.apache.logging.log4j.util.Strings;
 
 import java.util.*;
 
-@Route("hw")
 @PageTitle("Evidence HW")
-public class HWPage extends OneColumnPage implements HasUrlParameter<Long> {
+@Route(value = "hw", layout = MainView.class)
+public class HWPage extends Div implements HasUrlParameter<Long> {
 
-	private static final long serialVersionUID = 3983638941237624740L;
+    private static final long serialVersionUID = 3983638941237624740L;
 
-	private Tabs tabSheet;
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter Long parameter) {
+        SecurityService securityService = SpringContextHelper.getBean(SecurityService.class);
+        if (!SpringContextHelper.getBean(HWSection.class)
+                .isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
 
-	private Tab overviewTab;
-	private Tab typesTab;
+        removeAll();
+        ComponentFactory  componentFactory = new ComponentFactory();
 
-	private HWItemsTab itemsTab;
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
-	private Div layout;
-	private Div pageLayout;
-	private Long idParameter;
+        Tabs tabSheet = new Tabs();
+        layout.add(tabSheet);
+        Tab overviewTab = new Tab("Přehled");
+        tabSheet.add(overviewTab);
 
-	@Override
-	public void setParameter(BeforeEvent event, @OptionalParameter Long parameter) {
-		if (!SpringContextHelper.getBean(HWSection.class).isVisibleForRoles(getUser().getRoles()))
-			throw new GrassPageException(403);
+        if (securityService.getCurrentUser().isAdmin()) {
+            Tab typesTab = new Tab("Typy zařízení");
+            tabSheet.add(typesTab);
+        }
 
-		idParameter = parameter;
-		if (layout == null) {
-			init();
-		} else {
-			layout.removeAll();
-			createContent();
-		}
+        Div tabLayout = new Div();
+        layout.add(tabLayout);
 
-		Location location = event.getLocation();
-		QueryParameters queryParameters = location.getQueryParameters();
+        HWItemsTab itemsTabContent = new HWItemsTab(this);
 
-		Map<String, List<String>> parametersMap = queryParameters
-				.getParameters();
-		HWFilterTO filterTO = HWUIUtils.processToQueryFilter(parametersMap);
+        tabSheet.addSelectedChangeListener(e -> {
+            tabLayout.removeAll();
+            switch (tabSheet.getSelectedIndex()) {
+                default:
+                case 0:
+                    tabLayout.add(itemsTabContent);
+                    break;
+                case 1:
+                    tabLayout.add(new HWTypesTab());
+                    break;
+            }
+        });
+        tabLayout.add(itemsTabContent);
 
-		itemsTab.search(filterTO);
+        Location location = event.getLocation();
+        QueryParameters queryParameters = location.getQueryParameters();
 
-		if (idParameter != null) {
-			itemsTab.select(idParameter);
-			itemsTab.openDetailWindow(idParameter);
-		}
-	}
+        Map<String, List<String>> parametersMap = queryParameters.getParameters();
+        HWFilterTO filterTO = HWUIUtils.processToQueryFilter(parametersMap);
 
-	@Override
-	protected void createColumnContent(Div contentLayout) {
-		layout = new Div();
-		contentLayout.add(layout);
-		createContent();
-	}
+        itemsTabContent.search(filterTO);
 
-	private void createContent() {
-		tabSheet = new Tabs();
-		layout.add(tabSheet);
-
-		overviewTab = new Tab("Přehled");
-		tabSheet.add(overviewTab);
-
-		if (getUser().isAdmin()) {
-			typesTab = new Tab("Typy zařízení");
-			tabSheet.add(typesTab);
-		}
-
-		pageLayout = new Div();
-		layout.add(pageLayout);
-
-		itemsTab = new HWItemsTab(this);
-
-		tabSheet.addSelectedChangeListener(e -> {
-			pageLayout.removeAll();
-			switch (tabSheet.getSelectedIndex()) {
-				default:
-				case 0:
-					switchOverviewTab();
-					break;
-				case 1:
-					switchTypesTab();
-					break;
-			}
-		});
-		switchOverviewTab();
-	}
-
-	private HWItemsTab switchOverviewTab() {
-		pageLayout.removeAll();
-		pageLayout.add(itemsTab);
-		tabSheet.setSelectedTab(overviewTab);
-		return itemsTab;
-	}
-
-	private HWTypesTab switchTypesTab() {
-		pageLayout.removeAll();
-		HWTypesTab tab = new HWTypesTab();
-		pageLayout.add(tab);
-		tabSheet.setSelectedTab(typesTab);
-		return tab;
-	}
+        if (parameter != null) {
+            itemsTabContent.select(parameter);
+            itemsTabContent.openDetailWindow(parameter);
+        }
+    }
 }

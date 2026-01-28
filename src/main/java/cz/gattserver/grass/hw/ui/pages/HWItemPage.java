@@ -5,14 +5,15 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.router.internal.HasUrlParameterFormat;
-import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.Breadcrumb;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.pages.factories.HWPageFactory;
@@ -25,8 +26,8 @@ import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
 
 import java.util.function.Consumer;
 
-@Route("hw-item")
-public class HWItemPage extends OneColumnPage implements HasUrlParameter<Long>, HasDynamicTitle {
+@Route(value = "hw-item", layout = MainView.class)
+public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
     private static final long serialVersionUID = -6773027334692911384L;
 
@@ -47,8 +48,6 @@ public class HWItemPage extends OneColumnPage implements HasUrlParameter<Long>, 
 
     private Consumer<HWItemTO> onRefreshListener;
 
-    private Div layout;
-
     public HWItemPage(HWService hwService) {
         this.hwService = hwService;
     }
@@ -67,17 +66,16 @@ public class HWItemPage extends OneColumnPage implements HasUrlParameter<Long>, 
                         .contains(CoreRole.ADMIN))
             throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
 
-        init();
-    }
+        removeAll();
 
-    @Override
-    protected void createColumnContent(Div layout) {
-        this.layout = layout;
+        ComponentFactory componentFactory = new ComponentFactory();
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
         Breadcrumb breadcrumb = new Breadcrumb();
-
         breadcrumb.resetBreadcrumb(new Breadcrumb.BreadcrumbElement(hwItem.getName(), HWItemPage.class, hwItem.getId()),
-                new Breadcrumb.BreadcrumbElement("HW list", HWPage.class)); layout.add(breadcrumb);
+                new Breadcrumb.BreadcrumbElement("HW list", HWPage.class));
+        layout.add(breadcrumb);
 
         infoTab = new Tab("Info");
         serviceNotesTab = new Tab(createServiceNotesTabLabel());
@@ -87,6 +85,7 @@ public class HWItemPage extends OneColumnPage implements HasUrlParameter<Long>, 
 
         tabs = new Tabs();
         tabs.add(infoTab, serviceNotesTab, photosTab, print3dTab, docsTab);
+        tabs.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(tabs);
 
         tabLayout = new Div();

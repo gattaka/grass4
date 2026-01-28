@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Hynek
  */
+@Deprecated
 public abstract class GrassPage extends Div {
 
 	private static final long serialVersionUID = 7952966362953000385L;

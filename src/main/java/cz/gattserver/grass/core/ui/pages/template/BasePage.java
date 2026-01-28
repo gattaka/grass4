@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 
+@Deprecated
 public abstract class BasePage extends MenuPage {
 
 	private static final long serialVersionUID = -2685924539988484100L;

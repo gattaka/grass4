@@ -27,6 +27,7 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.server.VaadinRequest;
 
+@Deprecated
 public abstract class MenuPage extends GrassPage {
 
     private static final long serialVersionUID = 8095742933880807949L;
@@ -48,23 +49,11 @@ public abstract class MenuPage extends GrassPage {
     @Autowired
     protected SecurityService securityService;
 
-    @Resource(name = "homePageFactory")
-    protected PageFactory homePageFactory;
-
     @Resource(name = "nodePageFactory")
     protected PageFactory nodePageFactory;
 
-    @Resource(name = "loginPageFactory")
-    protected PageFactory loginPageFactory;
-
     @Resource(name = "settingsPageFactory")
     protected PageFactory settingsPageFactory;
-
-    @Resource(name = "registrationPageFactory")
-    protected PageFactory registrationPageFactory;
-
-    @Resource(name = "quotesPageFactory")
-    protected PageFactory quotesPageFactory;
 
     @Override
     protected void createPageElements(Div payload) {

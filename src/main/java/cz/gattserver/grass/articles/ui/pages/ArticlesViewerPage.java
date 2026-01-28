@@ -14,6 +14,7 @@ import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.js.JScriptItem;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.ContentViewerPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -61,7 +62,7 @@ public class ArticlesViewerPage extends ContentViewerPage implements HasUrlParam
 		// vyřešit stav, ve kterém existuje takovýto nezobrazitelný obsah
 		if (article.getContentNode() == null) {
 			articleFacade.deleteArticle(article.getId(), true);
-			UIUtils.redirect(getPageURL(homePageFactory.getPageName()));
+            UI.getCurrent().navigate(MainView.class);
 		}
 
 		if (!article.getContentNode().isPublicated() && !getUser().isAdmin()

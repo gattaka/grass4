@@ -2,6 +2,7 @@ package cz.gattserver.grass.core.ui.pages.template;
 
 import com.vaadin.flow.component.html.Div;
 
+@Deprecated
 public abstract class OneColumnPage extends BasePage {
 
 	private static final long serialVersionUID = 5541555440277025949L;

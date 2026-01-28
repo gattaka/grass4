@@ -4,8 +4,6 @@ import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 
 public interface PageFactoriesRegister {
 
-	public void setHomepageFactory(PageFactory homepageFactory);
-
 	/**
 	 * Dělá prakticky to samé jako původní get, až na to, že pakliže není
 	 * nalezena factory pro daný klíč, je vrácena factory homepage

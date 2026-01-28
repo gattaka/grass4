@@ -34,10 +34,6 @@ import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
-@Route("")
-@RouteAlias("home")
-//@JsModule("themes/grass/custom.js")
-@PageTitle("Gattserver")
 public class HomePage extends OneColumnPage {
 
 	private static final long serialVersionUID = 3100924667157515504L;

@@ -40,4 +40,12 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 5px;
+    font-family: var(--aura-font-family);
+    font-size: 12px;
+}
+
+.hw-photos-div-item div {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
 }

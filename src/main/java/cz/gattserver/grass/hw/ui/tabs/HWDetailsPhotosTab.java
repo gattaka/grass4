@@ -6,6 +6,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.slideshow.ImageSlideshow;
@@ -108,6 +109,8 @@ public class HWDetailsPhotosTab extends Div {
                     getHWService().getHWItemImagesMiniFileInputStream(hwItem.getId(), item.getName()), item.getName(),
                     null, -1)), item.getName());
             itemDiv.add(img);
+
+            itemDiv.add(new Span(item.getName()));
 
             int finalIndex = i;
             img.addClickListener(e -> showItem(images, finalIndex));

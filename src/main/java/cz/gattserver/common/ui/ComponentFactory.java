@@ -296,6 +296,12 @@ public class ComponentFactory {
         return createButtonLayout(true);
     }
 
+    public Div createOneColumnLayout() {
+        Div contentLayout = new Div();
+        contentLayout.setId("center-content");
+        return contentLayout;
+    }
+
     /*
      * Dialogy
      */
