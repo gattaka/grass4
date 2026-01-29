@@ -12,7 +12,6 @@ import com.vaadin.flow.data.renderer.IconRenderer;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
-import cz.gattserver.grass.core.ui.pages.template.MenuPage;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
@@ -22,7 +21,7 @@ public class NewContentNodeGrid extends Grid<ContentModule> {
 
 	private static final long serialVersionUID = -2220485504407844582L;
 
-	public NewContentNodeGrid(MenuPage page, final NodeTO node) {
+	public NewContentNodeGrid(final NodeTO node) {
 		// inject nefunguje kvůli něčemu v předkovi
 		final ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);
 

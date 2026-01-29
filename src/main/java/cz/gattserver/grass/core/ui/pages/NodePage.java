@@ -3,6 +3,8 @@ package cz.gattserver.grass.core.ui.pages;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.vaadin.flow.component.UI;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
@@ -10,8 +12,10 @@ import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.grass.core.services.CoreACLService;
+import cz.gattserver.grass.core.services.NodeService;
+import cz.gattserver.grass.core.services.SecurityService;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -29,59 +33,42 @@ import cz.gattserver.grass.core.ui.components.Breadcrumb;
 import cz.gattserver.grass.core.ui.components.ContentsLazyGrid;
 import cz.gattserver.grass.core.ui.components.NewContentNodeGrid;
 import cz.gattserver.grass.core.ui.components.NodesGrid;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
-@Route("category")
-public class NodePage extends OneColumnPage implements HasUrlParameter<String>, HasDynamicTitle {
+@Route(value = "category", layout = MainView.class)
+public class NodePage extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
     private static final long serialVersionUID = 1560125362904332256L;
 
-    @Autowired
-    private ContentNodeService contentNodeFacade;
+    private ContentNodeService contentNodeService;
+    private NodeService nodeService;
+    private CoreACLService coreACLService;
+    private SecurityService securityService;
 
     private TextField searchField;
 
-    // Přehled podkategorií
-    private NodesGrid subNodesTable;
-
     private NodeTO node;
 
-    private String categoryParameter;
-
-    private Div layout;
-
-    private BeforeEvent beforeEvent;
+    public NodePage(ContentNodeService contentNodeService, NodeService nodeService, CoreACLService coreACLService,
+                    SecurityService securityService) {
+        this.contentNodeService = contentNodeService;
+        this.nodeService = nodeService;
+        this.coreACLService = coreACLService;
+        this.securityService = securityService;
+    }
 
     @Override
     public void setParameter(BeforeEvent event, String parameter) {
-        beforeEvent = event;
-        categoryParameter = parameter;
-        if (layout == null) {
-            init();
-        } else {
-            layout.removeAll();
-            createContent();
-        }
-    }
-
-    @Override
-    public String getPageTitle() {
-        return node.getName();
-    }
-
-    @Override
-    protected void createColumnContent(Div contentLayout) {
-        layout = new Div();
-        contentLayout.add(layout);
-        createContent();
-    }
-
-    private void createContent() {
-        URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(categoryParameter);
+        URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(parameter);
         if (identifier == null) throw new GrassPageException(404);
 
-        node = nodeFacade.getNodeByIdForDetail(identifier.getId());
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
+
+        node = nodeService.getNodeByIdForDetail(identifier.getId());
 
         // Navigační breadcrumb
         createBreadcrumb(layout, node);
@@ -94,6 +81,7 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
     }
 
     private void createNewNodePanel(Div layout, final NodeTO node) {
+        ComponentFactory componentFactory = new ComponentFactory();
         Div buttonLayout = componentFactory.createButtonLayout();
         buttonLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(buttonLayout);
@@ -115,11 +103,12 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
                 .bind(NodeOverviewTO::getName, NodeOverviewTO::setName);
         binder.setBean(to);
 
+        ComponentFactory componentFactory = new ComponentFactory();
         HorizontalLayout saveCloseLayout = componentFactory.createDialogSubmitOrStornoLayout(event -> {
             if (binder.validate().isOk()) {
-                Long newNodeId = nodeFacade.createNewNode(parentNode.getId(), to.getName());
-                UIUtils.redirect(
-                        getPageURL(nodePageFactory, URLIdentifierUtils.createURLIdentifier(newNodeId, to.getName())));
+                Long newNodeId = nodeService.createNewNode(parentNode.getId(), to.getName());
+                UI.getCurrent()
+                        .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(newNodeId, to.getName()));
                 dialog.close();
             }
         }, event -> dialog.close());
@@ -142,8 +131,8 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
             // nejprve zkus zjistit, zda předek existuje
             if (parent == null) throw new GrassPageException(404);
 
-            breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(parent.getName(), getPageURL(nodePageFactory,
-                    URLIdentifierUtils.createURLIdentifier(parent.getId(), parent.getName()))));
+            breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(parent.getName(), NodePage.class,
+                    URLIdentifierUtils.createURLIdentifier(parent.getId(), parent.getName())));
 
             // pokud je můj předek null, pak je to konec a je to všechno
             if (parent.getParent() == null) break;
@@ -155,23 +144,18 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
     }
 
     private void createSubnodesPart(Div layout, NodeTO node) {
-        subNodesTable = new NodesGrid();
-
         layout.add(new H2("Podkategorie"));
 
-        populateSubnodesTable(node);
+        List<NodeOverviewTO> nodes = nodeService.getNodesByParentNode(node.getId());
+        if (nodes == null) throw new GrassPageException(500);
+        NodesGrid subNodesTable = new NodesGrid();
+        subNodesTable.populate(nodes);
 
         layout.add(subNodesTable);
         subNodesTable.setWidthFull();
 
         // Vytvořit novou kategorii
-        if (coreACL.canCreateNode(getUser())) createNewNodePanel(layout, node);
-    }
-
-    private void populateSubnodesTable(NodeTO node) {
-        List<NodeOverviewTO> nodes = nodeFacade.getNodesByParentNode(node.getId());
-        if (nodes == null) throw new GrassPageException(500);
-        subNodesTable.populate(nodes);
+        if (coreACLService.canCreateNode(securityService.getCurrentUser())) createNewNodePanel(layout, node);
     }
 
     private ContentNodeFilterTO createFilterTO() {
@@ -192,21 +176,26 @@ public class NodePage extends OneColumnPage implements HasUrlParameter<String>, 
         searchResultsTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(searchResultsTable);
 
-        searchResultsTable.populate(getUser().getId() != null,
-                q -> contentNodeFacade.getByFilter(createFilterTO(), q.getOffset(), q.getLimit()).stream(),
-                q -> contentNodeFacade.getCountByFilter(createFilterTO()));
+        searchResultsTable.populate(securityService.getCurrentUser().getId() != null,
+                q -> contentNodeService.getByFilter(createFilterTO(), q.getOffset(), q.getLimit()).stream(),
+                q -> contentNodeService.getCountByFilter(createFilterTO()));
 
         searchField.addValueChangeListener(e -> searchResultsTable.getDataProvider().refreshAll());
 
         // Vytvořit obsahy
-        if (coreACL.canCreateContent(getUser())) createNewContentMenu(layout, node);
+        if (coreACLService.canCreateContent(securityService.getCurrentUser())) createNewContentMenu(layout, node);
     }
 
     private void createNewContentMenu(Div layout, NodeTO node) {
         layout.add(new H2("Vytvořit nový obsah"));
-        NewContentNodeGrid newContentsTable = new NewContentNodeGrid(NodePage.this, node);
+        NewContentNodeGrid newContentsTable = new NewContentNodeGrid(node);
         layout.add(newContentsTable);
         newContentsTable.setWidthFull();
+    }
+
+    @Override
+    public String getPageTitle() {
+        return node.getName();
     }
 
 }
