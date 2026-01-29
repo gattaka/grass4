@@ -6,7 +6,7 @@ import cz.gattserver.grass.books.model.interfaces.BookTO;
 
 import java.util.List;
 
-public interface BooksFacade {
+public interface BooksService {
 
 	/**
 	 * Smaže knihu

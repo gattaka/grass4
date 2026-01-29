@@ -1,7 +1,7 @@
 package cz.gattserver.grass.books.facades.impl;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import cz.gattserver.grass.books.facades.BooksFacade;
+import cz.gattserver.grass.books.facades.BooksService;
 import cz.gattserver.grass.books.model.dao.BookRepository;
 import cz.gattserver.grass.books.model.domain.Book;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
@@ -15,7 +15,7 @@ import java.util.List;
 
 @Transactional
 @Component
-public class BooksFacadeImpl implements BooksFacade {
+public class BooksServiceImpl implements BooksService {
 
 	@Autowired
 	private BookRepository bookRepository;

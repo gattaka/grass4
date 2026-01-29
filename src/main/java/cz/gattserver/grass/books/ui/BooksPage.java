@@ -14,14 +14,15 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.grass.books.facades.BooksFacade;
+import cz.gattserver.grass.books.facades.BooksService;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
@@ -34,15 +35,14 @@ import java.io.ByteArrayInputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-@Route("books")
 @PageTitle("Knihy")
-public class BooksPage extends OneColumnPage implements HasUrlParameter<String> {
+@Route(value = "books", layout = MainView.class)
+public class BooksPage extends Div implements HasUrlParameter<String> {
 
     private static final long serialVersionUID = -5187973603822110627L;
 
     private transient SecurityService securityService;
-    private transient PageFactory booksPageFactory;
-    private transient BooksFacade booksFacade;
+    private transient BooksService booksService;
 
     private Image image;
     private Div dataDiv;
@@ -54,31 +54,19 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
 
     private CallbackDataProvider<BookOverviewTO, BookOverviewTO> dataProvider;
 
-    private String parameter;
-
-    private Div layout;
+    public BooksPage(SecurityService securityService, BooksService booksService) {
+        this.securityService = securityService;
+        this.booksService = booksService;
+    }
 
     @Override
     public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
-        this.parameter = parameter;
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-        if (layout == null) {
-            init();
-            loadCSS(getContextPath() + "/books/style.css");
-        } else {
-            layout.removeAll();
-            createContent();
-        }
-    }
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
-    @Override
-    protected void createColumnContent(Div contentLayout) {
-        layout = new Div();
-        contentLayout.add(layout);
-        createContent();
-    }
-
-    private void createContent() {
         filterTO = new BookOverviewTO();
         grid = createGrid(filterTO);
         UIUtils.applyGrassDefaultStyle(grid);
@@ -105,7 +93,6 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
         imageDiv.add(image);
 
         dataDiv = new Div();
-        dataDiv.setWidthFull();
         dataDiv.setId("books-data-div");
         contentLayout.add(dataDiv);
 
@@ -122,7 +109,6 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
     }
 
     protected Grid<BookOverviewTO> createGrid(final BookOverviewTO filterTO) {
-
         final Grid<BookOverviewTO> grid = new Grid<>();
         UIUtils.applyGrassDefaultStyle(grid);
         grid.setWidthFull();
@@ -134,7 +120,7 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
         Column<BookOverviewTO> nameColumn =
                 grid.addColumn(BookOverviewTO::getName).setHeader("Název").setFlexGrow(50).setAutoWidth(true)
                         .setSortProperty("name");
-        grid.addColumn(new ComponentRenderer<RatingStars, BookOverviewTO>(to -> {
+        grid.addColumn(new ComponentRenderer<>(to -> {
             RatingStars rs = new RatingStars();
             rs.setValue(to.getRating());
             rs.setReadOnly(true);
@@ -166,27 +152,18 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
     }
 
     protected void populateBtnLayout(Div btnLayout) {
-        btnLayout.add(componentFactory.createCreateButton(event -> new BookDialog() {
-            private static final long serialVersionUID = -4863260002363608014L;
+        ComponentFactory componentFactory = new ComponentFactory();
+        btnLayout.add(componentFactory.createCreateButton(event -> new BookDialog(to -> {
+            to = getBooksFacade().saveBook(to);
+            showDetail(to);
+            dataProvider.refreshAll();
+        }).open()));
 
-            @Override
-            protected void onSave(BookTO to) {
-                to = getBooksFacade().saveBook(to);
-                showDetail(to);
-                dataProvider.refreshAll();
-            }
-        }.open()));
-
-        btnLayout.add(componentFactory.createEditGridButton(event -> new BookDialog(choosenBook) {
-            private static final long serialVersionUID = 5264621441522056786L;
-
-            @Override
-            protected void onSave(BookTO to) {
-                to = getBooksFacade().saveBook(to);
-                showDetail(to);
-                dataProvider.refreshItem(to);
-            }
-        }.open(), grid));
+        btnLayout.add(componentFactory.createEditGridButton(event -> new BookDialog(choosenBook, to -> {
+            to = getBooksFacade().saveBook(to);
+            showDetail(to);
+            dataProvider.refreshItem(to);
+        }).open(), grid));
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (BookOverviewTO s : items)
@@ -223,7 +200,6 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
         infoLayout.add(new Breakline());
 
         HtmlDiv description = new HtmlDiv(choosenBook.getDescription().replaceAll("\n", "<br/>"));
-        description.setSizeFull();
         dataLayout.add(description);
     }
 
@@ -232,14 +208,9 @@ public class BooksPage extends OneColumnPage implements HasUrlParameter<String> 
         return securityService;
     }
 
-    protected PageFactory getBooksPageFactory() {
-        if (booksPageFactory == null) booksPageFactory = (PageFactory) SpringContextHelper.getBean("booksPageFactory");
-        return booksPageFactory;
-    }
-
-    protected BooksFacade getBooksFacade() {
-        if (booksFacade == null) booksFacade = SpringContextHelper.getBean(BooksFacade.class);
-        return booksFacade;
+    protected BooksService getBooksFacade() {
+        if (booksService == null) booksService = SpringContextHelper.getBean(BooksService.class);
+        return booksService;
     }
 
     public void selectBook(Long id) {

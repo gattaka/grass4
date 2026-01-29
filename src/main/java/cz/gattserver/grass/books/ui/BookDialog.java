@@ -28,8 +28,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Consumer;
 
-public abstract class BookDialog extends EditWebDialog {
+public class BookDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = 6803519662032576371L;
 
@@ -39,13 +40,11 @@ public abstract class BookDialog extends EditWebDialog {
 	private Upload upload;
 	private Image image;
 
-	protected abstract void onSave(BookTO to);
-
-	public BookDialog() {
-		this(null);
+	public BookDialog(Consumer<BookTO> onSave) {
+		this(null,onSave);
 	}
 
-	public BookDialog(final BookTO originalTO) {
+	public BookDialog(final BookTO originalTO, Consumer<BookTO> onSave) {
 		super("Kniha");
 
 		BookTO formTO = new BookTO();
@@ -93,10 +92,20 @@ public abstract class BookDialog extends EditWebDialog {
 		btnsLayout.setWidthFull();
 		addComponent(btnsLayout);
 
-		if (originalTO != null)
-			btnsLayout.add(componentFactory.createEditButton(event -> save(originalTO, binder)));
-		else
-			btnsLayout.add(componentFactory.createCreateButton(event -> save(originalTO, binder)));
+			btnsLayout.add(componentFactory.createSaveButton(event -> {
+                try {
+                    BookTO writeTO = originalTO == null ? new BookTO() : originalTO;
+                    binder.writeBean(writeTO);
+                    writeTO.setImage(binder.getBean().getImage());
+                    onSave.accept(writeTO);
+                    close();
+                } catch (ValidationException ve) {
+                    new ErrorDialog("Chybná vstupní data\n\n   " + ve.getValidationErrors().iterator().next().getErrorMessage())
+                            .open();
+                } catch (Exception ve) {
+                    new ErrorDialog("Uložení se nezdařilo").open();
+                }
+            }));
 
 		btnsLayout.add(componentFactory.createStornoButton(e -> close()));
 
@@ -108,21 +117,6 @@ public abstract class BookDialog extends EditWebDialog {
 
 		if (originalTO != null)
 			binder.readBean(originalTO);
-	}
-
-	private void save(BookTO originalTO, Binder<BookTO> binder) {
-		try {
-			BookTO writeTO = originalTO == null ? new BookTO() : originalTO;
-			binder.writeBean(writeTO);
-			writeTO.setImage(binder.getBean().getImage());
-			onSave(writeTO);
-			close();
-		} catch (ValidationException ve) {
-			new ErrorDialog("Chybná vstupní data\n\n   " + ve.getValidationErrors().iterator().next().getErrorMessage())
-					.open();
-		} catch (Exception ve) {
-			new ErrorDialog("Uložení se nezdařilo").open();
-		}
 	}
 
 	private void placeImage(BookTO to) {
