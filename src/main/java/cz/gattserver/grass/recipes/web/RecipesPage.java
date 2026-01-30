@@ -1,8 +1,10 @@
 package cz.gattserver.grass.recipes.web;
 
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,16 +24,12 @@ import cz.gattserver.grass.recipes.facades.RecipesService;
 import cz.gattserver.grass.recipes.model.dto.RecipeDTO;
 import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 
-@Route("recipes")
 @PageTitle("Recepty")
-public class RecipesPage extends OneColumnPage {
+@Route(value = "recipes", layout = MainView.class)
+public class RecipesPage extends Div {
 
     private static final long serialVersionUID = 1214280599196303350L;
 
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
     private RecipesService recipesService;
 
     private Grid<RecipeOverviewTO> grid;
@@ -40,21 +38,15 @@ public class RecipesPage extends OneColumnPage {
     private RecipeDTO choosenRecipe;
     private RecipeOverviewTO filterTO;
 
-    public RecipesPage() {
-        init();
-        loadCSS(getContextPath() + "/recipes/style.css");
-    }
+    public RecipesPage(RecipesService recipesService, SecurityService securityService) {
+        this.recipesService = recipesService;
 
-    private void showDetail(RecipeDTO choosenRecipe) {
-        nameLabel.setVisible(true);
-        nameLabel.setText(choosenRecipe.getName());
-        String value = recipesService.eolToBreakline(choosenRecipe.getDescription());
-        contentLabel.setValue(value);
-        this.choosenRecipe = choosenRecipe;
-    }
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-    @Override
-    protected void createColumnContent(Div layout) {
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
+
         Div recipesLayout = new Div();
         recipesLayout.setId("recipes-div");
         layout.add(recipesLayout);
@@ -133,6 +125,15 @@ public class RecipesPage extends OneColumnPage {
                 recipesService.deleteRecipe(item.getId());
             populate();
         }, grid));
+    }
+
+
+    private void showDetail(RecipeDTO choosenRecipe) {
+        nameLabel.setVisible(true);
+        nameLabel.setText(choosenRecipe.getName());
+        String value = recipesService.eolToBreakline(choosenRecipe.getDescription());
+        contentLabel.setValue(value);
+        this.choosenRecipe = choosenRecipe;
     }
 
     private void populate() {
