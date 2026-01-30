@@ -9,7 +9,10 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.medic.MedicSection;
 import cz.gattserver.grass.medic.web.tabs.MedicalInstitutionsTab;
@@ -18,109 +21,113 @@ import cz.gattserver.grass.medic.web.tabs.MedicamentsTab;
 import cz.gattserver.grass.medic.web.tabs.PhysiciansTab;
 import cz.gattserver.grass.medic.web.tabs.ScheduledVisitsTab;
 
-@Route("medic")
 @PageTitle("Medic")
-public class MedicPage extends OneColumnPage implements BeforeEnterObserver {
+@Route(value = "medic", layout = MainView.class)
+public class MedicPage extends Div implements BeforeEnterObserver {
 
-	private static final long serialVersionUID = -7969964922025344992L;
+    private static final long serialVersionUID = -7969964922025344992L;
 
-	private Tabs tabSheet;
-	private Div pageLayout;
+    private Tabs tabSheet;
+    private Div pageLayout;
 
-	private Tab scheduledVisitsTab;
-	private Tab medicalRecordsTab;
-	private Tab medicalInstitutionsTab;
-	private Tab medicamentsTab;
-	private Tab physiciansTab;
+    private Tab scheduledVisitsTab;
+    private Tab medicalRecordsTab;
+    private Tab medicalInstitutionsTab;
+    private Tab medicamentsTab;
+    private Tab physiciansTab;
 
-	public MedicPage() {
-		init();
-	}
+    private SecurityService securityService;
 
-	private ScheduledVisitsTab switchScheduledVisitsTab() {
-		pageLayout.removeAll();
-		ScheduledVisitsTab tab = new ScheduledVisitsTab();
-		pageLayout.add(tab);
-		tabSheet.setSelectedTab(scheduledVisitsTab);
-		return tab;
-	}
+    public MedicPage(SecurityService securityService) {
+        this.securityService = securityService;
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-	private MedicalRecordsTab switchMedicalRecordsTab() {
-		pageLayout.removeAll();
-		MedicalRecordsTab tab = new MedicalRecordsTab();
-		pageLayout.add(tab);
-		tabSheet.setSelectedTab(medicalRecordsTab);
-		return tab;
-	}
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
-	private MedicalInstitutionsTab switchMedicalInstitutionsTab() {
-		pageLayout.removeAll();
-		MedicalInstitutionsTab tab = new MedicalInstitutionsTab();
-		pageLayout.add(tab);
-		tabSheet.setSelectedTab(medicalInstitutionsTab);
-		return tab;
-	}
+        tabSheet = new Tabs();
+        layout.add(tabSheet);
 
-	private MedicamentsTab switchMedicamentsTab() {
-		pageLayout.removeAll();
-		MedicamentsTab tab = new MedicamentsTab();
-		pageLayout.add(tab);
-		tabSheet.setSelectedTab(medicamentsTab);
-		return tab;
-	}
+        scheduledVisitsTab = new Tab("Plánované návštěvy");
+        medicalRecordsTab = new Tab("Záznamy");
+        medicalInstitutionsTab = new Tab("Instituce");
+        medicamentsTab = new Tab("Medikamenty");
+        physiciansTab = new Tab("Doktoři");
+        tabSheet.add(scheduledVisitsTab, medicalRecordsTab, medicalInstitutionsTab, medicalInstitutionsTab,
+                medicamentsTab, physiciansTab);
 
-	private PhysiciansTab switchPhysiciansTab() {
-		pageLayout.removeAll();
-		PhysiciansTab tab = new PhysiciansTab();
-		pageLayout.add(tab);
-		tabSheet.setSelectedTab(physiciansTab);
-		return tab;
-	}
+        pageLayout = new Div();
+        layout.add(pageLayout);
 
-	@Override
-	protected void createColumnContent(Div layout) {
-		tabSheet = new Tabs();
-		layout.add(tabSheet);
+        tabSheet.addSelectedChangeListener(e -> {
+            pageLayout.removeAll();
+            switch (tabSheet.getSelectedIndex()) {
+                default:
+                case 0:
+                    switchScheduledVisitsTab();
+                    break;
+                case 1:
+                    switchMedicalRecordsTab();
+                    break;
+                case 2:
+                    switchMedicalInstitutionsTab();
+                    break;
+                case 3:
+                    switchMedicamentsTab();
+                    break;
+                case 4:
+                    switchPhysiciansTab();
+                    break;
+            }
+        });
 
-		scheduledVisitsTab = new Tab("Plánované návštěvy");
-		medicalRecordsTab = new Tab("Záznamy");
-		medicalInstitutionsTab = new Tab("Instituce");
-		medicamentsTab = new Tab("Medikamenty");
-		physiciansTab = new Tab("Doktoři");
-		tabSheet.add(scheduledVisitsTab, medicalRecordsTab, medicalInstitutionsTab, medicalInstitutionsTab,
-				medicamentsTab, physiciansTab);
+        switchScheduledVisitsTab();
+    }
 
-		pageLayout = new Div();
-		layout.add(pageLayout);
+    private ScheduledVisitsTab switchScheduledVisitsTab() {
+        pageLayout.removeAll();
+        ScheduledVisitsTab tab = new ScheduledVisitsTab();
+        pageLayout.add(tab);
+        tabSheet.setSelectedTab(scheduledVisitsTab);
+        return tab;
+    }
 
-		tabSheet.addSelectedChangeListener(e -> {
-			pageLayout.removeAll();
-			switch (tabSheet.getSelectedIndex()) {
-				default:
-				case 0:
-					switchScheduledVisitsTab();
-					break;
-				case 1:
-					switchMedicalRecordsTab();
-					break;
-				case 2:
-					switchMedicalInstitutionsTab();
-					break;
-				case 3:
-					switchMedicamentsTab();
-					break;
-				case 4:
-					switchPhysiciansTab();
-					break;
-			}
-		});
+    private MedicalRecordsTab switchMedicalRecordsTab() {
+        pageLayout.removeAll();
+        MedicalRecordsTab tab = new MedicalRecordsTab();
+        pageLayout.add(tab);
+        tabSheet.setSelectedTab(medicalRecordsTab);
+        return tab;
+    }
 
-		switchScheduledVisitsTab();
-	}
+    private MedicalInstitutionsTab switchMedicalInstitutionsTab() {
+        pageLayout.removeAll();
+        MedicalInstitutionsTab tab = new MedicalInstitutionsTab();
+        pageLayout.add(tab);
+        tabSheet.setSelectedTab(medicalInstitutionsTab);
+        return tab;
+    }
 
-	@Override
-	public void beforeEnter(BeforeEnterEvent event) {
-		if (!SpringContextHelper.getBean(MedicSection.class).isVisibleForRoles(getUser().getRoles()))
-			throw new GrassPageException(403);
-	}
+    private MedicamentsTab switchMedicamentsTab() {
+        pageLayout.removeAll();
+        MedicamentsTab tab = new MedicamentsTab();
+        pageLayout.add(tab);
+        tabSheet.setSelectedTab(medicamentsTab);
+        return tab;
+    }
+
+    private PhysiciansTab switchPhysiciansTab() {
+        pageLayout.removeAll();
+        PhysiciansTab tab = new PhysiciansTab();
+        pageLayout.add(tab);
+        tabSheet.setSelectedTab(physiciansTab);
+        return tab;
+    }
+
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (!SpringContextHelper.getBean(MedicSection.class)
+                .isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
+    }
 }
