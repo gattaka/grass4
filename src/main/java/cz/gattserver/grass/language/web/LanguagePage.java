@@ -7,9 +7,11 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,9 +37,9 @@ import cz.gattserver.grass.language.web.tabs.CrosswordTab;
 import cz.gattserver.grass.language.web.tabs.ItemsTab;
 import cz.gattserver.grass.language.web.tabs.StatisticsTab;
 
-@Route("language")
 @PageTitle("Jazyky")
-public class LanguagePage extends OneColumnPage {
+@Route(value = "language", layout = MainView.class)
+public class LanguagePage extends Div {
 
     private static final long serialVersionUID = 4767207674013382065L;
 
@@ -56,20 +58,12 @@ public class LanguagePage extends OneColumnPage {
     private List<Consumer<Long>> tabActions = new ArrayList<>();
 
     public LanguagePage() {
-        init();
-    }
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-    private void createTabSheet(long langId) {
-        tabs = new Tabs();
-        tabs.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        tabs.addSelectedChangeListener(e -> {
-            tabLayout.removeAll();
-            tabActions.get(tabs.getSelectedIndex()).accept(langId);
-        });
-    }
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
-    @Override
-    protected void createColumnContent(Div layout) {
         List<LanguageTO> langs = languageFacade.getLanguages();
         Grid<LanguageTO> grid = new Grid<>();
         UIUtils.applyGrassDefaultStyle(grid);
@@ -135,11 +129,21 @@ public class LanguagePage extends OneColumnPage {
         }).open(), grid));
     }
 
+    private void createTabSheet(long langId) {
+        tabs = new Tabs();
+        tabs.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        tabs.addSelectedChangeListener(e -> {
+            tabLayout.removeAll();
+            tabActions.get(tabs.getSelectedIndex()).accept(langId);
+        });
+    }
+
     private void createCrosswordTab(Long langId) {
         tabLayout.add(new CrosswordTab(langId));
     }
 
     private void createTestTab(Long langId) {
+        ComponentFactory componentFactory = new ComponentFactory();
         Div buttonLayout = componentFactory.createButtonLayout();
         tabLayout.add(buttonLayout);
 
