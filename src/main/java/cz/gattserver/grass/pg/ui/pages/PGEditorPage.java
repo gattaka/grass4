@@ -30,7 +30,10 @@ import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.security.CoreRole;
+import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
+import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessStartEvent;
@@ -58,9 +61,9 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
 
-@Route("pg-editor")
 @PageTitle("Editor fotogalerie")
-public class PGEditorPage extends OneColumnPage implements HasUrlParameter<String>, BeforeLeaveObserver {
+@Route(value = "pg-editor", layout = MainView.class)
+public class PGEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
     private static final long serialVersionUID = 8685208356478891386L;
 
@@ -102,6 +105,14 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
     private String operationToken;
     private String identifierToken;
 
+    private NodeService nodeService;
+    private SecurityService securityService;
+
+    public PGEditorPage(NodeService nodeService, SecurityService securityService) {
+        this.nodeService = nodeService;
+        this.securityService = securityService;
+    }
+
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
         if (!SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
@@ -111,19 +122,20 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         if (chunks.length > 0) operationToken = chunks[0];
         if (chunks.length > 1) identifierToken = chunks[1];
 
-        init();
-
         // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
         UIUtils.addOnbeforeunloadWarning();
-    }
 
-    @Override
-    protected void createColumnContent(Div editorLayout) {
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) {
             logger.debug("Nezdařilo se vytěžit URL identifikátor z řetězce: '{}'", identifierToken);
             throw new GrassPageException(404);
         }
+
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div editorLayout = componentFactory.createOneColumnLayout();
+        add(editorLayout);
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
                 q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
@@ -138,8 +150,6 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         photogalleryNameField = new TextField();
         photogalleryNameField.setValueChangeMode(ValueChangeMode.EAGER);
 
-        ComponentFactory componentFactory = new ComponentFactory();
-
         photogalleryDateField = componentFactory.createDatePicker("Přepsat datum vytvoření galerie");
         photogalleryDateField.setWidth("250px");
         photogalleryDateField.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -149,7 +159,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
             editMode = false;
-            node = nodeFacade.getNodeByIdForOverview(identifier.getId());
+            node = nodeService.getNodeByIdForOverview(identifier.getId());
             photogalleryNameField.setValue("");
             publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
@@ -166,8 +176,9 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
             photogalleryDateField.setValue(photogallery.getContentNode().getCreationDate().toLocalDate());
 
             // nemá oprávnění upravovat tento obsah
-            if (!photogallery.getContentNode().getAuthor().getName().equals(getUser().getName()) &&
-                    !getUser().isAdmin()) throw new GrassPageException(403);
+            if (!photogallery.getContentNode().getAuthor().getName()
+                    .equals(securityService.getCurrentUser().getName()) && !securityService.getCurrentUser().isAdmin())
+                throw new GrassPageException(403);
         } else {
             logger.debug("Neznámá operace: '{}'", operationToken);
             throw new GrassPageException(404);
@@ -293,6 +304,8 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
     }
 
     private void populateButtonsLayout(Div buttonLayout) {
+        ComponentFactory componentFactory = new ComponentFactory();
+
         // Uložit
         Button saveButton = componentFactory.createSaveButton(event -> {
             if (!isFormValid()) return;
@@ -354,7 +367,8 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
         if (editMode) {
             pgService.modifyPhotogallery(UUID.randomUUID(), photogallery.getId(), payloadTO, ldt);
         } else {
-            pgService.savePhotogallery(UUID.randomUUID(), payloadTO, node.getId(), getUser().getId(), ldt);
+            pgService.savePhotogallery(UUID.randomUUID(), payloadTO, node.getId(),
+                    securityService.getCurrentUser().getId(), ldt);
         }
     }
 
@@ -362,17 +376,17 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
      * Zavolá vrácení se na galerii
      */
     private void returnToPhotogallery() {
-        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UIUtils.redirect(
-                getPageURL(photogalleryViewerPageFactory, URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
-                        photogallery.getContentNode().getName()))));
+        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UI.getCurrent()
+                .navigate(PGViewerPage.class, URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
+                        photogallery.getContentNode().getName())));
     }
 
     /**
      * zavolání vrácení se na kategorii
      */
     private void returnToNode() {
-        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UIUtils.redirect(
-                getPageURL(nodePageFactory, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()))));
+        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UI.getCurrent()
+                .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
     }
 
     @Handler
@@ -434,6 +448,7 @@ public class PGEditorPage extends OneColumnPage implements HasUrlParameter<Strin
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         beforeLeaveEvent.postpone();
+        ComponentFactory componentFactory = new ComponentFactory();
         componentFactory.createBeforeLeaveConfirmDialog(beforeLeaveEvent).open();
     }
 }
