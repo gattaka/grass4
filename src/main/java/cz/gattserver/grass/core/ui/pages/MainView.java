@@ -11,14 +11,12 @@ import com.vaadin.flow.server.VaadinRequest;
 import com.vaadin.flow.server.VaadinServletRequest;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.modules.SectionService;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
-import cz.gattserver.grass.core.services.CoreACLService;
-import cz.gattserver.grass.core.services.NodeService;
-import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.services.VersionInfoService;
+import cz.gattserver.grass.core.services.*;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import jakarta.annotation.Resource;
@@ -48,7 +46,7 @@ public class MainView extends Div implements AfterNavigationObserver, RouterLayo
 
     private Div contentDiv;
 
-    public MainView() {
+    public MainView(QuotesService quotesService) {
         SpringContextHelper.inject(this);
 
         setId("main-div");
@@ -77,13 +75,17 @@ public class MainView extends Div implements AfterNavigationObserver, RouterLayo
         Anchor homelink = new Anchor(url, new Image("img/logo.png", "Gattserver"));
         homelinkDiv.add(homelink);
 
-        // TODO
-//        if (!isMobileDevice()) {
-//            Div quotes = new Div();
-//            quotes.setId("quotes");
-//            logoLine.add(quotes);
-//            createQuotes(quotes);
-//        }
+        if (!UIUtils.isMobileDevice()) {
+            Div quoteLayout = new Div();
+            quoteLayout.setId("quotes");
+            logoLine.add(quoteLayout);
+
+            String quote = quotesService.getRandomQuote();
+            if (quote == null) throw new GrassPageException(500);
+
+            RouterLink quoteLink = new RouterLink(quote, QuotesPage.class);
+            quoteLayout.add(quoteLink);
+        }
 
         Div menuWrapper = new Div();
         menuWrapper.setId("menu-wrapper");
