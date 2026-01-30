@@ -6,7 +6,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 
 @PageTitle("Gattserver")
 @Route(value = "noservice", layout = MainView.class)

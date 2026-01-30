@@ -7,7 +7,6 @@ import com.vaadin.flow.router.*;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.drinks.ui.*;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.common.server.URLIdentifierUtils;
 
 @PageTitle("Nápoje")

@@ -5,9 +5,7 @@ import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;

@@ -7,14 +7,12 @@ import com.vaadin.flow.router.RouterLink;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.services.*;
 import cz.gattserver.grass.core.ui.components.NodesGrid;
-import jakarta.annotation.Resource;
 
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.ui.components.ContentsLazyGrid;
 import cz.gattserver.common.server.URLIdentifierUtils;
-import cz.gattserver.common.vaadin.HtmlSpan;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -32,8 +30,6 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 @Route(value = "", layout = MainView.class)

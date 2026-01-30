@@ -7,7 +7,6 @@ import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.ContentsLazyGrid;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
@@ -16,7 +15,6 @@ import com.vaadin.flow.router.HasDynamicTitle;
 import com.vaadin.flow.router.HasUrlParameter;
 import com.vaadin.flow.router.Route;
 
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.common.server.URLIdentifierUtils;
 
 @Route(value = "tag", layout = MainView.class)

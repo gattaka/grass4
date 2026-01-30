@@ -39,7 +39,6 @@ import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.print3d.interfaces.Print3dPayloadTO;

@@ -13,7 +13,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.medic.MedicSection;
 import cz.gattserver.grass.medic.web.tabs.MedicalInstitutionsTab;
 import cz.gattserver.grass.medic.web.tabs.MedicalRecordsTab;

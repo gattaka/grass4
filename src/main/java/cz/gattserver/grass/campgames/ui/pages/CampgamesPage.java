@@ -11,7 +11,6 @@ import com.vaadin.flow.router.Route;
 
 import cz.gattserver.grass.campgames.ui.CampgameKeywordsTab;
 import cz.gattserver.grass.core.ui.pages.MainView;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 
 @PageTitle("Táborové hry")
 @Route(value = "campgames", layout = MainView.class)

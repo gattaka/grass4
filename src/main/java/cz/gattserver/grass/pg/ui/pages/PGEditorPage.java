@@ -45,7 +45,6 @@ import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;

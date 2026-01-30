@@ -10,15 +10,11 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.hw.HWSection;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.interfaces.HWItemState;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
 import cz.gattserver.grass.hw.ui.tabs.HWTypesTab;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 
 import java.util.*;
 

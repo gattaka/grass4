@@ -3,7 +3,6 @@ package cz.gattserver.grass.core.ui.pages;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.RegistrationTO;
 import cz.gattserver.grass.core.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -19,7 +18,6 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 @PageTitle("Registrace")
