@@ -24,6 +24,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.CZAmountFormatter;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
@@ -31,8 +32,10 @@ import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.services.FileSystemService;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.Breadcrumb;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
@@ -61,9 +64,9 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.util.*;
 
-@Route("fm")
 @PageTitle("Správce souborů")
-public class FMPage extends OneColumnPage implements HasUrlParameter<String>, BeforeEnterObserver {
+@Route(value = "fm", layout = MainView.class)
+public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterObserver {
 
     private static final long serialVersionUID = -5884444775720831930L;
 
@@ -117,30 +120,23 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 
     private Div layout;
 
-    @Override
-    public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
-        this.parameter = parameter;
-        if (layout == null) {
-            init();
-        } else {
-            layout.removeAll();
-            createContent();
-        }
-    }
+    private SecurityService securityService;
 
-    public FMPage() {
+    public FMPage(SecurityService securityService) {
         selectFormatter = new CZAmountFormatter("Vybrán %d soubor", "Vybrány %d soubory", "Vybráno %d souborů");
         listFormatter = new CZAmountFormatter("Zobrazen %d soubor", "Zobrazeny %d soubory", "Zobrazeno %d souborů");
+        this.securityService = securityService;
     }
 
     @Override
-    protected void createColumnContent(Div contentLayout) {
-        layout = new Div();
-        contentLayout.add(layout);
-        createContent();
-    }
+    public void setParameter(BeforeEvent beforeEvent, @WildcardParameter String parameter) {
+        this.parameter = parameter;
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-    private void createContent() {
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
+
         urlBase = UIUtils.getURLBase();
 
         statusLabel = new Div();
@@ -221,12 +217,13 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
         // aktuální polohu cílové kategorie
         List<Breadcrumb.BreadcrumbElement> breadcrumbElements = new ArrayList<>();
         for (FMItemTO c : explorer.getBreadcrumbChunks())
-            breadcrumbElements.add(
-                    new Breadcrumb.BreadcrumbElement(c.getName(), getPageURL(fmPageFactory, c.getPathFromFMRoot())));
+            breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(c.getName(), FMPage.class, c.getPathFromFMRoot()));
         breadcrumb.resetBreadcrumb(breadcrumbElements);
     }
 
     private void createFilesGrid(Div layout) {
+        ComponentFactory componentFactory = new ComponentFactory();
+
         grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setColumnReorderingAllowed(true);
@@ -272,7 +269,8 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
             return button;
         })).setHeader("URL").setTextAlign(ColumnTextAlign.CENTER).setWidth("50px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
                 .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new ComponentRenderer<>(to -> {
@@ -349,6 +347,8 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
     }
 
     private void createButtonsLayout(Div layout) {
+        ComponentFactory componentFactory = new ComponentFactory();
+
         Div buttonsLayout = componentFactory.createButtonLayout();
         buttonsLayout.add(componentFactory.createCreateDirButton(e -> handleNewDirectory()));
         buttonsLayout.add(componentFactory.createDownloadGridButton(this::handleDownloadAction, grid));
@@ -496,7 +496,7 @@ public class FMPage extends OneColumnPage implements HasUrlParameter<String>, Be
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (!SpringContextHelper.getBean(FMSection.class).isVisibleForRoles(getUser().getRoles()))
-            throw new GrassPageException(403);
+        if (!SpringContextHelper.getBean(FMSection.class)
+                .isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
     }
 }
