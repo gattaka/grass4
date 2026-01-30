@@ -1,5 +1,7 @@
 package cz.gattserver.grass.core.ui.pages;
 
+import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.grass.core.interfaces.RegistrationTO;
 import cz.gattserver.grass.core.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -20,121 +22,80 @@ import com.vaadin.flow.router.Route;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
-@Route(value = "registration")
 @PageTitle("Registrace")
-public class RegistrationPage extends OneColumnPage {
+@Route(value = "registration", layout = MainView.class)
+public class RegistrationPage extends Div {
 
-	private static final long serialVersionUID = 3104749805983602744L;
+    private static final long serialVersionUID = 3104749805983602744L;
 
-	@Autowired
-	private UserService userFacade;
+    private static final int MIN_USERNAME_LENGTH = 2;
+    private static final int MAX_USERNAME_LENGTH = 20;
 
-	private static final int MIN_USERNAME_LENGTH = 2;
-	private static final int MAX_USERNAME_LENGTH = 20;
+    public RegistrationPage(UserService userService) {
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-	public RegistrationPage() {
-		init();
-	}
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
-	private static class RegistrationTO {
-		private String username;
-		private String password;
-		private String password2;
-		private String email;
+        layout.add(new H2("Registrace nového uživatele"));
 
-		public String getUsername() {
-			return username;
-		}
+        VerticalLayout formLayout = new VerticalLayout();
+        layout.add(formLayout);
 
-		public void setUsername(String username) {
-			this.username = username;
-		}
+        FormLayout formFieldsLayout = new FormLayout();
+        formLayout.add(formFieldsLayout);
 
-		public String getPassword() {
-			return password;
-		}
+        Binder<RegistrationTO> binder = new Binder<>();
+        binder.setBean(new RegistrationTO());
 
-		public void setPassword(String password) {
-			this.password = password;
-		}
+        // Username
+        final TextField usernameField = new TextField("Uživatelské jméno");
+        binder.forField(usernameField).asRequired("Jméno je povinné").withValidator(
+                new StringLengthValidator("Délka jména musí být mezi 2 až 20 znaky", MIN_USERNAME_LENGTH,
+                        MAX_USERNAME_LENGTH)).bind(RegistrationTO::getUsername, RegistrationTO::setUsername);
+        formFieldsLayout.add(usernameField);
 
-		public String getPassword2() {
-			return password2;
-		}
+        // Email
+        final TextField emailField = new TextField("Email");
+        binder.forField(emailField).asRequired("Email je povinný")
+                .withValidator(new EmailValidator("Email má špatný tvar"))
+                .bind(RegistrationTO::getEmail, RegistrationTO::setEmail);
+        formFieldsLayout.add(emailField);
 
-		public void setPassword2(String password2) {
-			this.password2 = password2;
-		}
+        // Password
+        final PasswordField passwordField = new PasswordField("Heslo");
+        binder.forField(passwordField).asRequired("Heslo je povinné")
+                .bind(RegistrationTO::getPassword, RegistrationTO::setPassword);
+        formFieldsLayout.add(passwordField);
 
-		public String getEmail() {
-			return email;
-		}
+        // Password 2
+        final PasswordField passwordCopyField = new PasswordField("Heslo znovu");
+        binder.forField(passwordCopyField).asRequired("Heslo je povinné").withValidator((value, context) -> {
+            if (binder.getBean().getPassword() != null && binder.getBean().getPassword().equals(value))
+                return ValidationResult.ok();
+            return ValidationResult.error("Hesla se musí shodovat");
+        }).bind(RegistrationTO::getPassword2, RegistrationTO::setPassword2);
+        formFieldsLayout.add(passwordCopyField);
 
-		public void setEmail(String email) {
-			this.email = email;
-		}
-	}
+        VerticalLayout buttonLayout = new VerticalLayout();
+        formLayout.add(buttonLayout);
+        buttonLayout.setSpacing(true);
+        buttonLayout.setPadding(false);
 
-	@Override
-	protected void createColumnContent(Div layout) {
-		layout.add(new H2("Registrace nového uživatele"));
+        // Login button
+        Button submitButton = new Button("Registrovat", event -> {
+            if (binder.isValid()) {
+                RegistrationTO bean = binder.getBean();
+                userService.registrateNewUser(bean.getEmail(), bean.getUsername(), bean.getPassword());
+                UIUtils.showInfo("Registrace proběhla úspěšně");
+                binder.setBean(new RegistrationTO());
+            }
+        });
+        submitButton.setEnabled(false);
+        buttonLayout.add(submitButton);
 
-		VerticalLayout formLayout = new VerticalLayout();
-		layout.add(formLayout);
+        binder.addStatusChangeListener(e -> submitButton.setEnabled(e.getBinder().isValid()));
+    }
 
-		FormLayout formFieldsLayout = new FormLayout();
-		formLayout.add(formFieldsLayout);
-
-		Binder<RegistrationTO> binder = new Binder<>();
-		binder.setBean(new RegistrationTO());
-
-		// Username
-		final TextField usernameField = new TextField("Uživatelské jméno");
-		binder.forField(usernameField).asRequired("Jméno je povinné")
-				.withValidator(new StringLengthValidator("Délka jména musí být mezi 2 až 20 znaky", MIN_USERNAME_LENGTH,
-						MAX_USERNAME_LENGTH))
-				.bind(RegistrationTO::getUsername, RegistrationTO::setUsername);
-		formFieldsLayout.add(usernameField);
-
-		// Email
-		final TextField emailField = new TextField("Email");
-		binder.forField(emailField).asRequired("Email je povinný")
-				.withValidator(new EmailValidator("Email má špatný tvar"))
-				.bind(RegistrationTO::getEmail, RegistrationTO::setEmail);
-		formFieldsLayout.add(emailField);
-
-		// Password
-		final PasswordField passwordField = new PasswordField("Heslo");
-		binder.forField(passwordField).asRequired("Heslo je povinné").bind(RegistrationTO::getPassword,
-				RegistrationTO::setPassword);
-		formFieldsLayout.add(passwordField);
-
-		// Password 2
-		final PasswordField passwordCopyField = new PasswordField("Heslo znovu");
-		binder.forField(passwordCopyField).asRequired("Heslo je povinné").withValidator((value, context) -> {
-			if (binder.getBean().getPassword() != null && binder.getBean().getPassword().equals(value))
-				return ValidationResult.ok();
-			return ValidationResult.error("Hesla se musí shodovat");
-		}).bind(RegistrationTO::getPassword2, RegistrationTO::setPassword2);
-		formFieldsLayout.add(passwordCopyField);
-
-		VerticalLayout buttonLayout = new VerticalLayout();
-		formLayout.add(buttonLayout);
-		buttonLayout.setSpacing(true);
-		buttonLayout.setPadding(false);
-
-		// Login button
-		Button submitButton = new Button("Registrovat", event -> {
-			if (binder.isValid()) {
-				RegistrationTO bean = binder.getBean();
-				userFacade.registrateNewUser(bean.getEmail(), bean.getUsername(), bean.getPassword());
-				UIUtils.showInfo("Registrace proběhla úspěšně");
-				binder.setBean(new RegistrationTO());
-			}
-		});
-		submitButton.setEnabled(false);
-		buttonLayout.add(submitButton);
-
-		binder.addStatusChangeListener(e -> submitButton.setEnabled(e.getBinder().isValid()));
-	}
 }
