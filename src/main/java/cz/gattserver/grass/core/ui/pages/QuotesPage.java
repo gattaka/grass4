@@ -1,6 +1,8 @@
 package cz.gattserver.grass.core.ui.pages;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
@@ -10,31 +12,27 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.QuoteTO;
+import cz.gattserver.grass.core.services.CoreACLService;
+import cz.gattserver.grass.core.services.QuotesService;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.dialogs.QuoteDialog;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
-@Route("quotes")
 @PageTitle("Hlášky")
-public class QuotesPage extends OneColumnPage {
+@Route(value = "quotes", layout = MainView.class)
+public class QuotesPage extends Div {
 
     private static final long serialVersionUID = 6209768531464272839L;
 
-    private List<QuoteTO> data;
-    private Grid<QuoteTO> grid;
+    public QuotesPage(QuotesService quotesService, CoreACLService coreACLService, SecurityService securityService) {
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-    public QuotesPage() {
-        init();
-    }
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
-    private void populateData(String filter) {
-        data = quotesFacade.getQuotes(filter);
-        grid.setItems(data);
-    }
-
-    @Override
-    protected void createColumnContent(Div layout) {
         layout.add(new H2("Vyhledávání"));
 
         TextField searchField = new TextField();
@@ -42,37 +40,45 @@ public class QuotesPage extends OneColumnPage {
         searchField.setWidthFull();
         layout.add(searchField);
 
-        searchField.addValueChangeListener(e -> populateData(e.getValue()));
-        searchField.setValueChangeMode(ValueChangeMode.EAGER);
-
         layout.add(new H2("Seznam hlášek"));
 
-        grid = new Grid<>();
+        Grid<QuoteTO> grid = new Grid<>();
         UIUtils.applyGrassDefaultStyle(grid);
         layout.add(grid);
 
-        populateData(null);
+        List<QuoteTO> data = new ArrayList<>();
+
+        Consumer<String> populateCallback = filter -> {
+            data.clear();
+            data.addAll(quotesService.getQuotes(filter));
+            grid.setItems(data);
+        };
+
+        searchField.addValueChangeListener(e -> populateCallback.accept(e.getValue()));
+        searchField.setValueChangeMode(ValueChangeMode.EAGER);
+
+        populateCallback.accept(null);
 
         grid.addColumn(QuoteTO::getId).setHeader("Id").setFlexGrow(0).setWidth("50px");
         grid.addColumn(QuoteTO::getName).setHeader("Obsah");
 
         Div btnLayout = componentFactory.createButtonLayout();
         layout.add(btnLayout);
-        btnLayout.setVisible(coreACL.canModifyQuotes(getUser()));
+        btnLayout.setVisible(coreACLService.canModifyQuotes(securityService.getCurrentUser()));
 
         btnLayout.add(componentFactory.createCreateButton(e -> new QuoteDialog(q -> {
-            quotesFacade.createQuote(q.getName());
-            populateData(searchField.getValue());
+            quotesService.createQuote(q.getName());
+            populateCallback.accept(searchField.getValue());
         }).open()));
 
         btnLayout.add(componentFactory.createEditGridButton(originQuote -> new QuoteDialog(originQuote, q -> {
-            quotesFacade.modifyQuote(q.getId(), q.getName());
+            quotesService.modifyQuote(q.getId(), q.getName());
             grid.getDataProvider().refreshItem(q);
             grid.select(q);
         }).open(), grid));
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> items.forEach(q -> {
-            quotesFacade.deleteQuote(q.getId());
+            quotesService.deleteQuote(q.getId());
             data.remove(q);
             grid.getDataProvider().refreshAll();
         }), grid));
