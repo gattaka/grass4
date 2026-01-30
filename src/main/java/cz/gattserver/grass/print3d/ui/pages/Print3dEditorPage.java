@@ -23,6 +23,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
@@ -32,8 +33,11 @@ import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentTagService;
+import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
+import cz.gattserver.grass.core.ui.pages.MainView;
+import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.TokenField;
@@ -56,9 +60,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Route("print3d-editor")
 @PageTitle("Editor 3D projektu")
-public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<String>, BeforeLeaveObserver {
+@Route(value = "print3d-editor", layout = MainView.class)
+public class Print3dEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
     private static final long serialVersionUID = 8685208356478891386L;
 
@@ -98,6 +102,14 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
     private String operationToken;
     private String identifierToken;
 
+    private SecurityService securityService;
+    private NodeService nodeService;
+
+    public Print3dEditorPage(SecurityService securityService, NodeService nodeService) {
+        this.securityService = securityService;
+        this.nodeService = nodeService;
+    }
+
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
         if (!SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
@@ -107,15 +119,16 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
         if (chunks.length > 0) operationToken = chunks[0];
         if (chunks.length > 1) identifierToken = chunks[1];
 
-        init();
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div editorLayout = componentFactory.createOneColumnLayout();
+        add(editorLayout);
 
         UI.getCurrent().getPage().executeJs(
                 "window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
                         "rozpracovaná data nejsou uložena ?\" };");
-    }
 
-    @Override
-    protected void createColumnContent(Div editorLayout) {
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) {
             logger.debug("Nezdařilo se vytěžit URL identifikátor z řetězce: '{}'", identifierToken);
@@ -139,7 +152,7 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
             editMode = false;
-            node = nodeFacade.getNodeByIdForOverview(identifier.getId());
+            node = nodeService.getNodeByIdForOverview(identifier.getId());
             nameField.setValue("");
             publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
@@ -155,8 +168,8 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
             publicatedCheckBox.setValue(project.getContentNode().isPublicated());
 
             // nemá oprávnění upravovat tento obsah
-            if (!project.getContentNode().getAuthor().getName().equals(getUser().getName()) && !getUser().isAdmin())
-                throw new GrassPageException(403);
+            if (!project.getContentNode().getAuthor().getName().equals(securityService.getCurrentUser().getName()) &&
+                    !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
             logger.debug("Neznámá operace: '{}'", operationToken);
             throw new GrassPageException(404);
@@ -276,20 +289,21 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
         populateButtonsLayout(buttonsLayout);
     }
 
+
     private void populateButtonsLayout(Div buttonLayout) {
         Div closeJsDiv = new Div() {
             private static final long serialVersionUID = -7319482130016598549L;
 
             @ClientCallable
             private void returnToProjectCallback() {
-                UIUtils.redirect(getPageURL(print3dViewerPageFactory,
-                        URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
+                UI.getCurrent().navigate(Print3dViewerPage.class,
+                        URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName()));
             }
 
             @ClientCallable
             private void returnToNodeCallback() {
-                UIUtils.redirect(getPageURL(nodePageFactory,
-                        URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
+                UI.getCurrent()
+                        .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
             }
         };
         closeJsDiv.setId(CLOSE_JS_DIV_ID);
@@ -297,6 +311,7 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
 
         // Uložit
 
+        ComponentFactory componentFactory = new ComponentFactory();
         Button saveButton = componentFactory.createSaveButton(event -> {
             if (!isFormValid()) return;
             stayInEditor = true;
@@ -353,7 +368,7 @@ public class Print3dEditorPage extends OneColumnPage implements HasUrlParameter<
             print3dService.modifyProject(project.getId(), payloadTO);
             onModifyResult(project.getId());
         } else {
-            onSaveResult(print3dService.saveProject(payloadTO, node.getId(), getUser().getId()));
+            onSaveResult(print3dService.saveProject(payloadTO, node.getId(), securityService.getCurrentUser().getId()));
         }
     }
 
