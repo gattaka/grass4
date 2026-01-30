@@ -1,5 +1,6 @@
 package cz.gattserver.grass.campgames.ui.pages;
 
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.campgames.ui.CampgamesTab;
 
 import com.vaadin.flow.component.html.Div;
@@ -9,64 +10,67 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import cz.gattserver.grass.campgames.ui.CampgameKeywordsTab;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 
-@Route("campgames")
 @PageTitle("Táborové hry")
-public class CampgamesPage extends OneColumnPage {
+@Route(value = "campgames", layout = MainView.class)
+public class CampgamesPage extends Div {
 
-	private static final long serialVersionUID = -5354424168298678698L;
+    private static final long serialVersionUID = -5354424168298678698L;
 
-	private Tabs tabSheet;
-	private Tab overviewTab;
-	private Tab keywordsTab;
+    private Tabs tabSheet;
+    private Tab overviewTab;
+    private Tab keywordsTab;
 
-	private Div pageLayout;
+    private Div pageLayout;
 
-	public CampgamesPage() {
-		init();
-	}
+    public CampgamesPage() {
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-	@Override
-	protected void createColumnContent(Div layout) {
-		tabSheet = new Tabs();
-		layout.add(tabSheet);
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
-		pageLayout = new Div();
-		layout.add(pageLayout);
+        tabSheet = new Tabs();
+        layout.add(tabSheet);
 
-		overviewTab = new Tab();
-		overviewTab.setLabel("Přehled");
-		tabSheet.add(overviewTab);
+        pageLayout = new Div();
+        layout.add(pageLayout);
 
-		keywordsTab = new Tab();
-		keywordsTab.setLabel("Klíčová slova");
-		tabSheet.add(keywordsTab);
+        overviewTab = new Tab();
+        overviewTab.setLabel("Přehled");
+        tabSheet.add(overviewTab);
 
-		tabSheet.addSelectedChangeListener(e -> {
-			pageLayout.removeAll();
-			switch (tabSheet.getSelectedIndex()) {
-			default:
-			case 0:
-				switchCampgamesTab();
-				break;
-			case 1:
-				switchCampgameKeywordsTab();
-				break;
-			}
-		});
-		switchCampgamesTab();
-	}
+        keywordsTab = new Tab();
+        keywordsTab.setLabel("Klíčová slova");
+        tabSheet.add(keywordsTab);
 
-	private void switchCampgamesTab() {
-		pageLayout.removeAll();
-		pageLayout.add(new CampgamesTab());
-		tabSheet.setSelectedTab(overviewTab);
-	}
+        tabSheet.addSelectedChangeListener(e -> {
+            pageLayout.removeAll();
+            switch (tabSheet.getSelectedIndex()) {
+                default:
+                case 0:
+                    switchCampgamesTab();
+                    break;
+                case 1:
+                    switchCampgameKeywordsTab();
+                    break;
+            }
+        });
+        switchCampgamesTab();
+    }
 
-	private void switchCampgameKeywordsTab() {
-		pageLayout.removeAll();
-		pageLayout.add(new CampgameKeywordsTab());
-		tabSheet.setSelectedTab(keywordsTab);
-	}
+    private void switchCampgamesTab() {
+        pageLayout.removeAll();
+        pageLayout.add(new CampgamesTab());
+        tabSheet.setSelectedTab(overviewTab);
+    }
+
+    private void switchCampgameKeywordsTab() {
+        pageLayout.removeAll();
+        pageLayout.add(new CampgameKeywordsTab());
+        tabSheet.setSelectedTab(keywordsTab);
+    }
 }
+
