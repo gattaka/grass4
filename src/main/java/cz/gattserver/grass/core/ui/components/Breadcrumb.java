@@ -22,6 +22,8 @@ public class Breadcrumb extends Div {
         private Class<? extends Component> routeTarget;
         private RouteParameters routeParameters;
 
+        private RouterLink routerLink;
+
         public BreadcrumbElement(String caption, String url) {
             this.url = url;
             this.caption = caption;
@@ -29,6 +31,10 @@ public class Breadcrumb extends Div {
 
         public BreadcrumbElement(String caption, Class<? extends Component> routeTarget) {
             this(caption, routeTarget, null);
+        }
+
+        public BreadcrumbElement(RouterLink routerLink) {
+            this.routerLink = routerLink;
         }
 
         public BreadcrumbElement(String caption, Class<? extends Component> routeTarget,
@@ -71,6 +77,8 @@ public class Breadcrumb extends Div {
     private Component createBreadcrumbElementLink(BreadcrumbElement element) {
         if (element.url != null) {
             return new Anchor(element.getUrl(), element.getCaption());
+        } else if (element.routerLink != null) {
+            return element.routerLink;
         } else {
             if (element.routeParameters != null) {
                 return new RouterLink(element.getCaption(), element.routeTarget, element.routeParameters);

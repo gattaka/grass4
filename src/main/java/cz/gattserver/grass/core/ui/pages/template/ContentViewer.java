@@ -3,10 +3,21 @@ package cz.gattserver.grass.core.ui.pages.template;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
+import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.router.RouterLink;
+import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
-import jakarta.annotation.Resource;
+import cz.gattserver.grass.core.services.CoreACLService;
+import cz.gattserver.grass.core.services.NodeService;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.NodePage;
+import cz.gattserver.grass.core.ui.pages.TagPage;
 
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
@@ -16,33 +27,28 @@ import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.UserService;
 import cz.gattserver.grass.core.ui.components.Breadcrumb;
 import cz.gattserver.grass.core.ui.dialogs.ContentMoveDialog;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Span;
 
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.HtmlSpan;
 
-public abstract class ContentViewerPage extends TwoColumnPage {
+public class ContentViewer extends Div {
 
     private static final long serialVersionUID = -1564043277444025560L;
 
-    @Autowired
-    protected UserService userFacade;
+    private UserService userService;
+    private SecurityService securityService;
+    private CoreACLService coreACLService;
+    private NodeService nodeService;
 
-    @Resource(name = "tagPageFactory")
-    protected PageFactory tagPageFactory;
-
-    private ContentNodeTO content;
+    private ContentNodeTO contentNodeTO;
     private H2 contentNameLabel;
     private Span contentAuthorNameLabel;
     private Span contentCreationDateNameLabel;
@@ -54,39 +60,54 @@ public abstract class ContentViewerPage extends TwoColumnPage {
     private Button removeFromFavouritesButton;
     private Button addToFavouritesButton;
 
-    /**
-     * Breadcrumb
-     */
     private Breadcrumb breadcrumb;
 
-    @Override
-    public void init() {
-        breadcrumb = new Breadcrumb();
+    private RouterLink contentLink;
 
-        content = getContentNodeDTO();
-        updateBreadcrumb(content);
+    public ContentViewer(Component contentComponent, ContentNodeTO contentNodeTO,
+                         Consumer<ClickEvent<Button>> deleteAction, Consumer<ClickEvent<Button>> editAction,
+                         RouterLink contentLink) {
+        this.securityService = SpringContextHelper.getBean(SecurityService.class);
+        this.userService = SpringContextHelper.getBean(UserService.class);
+        this.coreACLService = SpringContextHelper.getBean(CoreACLService.class);
+        this.nodeService = SpringContextHelper.getBean(NodeService.class);
+
+        this.contentLink = contentLink;
+
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        breadcrumb = new Breadcrumb();
+        this.contentNodeTO = contentNodeTO;
+        updateBreadcrumb(this.contentNodeTO);
 
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm:ss");
 
-        contentNameLabel = new H2(content.getName());
-        contentAuthorNameLabel = new Span(content.getAuthor().getName());
-        contentCreationDateNameLabel =
-                new HtmlSpan(content.getCreationDate() == null ? "" : content.getCreationDate().format(dateFormat));
+        contentNameLabel = new H2(this.contentNodeTO.getName());
+        contentAuthorNameLabel = new Span(this.contentNodeTO.getAuthor().getName());
+        contentCreationDateNameLabel = new HtmlSpan(this.contentNodeTO.getCreationDate() == null ? "" :
+                this.contentNodeTO.getCreationDate().format(dateFormat));
         contentLastModificationDateLabel = new HtmlSpan(
-                content.getLastModificationDate() == null ? "<em>-neupraveno-</em>" :
-                        dateFormat.format(content.getLastModificationDate()));
+                this.contentNodeTO.getLastModificationDate() == null ? "<em>-neupraveno-</em>" :
+                        dateFormat.format(this.contentNodeTO.getLastModificationDate()));
 
         tagsListLayout = new Div();
         tagsListLayout.setId("content-info-tags");
-        for (ContentTagOverviewTO contentTag : content.getContentTags()) {
-            Anchor tagLink = new Anchor(getPageURL(tagPageFactory,
-                    URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName())),
-                    contentTag.getName());
+        for (ContentTagOverviewTO contentTag : this.contentNodeTO.getContentTags()) {
+            RouterLink tagLink = new RouterLink(contentTag.getName(), TagPage.class,
+                    URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()));
             tagsListLayout.add(new Div(tagLink));
         }
 
         operationsListLayout = componentFactory.createButtonLayout();
-        if (!content.isDraft()) createContentOperations(operationsListLayout);
+        if (!this.contentNodeTO.isDraft()) createContentOperations(operationsListLayout, editAction, deleteAction);
+
+        Div leftColumnLayout = componentFactory.createLeftColumnLayout();
+        add(leftColumnLayout);
+        createLeftColumnContent(leftColumnLayout);
+
+        Div rightColumnLayout = componentFactory.createRightColumnLayout();
+        add(rightColumnLayout);
+        createRightColumnContent(rightColumnLayout, contentComponent);
 
         UI.getCurrent().getPage()
                 .executeJs("var pageScroll = document.getElementsByClassName('v-ui v-scrollable')" + "[0]; "
@@ -98,14 +119,15 @@ public abstract class ContentViewerPage extends TwoColumnPage {
                         /*		*/ + "else "
                         /*			*/ + "document.getElementById('left').style['margin-top'] = '0px'; "
                         /*	*/ + "});");
-
-        super.init();
     }
 
-    protected void createContentOperations(Div operationsListLayout) {
+    protected void createContentOperations(Div operationsListLayout, Consumer<ClickEvent<Button>> onEditOperation,
+                                           Consumer<ClickEvent<Button>> onDeleteOperation) {
+        ComponentFactory componentFactory = new ComponentFactory();
+
         // Upravit
-        if (coreACL.canModifyContent(content, getUser())) {
-            Button modBtn = componentFactory.createEditButton(e -> onEditOperation());
+        if (coreACLService.canModifyContent(contentNodeTO, securityService.getCurrentUser())) {
+            Button modBtn = componentFactory.createEditButton(onEditOperation::accept);
             operationsListLayout.add(modBtn);
         }
 
@@ -113,7 +135,8 @@ public abstract class ContentViewerPage extends TwoColumnPage {
         removeFromFavouritesButton = componentFactory.createUnmarkFavouriteButton(event -> {
             // zdařilo se ? Pokud ano, otevři info okno
             try {
-                userFacade.removeContentFromFavourites(content.getId(), getUser().getId());
+                userService.removeContentFromFavourites(contentNodeTO.getId(),
+                        securityService.getCurrentUser().getId());
                 removeFromFavouritesButton.setVisible(false);
                 addToFavouritesButton.setVisible(true);
             } catch (Exception e) {
@@ -122,12 +145,13 @@ public abstract class ContentViewerPage extends TwoColumnPage {
             }
         });
         operationsListLayout.add(removeFromFavouritesButton);
-        removeFromFavouritesButton.setVisible(coreACL.canRemoveContentFromFavourites(content, getUser()));
+        removeFromFavouritesButton.setVisible(
+                coreACLService.canRemoveContentFromFavourites(contentNodeTO, securityService.getCurrentUser()));
 
         addToFavouritesButton = componentFactory.createMarkFavouriteButton(event -> {
             // zdařilo se? Pokud ano, otevři info okno
             try {
-                userFacade.addContentToFavourites(content.getId(), getUser().getId());
+                userService.addContentToFavourites(contentNodeTO.getId(), securityService.getCurrentUser().getId());
                 addToFavouritesButton.setVisible(false);
                 removeFromFavouritesButton.setVisible(true);
             } catch (Exception e) {
@@ -136,31 +160,34 @@ public abstract class ContentViewerPage extends TwoColumnPage {
             }
         });
         operationsListLayout.add(addToFavouritesButton);
-        addToFavouritesButton.setVisible(coreACL.canAddContentToFavourites(content, getUser()));
+        addToFavouritesButton.setVisible(
+                coreACLService.canAddContentToFavourites(contentNodeTO, securityService.getCurrentUser()));
 
         // Změna kategorie
-        if (coreACL.canModifyContent(content, getUser())) {
-            Button moveBtn = componentFactory.createMoveButton(event -> new ContentMoveDialog(content) {
+        if (coreACLService.canModifyContent(contentNodeTO, securityService.getCurrentUser())) {
+            Button moveBtn = componentFactory.createMoveButton(event -> new ContentMoveDialog(contentNodeTO) {
                 private static final long serialVersionUID = 3748723613020816248L;
 
                 @Override
                 protected void onMove() {
-                    UIUtils.redirect(getPageURL(getContentViewerPageFactory(),
-                            URLIdentifierUtils.createURLIdentifier(content.getContentID(), content.getName())));
+                    UI.getCurrent().getPage().reload();
                 }
             }.open());
             operationsListLayout.add(moveBtn);
         }
 
         // Smazat
-        if (coreACL.canDeleteContent(content, getUser())) {
-            Button delBtn = componentFactory.createDeleteButton(event -> onDeleteOperation());
+        if (coreACLService.canDeleteContent(contentNodeTO, securityService.getCurrentUser())) {
+            Button delBtn = componentFactory.createDeleteButton(onDeleteOperation::accept);
             operationsListLayout.add(delBtn);
         }
     }
 
-    @Override
-    protected void createLeftColumnContent(Div leftContentLayout) {
+    public Div getOperationsListLayout() {
+        return operationsListLayout;
+    }
+
+    private void createLeftColumnContent(Div leftContentLayout) {
         Div layout = new Div();
         layout.setClassName("left-content-view");
         leftContentLayout.add(layout);
@@ -189,7 +216,7 @@ public abstract class ContentViewerPage extends TwoColumnPage {
         modifiedPart.add(new Breakline());
         modifiedPart.add(contentLastModificationDateLabel);
 
-        if (!content.isPublicated()) {
+        if (!contentNodeTO.isPublicated()) {
             Div publicatedLayout = new Div();
             publicatedLayout.addClassName("not-publicated-info");
             publicatedLayout.add(ImageIcon.INFO_16_ICON.createImage("Info"));
@@ -210,20 +237,14 @@ public abstract class ContentViewerPage extends TwoColumnPage {
         operationsDiv.setVisible(operationsListLayout.getChildren().count() > 0);
     }
 
-    @Override
-    protected void createRightColumnContent(Div rightContentLayout) {
+    private void createRightColumnContent(Div rightContentLayout, Component contentComponent) {
         rightContentLayout.add(breadcrumb);
         rightContentLayout.add(contentNameLabel);
 
         // samotný obsah
-        createContent(rightContentLayout);
+        rightContentLayout.add(contentComponent);
     }
 
-    protected abstract void createContent(Div layout);
-
-    protected abstract ContentNodeTO getContentNodeDTO();
-
-    protected abstract PageFactory getContentViewerPageFactory();
 
     private void updateBreadcrumb(ContentNodeTO content) {
 
@@ -234,21 +255,19 @@ public abstract class ContentViewerPage extends TwoColumnPage {
         /**
          * obsah
          */
-        breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(content.getName(),
-                getPageURL(getContentViewerPageFactory(),
-                        URLIdentifierUtils.createURLIdentifier(content.getContentID(), content.getName()))));
+        breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(contentLink));
 
         /**
          * kategorie
          */
-        NodeTO parent = nodeFacade.getNodeByIdForDetail(content.getParent().getId());
+        NodeTO parent = nodeService.getNodeByIdForDetail(content.getParent().getId());
         while (true) {
 
             // nejprve zkus zjistit, zda předek existuje
             if (parent == null) throw new GrassPageException(404);
 
-            breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(parent.getName(), getPageURL(nodePageFactory,
-                    URLIdentifierUtils.createURLIdentifier(parent.getId(), parent.getName()))));
+            breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(parent.getName(), NodePage.class,
+                    URLIdentifierUtils.createURLIdentifier(parent.getId(), parent.getName())));
 
             // pokud je můj předek null, pak je to konec a je to všechno
             if (parent.getParent() == null) break;
@@ -258,8 +277,4 @@ public abstract class ContentViewerPage extends TwoColumnPage {
 
         breadcrumb.resetBreadcrumb(breadcrumbElements);
     }
-
-    protected abstract void onDeleteOperation();
-
-    protected abstract void onEditOperation();
 }

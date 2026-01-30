@@ -8,11 +8,11 @@ import cz.gattserver.grass.core.services.impl.LoginResult;
 
 public interface SecurityService {
 
-	public LoginResult login(String username, String password, boolean remember, HttpServletRequest request,
-			HttpServletResponse response);
+    LoginResult login(String username, String password, boolean remember, HttpServletRequest request,
+                      HttpServletResponse response);
 
-	public UserInfoTO getCurrentUser();
+    UserInfoTO getCurrentUser();
 
-	void logout(HttpServletRequest request, HttpServletResponse response);
+    void logout(HttpServletRequest request, HttpServletResponse response);
 
 }

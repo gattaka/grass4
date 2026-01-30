@@ -297,9 +297,21 @@ public class ComponentFactory {
     }
 
     public Div createOneColumnLayout() {
-        Div contentLayout = new Div();
-        contentLayout.setId("center-content");
-        return contentLayout;
+        Div layout = new Div();
+        layout.setId("center-content");
+        return layout;
+    }
+
+    public Div createLeftColumnLayout() {
+        Div layout = new Div();
+        layout.setId("left-content");
+        return layout;
+    }
+
+    public Div createRightColumnLayout() {
+        Div layout = new Div();
+        layout.setId("right-content");
+        return layout;
     }
 
     /*

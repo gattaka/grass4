@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.VaadinSession;
+import cz.gattserver.common.exception.ApplicationErrorHandler;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.services.*;
 import cz.gattserver.grass.core.ui.components.NodesGrid;
@@ -67,6 +69,8 @@ public class HomePage extends Div {
                     ContentNodeService contentNodeService) {
         this.contentNodeService = contentNodeService;
         this.contentTagService = contentTagService;
+
+        VaadinSession.getCurrent().setErrorHandler(new ApplicationErrorHandler());
 
         ComponentFactory componentFactory = new ComponentFactory();
         Div layout = componentFactory.createOneColumnLayout();

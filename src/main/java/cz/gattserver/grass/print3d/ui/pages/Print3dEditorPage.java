@@ -295,7 +295,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
             @ClientCallable
             private void returnToProjectCallback() {
-                UI.getCurrent().navigate(Print3dViewerPage.class,
+                UI.getCurrent().navigate(Print3DViewer.class,
                         URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName()));
             }
 

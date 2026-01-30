@@ -376,7 +376,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      */
     private void returnToPhotogallery() {
         UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UI.getCurrent()
-                .navigate(PGViewerPage.class, URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
+                .navigate(PGViewer.class, URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
                         photogallery.getContentNode().getName())));
     }
 

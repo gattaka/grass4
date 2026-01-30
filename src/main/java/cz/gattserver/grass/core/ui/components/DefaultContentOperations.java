@@ -23,4 +23,8 @@ public enum DefaultContentOperations {
 	 */
 	DELETE;
 
+    public String withParameter(String parameter) {
+        return this.name() + "/" + parameter;
+    }
+
 }

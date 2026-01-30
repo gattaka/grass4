@@ -18,6 +18,7 @@ import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.shared.Registration;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
@@ -39,10 +40,11 @@ import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.ContentTagService;
+import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.pages.template.TwoColumnPage;
+import cz.gattserver.grass.core.ui.pages.MainView;
+import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -64,28 +66,20 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Route("articles-editor")
 @PageTitle("Editor článku")
-public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter<String>, BeforeLeaveObserver {
+@Route(value = "articles-editor", layout = MainView.class)
+public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
     private static final long serialVersionUID = -5107777679764121445L;
 
     private static final Logger logger = LoggerFactory.getLogger(ArticlesEditorPage.class);
+    private final NodeService nodeService;
 
-    @Autowired
     private ArticleService articleService;
-
-    @Autowired
     private ContentTagService contentTagFacade;
-
-    @Autowired
     private ContentNodeService contentNodeService;
-
-    @Autowired
     private PluginRegisterService pluginRegister;
-
-    @Resource(name = "articlesViewerPageFactory")
-    private PageFactory articlesViewerPageFactory;
+    private SecurityService securityService;
 
     private Grid<AttachmentTO> grid;
 
@@ -111,6 +105,23 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
     private String identifierToken;
     private String partNumberToken;
 
+    private ComponentFactory componentFactory;
+
+    private boolean leaving;
+
+    public ArticlesEditorPage(ArticleService articleService, ContentTagService contentTagFacade,
+                              ContentNodeService contentNodeService, PluginRegisterService pluginRegisterService,
+                              SecurityService securityService, NodeService nodeService) {
+        this.articleService = articleService;
+        this.contentTagFacade = contentTagFacade;
+        this.contentNodeService = contentNodeService;
+        this.pluginRegister = pluginRegisterService;
+        this.securityService = securityService;
+        this.nodeService = nodeService;
+
+        componentFactory = new ComponentFactory();
+    }
+
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
         if (!SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
@@ -121,10 +132,65 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         if (chunks.length > 1) identifierToken = chunks[1];
         if (chunks.length > 2) partNumberToken = chunks[2];
 
-        init();
+        removeAll();
+        createCenterElements(this);
+
+        Div leftContentLayout = componentFactory.createLeftColumnLayout();
+        createLeftColumnContent(leftContentLayout);
+        add(leftContentLayout);
+
+        Div rightContentLayout = componentFactory.createRightColumnLayout();
+        createRightColumnContent(rightContentLayout);
+        add(rightContentLayout);
 
         // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
         UIUtils.addOnbeforeunloadWarning();
+    }
+
+    protected void createCenterElements(Div customlayout) {
+        articleNameField = new TextField();
+        articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
+
+        CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
+                q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+        CallbackDataProvider.CountCallback<String, String> serializableFunction =
+                q -> contentTagFacade.countByFilter(q.getFilter().get());
+        articleKeywords = new TokenField(fetchItemsCallback, serializableFunction);
+        articleKeywords.isEnabled();
+        articleKeywords.setPlaceholder("klíčové slovo");
+
+        articleTextArea = new TextArea();
+        articleTextArea.setHeight("30em");
+        articleTextArea.setWidthFull();
+        articleTextArea.setValueChangeMode(ValueChangeMode.EAGER);
+        publicatedCheckBox = new Checkbox();
+
+        // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
+        articleTextAreaFocusRegistration = articleTextArea.addFocusListener(event -> {
+            String js = createTextareaGetJS() + "ta.addEventListener('keydown', function(e) {"
+                    /*				*/ + "let keyCode = e.keyCode || e.which;"
+                    /*				*/ + "if (keyCode == 9) {"
+                    /*					*/ + "e.preventDefault();"
+                    /*					*/ + createTextareaGetSelectionJS()
+                    /*					*/ + "$0.$server.handleTab(start, finish, ta.value);"
+                    /*				*/ + "}"
+                    /*			*/ + "}, false);";
+            UI.getCurrent().getPage().executeJs(js, getElement());
+            // je potřeba jenom jednou pro registraci
+            articleTextAreaFocusRegistration.remove();
+        });
+        // aby se zaregistroval JS listener
+        articleTextArea.focus();
+
+        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
+        if (drafts.isEmpty()) {
+            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
+            // článků, otevři editor dle operace (new/edit)
+            defaultCreateContent(customlayout);
+        } else {
+            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
+            draftCreateContent(customlayout, drafts);
+        }
     }
 
     private void populateByExistingArticle(ArticleTO article, String partNumberToken) {
@@ -154,8 +220,8 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     private void checkAuthorization(ArticleTO article) {
         // má oprávnění upravovat tento článek?
-        if (article != null && !article.getContentNode().getAuthor().equals(getUser()) && !getUser().isAdmin())
-            throw new GrassPageException(403);
+        if (article != null && !article.getContentNode().getAuthor().equals(securityService.getCurrentUser()) &&
+                !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
     }
 
     private void defaultCreateContent(Div customlayout) {
@@ -175,7 +241,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
-            node = nodeFacade.getNodeByIdForOverview(identifier.getId());
+            node = nodeService.getNodeByIdForOverview(identifier.getId());
             articleNameField.setValue("");
             articleTextArea.setValue("");
             publicatedCheckBox.setValue(true);
@@ -188,7 +254,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         }
 
         checkAuthorization(article);
-        super.createCenterElements(customlayout);
     }
 
     private void draftCreateContent(Div customlayout, List<ArticleDraftOverviewTO> drafts) {
@@ -243,55 +308,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
                 }
             }
         }
-
-        ArticlesEditorPage.super.createCenterElements(customlayout);
-    }
-
-    @Override
-    protected void createCenterElements(Div customlayout) {
-        articleNameField = new TextField();
-        articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
-
-        CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
-        CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagFacade.countByFilter(q.getFilter().get());
-        articleKeywords = new TokenField(fetchItemsCallback, serializableFunction);
-        articleKeywords.isEnabled();
-        articleKeywords.setPlaceholder("klíčové slovo");
-
-        articleTextArea = new TextArea();
-        articleTextArea.setHeight("30em");
-        articleTextArea.setWidthFull();
-        articleTextArea.setValueChangeMode(ValueChangeMode.EAGER);
-        publicatedCheckBox = new Checkbox();
-
-        // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
-        articleTextAreaFocusRegistration = articleTextArea.addFocusListener(event -> {
-            String js = createTextareaGetJS() + "ta.addEventListener('keydown', function(e) {"
-                    /*				*/ + "let keyCode = e.keyCode || e.which;"
-                    /*				*/ + "if (keyCode == 9) {"
-                    /*					*/ + "e.preventDefault();"
-                    /*					*/ + createTextareaGetSelectionJS()
-                    /*					*/ + "$0.$server.handleTab(start, finish, ta.value);"
-                    /*				*/ + "}"
-                    /*			*/ + "}, false);";
-            UI.getCurrent().getPage().executeJs(js, getElement());
-            // je potřeba jenom jednou pro registraci
-            articleTextAreaFocusRegistration.remove();
-        });
-        // aby se zaregistroval JS listener
-        articleTextArea.focus();
-
-        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(getUser().getId());
-        if (drafts.isEmpty()) {
-            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
-            // článků, otevři editor dle operace (new/edit)
-            defaultCreateContent(customlayout);
-        } else {
-            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
-            draftCreateContent(customlayout, drafts);
-        }
     }
 
     private String createTextareaGetJS() {
@@ -302,7 +318,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         return "let start = ta.selectionStart;" + "let finish = ta.selectionEnd;";
     }
 
-    @Override
     protected void createLeftColumnContent(Div layout) {
         List<String> families = new ArrayList<>(pluginRegister.getRegisteredFamilies());
         Collections.sort(families, (o1, o2) -> {
@@ -356,8 +371,10 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         Button previewButton = componentFactory.createPreviewButton(event -> {
             try {
                 String draftName = saveArticleDraft(true);
-                UI.getCurrent().getPage().open(getPageURL(articlesViewerPageFactory,
-                        URLIdentifierUtils.createURLIdentifier(existingDraftId, draftName)));
+                String url = RouteConfiguration.forRegistry(ComponentUtil.getRouter(this).getRegistry())
+                        .getUrl(ArticlesViewer.class,
+                                URLIdentifierUtils.createURLIdentifier(existingDraftId, draftName));
+                UI.getCurrent().getPage().open(url, "_blank");
             } catch (Exception e) {
                 logger.error("Při ukládání náhledu článku došlo k chybě", e);
             }
@@ -385,6 +402,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
             if (!isFormValid()) return;
             if (saveOrUpdateArticle()) {
                 // Tady nemá cena dávat infowindow
+                leaving = true;
                 returnToArticle();
             } else {
                 UIUtils.showWarning(ArticlesEditorPage.this.existingArticleId != null ? "Úprava článku se nezdařila" :
@@ -413,14 +431,15 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         String draftName = articleNameField.getValue();
         ArticlePayloadTO payload =
                 new ArticlePayloadTO(draftName, articleTextArea.getValue(), articleKeywords.getValues(),
-                        publicatedCheckBox.getValue(), attachmentsDirId, getContextPath());
+                        publicatedCheckBox.getValue(), attachmentsDirId, UIUtils.getContextPath());
         if (existingDraftId == null) {
             if (existingArticleId == null) {
-                existingDraftId = articleService.saveDraft(payload, node.getId(), getUser().getId(), asPreview);
-            } else {
                 existingDraftId =
-                        articleService.saveDraftOfExistingArticle(payload, node.getId(), getUser().getId(), partNumber,
-                                existingArticleId, asPreview);
+                        articleService.saveDraft(payload, node.getId(), securityService.getCurrentUser().getId(),
+                                asPreview);
+            } else {
+                existingDraftId = articleService.saveDraftOfExistingArticle(payload, node.getId(),
+                        securityService.getCurrentUser().getId(), partNumber, existingArticleId, asPreview);
             }
         } else {
             if (existingArticleId == null) {
@@ -560,14 +579,17 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         grid.addColumn(AttachmentTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px")
                 .setFlexGrow(0).setSortProperty("size");
 
-        grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
                 .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton("Vložit", e -> handleInsertAction(to))))
-                .setHeader("Vložit").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> componentFactory.createInlineButton("Vložit", e -> handleInsertAction(to)))).setHeader("Vložit")
+                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton("Smazat", e -> handleDeleteAction(to))))
-                .setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> componentFactory.createInlineButton("Smazat", e -> handleDeleteAction(to)))).setHeader("Smazat")
+                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d. MM. yyyy HH:mm"))
                 .setHeader("Upraveno").setAutoWidth(true).setTextAlign(ColumnTextAlign.END)
@@ -603,7 +625,6 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
         layout.add(upload);
     }
 
-    @Override
     protected void createRightColumnContent(Div layout) {
         layout.add(new H3("Název článku"));
         layout.add(articleNameField);
@@ -679,11 +700,12 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
             ArticlePayloadTO payload =
                     new ArticlePayloadTO(articleNameField.getValue(), text, articleKeywords.getValues(),
-                            publicatedCheckBox.getValue(), attachmentsDirId, getContextPath());
+                            publicatedCheckBox.getValue(), attachmentsDirId, UIUtils.getContextPath());
             if (existingArticleId == null) {
                 // byl uložen článek, od teď eviduj draft, jako draft
                 // existujícího obsahu
-                existingArticleId = articleService.saveArticle(payload, node.getId(), getUser().getId());
+                existingArticleId =
+                        articleService.saveArticle(payload, node.getId(), securityService.getCurrentUser().getId());
                 this.existingArticleName = articleNameField.getValue();
             } else {
                 articleService.modifyArticle(existingArticleId, payload, partNumber);
@@ -697,14 +719,13 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
 
     @ClientCallable
     private void returnToNodeCallback() {
-        UIUtils.redirect(
-                getPageURL(nodePageFactory, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
+        UI.getCurrent().navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
     }
 
     @ClientCallable
     private void returnToArticleCallback() {
-        UIUtils.redirect(getPageURL(articlesViewerPageFactory,
-                URLIdentifierUtils.createURLIdentifier(existingArticleId, existingArticleName)));
+        UI.getCurrent().navigate(ArticlesViewer.class,
+                URLIdentifierUtils.createURLIdentifier(existingArticleId, existingArticleName));
     }
 
     /**
@@ -734,6 +755,7 @@ public class ArticlesEditorPage extends TwoColumnPage implements HasUrlParameter
      */
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+        if (leaving) return;
         beforeLeaveEvent.postpone();
         componentFactory.createBeforeLeaveConfirmDialog(beforeLeaveEvent).open();
     }

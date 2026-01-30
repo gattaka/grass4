@@ -3,86 +3,66 @@ package cz.gattserver.grass.core.ui.pages.settings;
 import java.util.Comparator;
 import java.util.List;
 
+import com.vaadin.flow.router.*;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.modules.register.ModuleSettingsPageFactoriesRegister;
-import cz.gattserver.grass.core.ui.pages.template.TwoColumnPage;
-import org.springframework.beans.factory.annotation.Autowired;
+import cz.gattserver.grass.core.ui.pages.MainView;
 
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.router.BeforeEvent;
-import com.vaadin.flow.router.HasUrlParameter;
-import com.vaadin.flow.router.OptionalParameter;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
 
-@Route("settings")
 @PageTitle("Nastavení")
-public class SettingsPage extends TwoColumnPage implements HasUrlParameter<String> {
+@Route(value = "settings", layout = MainView.class)
+public class SettingsPage extends Div implements HasUrlParameter<String> {
 
-	private static final long serialVersionUID = 935609806962179905L;
+    private static final long serialVersionUID = 935609806962179905L;
 
-	@Autowired
-	private List<ModuleSettingsPageFactory> settingsTabFactories;
+    private List<ModuleSettingsPageFactory> settingsTabFactories;
+    private ModuleSettingsPageFactoriesRegister register;
 
-	@Autowired
-	private ModuleSettingsPageFactoriesRegister register;
+    public SettingsPage(List<ModuleSettingsPageFactory> settingsTabFactories,
+                        ModuleSettingsPageFactoriesRegister register) {
+        this.settingsTabFactories = settingsTabFactories;
+        this.register = register;
+    }
 
-	private ModuleSettingsPageFactory settingsTabFactory = null;
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
+        Div leftLayout = componentFactory.createLeftColumnLayout();
+        Div rightLayout = componentFactory.createRightColumnLayout();
+        add(leftLayout);
+        add(rightLayout);
 
-	private String moduleParameter;
+        createLeftColumnContent(leftLayout);
+        ModuleSettingsPageFactory moduleSettingsPageFactory = register.getFactory(parameter);
+        if (moduleSettingsPageFactory != null && !moduleSettingsPageFactory.isAuthorized())
+            throw new GrassPageException(403);
 
-	private Div layout;
+        createRightColumnContent(rightLayout, moduleSettingsPageFactory);
+    }
 
-	@Override
-	public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
-		moduleParameter = parameter;
+    protected void createLeftColumnContent(Div leftContentLayout) {
+        VerticalLayout menuLayout = new VerticalLayout();
+        menuLayout.setSpacing(true);
+        menuLayout.setPadding(false);
+        leftContentLayout.add(menuLayout);
+        settingsTabFactories.sort(Comparator.comparing(ModuleSettingsPageFactory::getSettingsCaption));
+        for (ModuleSettingsPageFactory f : settingsTabFactories) {
+            RouterLink link = new RouterLink(f.getSettingsCaption(), SettingsPage.class, f.getSettingsURL());
+            menuLayout.add(link);
+        }
+    }
 
-		ModuleSettingsPageFactory moduleSettingsPageFactory = register.getFactory(moduleParameter);
-		if (moduleSettingsPageFactory != null) {
-			if (!moduleSettingsPageFactory.isAuthorized()) {
-				throw new GrassPageException(403);
-			} else {
-				this.settingsTabFactory = moduleSettingsPageFactory;
-			}
-		}
-
-		if (layout == null) {
-			init();
-		} else {
-			layout.removeAll();
-			createContent();
-		}
-	}
-
-	@Override
-	protected void createLeftColumnContent(Div leftContentLayout) {
-		VerticalLayout menuLayout = new VerticalLayout();
-		menuLayout.setSpacing(true);
-		menuLayout.setPadding(false);
-		leftContentLayout.add(menuLayout);
-		settingsTabFactories.sort(Comparator.comparing(ModuleSettingsPageFactory::getSettingsCaption));
-		for (ModuleSettingsPageFactory f : settingsTabFactories) {
-			Anchor link = new Anchor(getPageURL(settingsPageFactory, f.getSettingsURL()), f.getSettingsCaption());
-			menuLayout.add(link);
-		}
-	}
-
-	@Override
-	protected void createRightColumnContent(Div rightContentLayout) {
-		layout = new Div();
-		rightContentLayout.add(layout);
-		createContent();
-	}
-
-	private void createContent() {
-		if (settingsTabFactory != null) {
-			settingsTabFactory.createFragmentIfAuthorized(layout);
-		} else {
-			Span span = new Span("Zvolte položku nastavení z menu");
-			layout.add(span);
-		}
-	}
+    protected void createRightColumnContent(Div rightContentLayout, ModuleSettingsPageFactory factory) {
+        if (factory != null) {
+            factory.createFragmentIfAuthorized(rightContentLayout);
+        } else {
+            Span span = new Span("Zvolte položku nastavení z menu");
+            rightContentLayout.add(span);
+        }
+    }
 }

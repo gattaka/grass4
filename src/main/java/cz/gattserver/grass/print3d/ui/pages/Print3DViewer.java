@@ -19,18 +19,24 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
+import cz.gattserver.grass.articles.ui.pages.ArticlesEditorPage;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.services.CoreACLService;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
+import cz.gattserver.grass.core.ui.pages.MainView;
+import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.pages.template.ContentViewerPage;
+import cz.gattserver.grass.core.ui.pages.template.ContentViewer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.print3d.config.Print3dConfiguration;
 import cz.gattserver.grass.print3d.events.impl.Print3dZipProcessProgressEvent;
@@ -45,33 +51,23 @@ import cz.gattserver.common.stlviewer.STLViewer;
 import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.annotation.Resource;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 
-@Route("print3d")
-public class Print3dViewerPage extends ContentViewerPage implements HasUrlParameter<String>, HasDynamicTitle {
+@Route(value = "print3d", layout = MainView.class)
+public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
     private static final long serialVersionUID = 7334408385869747381L;
 
-    private static final Logger logger = LoggerFactory.getLogger(Print3dViewerPage.class);
+    private static final Logger logger = LoggerFactory.getLogger(Print3DViewer.class);
 
-    @Autowired
     private Print3dService print3dService;
-
-    @Resource(name = "print3dViewerPageFactory")
-    private PageFactory print3dViewerPageFactory;
-
-    @Resource(name = "print3dEditorPageFactory")
-    private PageFactory print3dEditorPageFactory;
-
-    @Autowired
     private EventBus eventBus;
+    private SecurityService securityService;
+    private CoreACLService coreACLService;
 
     private ProgressDialog progressIndicatorWindow;
 
@@ -89,25 +85,24 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
 
     private STLViewer stlViewer;
 
+    private ComponentFactory componentFactory;
+
+    public Print3DViewer(Print3dService print3dService, EventBus eventBus, SecurityService securityService,
+                         CoreACLService coreACLService) {
+        this.print3dService = print3dService;
+        this.eventBus = eventBus;
+        this.securityService = securityService;
+        this.coreACLService = coreACLService;
+        this.componentFactory = new ComponentFactory();
+    }
+
     @Override
     public String getPageTitle() {
         return print3dTO.getContentNode().getName();
     }
 
     @Override
-    protected void createContentOperations(Div operationsListLayout) {
-        operationsListLayout.add(
-                componentFactory.createZipButton(event -> new ConfirmDialog("Přejete si vytvořit ZIP projektu?", e -> {
-                    logger.info("zipPrint3dProject thread: {}", Thread.currentThread().threadId());
-                    progressIndicatorWindow = new ProgressDialog();
-                    eventBus.subscribe(Print3dViewerPage.this);
-                    print3dService.zipProject(projectDir);
-                }).open()));
-        super.createContentOperations(operationsListLayout);
-    }
-
-    @Override
-    public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
+    public void setParameter(BeforeEvent beforeEvent, @WildcardParameter String parameter) {
         String[] chunks = parameter.split("/");
         if (chunks.length > 0) identifierToken = chunks[0];
         if (chunks.length > 1) magickToken = chunks[1];
@@ -123,28 +118,37 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
 
         projectDir = print3dTO.getPrint3dProjectPath();
 
-        init();
+        removeAll();
+        ContentNodeTO contentNodeTO = print3dTO.getContentNode();
+        ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
+                e -> UI.getCurrent().navigate(Print3dEditorPage.class, parameter),
+                new RouterLink(contentNodeTO.getName(), Print3DViewer.class, parameter));
+
+        add(contentViewer);
+        contentViewer.getOperationsListLayout().add(componentFactory.createZipButton(
+                event -> new ConfirmDialog("Přejete si vytvořit ZIP projektu?", e -> {
+                    logger.info("zipPrint3dProject thread: {}", Thread.currentThread().threadId());
+                    progressIndicatorWindow = new ProgressDialog();
+                    eventBus.subscribe(Print3DViewer.this);
+                    print3dService.zipProject(projectDir);
+                }).open()));
 
         UIUtils.turnOffRouterAnchors();
     }
 
     private boolean isAdminOrAuthor() {
-        return getUser().isAdmin() || print3dTO.getContentNode().getAuthor().equals(getUser());
+        return securityService.getCurrentUser().isAdmin() ||
+                print3dTO.getContentNode().getAuthor().equals(securityService.getCurrentUser());
     }
 
-    @Override
-    protected ContentNodeTO getContentNodeDTO() {
-        return print3dTO.getContentNode();
-    }
-
-    @Override
-    protected void createContent(Div layout) {
+    protected Div createContent() {
+        Div layout = new Div();
         // pokud je obsah porušený, pak nic nevypisuj
         try {
             if (!print3dService.checkProject(projectDir)) {
                 layout.add(new Span("Chyba: Projekt je porušen -- kontaktujte administrátora (ID: " +
                         print3dTO.getPrint3dProjectPath() + ")"));
-                return;
+                return layout;
             }
         } catch (IllegalStateException e) {
             throw new GrassPageException(500, e);
@@ -250,7 +254,7 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
             return link;
         })).setHeader("Stáhnout").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-        if (coreACL.canModifyContent(getContentNodeDTO(), getUser())) {
+        if (coreACLService.canModifyContent(print3dTO.getContentNode(), securityService.getCurrentUser())) {
             grid.addColumn(new ComponentRenderer<>(item -> componentFactory.createInlineButton("Smazat", be -> {
                 new ConfirmDialog("Opravdu smazat soubor?", e -> {
                     print3dService.deleteFile(item, projectDir);
@@ -285,14 +289,15 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
         upload.setDropLabel(dropLabel);
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         upload.addFinishedListener(e -> {
-            eventBus.subscribe(Print3dViewerPage.this);
+            eventBus.subscribe(Print3DViewer.this);
             progressIndicatorWindow = new ProgressDialog();
             Print3dPayloadTO payloadTO = new Print3dPayloadTO(print3dTO.getContentNode().getName(), projectDir,
                     print3dTO.getContentNode().getContentTagsAsStrings(), print3dTO.getContentNode().isPublicated());
             print3dService.modifyProject(print3dTO.getId(), payloadTO);
             UI.getCurrent().getPage().reload();
         });
-        if (coreACL.canModifyContent(print3dTO.getContentNode(), getUser())) layout.add(upload);
+        if (coreACLService.canModifyContent(print3dTO.getContentNode(), securityService.getCurrentUser()))
+            layout.add(upload);
 
         Div statusRow = new Div();
         statusRow.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -301,6 +306,8 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
         statusRow.setSizeUndefined();
         statusRow.setText("Projekt: " + print3dTO.getPrint3dProjectPath() + " celkem položek: " + items.size());
         layout.add(statusRow);
+
+        return layout;
     }
 
     @Handler
@@ -345,45 +352,33 @@ public class Print3dViewerPage extends ContentViewerPage implements HasUrlParame
                 UIUtils.showWarning(event.getResultDetails());
             }
         });
-        eventBus.unsubscribe(Print3dViewerPage.this);
+        eventBus.unsubscribe(Print3DViewer.this);
     }
 
     private String getItemURL(String file) {
-        return getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" + print3dTO.getPrint3dProjectPath() +
-                "/" + file;
+        return UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" +
+                print3dTO.getPrint3dProjectPath() + "/" + file;
     }
 
-    @Override
-    protected PageFactory getContentViewerPageFactory() {
-        return print3dViewerPageFactory;
-    }
-
-    @Override
     protected void onDeleteOperation() {
         ConfirmDialog confirmSubwindow = new ConfirmDialog("Opravdu si přejete smazat tento projekt ?", ev -> {
             NodeOverviewTO nodeDTO = print3dTO.getContentNode().getParent();
 
-            final String nodeURL = getPageURL(nodePageFactory,
-                    URLIdentifierUtils.createURLIdentifier(nodeDTO.getId(), nodeDTO.getName()));
+            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(nodeDTO.getId(), nodeDTO.getName());
 
             // zdařilo se ? Pokud ano, otevři info okno a při
             // potvrzení jdi na kategorii
             if (print3dService.deleteProject(print3dTO.getId())) {
-                UIUtils.redirect(nodeURL);
+                UI.getCurrent().navigate(NodePage.class, urlIdentifier);
             } else {
                 // Pokud ne, otevři warn okno a při
                 // potvrzení jdi na kategorii
                 WarnDialog warnSubwindow = new WarnDialog("Při mazání projektu se nezdařilo smazat některé soubory.");
-                warnSubwindow.addDialogCloseActionListener(e -> UIUtils.redirect(nodeURL));
+                warnSubwindow.addDialogCloseActionListener(
+                        e -> UI.getCurrent().navigate(NodePage.class, urlIdentifier));
                 warnSubwindow.open();
             }
         });
         confirmSubwindow.open();
-    }
-
-    @Override
-    protected void onEditOperation() {
-        UIUtils.redirect(getPageURL(print3dEditorPageFactory, DefaultContentOperations.EDIT.toString(),
-                URLIdentifierUtils.createURLIdentifier(print3dTO.getId(), print3dTO.getContentNode().getName())));
     }
 }
