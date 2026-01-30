@@ -28,7 +28,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
-import cz.gattserver.grass.language.facades.LanguageFacade;
+import cz.gattserver.grass.language.facades.LanguageService;
 import cz.gattserver.grass.language.model.domain.ItemType;
 import cz.gattserver.grass.language.model.dto.LanguageItemTO;
 import cz.gattserver.grass.language.model.dto.LanguageTO;
@@ -40,7 +40,7 @@ public class ItemsTab extends Div {
     private static final long serialVersionUID = 678133965931216087L;
 
     @Autowired
-    private LanguageFacade languageFacade;
+    private LanguageService languageService;
 
     @Autowired
     private SecurityService securityService;
@@ -107,21 +107,21 @@ public class ItemsTab extends Div {
 
         btnLayout.add(componentFactory.createCreateButton(event -> new LanguageItemDialog(to -> {
             to.setLanguage(langId);
-            languageFacade.saveLanguageItem(to);
+            languageService.saveLanguageItem(to);
             grid.getDataProvider().refreshAll();
         }, langId, type).open()));
 
         btnLayout.add(componentFactory.createEditGridButton(item -> {
             ItemType oldType = item.getType();
             new LanguageItemDialog(item, to -> {
-                languageFacade.saveLanguageItem(to);
+                languageService.saveLanguageItem(to);
                 if (oldType.equals(to.getType())) grid.getDataProvider().refreshItem(to);
                 else grid.getDataProvider().refreshAll();
             }, langId, type).open();
         }, grid));
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> items.forEach(item -> {
-            languageFacade.deleteLanguageItem(item);
+            languageService.deleteLanguageItem(item);
             grid.getDataProvider().refreshAll();
         }), grid));
 
@@ -151,14 +151,14 @@ public class ItemsTab extends Div {
         layout.setMargin(true);
         w.add(layout);
 
-        List<LanguageTO> langs = languageFacade.getLanguages();
+        List<LanguageTO> langs = languageService.getLanguages();
         Grid<LanguageTO> targatGrid = new Grid<>(LanguageTO.class);
         targatGrid.setItems(langs);
         targatGrid.addColumn(LanguageTO::getName).setHeader("Název");
         layout.add(targatGrid);
 
         targatGrid.addSelectionListener(se -> se.getFirstSelectedItem().ifPresent(lang -> items.forEach(item -> {
-            languageFacade.moveLanguageItemTo(item, lang);
+            languageService.moveLanguageItemTo(item, lang);
             targatGrid.getDataProvider().refreshAll();
             w.close();
             grid.getDataProvider().refreshAll();
@@ -168,8 +168,8 @@ public class ItemsTab extends Div {
 
     private void populate(Grid<LanguageItemTO> grid, LanguageItemTO filterTO) {
         FetchCallback<LanguageItemTO, LanguageItemTO> fetchCallback =
-                q -> languageFacade.getLanguageItems(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
-        CountCallback<LanguageItemTO, LanguageItemTO> countCallback = q -> languageFacade.countLanguageItems(filterTO);
+                q -> languageService.getLanguageItems(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
+        CountCallback<LanguageItemTO, LanguageItemTO> countCallback = q -> languageService.countLanguageItems(filterTO);
         grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
     }
 }

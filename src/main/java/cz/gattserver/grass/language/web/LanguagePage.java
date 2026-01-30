@@ -12,10 +12,8 @@ import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
@@ -28,7 +26,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-import cz.gattserver.grass.language.facades.LanguageFacade;
+import cz.gattserver.grass.language.facades.LanguageService;
 import cz.gattserver.grass.language.model.domain.ItemType;
 import cz.gattserver.grass.language.model.dto.LanguageItemTO;
 import cz.gattserver.grass.language.model.dto.LanguageTO;
@@ -45,26 +43,25 @@ public class LanguagePage extends Div {
 
     public static final String PREKLAD_LABEL = "Překlad";
 
-    @Autowired
-    private LanguageFacade languageFacade;
-
-    @Autowired
-    private SecurityService securityService;
+    private LanguageService languageService;
 
     private Tabs tabs;
     private Div tabLayout;
     private VerticalLayout testLayout;
 
+
     private List<Consumer<Long>> tabActions = new ArrayList<>();
 
-    public LanguagePage() {
+    public LanguagePage(LanguageService languageService, SecurityService securityService) {
+        this.languageService = languageService;
+
         removeAll();
         ComponentFactory componentFactory = new ComponentFactory();
 
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        List<LanguageTO> langs = languageFacade.getLanguages();
+        List<LanguageTO> langs = languageService.getLanguages();
         Grid<LanguageTO> grid = new Grid<>();
         UIUtils.applyGrassDefaultStyle(grid);
         grid.setItems(langs);
@@ -115,16 +112,16 @@ public class LanguagePage extends Div {
         }));
 
         btnLayout.add(componentFactory.createCreateButton(event -> new LanguageDialog(to -> {
-            languageFacade.saveLanguage(to);
+            languageService.saveLanguage(to);
             langs.clear();
-            langs.addAll(languageFacade.getLanguages());
+            langs.addAll(languageService.getLanguages());
             grid.getDataProvider().refreshAll();
         }).open()));
 
         btnLayout.add(componentFactory.createEditGridButton(item -> new LanguageDialog(item, to -> {
-            languageFacade.saveLanguage(to);
+            languageService.saveLanguage(to);
             langs.clear();
-            langs.addAll(languageFacade.getLanguages());
+            langs.addAll(languageService.getLanguages());
             grid.getDataProvider().refreshAll();
         }).open(), grid));
     }
@@ -151,14 +148,14 @@ public class LanguagePage extends Div {
         allTestBtn.setIcon(VaadinIcon.PLAY_CIRCLE.create());
         buttonLayout.add(allTestBtn);
 
-        Float wordsProgress = languageFacade.getSuccessRateOfLanguageAndType(ItemType.WORD, langId);
+        Float wordsProgress = languageService.getSuccessRateOfLanguageAndType(ItemType.WORD, langId);
         String wordsProgressLabel = (int) (wordsProgress * 100) + "%";
         Button wordsTestBtn = new Button("Spustit test slovíček (" + wordsProgressLabel + ")",
                 event -> startTest(langId, ItemType.WORD));
         wordsTestBtn.setIcon(VaadinIcon.PLAY_CIRCLE_O.create());
         buttonLayout.add(wordsTestBtn);
 
-        Float phrasesProgress = languageFacade.getSuccessRateOfLanguageAndType(ItemType.PHRASE, langId);
+        Float phrasesProgress = languageService.getSuccessRateOfLanguageAndType(ItemType.PHRASE, langId);
         String phrasesProgressLabel = (int) (phrasesProgress * 100) + "%";
         Button phrasesTestBtn = new Button("Spustit test frází (" + phrasesProgressLabel + ")",
                 event -> startTest(langId, ItemType.PHRASE));
@@ -189,9 +186,9 @@ public class LanguagePage extends Div {
 
         Map<LanguageItemTO, TextField> answersMap = new LinkedHashMap<>();
 
-        List<LanguageItemTO> itemsToLearn = languageFacade.getLanguageItemsForTest(langId, 0, 0.1, 10, type);
-        List<LanguageItemTO> itemsToImprove = languageFacade.getLanguageItemsForTest(langId, 0.1, 0.8, 5, type);
-        List<LanguageItemTO> itemsToRefresh = languageFacade.getLanguageItemsForTest(langId, 0.8, 1.1, 4, type);
+        List<LanguageItemTO> itemsToLearn = languageService.getLanguageItemsForTest(langId, 0, 0.1, 10, type);
+        List<LanguageItemTO> itemsToImprove = languageService.getLanguageItemsForTest(langId, 0.1, 0.8, 5, type);
+        List<LanguageItemTO> itemsToRefresh = languageService.getLanguageItemsForTest(langId, 0.8, 1.1, 4, type);
 
         FormLayout columnsLayout = new FormLayout();
         columnsLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("200px", 2));
@@ -271,8 +268,7 @@ public class LanguagePage extends Div {
                 answerDiv.getStyle().set("color", success ? "hsl(122, 100%, 33%)" : "hsl(0, 100%, 49%)");
                 resultLayout.add(answerDiv);
 
-                languageFacade.updateItemAfterTest(item, success);
-
+                languageService.updateItemAfterTest(item, success);
             });
         });
         testLayout.add(submitBtn);

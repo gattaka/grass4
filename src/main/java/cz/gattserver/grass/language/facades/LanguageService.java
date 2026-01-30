@@ -10,7 +10,7 @@ import cz.gattserver.grass.language.model.dto.LanguageItemTO;
 import cz.gattserver.grass.language.model.dto.LanguageTO;
 import cz.gattserver.grass.language.model.dto.StatisticsTO;
 
-public interface LanguageFacade {
+public interface LanguageService {
 
 	/**
 	 * Získá přehled všech jazyků

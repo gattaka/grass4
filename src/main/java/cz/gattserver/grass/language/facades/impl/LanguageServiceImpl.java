@@ -1,6 +1,5 @@
 package cz.gattserver.grass.language.facades.impl;
 
-import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -16,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 
-import cz.gattserver.grass.language.facades.LanguageFacade;
+import cz.gattserver.grass.language.facades.LanguageService;
 import cz.gattserver.grass.language.model.dao.LanguageItemRepository;
 import cz.gattserver.grass.language.model.dao.LanguageRepository;
 import cz.gattserver.grass.language.model.domain.ItemType;
@@ -31,7 +30,7 @@ import cz.gattserver.grass.language.util.Mapper;
 
 @Transactional
 @Component
-public class LanguageFacadeImpl implements LanguageFacade {
+public class LanguageServiceImpl implements LanguageService {
 
 	@Autowired
 	private Mapper mapper;

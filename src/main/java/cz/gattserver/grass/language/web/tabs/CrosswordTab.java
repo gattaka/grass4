@@ -21,7 +21,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 
-import cz.gattserver.grass.language.facades.LanguageFacade;
+import cz.gattserver.grass.language.facades.LanguageService;
 import cz.gattserver.grass.language.model.domain.ItemType;
 import cz.gattserver.grass.language.model.dto.CrosswordCell;
 import cz.gattserver.grass.language.model.dto.CrosswordHintTO;
@@ -34,7 +34,7 @@ public class CrosswordTab extends Div {
     private static final long serialVersionUID = 6332893829812704996L;
 
     @Autowired
-    private LanguageFacade languageFacade;
+    private LanguageService languageService;
 
     public CrosswordTab(Long langId) {
         SpringContextHelper.inject(this);
@@ -80,7 +80,7 @@ public class CrosswordTab extends Div {
         filterTO.setLanguage(langId);
         filterTO.setType(ItemType.WORD);
 
-        CrosswordTO crosswordTO = languageFacade.prepareCrossword(filterTO, size);
+        CrosswordTO crosswordTO = languageService.prepareCrossword(filterTO, size);
 
         if (crosswordTO.getHints().isEmpty()) {
             mainLayout.add("Nezdařilo se sestavit křížovku");

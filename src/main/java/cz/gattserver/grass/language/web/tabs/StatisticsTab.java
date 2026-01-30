@@ -17,9 +17,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.server.StreamResource;
 
-import cz.gattserver.grass.language.facades.LanguageFacade;
+import cz.gattserver.grass.language.facades.LanguageService;
 import cz.gattserver.grass.language.model.domain.ItemType;
 import cz.gattserver.grass.language.model.dto.LanguageItemTO;
 import cz.gattserver.grass.language.web.ChartUtils;
@@ -32,7 +31,7 @@ public class StatisticsTab extends Div {
     private static final Logger logger = LoggerFactory.getLogger(LanguagePage.class);
 
     @Autowired
-    private LanguageFacade languageFacade;
+    private LanguageService languageService;
 
     public StatisticsTab(Long langId) {
         SpringContextHelper.inject(this);
@@ -40,12 +39,12 @@ public class StatisticsTab extends Div {
         LanguageItemTO to = new LanguageItemTO();
         to.setLanguage(langId);
         to.setType(ItemType.WORD);
-        int words = languageFacade.countLanguageItems(to);
+        int words = languageService.countLanguageItems(to);
         to.setType(ItemType.PHRASE);
-        int phrases = languageFacade.countLanguageItems(to);
+        int phrases = languageService.countLanguageItems(to);
 
         add("Slovíček: " + words);
-        final BufferedImage wordsImage = ChartUtils.drawChart(languageFacade.getStatisticsItems(ItemType.WORD, langId));
+        final BufferedImage wordsImage = ChartUtils.drawChart(languageService.getStatisticsItems(ItemType.WORD, langId));
         Image wordsImg = new Image(DownloadHandler.fromInputStream(e -> {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
@@ -64,7 +63,7 @@ public class StatisticsTab extends Div {
         header.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         add(header);
         final BufferedImage phrasesImage =
-                ChartUtils.drawChart(languageFacade.getStatisticsItems(ItemType.PHRASE, langId));
+                ChartUtils.drawChart(languageService.getStatisticsItems(ItemType.PHRASE, langId));
         Image phrasesImg = new Image(DownloadHandler.fromInputStream(e -> {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
@@ -83,7 +82,7 @@ public class StatisticsTab extends Div {
         header.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         add(header);
 
-        final BufferedImage itemsImage = ChartUtils.drawChart(languageFacade.getStatisticsItems(null, langId));
+        final BufferedImage itemsImage = ChartUtils.drawChart(languageService.getStatisticsItems(null, langId));
         Image itemsImg = new Image(DownloadHandler.fromInputStream(e -> {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
