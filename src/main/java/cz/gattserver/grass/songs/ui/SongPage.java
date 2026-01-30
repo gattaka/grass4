@@ -14,6 +14,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.grass.core.export.ExportType;
 import cz.gattserver.grass.core.export.ExportsService;
@@ -21,14 +22,13 @@ import cz.gattserver.grass.core.export.JasperExportDataSource;
 import cz.gattserver.grass.core.export.PagedDataSource;
 import cz.gattserver.grass.core.server.ExportRequestHandler;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import cz.gattserver.grass.songs.util.ChordImageUtils;
-import jakarta.annotation.Resource;
 import net.sf.jasperreports.engine.JRDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -44,9 +44,9 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Route("song/:id([0-9]*)")
 @PageTitle("Zpěvník")
-public class SongPage extends OneColumnPage implements BeforeEnterObserver {
+@Route(value = "song/:id([0-9]*)", layout = MainView.class)
+public class SongPage extends Div implements BeforeEnterObserver {
 
     private static final long serialVersionUID = 594189301140808163L;
 
@@ -54,16 +54,8 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
 
     private static final String JS_DIV_ID = "js-div";
 
-    @Autowired
-    private SongsService songsFacade;
-
-    @Autowired
+    private SongsService songsService;
     private SecurityService securityService;
-
-    @Resource(name = "songsPageFactory")
-    private SongsPageFactory pageFactory;
-
-    @Autowired
     private ExportsService exportsService;
 
     private H2 nameLabel;
@@ -73,23 +65,25 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
 
     private SongTO choosenSong;
 
-    public SongPage() {
-        init();
+    public SongPage(SongsService songsService, SecurityService securityService, ExportsService exportsService) {
+        this.songsService = songsService;
+        this.securityService = securityService;
+        this.exportsService = exportsService;
     }
 
     @Override
-    public void beforeEnter(BeforeEnterEvent event) {
-        Optional<Long> param = event.getRouteParameters().get("id").map(Long::parseLong);
+    public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
+        Optional<Long> param = beforeEnterEvent.getRouteParameters().get("id").map(Long::parseLong);
 
         Long id = param.get();
         VaadinSession.getCurrent().setAttribute(SongsPage.SONG_ID_TAB_VAR, id);
 
-        choosenSong = songsFacade.getSongById(id);
-        showDetail(choosenSong);
-    }
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
 
-    @Override
-    protected void createColumnContent(Div layout) {
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
+
         TabsMenu tabsMenu = new TabsMenu();
         layout.add(tabsMenu);
         tabsMenu.selectSongTab();
@@ -128,13 +122,13 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
         layout.add(btnLayout);
 
         Button modifyButton = componentFactory.createEditButton(event -> new SongDialog(choosenSong, to -> {
-            to = songsFacade.saveSong(to);
+            to = songsService.saveSong(to);
             showDetail(to);
         }).open());
         btnLayout.add(modifyButton);
         modifyButton.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-        Button deleteButton = componentFactory.createDeleteButton(e -> songsFacade.deleteSong(choosenSong.getId()));
+        Button deleteButton = componentFactory.createDeleteButton(e -> songsService.deleteSong(choosenSong.getId()));
         btnLayout.add(deleteButton);
         deleteButton.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
@@ -167,7 +161,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
             private void chordCallback(String chord, double x, double y) {
                 chordDiv.setVisible(true);
                 chordDiv.removeAll();
-                ChordTO to = songsFacade.getChordByName(chord);
+                ChordTO to = songsService.getChordByName(chord);
                 BufferedImage image = ChordImageUtils.drawChord(to, 20);
                 String name = "Chord-" + chord;
                 chordDiv.add(new Image(DownloadHandler.fromInputStream(e -> {
@@ -196,6 +190,9 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
         };
         callbackDiv.setId(JS_DIV_ID);
         layout.add(callbackDiv);
+
+        choosenSong = songsService.getSongById(id);
+        showDetail(choosenSong);
     }
 
     private Path createReportPath(SongTO choosenSong, boolean twoColumn) {
@@ -233,7 +230,7 @@ public class SongPage extends OneColumnPage implements BeforeEnterObserver {
                 value = value + " (" + choosenSong.getYear() + ")";
             authorYearLabel.setValue(value);
             Set<String> chords =
-                    songsFacade.getChords(new ChordTO()).stream().map(ChordTO::getName).collect(Collectors.toSet());
+                    songsService.getChords(new ChordTO()).stream().map(ChordTO::getName).collect(Collectors.toSet());
             String htmlText = "";
             for (String line : choosenSong.getText().split("<br/>")) {
                 boolean chordLine = true;

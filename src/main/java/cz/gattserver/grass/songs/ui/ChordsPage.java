@@ -13,7 +13,8 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.facades.SongsService;
@@ -33,16 +34,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Route("chords")
 @PageTitle("Akordy")
-public class ChordsPage extends OneColumnPage implements HasUrlParameter<String> {
+@Route(value = "chords", layout = MainView.class)
+public class ChordsPage extends Div implements HasUrlParameter<String> {
 
     private static final long serialVersionUID = -6336711256361320029L;
 
     private static final Logger logger = LoggerFactory.getLogger(ChordsPage.class);
 
-    @Autowired
     private SongsService songsService;
+    private SecurityService securityService;
 
     private TabsMenu tabsMenu;
 
@@ -57,22 +58,21 @@ public class ChordsPage extends OneColumnPage implements HasUrlParameter<String>
 
     private String chordName;
 
-    @Override
-    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
-        if (parameter != null) chordName = parameter;
-
-        if (tabsMenu == null) init();
-
-        if (chordName != null) {
-            ChordTO to = songsService.getChordByName(chordName);
-            selectChord(to);
-        } else {
-            selectChord(null);
-        }
+    public ChordsPage(SecurityService securityService, SongsService songsService) {
+        this.securityService = securityService;
+        this.songsService = songsService;
     }
 
     @Override
-    protected void createColumnContent(Div layout) {
+    public void setParameter(BeforeEvent beforeEvent, @OptionalParameter String parameter) {
+        if (parameter != null) chordName = parameter;
+
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
+
         tabsMenu = new TabsMenu();
         layout.add(tabsMenu);
         tabsMenu.selectChordsTab();
@@ -130,7 +130,6 @@ public class ChordsPage extends OneColumnPage implements HasUrlParameter<String>
 
         btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 
-        ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton("Přidat", event -> new ChordDialog(to -> {
             to = songsService.saveChord(to);
             loadChords();
@@ -155,6 +154,13 @@ public class ChordsPage extends OneColumnPage implements HasUrlParameter<String>
             loadChords();
             showDetail(null);
         }, grid));
+
+        if (chordName != null) {
+            ChordTO to = songsService.getChordByName(chordName);
+            selectChord(to);
+        } else {
+            selectChord(null);
+        }
     }
 
     public void selectChord(ChordTO choosenChord) {

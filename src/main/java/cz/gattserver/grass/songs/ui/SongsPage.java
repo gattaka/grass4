@@ -14,7 +14,10 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -28,9 +31,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Route("songs")
 @PageTitle("Zpěvník")
-public class SongsPage extends OneColumnPage implements HasUrlParameter<String> {
+@Route(value = "songs", layout = MainView.class)
+public class SongsPage extends Div implements HasUrlParameter<String> {
 
     private static final long serialVersionUID = -6336711256361320029L;
 
@@ -38,8 +41,8 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
     public static final String SORT_SESSION_VAR = "grass-songs-sort";
     public static final String FILTER_SESSION_VAR = "grass-songs-filter";
 
-    @Autowired
     private SongsService songsService;
+    private SecurityService securityService;
 
     private Grid<SongOverviewTO> grid;
 
@@ -52,32 +55,19 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
     private Div pageLayout;
     private Long songId;
 
-    @Override
-    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
-        if (tabsMenu == null) init();
-
-        Object val = VaadinSession.getCurrent().getAttribute(SongsPage.SONG_ID_TAB_VAR);
-        if (val != null) {
-            songId = (Long) val;
-            UI.getCurrent().access(() -> {
-                VaadinSession.getCurrent().setAttribute(SongsPage.SONG_ID_TAB_VAR, null);
-                if (songId != null) {
-                    UI.getCurrent().getPage().getHistory().replaceState(null, "songs/" + songId);
-                } else if (parameter != null) songId = Long.parseLong(parameter);
-
-                if (songId != null) {
-                    SongOverviewTO to = new SongOverviewTO();
-                    to.setId(songId);
-                    selectSong(to, false);
-                } else {
-                    selectSong(null, false);
-                }
-            });
-        }
+    public SongsPage(SongsService songsService, SecurityService securityService) {
+        this.songsService = songsService;
+        this.securityService = securityService;
     }
 
     @Override
-    protected void createColumnContent(Div layout) {
+    public void setParameter(BeforeEvent beforeEvent, @OptionalParameter String parameter) {
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
+
         tabsMenu = new TabsMenu();
         layout.add(tabsMenu);
 
@@ -198,6 +188,25 @@ public class SongsPage extends OneColumnPage implements HasUrlParameter<String> 
             populate();
             selectSong(null, false);
         }, grid));
+
+        Object val = VaadinSession.getCurrent().getAttribute(SongsPage.SONG_ID_TAB_VAR);
+        if (val != null) {
+            songId = (Long) val;
+            UI.getCurrent().access(() -> {
+                VaadinSession.getCurrent().setAttribute(SongsPage.SONG_ID_TAB_VAR, null);
+                if (songId != null) {
+                    UI.getCurrent().getPage().getHistory().replaceState(null, "songs/" + songId);
+                } else if (parameter != null) songId = Long.parseLong(parameter);
+
+                if (songId != null) {
+                    SongOverviewTO to = new SongOverviewTO();
+                    to.setId(songId);
+                    selectSong(to, false);
+                } else {
+                    selectSong(null, false);
+                }
+            });
+        }
     }
 
     public void selectSong(SongOverviewTO to, boolean switchToDetail) {
