@@ -7,9 +7,11 @@ import java.util.Map.Entry;
 
 import com.vaadin.flow.component.DetachEvent;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.services.MailService;
-import cz.gattserver.grass.core.ui.pages.template.OneColumnPage;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.monitor.processor.item.*;
@@ -36,9 +38,9 @@ import cz.gattserver.grass.monitor.web.label.MonitorOutputLabel;
 import cz.gattserver.grass.monitor.web.label.SuccessMonitorStateLabel;
 import tools.jackson.databind.JsonNode;
 
-@Route("system-monitor")
 @PageTitle("System monitor")
-public class MonitorPage extends OneColumnPage {
+@Route(value = "system-monitor", layout = MainView.class)
+public class MonitorPage extends Div {
 
     private static final long serialVersionUID = 4862261730750923131L;
 
@@ -53,7 +55,7 @@ public class MonitorPage extends OneColumnPage {
 
     private final String TIMEOUTS_JS_ARRAY = "timeoutsArray";
 
-    private VerticalLayout layout;
+    private VerticalLayout monitorLayout;
     private VerticalLayout serversLayout;
     private VerticalLayout uptimeLayout;
     private VerticalLayout memoryStatusLayout;
@@ -72,11 +74,22 @@ public class MonitorPage extends OneColumnPage {
 
     private VerticalLayout servicesLayout;
 
-    public MonitorPage() {
-        if (!SpringContextHelper.getBean(MonitorSection.class).isVisibleForRoles(getUser().getRoles()))
+    public MonitorPage(SecurityService securityService) {
+        if (!SpringContextHelper.getBean(MonitorSection.class).isVisibleForRoles(securityService.getCurrentUser().getRoles()))
             throw new GrassPageException(403);
-        loadCSS(getContextPath() + "/monitor/style.css");
-        init();
+
+        removeAll();
+        ComponentFactory componentFactory = new ComponentFactory();
+
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
+
+        this.monitorLayout = new VerticalLayout();
+        this.monitorLayout.setSpacing(false);
+        this.monitorLayout.setPadding(false);
+        this.monitorLayout.addClassName("monitor-content");
+        layout.add(this.monitorLayout);
+        populateMonitor();
     }
 
     private String humanFormat(long value) {
@@ -96,7 +109,7 @@ public class MonitorPage extends OneColumnPage {
     }
 
     private void preparePartHeader(String header) {
-        layout.add(new H2(header));
+        monitorLayout.add(new H2(header));
     }
 
     private TableLayout prepareTableLayout() {
@@ -113,7 +126,7 @@ public class MonitorPage extends OneColumnPage {
         Image loadingImg = new Image("img/gattload_mini.gif", "loading...");
         loadingImg.getStyle().set("margin", "5px");
         partLayout.add(loadingImg);
-        layout.add(partLayout);
+        monitorLayout.add(partLayout);
         return partLayout;
     }
 
@@ -415,16 +428,6 @@ public class MonitorPage extends OneColumnPage {
         }
     }
 
-    @Override
-    protected void createColumnContent(Div layout) {
-        this.layout = new VerticalLayout();
-        this.layout.setSpacing(false);
-        this.layout.setPadding(false);
-        this.layout.addClassName("monitor-content");
-        layout.add(this.layout);
-        populateMonitor();
-    }
-
     private void populateMonitor() {
         //layout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 
@@ -495,7 +498,7 @@ public class MonitorPage extends OneColumnPage {
         };
         jsDiv.setId(jsDivId);
         jsDiv.getStyle().set("display", "none");
-        layout.add(jsDiv);
+        monitorLayout.add(jsDiv);
 
         String url = UIUtils.getContextPath() + "/ws/system-monitor";
 
@@ -547,9 +550,10 @@ public class MonitorPage extends OneColumnPage {
         }
 
         // Mail test
-        layout.add(new H2("Email test"));
+        monitorLayout.add(new H2("Email test"));
+        ComponentFactory componentFactory = new ComponentFactory();
         Div buttonLayout = componentFactory.createButtonLayout(false);
-        layout.add(buttonLayout);
+        monitorLayout.add(buttonLayout);
         buttonLayout.add(
                 new Button("Send test email", e -> mailService.sendToAdmin("Grass email test", "Test message")));
         buttonLayout.add(new Button("Send monitor email", e -> emailNotifier.getTimerTask().run()));
