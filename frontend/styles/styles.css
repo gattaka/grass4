@@ -192,6 +192,9 @@ span.label-err {
 
 .error-label {
     text-align: center;
+    font-size: 15pt;
+    font-family: var(--aura-font-family);
+    font-weight: 500;
 }
 
 /* monitor */
