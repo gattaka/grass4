@@ -11,37 +11,29 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
-import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.common.spring.SpringContextHelper;
 
 import java.util.List;
+import java.util.function.Consumer;
 
-public abstract class DraftMenuDialog extends WebDialog {
+public class DraftMenuDialog extends WebDialog {
 
     private static final long serialVersionUID = 4105221381350726137L;
 
-    private transient ArticleService articleFacade;
-
     private boolean continueFlag = false;
 
-    protected abstract void onChoose(ArticleDraftOverviewTO draft);
-
-    protected abstract void onCancel();
-
-    private ArticleService getArticleService() {
-        if (articleFacade == null) articleFacade = SpringContextHelper.getBean(ArticleService.class);
-        return articleFacade;
-    }
+    private final Consumer<ArticleDraftOverviewTO> onSelect;
 
     private void innerChoose(ArticleDraftOverviewTO draft) {
         continueFlag = true;
-        onChoose(draft);
+        onSelect.accept(draft);
     }
 
-    public DraftMenuDialog(List<ArticleDraftOverviewTO> drafts) {
+    public DraftMenuDialog(List<ArticleDraftOverviewTO> drafts, Consumer<ArticleDraftOverviewTO> onSelect, Consumer<ArticleDraftOverviewTO> onDelete) {
         super("Rozpracované obsahy");
+        this.onSelect = onSelect;
+
         Span label = new Span("Byly nalezeny rozpracované obsahy -- přejete si pokračovat v jejich úpravách?");
         addComponent(label);
 
@@ -62,11 +54,9 @@ public abstract class DraftMenuDialog extends WebDialog {
                                 a.getContentNode().getLastModificationDate(), "d. M. yyyy HH:mm"))
                 .setHeader("Naposledy upraveno").setFlexGrow(0).setWidth("180px");
 
-        grid.addItemClickListener(e -> {
-            if (e.getClickCount() > 1) {
-                innerChoose(e.getItem());
-                close();
-            }
+        grid.addItemDoubleClickListener(e -> {
+            innerChoose(e.getItem());
+            close();
         });
 
         addComponent(grid);
@@ -86,8 +76,7 @@ public abstract class DraftMenuDialog extends WebDialog {
 
         Button deleteBtn = componentFactory.createDeleteButton(e -> {
             ArticleDraftOverviewTO to = grid.getSelectedItems().iterator().next();
-            // smaž draft, ponechej přílohy, pokud k draftu existuje článek
-            getArticleService().deleteArticle(to.getId(), to.getContentNode().getDraftSourceId() == null);
+            onDelete.accept(to);
             drafts.remove(to);
             grid.getDataProvider().refreshAll();
             grid.deselectAll();
@@ -107,7 +96,6 @@ public abstract class DraftMenuDialog extends WebDialog {
     @Override
     public void close() {
         super.close();
-        if (!continueFlag) onCancel();
+        if (!continueFlag) onSelect.accept(null);
     }
-
 }

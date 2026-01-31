@@ -163,6 +163,7 @@ h2 {
     font-size: var(--aura-font-size-m);
     color: #045491;
     width: fit-content;
+    display: inline-block;
 }
 
 .inline-button:hover {
