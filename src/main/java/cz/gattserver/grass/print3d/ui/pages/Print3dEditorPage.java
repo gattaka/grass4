@@ -43,10 +43,9 @@ import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
 import cz.gattserver.grass.print3d.service.Print3dService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.nio.file.Path;
+import java.io.Serial;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -57,19 +56,18 @@ import java.util.Set;
 @Route(value = "print3d-editor", layout = MainView.class)
 public class Print3dEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
+    @Serial
     private static final long serialVersionUID = 8685208356478891386L;
 
     private static final Logger logger = LoggerFactory.getLogger(Print3dEditorPage.class);
 
     private static final String CLOSE_JS_DIV_ID = "close-js-div";
 
-    private Print3dService print3dService;
-    private ContentTagService contentTagFacade;
-    private SecurityService securityService;
-    private NodeService nodeService;
-
-    @Autowired
-    private EventBus eventBus;
+    private final Print3dService print3dService;
+    private final ContentTagService contentTagFacade;
+    private final SecurityService securityService;
+    private final NodeService nodeService;
+    private final EventBus eventBus;
 
     private NodeOverviewTO node;
     private Print3dTO project;
@@ -86,22 +84,23 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
      * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
      * smazat.
      */
-    private Set<Print3dViewItemTO> newFiles = new HashSet<>();
+    private final Set<Print3dViewItemTO> newFiles = new HashSet<>();
 
     private String operationToken;
     private String identifierToken;
 
     public Print3dEditorPage(Print3dService print3dService, ContentTagService contentTagFacade,
-                             SecurityService securityService, NodeService nodeService) {
+                             SecurityService securityService, NodeService nodeService, EventBus eventBus) {
         this.securityService = securityService;
         this.nodeService = nodeService;
         this.print3dService = print3dService;
         this.contentTagFacade = contentTagFacade;
+        this.eventBus = eventBus;
     }
 
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
-        if (!SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
+        if (!securityService.getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
             throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
 
         String[] chunks = parameter.split("/");
@@ -211,7 +210,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         grid.addColumn(new TextRenderer<>(p -> p.getFile().getFileName().toString())).setHeader("Název")
                 .setFlexGrow(100);
 
-        grid.addColumn(new TextRenderer<>(p -> p.getSize())).setHeader("Velikost").setWidth("80px")
+        grid.addColumn(new TextRenderer<>(Print3dViewItemTO::getSize)).setHeader("Velikost").setWidth("80px")
                 .setTextAlign(ColumnTextAlign.END).setFlexGrow(0);
 
         grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Zobrazit", e -> {
@@ -227,16 +226,14 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
             previewDialog.open();
         }))).setHeader("Zobrazit").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-        grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Smazat", be -> {
-            new ConfirmDialog("Opravdu smazat?", e -> {
-                try {
-                    print3dService.deleteFile(itemTO, projectDir);
-                    items.remove(itemTO);
-                } catch (Exception ex) {
-                    UIUtils.showWarning("Nezdařilo se smazat některé soubory");
-                }
-                grid.getDataProvider().refreshAll();
-            }).open();
+        grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createDeleteInlineButton(e -> {
+            try {
+                print3dService.deleteFile(itemTO, projectDir);
+                items.remove(itemTO);
+            } catch (Exception ex) {
+                UIUtils.showWarning("Nezdařilo se smazat některé soubory");
+            }
+            grid.getDataProvider().refreshAll();
         }))).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
         gridLayout.add(grid);

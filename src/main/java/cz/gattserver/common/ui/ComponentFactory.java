@@ -38,6 +38,11 @@ public class ComponentFactory {
         return div;
     }
 
+    public Component createDeleteInlineButton(ComponentEventListener<ClickEvent<Div>> clickListener) {
+        return createInlineButton("Smazat",
+                e -> new ConfirmDialog("Smazat záznam?", ee -> clickListener.onComponentEvent(e)).open());
+    }
+
     private <T> Button createGridSetButton(Function<ComponentEventListener<ClickEvent<Button>>, Button> buttonFactory,
                                            Consumer<Set<T>> clickListener, Grid<T> grid) {
         Button btn = buttonFactory.apply(e -> clickListener.accept(grid.getSelectedItems()));
@@ -329,4 +334,5 @@ public class ComponentFactory {
     public String createRequiredLabel() {
         return "Toto pole je povinné";
     }
+
 }

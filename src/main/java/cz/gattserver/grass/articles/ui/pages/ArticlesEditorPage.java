@@ -492,18 +492,16 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     }
 
     private void handleDeleteAction(AttachmentTO to) {
-        new ConfirmDialog(e -> {
-            AttachmentsOperationResult result = articleService.deleteAttachment(attachmentsDirId, to.getName());
-            switch (result.getState()) {
-                case SUCCESS:
-                    attachmentsDirId = result.getAttachmentDirId();
-                    populateGrid();
-                    break;
-                default:
-                    UIUtils.showWarning(
-                            "Soubor '" + to.getName() + "' nebylo možné smazat - došlo k systémové chybě" + ".");
-            }
-        }).open();
+        AttachmentsOperationResult result = articleService.deleteAttachment(attachmentsDirId, to.getName());
+        switch (result.getState()) {
+            case SUCCESS:
+                attachmentsDirId = result.getAttachmentDirId();
+                populateGrid();
+                break;
+            default:
+                UIUtils.showWarning(
+                        "Soubor '" + to.getName() + "' nebylo možné smazat - došlo k systémové chybě" + ".");
+        }
     }
 
     private void handleInsertAction(AttachmentTO to) {
@@ -536,9 +534,9 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                         to -> componentFactory.createInlineButton("Vložit", e -> handleInsertAction(to)))).setHeader("Vložit")
                 .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(
-                        to -> componentFactory.createInlineButton("Smazat", e -> handleDeleteAction(to)))).setHeader("Smazat")
-                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(
+                        new ComponentRenderer<>(to -> componentFactory.createDeleteInlineButton(e -> handleDeleteAction(to))))
+                .setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d. MM. yyyy HH:mm"))
                 .setHeader("Upraveno").setAutoWidth(true).setTextAlign(ColumnTextAlign.END)
