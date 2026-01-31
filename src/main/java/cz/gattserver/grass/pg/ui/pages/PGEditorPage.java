@@ -24,7 +24,7 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
-import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
+import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
@@ -143,7 +143,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         photogalleryKeywords = new TokenField(fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
-                e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(photogalleryKeywords::addToken)).open());
+                e -> new CopyTagsDialog(list -> list.forEach(photogalleryKeywords::addToken)).open());
         photogalleryKeywords.getChooseElementsDiv().add(copyFromContentButton);
 
         photogalleryNameField = new TextField();

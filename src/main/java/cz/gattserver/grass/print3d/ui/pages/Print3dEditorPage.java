@@ -26,7 +26,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
-import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
+import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
@@ -141,7 +141,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         keywords = new TokenField(fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
-                e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(keywords::addToken)).open());
+                e -> new CopyTagsDialog(list -> list.forEach(keywords::addToken)).open());
         keywords.getChooseElementsDiv().add(copyFromContentButton);
 
         nameField = new TextField();

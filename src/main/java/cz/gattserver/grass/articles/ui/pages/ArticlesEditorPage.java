@@ -20,7 +20,7 @@ import com.vaadin.flow.shared.Registration;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
-import cz.gattserver.common.vaadin.dialogs.CopyTagsFromContentChooseDialog;
+import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
 import cz.gattserver.grass.articles.config.ArticlesConfiguration;
 import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTO;
@@ -53,9 +53,6 @@ import cz.gattserver.common.vaadin.HtmlSpan;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.annotation.Resource;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -633,7 +630,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         layout.add(articleKeywords);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
-                e -> new CopyTagsFromContentChooseDialog(list -> list.forEach(articleKeywords::addToken)).open());
+                e -> new CopyTagsDialog(list -> list.forEach(articleKeywords::addToken)).open());
         articleKeywords.getChooseElementsDiv().add(copyFromContentButton);
 
         layout.add(new H3("Obsah článku"));

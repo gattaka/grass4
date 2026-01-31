@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.components;
 
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
@@ -28,11 +29,16 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
     private static final long serialVersionUID = -5648982639686386190L;
 
     private boolean dynamicHeight = true;
+    private boolean activeLinks;
 
     public ContentsLazyGrid() {
-        super();
+        this(true);
+    }
+
+    public ContentsLazyGrid(boolean activeLinks) {
         UIUtils.applyGrassDefaultStyle(this);
         setSelectionMode(SelectionMode.NONE);
+        this.activeLinks = activeLinks;
     }
 
     public void populate(boolean showPubLock, FetchCallback<ContentNodeOverviewTO, Void> fetchCallback,
@@ -62,10 +68,15 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
         addColumn(new ComponentRenderer<>(contentNode -> {
             ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.getContentReaderID());
-            String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory) :
-                    UIUtils.getPageURL(contentService.getContentViewerPageFactory(),
-                            URLIdentifierUtils.createURLIdentifier(contentNode.getContentID(), contentNode.getName()));
-            return new Anchor(url, contentNode.getName());
+            if (activeLinks) {
+                String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory) :
+                        UIUtils.getPageURL(contentService.getContentViewerPageFactory(),
+                                URLIdentifierUtils.createURLIdentifier(contentNode.getContentID(),
+                                        contentNode.getName()));
+                return new Anchor(url, contentNode.getName());
+            } else {
+                return new Text(contentNode.getName());
+            }
         })).setFlexGrow(2).setHeader("Název").setId(nameBind);
 
         if (showPubLock) {
@@ -82,10 +93,14 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
         }
 
         addColumn(new ComponentRenderer<>(contentNode -> {
-            String url = UIUtils.getPageURL(nodePageFactory,
-                    URLIdentifierUtils.createURLIdentifier(contentNode.getParentNodeId(),
-                            contentNode.getParentNodeName())) + "'>" + contentNode.getParentNodeName();
-            return new Anchor(url, contentNode.getParentNodeName());
+            if (activeLinks) {
+                String url = UIUtils.getPageURL(nodePageFactory,
+                        URLIdentifierUtils.createURLIdentifier(contentNode.getParentNodeId(),
+                                contentNode.getParentNodeName())) + "'>" + contentNode.getParentNodeName();
+                return new Anchor(url, contentNode.getParentNodeName());
+            } else {
+                return new Text(contentNode.getParentNodeName());
+            }
         })).setFlexGrow(2).setHeader("Kategorie").setId(nodeBind);
 
         if (!UIUtils.isMobileDevice()) {
