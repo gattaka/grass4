@@ -1,6 +1,7 @@
 package cz.gattserver.common.stlviewer;
 
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -20,19 +21,19 @@ public class STLViewer extends Div {
 
 	private boolean stlViewerInitialized = false;
 
-	public STLViewer(SerializableConsumer<JsonNode> afterLoad) {
+	public STLViewer(Consumer<STLViewer> afterLoad) {
 		PendingJavaScriptResult result = UIUtils.loadJS(new JScriptItem(JS_PATH + "stl_viewer.min.js"));
 		if (afterLoad != null)
-			result.then(afterLoad);
+			result.then(json -> afterLoad.accept(this));
 
-		setId("stlcont-" + UUID.randomUUID().toString());
+		setId("stlcont-" + UUID.randomUUID());
 	}
 
 	public void show(String url) {
 		String modelDefinition = "{filename: \"" + url + "\", "
 				+ "animation: {delta: {rotationy: 1, msec: 5000, loop: true}}, "
 				+ "color: \"#286708\", view_edges: false}";
-		String js = null;
+		String js;
 		if (!stlViewerInitialized) {
 			String relativePath = UIUtils.getContextPath() + "/" + JS_PATH;
 			js = STL_VIEWER_INSTANCE_JS_VAR + " = new StlViewer(document.getElementById(\"" + getId().get()

@@ -1,14 +1,10 @@
 package cz.gattserver.grass.print3d.ui.pages;
 
-import com.vaadin.flow.component.ClientCallable;
-import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.KeyModifier;
-import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -19,14 +15,14 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.streams.DownloadHandler;
-import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.stlviewer.STLViewer;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
+import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
@@ -38,9 +34,9 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.print3d.config.Print3dConfiguration;
 import cz.gattserver.grass.print3d.interfaces.Print3dPayloadTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
@@ -49,10 +45,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.annotation.Resource;
-
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -69,14 +63,10 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
     private static final String CLOSE_JS_DIV_ID = "close-js-div";
 
-    @Autowired
     private Print3dService print3dService;
-
-    @Autowired
     private ContentTagService contentTagFacade;
-
-    @Resource(name = "print3dViewerPageFactory")
-    private PageFactory print3dViewerPageFactory;
+    private SecurityService securityService;
+    private NodeService nodeService;
 
     @Autowired
     private EventBus eventBus;
@@ -101,12 +91,12 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
     private String operationToken;
     private String identifierToken;
 
-    private SecurityService securityService;
-    private NodeService nodeService;
-
-    public Print3dEditorPage(SecurityService securityService, NodeService nodeService) {
+    public Print3dEditorPage(Print3dService print3dService, ContentTagService contentTagFacade,
+                             SecurityService securityService, NodeService nodeService) {
         this.securityService = securityService;
         this.nodeService = nodeService;
+        this.print3dService = print3dService;
+        this.contentTagFacade = contentTagFacade;
     }
 
     @Override
@@ -224,20 +214,18 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         grid.addColumn(new TextRenderer<>(p -> p.getSize())).setHeader("Velikost").setWidth("80px")
                 .setTextAlign(ColumnTextAlign.END).setFlexGrow(0);
 
-        grid.addColumn(new ComponentRenderer<>(itemTO -> {
-            String file = itemTO.getFile().getFileName().toString();
-            Anchor anchor = new Anchor(DownloadHandler.fromInputStream(e -> {
-                try {
-                    return new DownloadResponse(Files.newInputStream(print3dService.getFullImage(projectDir, file)),
-                            file, null, -1);
-                } catch (IOException e1) {
-                    UIUtils.showWarning("Obrázek nelze zobrazit");
-                    return null;
-                }
-            }), "Zobrazit");
-            anchor.setTarget("_blank");
-            return anchor;
-        })).setHeader("Zobrazit").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
+        grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Zobrazit", e -> {
+            // TODO funguje aktuálně pouze pro již nahrané
+            String url = UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" + projectDir + "/" +
+                    itemTO.getFile().getFileName();
+            WebDialog previewDialog = new WebDialog("Náhled");
+            STLViewer stlViewer = new STLViewer(instance -> instance.show(url));
+            stlViewer.setWidth(500, Unit.PIXELS);
+            stlViewer.setHeight(500, Unit.PIXELS);
+            previewDialog.add(stlViewer);
+            previewDialog.add(componentFactory.createDialogStornoLayout(ee -> previewDialog.close()));
+            previewDialog.open();
+        }))).setHeader("Zobrazit").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
         grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Smazat", be -> {
             new ConfirmDialog("Opravdu smazat?", e -> {
@@ -259,8 +247,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
             @Override
             protected void fileUploadSuccess(String fileName, long size) {
                 Print3dViewItemTO itemTO = new Print3dViewItemTO();
-                String sizeText = null;
-                sizeText = HumanBytesSizeFormatter.format(size);
+                String sizeText = HumanBytesSizeFormatter.format(size);
                 itemTO.setSize(sizeText);
                 itemTO.setFile(Paths.get(fileName));
                 newFiles.add(itemTO);
