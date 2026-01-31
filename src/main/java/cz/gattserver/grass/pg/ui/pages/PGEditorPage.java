@@ -44,15 +44,11 @@ import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.annotation.Resource;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -68,19 +64,13 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     private static final Logger logger = LoggerFactory.getLogger(PGEditorPage.class);
 
-    @Autowired
-    private PGService pgService;
+    private final PGService pgService;
+    private final ContentTagService contentTagFacade;
+    private final EventBus eventBus;
+    private NodeService nodeService;
+    private SecurityService securityService;
 
-    @Autowired
-    private ContentTagService contentTagFacade;
-
-    @Resource(name = "pgViewerPageFactory")
-    private PageFactory photogalleryViewerPageFactory;
-
-    @Autowired
-    private EventBus eventBus;
-
-    private ProgressDialog progressIndicatorWindow;
+    private ProgressDialog progressDialog;
 
     private NodeOverviewTO node;
     private PhotogalleryTO photogallery;
@@ -104,12 +94,13 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     private String operationToken;
     private String identifierToken;
 
-    private NodeService nodeService;
-    private SecurityService securityService;
-
     private ComponentFactory componentFactory;
 
-    public PGEditorPage(NodeService nodeService, SecurityService securityService) {
+    public PGEditorPage(PGService pgService, ContentTagService contentTagFacade, EventBus eventBus,
+                        NodeService nodeService, SecurityService securityService) {
+        this.pgService = pgService;
+        this.contentTagFacade = contentTagFacade;
+        this.eventBus = eventBus;
         this.nodeService = nodeService;
         this.securityService = securityService;
         this.componentFactory = new ComponentFactory();
@@ -117,7 +108,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
-        if (!SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
+        if (!securityService.getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
             throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
 
         String[] chunks = parameter.split("/");
@@ -361,7 +352,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
                 reprocessSlideshowAndMiniCheckBox.getValue());
 
         eventBus.subscribe(PGEditorPage.this);
-        progressIndicatorWindow = new ProgressDialog();
+        progressDialog = new ProgressDialog();
 
         LocalDateTime ldt =
                 photogalleryDateField.getValue() == null ? null : photogalleryDateField.getValue().atStartOfDay();
@@ -392,21 +383,21 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     @Handler
     protected void onProcessStart(final PGProcessStartEvent event) {
-        progressIndicatorWindow.runInUI(() -> {
-            progressIndicatorWindow.setTotal(event.getCountOfStepsToDo());
-            progressIndicatorWindow.open();
+        progressDialog.runInUI(() -> {
+            progressDialog.setTotal(event.getCountOfStepsToDo());
+            progressDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(PGProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getStepDescription()));
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.getStepDescription()));
     }
 
     @Handler
     protected void onProcessResult(final PGProcessResultEvent event) {
-        progressIndicatorWindow.runInUI(() -> {
-            if (progressIndicatorWindow != null) progressIndicatorWindow.close();
+        progressDialog.runInUI(() -> {
+            if (progressDialog != null) progressDialog.close();
             if (editMode) onModifyResult(event);
             else onSaveResult(event);
         });
