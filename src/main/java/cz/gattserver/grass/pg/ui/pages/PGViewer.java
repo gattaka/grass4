@@ -29,6 +29,7 @@ import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.pg.events.impl.*;
@@ -133,7 +134,8 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
         removeAll();
         ContentNodeTO contentNodeTO = photogallery.getContentNode();
         ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
-                e -> UI.getCurrent().navigate(PGEditorPage.class, parameter),
+                e -> UI.getCurrent()
+                        .navigate(PGEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
                 new RouterLink(contentNodeTO.getName(), PGViewer.class, parameter));
         add(contentViewer);
 

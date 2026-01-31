@@ -121,7 +121,8 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
         removeAll();
         ContentNodeTO contentNodeTO = print3dTO.getContentNode();
         ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
-                e -> UI.getCurrent().navigate(Print3dEditorPage.class, parameter),
+                e -> UI.getCurrent()
+                        .navigate(Print3dEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
                 new RouterLink(contentNodeTO.getName(), Print3DViewer.class, parameter));
 
         add(contentViewer);

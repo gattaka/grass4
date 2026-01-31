@@ -93,7 +93,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     private String galleryDir;
     private boolean editMode;
-    private boolean stayInEditor = false;
+    private boolean leaving;
 
     /**
      * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
@@ -107,9 +107,12 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     private NodeService nodeService;
     private SecurityService securityService;
 
+    private ComponentFactory componentFactory;
+
     public PGEditorPage(NodeService nodeService, SecurityService securityService) {
         this.nodeService = nodeService;
         this.securityService = securityService;
+        this.componentFactory = new ComponentFactory();
     }
 
     @Override
@@ -120,9 +123,6 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         String[] chunks = parameter.split("/");
         if (chunks.length > 0) operationToken = chunks[0];
         if (chunks.length > 1) identifierToken = chunks[1];
-
-        // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
-        UIUtils.addOnbeforeunloadWarning();
 
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) {
@@ -300,6 +300,9 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         editorLayout.add(buttonsLayout);
 
         populateButtonsLayout(buttonsLayout);
+
+        // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
+        UIUtils.addOnbeforeunloadWarning();
     }
 
     private void populateButtonsLayout(Div buttonLayout) {
@@ -308,7 +311,6 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         // Uložit
         Button saveButton = componentFactory.createSaveButton(event -> {
             if (!isFormValid()) return;
-            stayInEditor = true;
             saveOrUpdatePhotogallery();
         });
         buttonLayout.add(saveButton);
@@ -316,7 +318,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         // Uložit a zavřít
         Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
             if (!isFormValid()) return;
-            stayInEditor = false;
+            leaving = true;
             saveOrUpdatePhotogallery();
         });
         buttonLayout.add(saveAndCloseButton);
@@ -418,7 +420,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
-            if (!stayInEditor) returnToPhotogallery();
+            if (leaving) returnToPhotogallery();
             // odteď budeme editovat
             editMode = true;
         } else {
@@ -431,7 +433,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
-            if (!stayInEditor) returnToPhotogallery();
+            if (leaving) returnToPhotogallery();
         } else {
             UIUtils.showWarning("Úprava galerie se nezdařila");
         }
@@ -446,8 +448,8 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      */
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+        if (leaving) return;
         beforeLeaveEvent.postpone();
-        ComponentFactory componentFactory = new ComponentFactory();
         componentFactory.createBeforeLeaveConfirmDialog(beforeLeaveEvent).open();
     }
 }

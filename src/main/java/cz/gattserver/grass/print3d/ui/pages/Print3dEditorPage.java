@@ -90,7 +90,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
     private String projectDir;
     private boolean editMode;
-    private boolean stayInEditor = false;
+    private boolean leaving;
 
     /**
      * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
@@ -313,7 +313,6 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         ComponentFactory componentFactory = new ComponentFactory();
         Button saveButton = componentFactory.createSaveButton(event -> {
             if (!isFormValid()) return;
-            stayInEditor = true;
             saveOrUpdateProject();
         });
         buttonLayout.add(saveButton);
@@ -321,7 +320,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         // Uložit a zavřít
         Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
             if (!isFormValid()) return;
-            stayInEditor = false;
+            leaving = true;
             saveOrUpdateProject();
         });
         buttonLayout.add(saveAndCloseButton);
@@ -395,7 +394,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
-            if (!stayInEditor) returnToProject();
+            if (leaving) returnToProject();
             // odteď budeme editovat
             editMode = true;
         } else {
@@ -408,7 +407,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
-            if (!stayInEditor) returnToProject();
+            if (leaving) returnToProject();
         } else {
             UIUtils.showWarning("Úprava projektu se nezdařila");
         }
@@ -416,9 +415,9 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
+        if (leaving) return;
         beforeLeaveEvent.postpone();
-        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.", e -> {
-            beforeLeaveEvent.getContinueNavigationAction().proceed();
-        }).open();
+        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.",
+                e -> beforeLeaveEvent.getContinueNavigationAction().proceed()).open();
     }
 }

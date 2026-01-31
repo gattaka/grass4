@@ -133,7 +133,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         if (chunks.length > 2) partNumberToken = chunks[2];
 
         removeAll();
-        createCenterElements(this);
 
         Div leftContentLayout = componentFactory.createLeftColumnLayout();
         createLeftColumnContent(leftContentLayout);
@@ -145,52 +144,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
         UIUtils.addOnbeforeunloadWarning();
-    }
-
-    protected void createCenterElements(Div customlayout) {
-        articleNameField = new TextField();
-        articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
-
-        CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
-        CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagFacade.countByFilter(q.getFilter().get());
-        articleKeywords = new TokenField(fetchItemsCallback, serializableFunction);
-        articleKeywords.isEnabled();
-        articleKeywords.setPlaceholder("klíčové slovo");
-
-        articleTextArea = new TextArea();
-        articleTextArea.setHeight("30em");
-        articleTextArea.setWidthFull();
-        articleTextArea.setValueChangeMode(ValueChangeMode.EAGER);
-        publicatedCheckBox = new Checkbox();
-
-        // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
-        articleTextAreaFocusRegistration = articleTextArea.addFocusListener(event -> {
-            String js = createTextareaGetJS() + "ta.addEventListener('keydown', function(e) {"
-                    /*				*/ + "let keyCode = e.keyCode || e.which;"
-                    /*				*/ + "if (keyCode == 9) {"
-                    /*					*/ + "e.preventDefault();"
-                    /*					*/ + createTextareaGetSelectionJS()
-                    /*					*/ + "$0.$server.handleTab(start, finish, ta.value);"
-                    /*				*/ + "}"
-                    /*			*/ + "}, false);";
-            UI.getCurrent().getPage().executeJs(js, getElement());
-            // je potřeba jenom jednou pro registraci
-            articleTextAreaFocusRegistration.remove();
-        });
-        // aby se zaregistroval JS listener
-        articleTextArea.focus();
-
-        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
-        if (drafts.isEmpty()) {
-            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
-            // článků, otevři editor dle operace (new/edit)
-            defaultCreateContent(customlayout);
-        } else {
-            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
-            draftCreateContent(customlayout, drafts);
-        }
     }
 
     private void populateByExistingArticle(ArticleTO article, String partNumberToken) {
@@ -224,7 +177,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
     }
 
-    private void defaultCreateContent(Div customlayout) {
+    private void defaultCreateContent() {
         parts = null;
         ArticleTO article = null;
 
@@ -256,25 +209,25 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         checkAuthorization(article);
     }
 
-    private void draftCreateContent(Div customlayout, List<ArticleDraftOverviewTO> drafts) {
+    private void draftCreateContent(List<ArticleDraftOverviewTO> drafts) {
         new DraftMenuDialog(drafts) {
             private static final long serialVersionUID = 1040472008288522032L;
 
             @Override
             protected void onChoose(ArticleDraftOverviewTO draft) {
-                populateByExistingDraft(customlayout, draft);
+                populateByExistingDraft(draft);
             }
 
             @Override
             protected void onCancel() {
                 // nebyl vybrán žádný draft, pokračuj výchozím otevřením
                 // editoru (new/edit)
-                defaultCreateContent(customlayout);
+                defaultCreateContent();
             }
         }.open();
     }
 
-    private void populateByExistingDraft(Div customlayout, ArticleDraftOverviewTO draft) {
+    private void populateByExistingDraft(ArticleDraftOverviewTO draft) {
         parts = null;
         ArticleTO article = null;
 
@@ -401,7 +354,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
             if (!isFormValid()) return;
             if (saveOrUpdateArticle()) {
-                // Tady nemá cena dávat infowindow
                 leaving = true;
                 returnToArticle();
             } else {
@@ -626,6 +578,50 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     }
 
     protected void createRightColumnContent(Div layout) {
+        articleNameField = new TextField();
+        articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
+
+        CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
+                q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+        CallbackDataProvider.CountCallback<String, String> serializableFunction =
+                q -> contentTagFacade.countByFilter(q.getFilter().get());
+        articleKeywords = new TokenField(fetchItemsCallback, serializableFunction);
+        articleKeywords.isEnabled();
+        articleKeywords.setPlaceholder("klíčové slovo");
+
+        articleTextArea = new TextArea();
+        articleTextArea.setHeight("30em");
+        articleTextArea.setWidthFull();
+        articleTextArea.setValueChangeMode(ValueChangeMode.EAGER);
+        publicatedCheckBox = new Checkbox();
+
+        // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
+        articleTextAreaFocusRegistration = articleTextArea.addFocusListener(event -> {
+            String js = createTextareaGetJS() + "ta.addEventListener('keydown', function(e) {"
+                    /*				*/ + "let keyCode = e.keyCode || e.which;"
+                    /*				*/ + "if (keyCode == 9) {"
+                    /*					*/ + "e.preventDefault();"
+                    /*					*/ + createTextareaGetSelectionJS()
+                    /*					*/ + "$0.$server.handleTab(start, finish, ta.value);"
+                    /*				*/ + "}"
+                    /*			*/ + "}, false);";
+            UI.getCurrent().getPage().executeJs(js, getElement());
+            // je potřeba jenom jednou pro registraci
+            articleTextAreaFocusRegistration.remove();
+        });
+        // aby se zaregistroval JS listener
+        articleTextArea.focus();
+
+        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
+        if (drafts.isEmpty()) {
+            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
+            // článků, otevři editor dle operace (new/edit)
+            defaultCreateContent();
+        } else {
+            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
+            draftCreateContent(drafts);
+        }
+
         layout.add(new H3("Název článku"));
         layout.add(articleNameField);
         articleNameField.setWidthFull();
