@@ -93,7 +93,7 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
         });
 
         Button renameAttachmentDirsButton =
-                new Button("Přegenerovat všechny články", VaadinIcon.COG_O.create(), event -> {
+                new Button("Přejmenovat adresáře příloh", VaadinIcon.COG_O.create(), event -> {
                     UIUtils.showSilentInfo(
                             "Bylo přejmenováno " + articleFacade.renameAttachmentDirs() + " adresářů příloh");
                 });

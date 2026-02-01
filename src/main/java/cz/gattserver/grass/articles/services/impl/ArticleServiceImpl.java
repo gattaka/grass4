@@ -48,6 +48,7 @@ import java.nio.file.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Transactional
@@ -55,6 +56,7 @@ import java.util.stream.Stream;
 public class ArticleServiceImpl implements ArticleService {
 
     private static final String ILLEGAL_PATH_ERR = "Podtečení adresáře příloh";
+    private static final String ATTACHMENT_DIR_PREFIX = "attachments-";
 
     private static final Logger logger = LoggerFactory.getLogger(ArticleServiceImpl.class);
 
@@ -103,16 +105,78 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Long saveArticle(ArticleEditorTO articleEditorTO) {
-        return innerSaveArticle(articleEditorTO, true, false);
+        // zatím bez procesování
+        Article article = innerSaveArticle(articleEditorTO, false, false);
+
+        // Nahraď draft id ve všech attachment odkazech novým id ostrého článku
+        String linkFrom = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + articleEditorTO.getDraftId();
+        String linkTo = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getId();
+        article.setText(article.getText().replaceAll(linkFrom, linkTo));
+        reprocessArticle(article, articleEditorTO.getContextRoot());
+
+        // Nejprve smaž draft, ale ponech přílohy (ty se musí přenést do ostrého článku).
+        // Pokud dojde k problémům se soubory, dá se provést DB rollback, pokud by pořadí operací bylo obráceně,
+        // mohl by nastat problém, protože filesystem nemá rollback
+        deleteArticleInner(articleEditorTO.getDraftId(), false);
+
+        Path existingArticleDirPath = getAttachmentsPath(articleEditorTO.getExistingArticleId(), true);
+
+        Set<String> draftAttachmentsNames =
+                articleEditorTO.getDraftAttachments().stream().map(AttachmentTO::getName).collect(Collectors.toSet());
+
+        // Smaž odebrané přílohy
+        try (Stream<Path> s = Files.list(existingArticleDirPath)) {
+            s.forEach(p -> {
+                String fileName = p.getFileName().toString();
+                try {
+                    if (!draftAttachmentsNames.contains(fileName)) Files.delete(p);
+                } catch (IOException e) {
+                    throw new RuntimeException("Chyba při mazání přílohy " + fileName + " článku " +
+                            articleEditorTO.getExistingArticleId(), e);
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Nezdařilo se získat přehled příloh článku " + articleEditorTO.getExistingArticleId(), e);
+        }
+
+        // Ulož nové přílohy
+        for (AttachmentTO to : articleEditorTO.getDraftAttachments()) {
+            if (to.isDraft()) {
+                Path targetPath = existingArticleDirPath.resolve(to.getPath().getFileName());
+                try {
+                    Files.move(to.getPath(), targetPath);
+                } catch (IOException e) {
+                    throw new RuntimeException("Nezdařilo se uložit přílohu " + to.getPath().getFileName(), e);
+                }
+            }
+        }
+
+        // Smaž adresář příloh draftu
+        Path draftAttachmentsDirPath = getAttachmentsPath(articleEditorTO.getDraftId(), false);
+        if (draftAttachmentsDirPath != null) {
+            try {
+                Files.delete(draftAttachmentsDirPath);
+            } catch (IOException e) {
+                throw new RuntimeException("Chyba při mazání adresáře příloh článku " + articleEditorTO.getDraftId(),
+                        e);
+            }
+        }
+
+        return article.getId();
     }
 
     @Override
     public Long saveDraft(ArticleEditorTO articleEditorTO, boolean asPreview) {
-        return innerSaveArticle(articleEditorTO, asPreview, true);
+        return innerSaveArticle(articleEditorTO, asPreview, true).getId();
     }
 
     @Override
     public void deleteArticle(Long id) {
+        deleteArticleInner(id, true);
+    }
+
+    private void deleteArticleInner(Long id, boolean deleteAttachments) {
         Article article = articleRepository.findById(id).get();
 
         // smaž článek
@@ -121,23 +185,29 @@ public class ArticleServiceImpl implements ArticleService {
         // smaž jeho content node
         contentNodeFacade.deleteByContentId(ArticlesContentModule.ID, id);
 
-        // smaž jeho přílohy
-        try {
-            Path attachmentsPath = getAttachmentsPath(article.getId(), false);
-            if (attachmentsPath != null) {
-                try (Stream<Path> s = Files.walk(attachmentsPath)) {
-                    s.sorted(Comparator.reverseOrder()).forEach(p -> {
-                        try {
-                            Files.delete(p);
-                        } catch (IOException e) {
-                            logger.error("Chyba při mazání přílohy článku [" + article.getAttachmentsDirId() + "] (" +
-                                    p.getFileName().toString() + ")", e);
-                        }
-                    });
+        if (deleteAttachments) {
+            // smaž jeho přílohy
+            try {
+                Path attachmentsPath = getAttachmentsPath(article.getId(), false);
+                if (attachmentsPath != null) {
+                    try (Stream<Path> s = Files.walk(attachmentsPath)) {
+                        // reverseOrder, protože jinak by walk začal přímo adresářem,
+                        // namísto jeho obsahem. Maže se všechno, takže potřebuju i samotný
+                        // adresář -- jinak bych použil Files::list, namísto Files::walk
+                        s.sorted(Comparator.reverseOrder()).forEach(p -> {
+                            try {
+                                Files.delete(p);
+                            } catch (IOException e) {
+                                logger.error(
+                                        "Chyba při mazání přílohy článku [" + article.getAttachmentsDirId() + "] (" +
+                                                p.getFileName().toString() + ")", e);
+                            }
+                        });
+                    }
                 }
+            } catch (Exception e) {
+                logger.warn("Nezdařilo se smazat adresář příloh článku [" + article.getAttachmentsDirId() + "]");
             }
-        } catch (Exception e) {
-            logger.warn("Nezdařilo se smazat adresář příloh článku [" + article.getAttachmentsDirId() + "]");
         }
     }
 
@@ -165,7 +235,7 @@ public class ArticleServiceImpl implements ArticleService {
         return set;
     }
 
-    private Long innerSaveArticle(ArticleEditorTO payload, boolean process, boolean draft) {
+    private Article innerSaveArticle(ArticleEditorTO payload, boolean process, boolean draft) {
         Long articleIdToFind = draft ? payload.getDraftId() : payload.getExistingArticleId();
 
         Article article;
@@ -208,7 +278,7 @@ public class ArticleServiceImpl implements ArticleService {
                     payload.isDraftPublicated());
         }
 
-        return article.getId();
+        return article;
     }
 
     @Override
@@ -268,37 +338,29 @@ public class ArticleServiceImpl implements ArticleService {
         return articlesMapper.mapArticlesForDraftOverview(articles);
     }
 
-    private Path createAttachmentsDir(Path rootPath) {
-        try (Stream<Path> stream = Files.list(rootPath).sorted(Comparator.reverseOrder())) {
-            Iterator<Path> it = stream.iterator();
-            while (it.hasNext()) {
-                Path path = it.next();
-                String fileName = path.getFileName().toString();
-                Long val;
-                try {
-                    val = Long.parseLong(fileName);
-                } catch (NumberFormatException e) {
-                    throw new IllegalStateException("Nezdařilo se iterovat název adresáře příloh", e);
-                }
-                Path newPath = rootPath.resolve(String.valueOf(val + 1));
-                if (!Files.exists(newPath)) return fileSystemService.createDirectoryWithPerms(newPath);
-            }
-            return fileSystemService.createDirectoryWithPerms(rootPath.resolve("0"));
-        } catch (IOException e) {
-            throw new IllegalStateException("Nezdařilo se získat přehled příloh", e);
-        }
-    }
-
+    @Override
     public Integer getBackupTimeout() {
         ArticlesConfiguration configuration = new ArticlesConfiguration();
         configurationService.loadConfiguration(configuration);
         return configuration.getBackupTimeout();
     }
 
+    private Path createAttachmentsDir(Path newPath) {
+        try {
+            return fileSystemService.createDirectoryWithPerms(newPath);
+        } catch (IOException e) {
+            throw new IllegalStateException("Nezdařilo se vytvořit přehled příloh", e);
+        }
+    }
+
     @Override
     public List<AttachmentTO> findAttachments(Long articleId) {
         Path path = getAttachmentsPath(articleId, true);
-        return List.of();
+        try {
+            return Files.list(path).map(this::mapPathToAttachmentTO).toList();
+        } catch (IOException e) {
+            throw new RuntimeException("Nezdařilo se získat přílohy článku " + articleId, e);
+        }
     }
 
     private Path findAttachmentsRootPath() {
@@ -311,30 +373,37 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private Path getAttachmentsPath(Long articleId, boolean createIfDoesNotExists) {
-        String attachmentsDirId = String.valueOf(articleId);
         Path rootPath = findAttachmentsRootPath();
         if (!Files.exists(rootPath)) throw new IllegalStateException("Kořenový adresář modulu článků musí existovat");
-        if (attachmentsDirId != null) {
-            Path attachmentsDirPath = rootPath.resolve(attachmentsDirId);
-            if (!Files.exists(attachmentsDirPath)) {
-                if (!createIfDoesNotExists) return null;
-                return createAttachmentsDir(rootPath);
-            }
-            return attachmentsDirPath;
-        } else {
-            if (!createIfDoesNotExists) return null;
-            return createAttachmentsDir(rootPath);
-        }
+        Path attachmentsPath = rootPath.resolve(ATTACHMENT_DIR_PREFIX + articleId);
+        if (Files.exists(attachmentsPath)) return attachmentsPath;
+        if (createIfDoesNotExists) return createAttachmentsDir(attachmentsPath);
+        return null;
     }
 
     @Override
-    public AttachmentsOperationResult saveAttachment(Long draftId, InputStream inputStream, String name) {
+    public AttachmentsOperationResult saveDraftAttachment(Long draftId, Long existingArticleId, InputStream inputStream,
+                                                          String name) {
         try {
-            Path directoryPath = getAttachmentsPath(draftId, true);
-            Path targetPath = directoryPath.resolve(name).normalize();
+            // kontrola, že nedojde ke kolizi při uložení a přesunu příloh z draftu do ostrého článku
+            Path existingArticleDirPath = getAttachmentsPath(existingArticleId, false);
+            if (existingArticleDirPath != null) {
+                Path futureTargetPath = existingArticleDirPath.resolve(name);
+                if (Files.exists(futureTargetPath)) {
+                    // Tohle je potřeba pro případ, že byla smazána příloha z reálného článku (příprava smazání) a záhy
+                    // byla příloha nahrána znova ... nemá smysl ji dávat do draftu, protože se vlastně nic nezměnilo.
+                    // Řešením je tedy vrátit původní AttachmentTO se záznamem z existujího článku
+                    AttachmentTO attachmentTO = mapPathToAttachmentTO(futureTargetPath);
+                    return AttachmentsOperationResult.success(attachmentTO);
+                }
+            }
+
+            Path draftDirPath = getAttachmentsPath(draftId, true);
+            Path targetPath = draftDirPath.resolve(name);
             Files.copy(inputStream, targetPath);
             fileSystemService.grantPermissions(targetPath);
             AttachmentTO attachmentTO = mapPathToAttachmentTO(targetPath);
+            attachmentTO.setDraft(true);
             return AttachmentsOperationResult.success(attachmentTO);
         } catch (FileAlreadyExistsException f) {
             return AttachmentsOperationResult.alreadyExists();
@@ -379,7 +448,7 @@ public class ArticleServiceImpl implements ArticleService {
         int renamed = 0;
         for (Article article : articleList) {
             Path attachmentsDirPath = rootPath.resolve(article.getAttachmentsDirId());
-            Path targetPath = rootPath.resolve("attachments-" + article.getId());
+            Path targetPath = rootPath.resolve(ATTACHMENT_DIR_PREFIX + article.getId());
             try {
                 Files.move(attachmentsDirPath, targetPath);
             } catch (IOException e) {

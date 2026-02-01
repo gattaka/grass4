@@ -77,6 +77,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     private TokenField articleKeywords;
     private TextField articleNameField;
     private Checkbox publicatedCheckBox;
+    private Grid<AttachmentTO> attachmentsGrid;
 
     private Span autosaveLabel;
 
@@ -194,6 +195,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setExistingArticleId(article.getId());
         }
 
+        articleEditorTO.getDraftAttachments()
+                .addAll(articleService.findAttachments(articleEditorTO.getExistingArticleId()));
         for (AttachmentTO attachmentTO : articleService.findAttachments(draft.getId())) {
             attachmentTO.setDraft(true);
             articleEditorTO.getDraftAttachments().add(attachmentTO);
@@ -207,6 +210,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         articleTextArea.setValue(articleEditorTO.getDraftText());
         publicatedCheckBox.setValue(articleEditorTO.isDraftPublicated());
         articleKeywords.addTokens(articleEditorTO.getDraftTags());
+        populateGrid();
     }
 
     private String createTextareaGetJS() {
@@ -300,22 +304,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         // aby se zaregistroval JS listener
         articleTextArea.focus();
 
-        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
-        if (drafts.isEmpty()) {
-            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
-            // článků, otevři editor dle operace (new/edit)
-            defaultCreateContent();
-        } else {
-            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
-            new DraftMenuDialog(drafts, to -> {
-                if (to != null) {
-                    populateByExistingDraft(to);
-                } else {
-                    defaultCreateContent();
-                }
-            }, to -> articleService.deleteArticle(to.getId())).open();
-        }
-
         layout.add(new H3("Název článku"));
         layout.add(articleNameField);
         articleNameField.setWidthFull();
@@ -334,7 +322,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         layout.add(articleTextArea);
 
         layout.add(new H3("Přílohy článku"));
-        Grid<AttachmentTO> attachmentsGrid = createAttachmentsGrid(layout);
+        createAttachmentsGrid(layout);
 
         layout.add(new H3("Nastavení článku"));
         publicatedCheckBox.setLabel("Publikovat článek");
@@ -359,50 +347,63 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         Span autosaveLabel = createAutosaveLabel();
         buttonLayout.add(autosaveLabel);
 
-        populateGrid(attachmentsGrid);
+        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
+        if (drafts.isEmpty()) {
+            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
+            // článků, otevři editor dle operace (new/edit)
+            defaultCreateContent();
+        } else {
+            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
+            new DraftMenuDialog(drafts, to -> {
+                if (to != null) {
+                    populateByExistingDraft(to);
+                } else {
+                    defaultCreateContent();
+                }
+            }, to -> articleService.deleteArticle(to.getId())).open();
+        }
     }
 
     private Grid<AttachmentTO> createAttachmentsGrid(Div layout) {
-        Grid<AttachmentTO> grid = new Grid<>();
-        grid.setColumnReorderingAllowed(true);
-        grid.setSelectionMode(SelectionMode.NONE);
-        UIUtils.applyGrassDefaultStyle(grid);
-        grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        layout.add(grid);
+        attachmentsGrid = new Grid<>();
+        attachmentsGrid.setColumnReorderingAllowed(true);
+        attachmentsGrid.setSelectionMode(SelectionMode.NONE);
+        UIUtils.applyGrassDefaultStyle(attachmentsGrid);
+        attachmentsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        layout.add(attachmentsGrid);
 
-        grid.setHeight("200px");
+        attachmentsGrid.setHeight("200px");
 
-        grid.addColumn(AttachmentTO::getName).setHeader("Název").setFlexGrow(100).setSortProperty("name");
-        grid.addColumn(AttachmentTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px")
-                .setFlexGrow(0).setSortProperty("size");
-        grid.addColumn(new ComponentRenderer<>(
+        attachmentsGrid.addColumn(AttachmentTO::getName).setHeader("Název").setFlexGrow(100).setSortProperty("name");
+        attachmentsGrid.addColumn(AttachmentTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END)
+                .setWidth("80px").setFlexGrow(0).setSortProperty("size");
+        attachmentsGrid.addColumn(new ComponentRenderer<>(
                         to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
                 .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
-        grid.addColumn(new ComponentRenderer<>(
+        attachmentsGrid.addColumn(new ComponentRenderer<>(
                         to -> componentFactory.createInlineButton("Vložit", e -> handleInsertAction(to)))).setHeader("Vložit")
                 .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
-        grid.addColumn(new ComponentRenderer<>(
-                        to -> componentFactory.createDeleteInlineButton(e -> handleDeleteAction(grid, to)))).setHeader("Smazat")
-                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
-        grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d. MM. yyyy HH:mm"))
+        attachmentsGrid.addColumn(
+                        new ComponentRenderer<>(to -> componentFactory.createDeleteInlineButton(e -> handleDeleteAction(to))))
+                .setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        attachmentsGrid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d. M. yyyy HH:mm"))
                 .setHeader("Upraveno").setAutoWidth(true).setTextAlign(ColumnTextAlign.END)
                 .setSortProperty("lastModified");
 
-        grid.addItemClickListener(e -> {
+        attachmentsGrid.addItemClickListener(e -> {
             if (e.getClickCount() > 1) handleInsertAction(e.getItem());
         });
 
         Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
             // vždy ukládá do draft adresáře; při ostrém uložení se přesune
             AttachmentsOperationResult result =
-                    articleService.saveAttachment(articleEditorTO.getDraftId(), new FileInputStream(file),
+                    articleService.saveDraftAttachment(articleEditorTO.getDraftId(), articleEditorTO.getExistingArticleId(), new FileInputStream(file),
                             metadata.fileName());
             switch (result.getState()) {
                 case SUCCESS:
                     AttachmentTO attachmentTO = result.getAttachment();
-                    attachmentTO.setDraft(true);
                     articleEditorTO.getDraftAttachments().add(attachmentTO);
-                    populateGrid(grid);
+                    populateGrid();
                     break;
                 case ALREADY_EXISTS:
                     UIUtils.showWarning("Soubor '" + metadata.fileName() +
@@ -416,7 +417,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(upload);
 
-        return grid;
+        return attachmentsGrid;
     }
 
     private Button createPreviewButton() {
@@ -452,6 +453,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     private Button createCancelButton() {
         return componentFactory.createStornoButton(event -> new ConfirmDialog(
                 "Opravdu si přejete zavřít editor článku? Veškeré neuložené změny budou ztraceny.", e -> {
+            deleteDraft();
             // ruším úpravu existujícího článku (vracím se na
             // článek), nebo nového (vracím se do kategorie) ?
             leaving = true;
@@ -546,29 +548,24 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         return autosaveLabel;
     }
 
-    private void populateGrid(Grid<AttachmentTO> grid) {
-        grid.setItems(articleEditorTO.getDraftAttachments());
+    private void populateGrid() {
+        attachmentsGrid.setItems(articleEditorTO.getDraftAttachments());
     }
 
     private String getDownloadLink(AttachmentTO item) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(UIUtils.getURLBase());
-        sb.append("/");
-        sb.append(ArticlesConfiguration.ATTACHMENTS_PATH);
-        if (!sb.toString().endsWith("/")) sb.append("/");
-        // TODO
-        sb.append(item.getPath());
-        sb.append("/");
-        sb.append(item.getName());
-
-        return sb.toString();
+        String id =
+                String.valueOf(item.isDraft() ? articleEditorTO.getDraftId() : articleEditorTO.getExistingArticleId());
+        return String.join("/", UIUtils.getURLBase(), ArticlesConfiguration.ATTACHMENTS_PATH, id, item.getName());
     }
 
     private void handleDownloadAction(AttachmentTO item) {
         UI.getCurrent().getPage().open(getDownloadLink(item));
     }
 
-    private void handleDeleteAction(Grid<AttachmentTO> grid, AttachmentTO to) {
+    // Poznámka:
+    // Aktuálně není řešeno, že pokud se draft zavře a obnoví,
+    // neobnoví se info o plánovaných smazání příloh existujícího článku
+    private void handleDeleteAction(AttachmentTO to) {
         articleEditorTO.getDraftAttachments().remove(to);
         // reálné mazání proveď pouze, pokud jde o draft přílohy
         // ostré přílohy se mažou až při ostrém uložení článku
@@ -579,7 +576,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 throw new RuntimeException("Nezdařilo se smazat soubor přílohy", e);
             }
         }
-        populateGrid(grid);
+        populateGrid();
     }
 
     private void handleInsertAction(AttachmentTO to) {
@@ -615,7 +612,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
      * Zavolá vrácení se na článek
      */
     private void returnToArticle() {
-        deleteDraft();
         UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> returnToArticleCallback());
     }
 
@@ -623,7 +619,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
      * zavolání vrácení se na kategorii
      */
     private void returnToNode() {
-        deleteDraft();
         UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> returnToNodeCallback());
     }
 

@@ -1,16 +1,13 @@
 package cz.gattserver.grass.articles.services;
 
-import com.vaadin.flow.data.provider.QuerySortOrder;
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
 import cz.gattserver.grass.articles.editor.parser.interfaces.*;
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 public interface ArticleService {
 
@@ -69,7 +66,8 @@ public interface ArticleService {
      */
     Integer getBackupTimeout();
 
-    AttachmentsOperationResult saveAttachment(Long draftId, InputStream inputStream, String name);
+    AttachmentsOperationResult saveDraftAttachment(Long draftId, Long existingArticleId, InputStream inputStream,
+                                                   String name);
 
     Path getAttachmentFilePath(Long articleId, String name);
 
