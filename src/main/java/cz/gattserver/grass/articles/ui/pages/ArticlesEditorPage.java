@@ -116,16 +116,28 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         // Vždy nový, postupně je naplněn
         articleEditorTO = new ArticleEditorTO(UIUtils.getContextPath());
 
-        Div leftContentLayout = componentFactory.createLeftColumnLayout();
-        createLeftColumnContent(leftContentLayout);
-        add(leftContentLayout);
-
-        Div rightContentLayout = componentFactory.createRightColumnLayout();
-        createRightColumnContent(rightContentLayout);
-        add(rightContentLayout);
+        loadArticle();
 
         // odchod mimo Vaadin routing není možné nijak odchytit, jediná možnost je moužít native browser JS
         UIUtils.addOnbeforeunloadWarning();
+    }
+
+    private void loadArticle() {
+        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
+        if (drafts.isEmpty()) {
+            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
+            // článků, otevři editor dle operace (new/edit)
+            defaultCreateContent();
+        } else {
+            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
+            new DraftMenuDialog(drafts, to -> {
+                if (to != null) {
+                    populateByExistingDraft(to);
+                } else {
+                    defaultCreateContent();
+                }
+            }, to -> articleService.deleteArticle(to.getId())).open();
+        }
     }
 
     private void defaultCreateContent() {
@@ -175,7 +187,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             throw new GrassPageException(404);
         }
 
-        populateFields();
+        createFields();
     }
 
     private void populateByExistingDraft(ArticleDraftOverviewTO draft) {
@@ -202,23 +214,19 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.getDraftAttachments().add(attachmentTO);
         }
 
+        createFields();
+    }
+
+    private void createFields() {
+        Div leftContentLayout = componentFactory.createLeftColumnLayout();
+        createLeftColumnContent(leftContentLayout);
+        add(leftContentLayout);
+
+        Div rightContentLayout = componentFactory.createRightColumnLayout();
+        createRightColumnContent(rightContentLayout);
+        add(rightContentLayout);
+
         populateFields();
-    }
-
-    private void populateFields() {
-        articleNameField.setValue(articleEditorTO.getDraftName());
-        articleTextArea.setValue(articleEditorTO.getDraftText());
-        publicatedCheckBox.setValue(articleEditorTO.isDraftPublicated());
-        articleKeywords.addTokens(articleEditorTO.getDraftTags());
-        populateGrid();
-    }
-
-    private String createTextareaGetJS() {
-        return "let ta = $(\"vaadin-text-area\")[0].children[2];";
-    }
-
-    private String createTextareaGetSelectionJS() {
-        return "let start = ta.selectionStart;" + "let finish = ta.selectionEnd;";
     }
 
     private void createLeftColumnContent(Div layout) {
@@ -346,22 +354,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         // Auto-ukládání
         Span autosaveLabel = createAutosaveLabel();
         buttonLayout.add(autosaveLabel);
-
-        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
-        if (drafts.isEmpty()) {
-            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
-            // článků, otevři editor dle operace (new/edit)
-            defaultCreateContent();
-        } else {
-            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
-            new DraftMenuDialog(drafts, to -> {
-                if (to != null) {
-                    populateByExistingDraft(to);
-                } else {
-                    defaultCreateContent();
-                }
-            }, to -> articleService.deleteArticle(to.getId())).open();
-        }
     }
 
     private Grid<AttachmentTO> createAttachmentsGrid(Div layout) {
@@ -376,7 +368,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         attachmentsGrid.addColumn(AttachmentTO::getName).setHeader("Název").setFlexGrow(100).setSortProperty("name");
         attachmentsGrid.addColumn(AttachmentTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END)
-                .setWidth("80px").setFlexGrow(0).setSortProperty("size");
+                .setWidth("90px").setFlexGrow(0).setSortable(false);
         attachmentsGrid.addColumn(new ComponentRenderer<>(
                         to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
                 .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
@@ -396,9 +388,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
             // vždy ukládá do draft adresáře; při ostrém uložení se přesune
-            AttachmentsOperationResult result =
-                    articleService.saveDraftAttachment(articleEditorTO.getDraftId(), articleEditorTO.getExistingArticleId(), new FileInputStream(file),
-                            metadata.fileName());
+            AttachmentsOperationResult result = articleService.saveDraftAttachment(articleEditorTO.getDraftId(),
+                    articleEditorTO.getExistingArticleId(), new FileInputStream(file), metadata.fileName());
             switch (result.getState()) {
                 case SUCCESS:
                     AttachmentTO attachmentTO = result.getAttachment();
@@ -463,6 +454,22 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 returnToArticle();
             }
         }).open());
+    }
+
+    private void populateFields() {
+        articleNameField.setValue(articleEditorTO.getDraftName());
+        articleTextArea.setValue(articleEditorTO.getDraftText());
+        publicatedCheckBox.setValue(articleEditorTO.isDraftPublicated());
+        articleKeywords.addTokens(articleEditorTO.getDraftTags());
+        populateGrid();
+    }
+
+    private String createTextareaGetJS() {
+        return "let ta = $(\"vaadin-text-area\")[0].children[2];";
+    }
+
+    private String createTextareaGetSelectionJS() {
+        return "let start = ta.selectionStart;" + "let finish = ta.selectionEnd;";
     }
 
     private void gatherFields() {
