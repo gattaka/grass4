@@ -1,5 +1,6 @@
 package cz.gattserver.grass.rest;
 
+import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleEditorTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleRESTTO;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.modules.ArticlesContentModule;
@@ -49,16 +50,19 @@ public class ArticlesResource {
 	// POST http://localhost:8180/web/ws/articles/create
 	// text test článku...
 	@RequestMapping(value = "/create", method = RequestMethod.POST)
-	public ResponseEntity<Long> smsImport(@RequestParam(value = "text", required = true) String text) {
+	public ResponseEntity<Long> smsImport(@RequestParam(value = "text") String text) {
 		logger.info("articles /create volán");
 		UserInfoTO user = securityService.getCurrentUser();
 		if (user.getId() == null)
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		ArticlePayloadTO payload = new ArticlePayloadTO(
-				"GrassAndroid Import " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("d.M.yyyy")), text,
-				new ArrayList<>(), false, null, "dummy");
+        // TODO "dummy" context root?
+		ArticleEditorTO payload = new ArticleEditorTO("dummy");
+        payload.setDraftName("GrassAndroid Import " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("d.M.yyyy")));
+        payload.setDraftText(text);
+        payload.setDraftPublicated(false);
+        payload.setNodeId(nodeService.getRootNodes().get(0).getId());
 
-		long articleId = articleService.saveArticle(payload, nodeService.getRootNodes().get(0).getId(), user.getId());
+		long articleId = articleService.saveArticle(payload);
 
 		logger.info("articles /create dokončen");
 		return new ResponseEntity<>(articleId, HttpStatus.OK);

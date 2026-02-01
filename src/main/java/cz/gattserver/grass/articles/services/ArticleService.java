@@ -14,16 +14,16 @@ import java.util.stream.Stream;
 
 public interface ArticleService {
 
-    long saveArticle(ArticleEditorTO articleEditorTO);
+    Long saveArticle(ArticleEditorTO articleEditorTO);
 
-    long saveDraft(ArticleEditorTO articleEditorTO, boolean asPreview);
+    Long saveDraft(ArticleEditorTO articleEditorTO, boolean asPreview);
 
     /**
      * Smaže článek
      *
      * @param id článek ke smazání
      */
-    void deleteArticle(long id);
+    void deleteArticle(Long id);
 
     /**
      * Získá článek dle jeho identifikátoru
@@ -31,7 +31,7 @@ public interface ArticleService {
      * @param id identifikátor
      * @return DTO článku
      */
-    ArticleTO getArticleForDetail(long id);
+    ArticleTO getArticleForDetail(Long id);
 
     /**
      * Získá článek pro REST dle jeho identifikátoru
@@ -70,4 +70,8 @@ public interface ArticleService {
     Integer getBackupTimeout();
 
     AttachmentsOperationResult saveAttachment(Long draftId, InputStream inputStream, String name);
+
+    Path getAttachmentFilePath(Long articleId, String name);
+
+    int renameAttachmentDirs();
 }

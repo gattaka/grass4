@@ -25,7 +25,7 @@ public class AttachmentsRequestHandler extends AbstractConfiguratedPathRequestHa
 		if (!fileName.matches("/[0-9]+/[^/]+"))
 			throw new GrassPageException(HttpStatus.SC_CLIENT_ERROR);
 		String[] chunks = fileName.split("/");
-		String id = chunks[1];
+		Long id = Long.parseLong(chunks[1]);
 		String name = chunks[2];
 		return articleService.getAttachmentFilePath(id, name);
 	}

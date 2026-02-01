@@ -15,7 +15,6 @@ public class ArticleEditorTO {
     private String contextRoot;
 
     private Long existingArticleId;
-    private String existingAttachmentsDir;
 
     /*
      * Vždy draft
@@ -86,14 +85,6 @@ public class ArticleEditorTO {
 
     public void setNodeName(String nodeName) {
         this.nodeName = nodeName;
-    }
-
-    public String getExistingAttachmentsDir() {
-        return existingAttachmentsDir;
-    }
-
-    public void setExistingAttachmentsDir(String existingAttachmentsDir) {
-        this.existingAttachmentsDir = existingAttachmentsDir;
     }
 
     public boolean isDraftPublicated() {

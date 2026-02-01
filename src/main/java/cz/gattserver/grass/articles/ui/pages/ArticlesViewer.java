@@ -26,7 +26,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
 
     private static final long serialVersionUID = 7511698289319715316L;
 
-    private ArticleService articleFacade;
+    private ArticleService articleService;
     private SecurityService securityService;
 
     private ArticleTO article;
@@ -36,9 +36,10 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         return article.getContentNode().getName();
     }
 
-    public ArticlesViewer(ArticleService articleFacade, SecurityService securityService) {
-        this.articleFacade = articleFacade;
+    public ArticlesViewer(ArticleService articleFacade, SecurityService securityService, ArticleService articleService) {
+        this.articleService = articleFacade;
         this.securityService = securityService;
+        this.articleService = articleService;
     }
 
     @Override
@@ -46,13 +47,13 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(parameter);
         if (identifier == null) throw new GrassPageException(404);
 
-        article = articleFacade.getArticleForDetail(identifier.getId());
+        article = articleService.getArticleForDetail(identifier.getId());
         if (article == null) throw new GrassPageException(404);
 
         // RESCUE -- tohle by se normálně stát nemělo, ale umožňuje to aspoň
         // vyřešit stav, ve kterém existuje takovýto nezobrazitelný obsah
         if (article.getContentNode() == null) {
-            articleFacade.deleteArticle(article.getId(), true);
+            articleService.deleteArticle(article.getId());
             UI.getCurrent().navigate(MainView.class);
         }
 
@@ -118,7 +119,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
             // zdařilo se ? Pokud ano, otevři info okno a při
             // potvrzení jdi na kategorii
             try {
-                articleFacade.deleteArticle(article.getId(), true);
+                articleService.deleteArticle(article.getId());
                 UI.getCurrent().navigate(NodePage.class,
                         URLIdentifierUtils.createURLIdentifier(nodeDTO.getId(), nodeDTO.getName()));
             } catch (Exception e) {

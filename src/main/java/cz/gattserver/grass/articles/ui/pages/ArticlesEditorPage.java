@@ -163,7 +163,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setNodeId(node.getId());
             articleEditorTO.setNodeName(node.getName());
             articleEditorTO.setExistingArticleId(existingArticle.getId());
-            articleEditorTO.setExistingAttachmentsDir(existingArticle.getAttachmentsDirId());
             articleEditorTO.setDraftName(existingArticle.getContentNode().getName());
             articleEditorTO.setDraftText(existingArticle.getText());
             articleEditorTO.setDraftPublicated(existingArticle.getContentNode().isPublicated());
@@ -193,7 +192,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         if (draft.getContentNode().getDraftSourceId() != null) {
             ArticleTO article = articleService.getArticleForDetail(draft.getContentNode().getDraftSourceId());
             articleEditorTO.setExistingArticleId(article.getId());
-            articleEditorTO.setExistingAttachmentsDir(article.getAttachmentsDirId());
         }
 
         for (AttachmentTO attachmentTO : articleService.findAttachments(draft.getId())) {
@@ -456,6 +454,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 "Opravdu si přejete zavřít editor článku? Veškeré neuložené změny budou ztraceny.", e -> {
             // ruším úpravu existujícího článku (vracím se na
             // článek), nebo nového (vracím se do kategorie) ?
+            leaving = true;
             if (articleEditorTO.getExistingArticleId() == null) {
                 returnToNode();
             } else {
