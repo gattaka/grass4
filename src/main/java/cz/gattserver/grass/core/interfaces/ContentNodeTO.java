@@ -6,6 +6,11 @@ import java.util.Set;
 
 public class ContentNodeTO {
 
+    /**
+     * DB identifikátor
+     */
+    private Long id;
+
 	/**
 	 * ID služby, která daný obsah umí číst
 	 */
@@ -47,17 +52,12 @@ public class ContentNodeTO {
 	private UserInfoTO author;
 
 	/**
-	 * DB identifikátor
-	 */
-	private Long id;
-
-	/**
 	 * Jde o plnohodnotný článek, nebo jde o rozpracovaný obsah?
 	 */
 	private boolean draft = false;
 
 	/**
-	 * Jde-li o draft upravovaného obsahu, jaké je jeho id
+	 * Jde-li o draft upravovaného obsahu, jaké je jeho id (id v rámci konkrétní služby, není ContentNode id)
 	 */
 	private Long draftSourceId;
 

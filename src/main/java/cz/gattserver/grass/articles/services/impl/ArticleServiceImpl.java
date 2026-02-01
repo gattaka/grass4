@@ -23,6 +23,7 @@ import cz.gattserver.grass.articles.model.repositories.ArticleRepository;
 import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.articles.services.ArticlesMapperService;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.modules.ArticlesContentModule;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
@@ -86,6 +87,9 @@ public class ArticleServiceImpl implements ArticleService {
     @Autowired
     private FileSystemService fileSystemService;
 
+    @Autowired
+    private SecurityService securityService;
+
     private Context processArticle(String source, String contextRoot) {
         Validate.notNull(contextRoot, "ContextRoot nemůže být null");
 
@@ -100,6 +104,16 @@ public class ArticleServiceImpl implements ArticleService {
         tree.apply(ctx);
 
         return ctx;
+    }
+
+    @Override
+    public long saveArticle(ArticleEditorTO articleEditorTO) {
+        return 0;
+    }
+
+    @Override
+    public long saveDraft(ArticleEditorTO articleEditorTO, boolean asPreview) {
+        return 0;
     }
 
     @Override
@@ -159,41 +173,7 @@ public class ArticleServiceImpl implements ArticleService {
         return set;
     }
 
-    @Override
-    public long saveArticle(ArticlePayloadTO payload, long nodeId, long authorId) {
-        return innerSaveArticle(payload, nodeId, authorId, true, false, null, null);
-    }
-
-    @Override
-    public void modifyArticle(long articleId, ArticlePayloadTO payload) {
-        innerSaveArticle(payload, null, null, true, false, articleId, null);
-    }
-
-    @Override
-    public long saveDraft(ArticlePayloadTO payload, long nodeId, long authorId, boolean asPreview) {
-        return innerSaveArticle(payload, nodeId, authorId, asPreview, true, null, null);
-    }
-
-    @Override
-    public long saveDraftOfExistingArticle(ArticlePayloadTO payload, long nodeId, long authorId, long originArticleId,
-                                           boolean asPreview) {
-        return innerSaveArticle(payload, nodeId, authorId, asPreview, true, null, originArticleId);
-    }
-
-    @Override
-    public void modifyDraft(long drafId, ArticlePayloadTO payload, boolean asPreview) {
-        innerSaveArticle(payload, null, null, asPreview, true, drafId, null);
-    }
-
-    @Override
-    public void modifyDraftOfExistingArticle(long drafId, ArticlePayloadTO payload, long originArticleId,
-                                             boolean asPreview) {
-        innerSaveArticle(payload, null, null, asPreview, true, drafId, originArticleId);
-    }
-
-    private long innerSaveArticle(ArticlePayloadTO payload, Long nodeId, Long authorId, boolean process, boolean draft,
-                                  Long existingId, Long draftSourceId) {
-
+    private long innerSaveArticle(ArticleEditorTO payload, boolean process, boolean draft) {
         Article article;
         if (existingId == null) {
             // vytvoř nový článek
@@ -204,14 +184,14 @@ public class ArticleServiceImpl implements ArticleService {
 
         // nasetuj do něj vše potřebné
         if (process) {
-            Context context = processArticle(payload.getText(), payload.getContextRoot());
+            Context context = processArticle(payload.getDraftText(), payload.getContextRoot());
             article.setOutputHTML(context.getOutput());
             article.setPluginCSSResources(context.getCSSResources());
             article.setPluginJSResources(createJSResourcesSet(context.getJSResources()));
             article.setPluginJSCodes(createJSCodesSet(context.getJSCodes()));
             article.setSearchableOutput(HTMLTagsFilter.trim(context.getOutput()));
         }
-        article.setText(payload.getText());
+        article.setText(payload.getDraftText());
         article.setAttachmentsDirId(payload.getAttachmentsDirId());
 
         // ulož ho a nasetuj jeho id
@@ -219,8 +199,10 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (existingId == null) {
             // vytvoř odpovídající content node
-            Long contentNodeId = contentNodeFacade.save(ArticlesContentModule.ID, article.getId(), payload.getName(),
-                    payload.getTags(), payload.isPublicated(), nodeId, authorId, draft, null, draftSourceId);
+            Long contentNodeId =
+                    contentNodeFacade.save(ArticlesContentModule.ID, article.getId(), payload.getDraftName(),
+                            payload.getDraftTags(), payload.isDraftPublicated(), nodeId, authorId, draft, null,
+                            draftSourceId);
 
             // ulož do článku referenci na jeho contentnode
             ContentNode contentNode = new ContentNode();
@@ -302,6 +284,11 @@ public class ArticleServiceImpl implements ArticleService {
         return articlesMapper.mapArticlesForDraftOverview(articles);
     }
 
+    @Override
+    public List<AttachmentTO> findAttachments(Long articleId) {
+        return List.of();
+    }
+
     private Path createAttachmentsDir(Path rootPath) {
         try (Stream<Path> stream = Files.list(rootPath).sorted((p1, p2) -> p2.compareTo(p1))) {
             Iterator<Path> it = stream.iterator();
@@ -350,14 +337,14 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public AttachmentsOperationResult saveAttachment(String attachmentsDirId, InputStream in, String name) {
+    public AttachmentsOperationResult saveAttachment(Long draftId, InputStream inputStream, String name) {
         try {
-            Path articleAttPath = getAttachmentsPath(attachmentsDirId, true);
-            attachmentsDirId = articleAttPath.getFileName().toString();
-            Path pathToSaveAs = articleAttPath.resolve(name).normalize();
-            Files.copy(in, pathToSaveAs);
-            fileSystemService.grantPermissions(pathToSaveAs);
-            return AttachmentsOperationResult.success(attachmentsDirId);
+            Path directoryPath = getAttachmentsPath(String.valueOf(draftId), true);
+            Path targetPath = directoryPath.resolve(name).normalize();
+            Files.copy(inputStream, targetPath);
+            fileSystemService.grantPermissions(targetPath);
+            AttachmentTO attachmentTO = mapPathToAttachmentTO(targetPath);
+            return AttachmentsOperationResult.success(attachmentTO);
         } catch (FileAlreadyExistsException f) {
             return AttachmentsOperationResult.alreadyExists();
         } catch (IOException e) {
@@ -401,6 +388,7 @@ public class ArticleServiceImpl implements ArticleService {
     private AttachmentTO mapPathToAttachmentTO(Path path) {
         AttachmentTO to = new AttachmentTO();
         to.setName(path.getFileName().toString());
+        to.setPath(path);
         try {
             to.setNumericSize(Files.size(path));
             to.setSize(HumanBytesSizeFormatter.format(to.getNumericSize(), true));

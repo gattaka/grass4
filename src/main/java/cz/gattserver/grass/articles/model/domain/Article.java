@@ -65,22 +65,9 @@ public class Article {
 	private SortedSet<ArticleJSCode> pluginJSCodes;
 
 	/**
-	 * Je-li draft a má-li rozpracovanou pouze část článku, pak kterou
-	 */
-	private Integer partNumber;
-
-	/**
 	 * Id adresáře příloh
 	 */
 	private String attachmentsDirId;
-
-	public Integer getPartNumber() {
-		return partNumber;
-	}
-
-	public void setPartNumber(Integer partNumber) {
-		this.partNumber = partNumber;
-	}
 
 	public Long getId() {
 		return id;

@@ -80,6 +80,11 @@ public class TokenField extends Div {
         }
     }
 
+    public void addTokens(Collection<String> tokens) {
+        for (String token : tokens)
+            addToken(token);
+    }
+
     public void addToken(String token) {
         if (!tokens.containsKey(token)) {
             Button tokenButton = new Button(token, e -> deleteToken(token));

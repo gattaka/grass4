@@ -12,14 +12,6 @@ public class AttachmentTO {
     private Path path;
     private boolean draft;
 
-    public boolean isDraft() {
-        return draft;
-    }
-
-    public void setDraft(boolean draft) {
-        this.draft = draft;
-    }
-
     public Path getPath() {
         return path;
     }
@@ -58,5 +50,13 @@ public class AttachmentTO {
 
     public void setPath(Path path) {
         this.path = path;
+    }
+
+    public boolean isDraft() {
+        return draft;
+    }
+
+    public void setDraft(boolean draft) {
+        this.draft = draft;
     }
 }

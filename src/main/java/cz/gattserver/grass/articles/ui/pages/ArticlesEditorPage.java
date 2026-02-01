@@ -11,7 +11,6 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
-import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -22,13 +21,8 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
-import cz.gattserver.grass.articles.AttachmentsState;
 import cz.gattserver.grass.articles.config.ArticlesConfiguration;
-import cz.gattserver.grass.articles.editor.parser.interfaces.EditorButtonResourcesTO;
-import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
-import cz.gattserver.grass.articles.editor.parser.interfaces.ArticlePayloadTO;
-import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
-import cz.gattserver.grass.articles.editor.parser.interfaces.AttachmentTO;
+import cz.gattserver.grass.articles.editor.parser.interfaces.*;
 import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.articles.ui.dialogs.DraftMenuDialog;
@@ -51,7 +45,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.Serial;
+import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -70,23 +66,17 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
     private final NodeService nodeService;
     private final ArticleService articleService;
-    private final ContentTagService contentTagFacade;
+    private final ContentTagService contentTagService;
     private final PluginRegisterService pluginRegister;
     private final SecurityService securityService;
 
-    private Grid<AttachmentTO> grid;
-
-    private NodeOverviewTO node;
+    // V případě, že jde o úpravu již existujícího článku (ne existujícího draftu)
+    private ArticleEditorTO articleEditorTO;
 
     private TextArea articleTextArea;
     private TokenField articleKeywords;
     private TextField articleNameField;
     private Checkbox publicatedCheckBox;
-
-    private String attachmentsDirId;
-    private Long existingArticleId;
-    private String existingArticleName;
-    private Long existingDraftId;
 
     private Span autosaveLabel;
 
@@ -101,12 +91,12 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
     public ArticlesEditorPage(ArticleService articleService, ContentTagService contentTagFacade,
                               PluginRegisterService pluginRegisterService, SecurityService securityService,
-                              NodeService nodeService) {
+                              NodeService nodeService, ContentTagService contentTagService) {
         this.articleService = articleService;
-        this.contentTagFacade = contentTagFacade;
         this.pluginRegister = pluginRegisterService;
         this.securityService = securityService;
         this.nodeService = nodeService;
+        this.contentTagService = contentTagService;
 
         componentFactory = new ComponentFactory();
     }
@@ -122,6 +112,9 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         removeAll();
 
+        // Vždy nový, postupně je naplněn
+        articleEditorTO = new ArticleEditorTO(UIUtils.getContextPath());
+
         Div leftContentLayout = componentFactory.createLeftColumnLayout();
         createLeftColumnContent(leftContentLayout);
         add(leftContentLayout);
@@ -134,30 +127,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         UIUtils.addOnbeforeunloadWarning();
     }
 
-    private void populateByExistingArticle(ArticleTO article) {
-        node = article.getContentNode().getParent();
-        existingArticleId = article.getId();
-        existingArticleName = article.getContentNode().getName();
-        attachmentsDirId = article.getAttachmentsDirId();
-        articleNameField.setValue(article.getContentNode().getName());
-
-        for (ContentTagOverviewTO tagDTO : article.getContentNode().getContentTags())
-            articleKeywords.addToken(tagDTO.getName());
-
-        publicatedCheckBox.setValue(article.getContentNode().isPublicated());
-
-        articleTextArea.setValue(article.getText());
-    }
-
-    private void checkAuthorization(ArticleTO article) {
-        // má oprávnění upravovat tento článek?
-        if (article != null && !article.getContentNode().getAuthor().equals(securityService.getCurrentUser()) &&
-                !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
-    }
-
     private void defaultCreateContent() {
-        ArticleTO article = null;
-
         if (operationToken == null || identifierToken == null) {
             logger.debug("Chybí operace nebo identifikátor cíle");
             throw new GrassPageException(404);
@@ -171,54 +141,74 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
-            node = nodeService.getNodeByIdForOverview(identifier.getId());
-            articleNameField.setValue("");
-            articleTextArea.setValue("");
-            publicatedCheckBox.setValue(true);
+            NodeOverviewTO node = nodeService.getNodeByIdForOverview(identifier.getId());
+            if (node == null) {
+                logger.debug("Neexistující kategorie: {}", identifier.getId());
+                throw new GrassPageException(404);
+            }
+            articleEditorTO.setNodeId(node.getId());
+            articleEditorTO.setNodeName(node.getName());
+            articleEditorTO.setDraftName("");
+            articleEditorTO.setDraftText("");
+            articleEditorTO.setDraftPublicated(true);
+
+            // rovnou ulož, ať máme draft id
+            articleEditorTO.setDraftId(articleService.saveDraft(articleEditorTO, false));
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
-            article = articleService.getArticleForDetail(identifier.getId());
-            populateByExistingArticle(article);
+            ArticleTO existingArticle = articleService.getArticleForDetail(identifier.getId());
+            // má oprávnění upravovat tento článek?
+            if (!existingArticle.getContentNode().getAuthor().equals(securityService.getCurrentUser()) &&
+                    !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
+            NodeOverviewTO node = existingArticle.getContentNode().getParent();
+            articleEditorTO.setNodeId(node.getId());
+            articleEditorTO.setNodeName(node.getName());
+            articleEditorTO.setExistingArticleId(existingArticle.getId());
+            articleEditorTO.setExistingAttachmentsDir(existingArticle.getAttachmentsDirId());
+            articleEditorTO.setDraftName(existingArticle.getContentNode().getName());
+            articleEditorTO.setDraftText(existingArticle.getText());
+            articleEditorTO.setDraftPublicated(existingArticle.getContentNode().isPublicated());
+            for (ContentTagOverviewTO tagDTO : existingArticle.getContentNode().getContentTags())
+                articleEditorTO.getDraftTags().add(tagDTO.getName());
+            articleEditorTO.getDraftAttachments().addAll(articleService.findAttachments(existingArticle.getId()));
         } else {
             logger.debug("Neznámá operace: {}", operationToken);
             throw new GrassPageException(404);
         }
 
-        checkAuthorization(article);
-    }
-
-    private void draftCreateContent(List<ArticleDraftOverviewTO> drafts) {
-        new DraftMenuDialog(drafts, to -> {
-            if (to != null) {
-                populateByExistingDraft(to);
-            } else {
-                defaultCreateContent();
-            }
-        }, to -> {
-            // smaž draft, ponechej přílohy, pokud k draftu existuje článek
-            // TODO upravit, aby se mazalo z draftu vše -- i přílohy (až bude upraveno ukládání příloh draftu)
-            articleService.deleteArticle(to.getId(), to.getContentNode().getDraftSourceId() == null);
-        }).open();
+        populateFields();
     }
 
     private void populateByExistingDraft(ArticleDraftOverviewTO draft) {
-        ArticleTO article;
-
-        existingDraftId = draft.getId();
-
-        node = draft.getContentNode().getParent();
-        articleNameField.setValue(draft.getContentNode().getName());
+        articleEditorTO.setDraftId(draft.getId());
+        NodeOverviewTO node = draft.getContentNode().getParent();
+        articleEditorTO.setNodeId(node.getId());
+        articleEditorTO.setNodeName(node.getName());
+        articleEditorTO.setDraftName(draft.getContentNode().getName());
+        articleEditorTO.setDraftText(draft.getText());
+        articleEditorTO.setDraftPublicated(draft.getContentNode().isPublicated());
         for (ContentTagOverviewTO tagDTO : draft.getContentNode().getContentTags())
-            articleKeywords.addToken(tagDTO.getName());
-        publicatedCheckBox.setValue(draft.getContentNode().isPublicated());
-        articleTextArea.setValue(draft.getText());
-        attachmentsDirId = draft.getAttachmentsDirId();
+            articleEditorTO.getDraftTags().add(tagDTO.getName());
 
         // jedná se o draft již existujícího obsahu?
         if (draft.getContentNode().getDraftSourceId() != null) {
-            article = articleService.getArticleForDetail(draft.getContentNode().getDraftSourceId());
-            existingArticleId = article.getId();
-            existingArticleName = article.getContentNode().getName();
+            ArticleTO article = articleService.getArticleForDetail(draft.getContentNode().getDraftSourceId());
+            articleEditorTO.setExistingArticleId(article.getId());
+            articleEditorTO.setExistingAttachmentsDir(article.getAttachmentsDirId());
         }
+
+        for (AttachmentTO attachmentTO : articleService.findAttachments(draft.getId())) {
+            attachmentTO.setDraft(true);
+            articleEditorTO.getDraftAttachments().add(attachmentTO);
+        }
+
+        populateFields();
+    }
+
+    private void populateFields() {
+        articleNameField.setValue(articleEditorTO.getDraftName());
+        articleTextArea.setValue(articleEditorTO.getDraftText());
+        publicatedCheckBox.setValue(articleEditorTO.isDraftPublicated());
+        articleKeywords.addTokens(articleEditorTO.getDraftTags());
     }
 
     private String createTextareaGetJS() {
@@ -229,7 +219,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         return "let start = ta.selectionStart;" + "let finish = ta.selectionEnd;";
     }
 
-    protected void createLeftColumnContent(Div layout) {
+    private void createLeftColumnContent(Div layout) {
         List<String> families = new ArrayList<>(pluginRegister.getRegisteredFamilies());
         families.sort((o1, o2) -> {
             if (o1 == null) {
@@ -277,13 +267,168 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         layout.getStyle().set("width", "420px").set("margin-left", "-200px");
     }
 
+    private void createRightColumnContent(Div layout) {
+        articleNameField = new TextField();
+        articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
+
+        CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
+                q -> contentTagService.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+        CallbackDataProvider.CountCallback<String, String> serializableFunction =
+                q -> contentTagService.countByFilter(q.getFilter().get());
+        articleKeywords = new TokenField(fetchItemsCallback, serializableFunction);
+        articleKeywords.isEnabled();
+        articleKeywords.setPlaceholder("klíčové slovo");
+
+        articleTextArea = new TextArea();
+        articleTextArea.setHeight("30em");
+        articleTextArea.setWidthFull();
+        articleTextArea.setValueChangeMode(ValueChangeMode.EAGER);
+        publicatedCheckBox = new Checkbox();
+
+        // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
+        articleTextAreaFocusRegistration = articleTextArea.addFocusListener(event -> {
+            String js = createTextareaGetJS() + "ta.addEventListener('keydown', function(e) {"
+                    /*				*/ + "let keyCode = e.keyCode || e.which;"
+                    /*				*/ + "if (keyCode == 9) {"
+                    /*					*/ + "e.preventDefault();"
+                    /*					*/ + createTextareaGetSelectionJS()
+                    /*					*/ + "$0.$server.handleTab(start, finish, ta.value);"
+                    /*				*/ + "}"
+                    /*			*/ + "}, false);";
+            UI.getCurrent().getPage().executeJs(js, getElement());
+            // je potřeba jenom jednou pro registraci
+            articleTextAreaFocusRegistration.remove();
+        });
+        // aby se zaregistroval JS listener
+        articleTextArea.focus();
+
+        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
+        if (drafts.isEmpty()) {
+            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
+            // článků, otevři editor dle operace (new/edit)
+            defaultCreateContent();
+        } else {
+            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
+            new DraftMenuDialog(drafts, to -> {
+                if (to != null) {
+                    populateByExistingDraft(to);
+                } else {
+                    defaultCreateContent();
+                }
+            }, to -> articleService.deleteArticle(to.getId())).open();
+        }
+
+        layout.add(new H3("Název článku"));
+        layout.add(articleNameField);
+        articleNameField.setWidthFull();
+
+        // label
+        layout.add(new H3("Klíčová slova"));
+
+        // menu tagů + textfield tagů
+        layout.add(articleKeywords);
+
+        Button copyFromContentButton = componentFactory.createCopyFromContentButton(
+                e -> new CopyTagsDialog(list -> list.forEach(articleKeywords::addToken)).open());
+        articleKeywords.getChooseElementsDiv().add(copyFromContentButton);
+
+        layout.add(new H3("Obsah článku"));
+        layout.add(articleTextArea);
+
+        layout.add(new H3("Přílohy článku"));
+        Grid<AttachmentTO> attachmentsGrid = createAttachmentsGrid(layout);
+
+        layout.add(new H3("Nastavení článku"));
+        publicatedCheckBox.setLabel("Publikovat článek");
+        layout.add(publicatedCheckBox);
+
+        Div buttonLayout = componentFactory.createButtonLayout();
+        layout.add(buttonLayout);
+
+        // Náhled
+        Button previewButton = createPreviewButton();
+        buttonLayout.add(previewButton);
+
+        // Uložit
+        Button saveButton = createSaveButton();
+        buttonLayout.add(saveButton);
+
+        // Zrušit
+        Button cancelButton = createCancelButton();
+        buttonLayout.add(cancelButton);
+
+        // Auto-ukládání
+        Span autosaveLabel = createAutosaveLabel();
+        buttonLayout.add(autosaveLabel);
+
+        populateGrid(attachmentsGrid);
+    }
+
+    private Grid<AttachmentTO> createAttachmentsGrid(Div layout) {
+        Grid<AttachmentTO> grid = new Grid<>();
+        grid.setColumnReorderingAllowed(true);
+        grid.setSelectionMode(SelectionMode.NONE);
+        UIUtils.applyGrassDefaultStyle(grid);
+        grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        layout.add(grid);
+
+        grid.setHeight("200px");
+
+        grid.addColumn(AttachmentTO::getName).setHeader("Název").setFlexGrow(100).setSortProperty("name");
+        grid.addColumn(AttachmentTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px")
+                .setFlexGrow(0).setSortProperty("size");
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
+                .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> componentFactory.createInlineButton("Vložit", e -> handleInsertAction(to)))).setHeader("Vložit")
+                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new ComponentRenderer<>(
+                        to -> componentFactory.createDeleteInlineButton(e -> handleDeleteAction(grid, to)))).setHeader("Smazat")
+                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d. MM. yyyy HH:mm"))
+                .setHeader("Upraveno").setAutoWidth(true).setTextAlign(ColumnTextAlign.END)
+                .setSortProperty("lastModified");
+
+        grid.addItemClickListener(e -> {
+            if (e.getClickCount() > 1) handleInsertAction(e.getItem());
+        });
+
+        Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
+            // vždy ukládá do draft adresáře; při ostrém uložení se přesune
+            AttachmentsOperationResult result =
+                    articleService.saveAttachment(articleEditorTO.getDraftId(), new FileInputStream(file),
+                            metadata.fileName());
+            switch (result.getState()) {
+                case SUCCESS:
+                    AttachmentTO attachmentTO = result.getAttachment();
+                    attachmentTO.setDraft(true);
+                    articleEditorTO.getDraftAttachments().add(attachmentTO);
+                    populateGrid(grid);
+                    break;
+                case ALREADY_EXISTS:
+                    UIUtils.showWarning("Soubor '" + metadata.fileName() +
+                            "' nebylo možné uložit - soubor s tímto názvem již existuje.");
+                    break;
+                default:
+                    UIUtils.showWarning(
+                            "Soubor '" + metadata.fileName() + "' nebylo možné uložit - došlo k systémové chybě.");
+            }
+        }));
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        layout.add(upload);
+
+        return grid;
+    }
+
     private Button createPreviewButton() {
         return componentFactory.createPreviewButton(event -> {
             try {
-                String draftName = saveArticleDraft(true);
+                saveDraft(true);
                 String url = RouteConfiguration.forRegistry(ComponentUtil.getRouter(this).getRegistry())
                         .getUrl(ArticlesViewer.class,
-                                URLIdentifierUtils.createURLIdentifier(existingDraftId, draftName));
+                                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getDraftId(),
+                                        articleEditorTO.getDraftName()));
                 UI.getCurrent().getPage().open(url, "_blank");
             } catch (Exception e) {
                 logger.error("Při ukládání náhledu článku došlo k chybě", e);
@@ -292,32 +437,18 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     }
 
     private Button createSaveButton() {
-        return componentFactory.createSaveButton(event -> {
+        Button saveAndCloseButton = componentFactory.createSaveButton(event -> {
             if (isFormInvalid()) return;
-            if (saveOrUpdateArticle()) {
-                UIUtils.showSilentInfo(
-                        ArticlesEditorPage.this.existingArticleId != null ? "Úprava článku proběhla úspěšně" :
-                                "Uložení článku proběhlo úspěšně");
-            } else {
-                UIUtils.showWarning(ArticlesEditorPage.this.existingArticleId != null ? "Úprava článku se nezdařila" :
-                        "Uložení článku se nezdařilo");
-            }
-        });
-    }
-
-    private Button createSaveAndCloseButton() {
-        Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
-            if (isFormInvalid()) return;
-            if (saveOrUpdateArticle()) {
-                leaving = true;
-                returnToArticle();
-            } else {
-                UIUtils.showWarning(ArticlesEditorPage.this.existingArticleId != null ? "Úprava článku se nezdařila" :
-                        "Uložení článku se nezdařilo");
-            }
+            saveArticle();
+            leaving = true;
+            returnToArticle();
         });
         saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
         return saveAndCloseButton;
+    }
+
+    private void deleteDraft() {
+        articleService.deleteArticle(articleEditorTO.getDraftId());
     }
 
     private Button createCancelButton() {
@@ -325,37 +456,29 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 "Opravdu si přejete zavřít editor článku? Veškeré neuložené změny budou ztraceny.", e -> {
             // ruším úpravu existujícího článku (vracím se na
             // článek), nebo nového (vracím se do kategorie) ?
-            if (existingArticleId != null) {
-                returnToArticle();
-            } else {
+            if (articleEditorTO.getExistingArticleId() == null) {
                 returnToNode();
+            } else {
+                returnToArticle();
             }
         }).open());
     }
 
-    private String saveArticleDraft(boolean asPreview) {
-        String draftName = articleNameField.getValue();
-        ArticlePayloadTO payload =
-                new ArticlePayloadTO(draftName, articleTextArea.getValue(), articleKeywords.getValues(),
-                        publicatedCheckBox.getValue(), attachmentsDirId, UIUtils.getContextPath());
-        if (existingDraftId == null) {
-            if (existingArticleId == null) {
-                existingDraftId =
-                        articleService.saveDraft(payload, node.getId(), securityService.getCurrentUser().getId(),
-                                asPreview);
-            } else {
-                existingDraftId = articleService.saveDraftOfExistingArticle(payload, node.getId(),
-                        securityService.getCurrentUser().getId(), existingArticleId, asPreview);
-            }
-        } else {
-            if (existingArticleId == null) {
-                articleService.modifyDraft(existingDraftId, payload, asPreview);
-            } else {
-                articleService.modifyDraftOfExistingArticle(existingDraftId, payload, existingArticleId,
-                        asPreview);
-            }
-        }
-        return draftName;
+    private void gatherFields() {
+        articleEditorTO.setDraftName(articleNameField.getValue());
+        articleEditorTO.setDraftText(articleTextArea.getValue());
+        articleEditorTO.setDraftTags(articleKeywords.getValues());
+        articleEditorTO.setDraftPublicated(publicatedCheckBox.getValue());
+    }
+
+    private void saveDraft(boolean asPreview) {
+        gatherFields();
+        articleEditorTO.setDraftId(articleService.saveDraft(articleEditorTO, asPreview));
+    }
+
+    private void saveArticle() {
+        gatherFields();
+        articleService.saveArticle(articleEditorTO);
     }
 
     @ClientCallable
@@ -398,7 +521,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     @ClientCallable
     private void autosaveCallback() {
         try {
-            saveArticleDraft(false);
+            saveDraft(false);
             autosaveLabel.setText(
                     LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + " Automaticky uloženo");
             autosaveLabel.setClassName("label-ok");
@@ -424,11 +547,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         return autosaveLabel;
     }
 
-    private void populateGrid() {
-        int size = articleService.listCount(attachmentsDirId);
-        grid.setDataProvider(DataProvider.fromFilteringCallbacks(
-                q -> articleService.listing(attachmentsDirId, q.getOffset(), q.getLimit(), q.getSortOrders()),
-                q -> size));
+    private void populateGrid(Grid<AttachmentTO> grid) {
+        grid.setItems(articleEditorTO.getDraftAttachments());
     }
 
     private String getDownloadLink(AttachmentTO item) {
@@ -437,7 +557,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         sb.append("/");
         sb.append(ArticlesConfiguration.ATTACHMENTS_PATH);
         if (!sb.toString().endsWith("/")) sb.append("/");
-        sb.append(attachmentsDirId);
+        // TODO
+        sb.append(item.getPath());
         sb.append("/");
         sb.append(item.getName());
 
@@ -448,14 +569,18 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         UI.getCurrent().getPage().open(getDownloadLink(item));
     }
 
-    private void handleDeleteAction(AttachmentTO to) {
-        AttachmentsOperationResult result = articleService.deleteAttachment(attachmentsDirId, to.getName());
-        if (Objects.requireNonNull(result.getState()) == AttachmentsState.SUCCESS) {
-            attachmentsDirId = result.getAttachmentDirId();
-            populateGrid();
-        } else {
-            UIUtils.showWarning("Soubor '" + to.getName() + "' nebylo možné smazat - došlo k systémové chybě" + ".");
+    private void handleDeleteAction(Grid<AttachmentTO> grid, AttachmentTO to) {
+        articleEditorTO.getDraftAttachments().remove(to);
+        // reálné mazání proveď pouze, pokud jde o draft přílohy
+        // ostré přílohy se mažou až při ostrém uložení článku
+        if (to.isDraft()) {
+            try {
+                Files.delete(to.getPath());
+            } catch (IOException e) {
+                throw new RuntimeException("Nezdařilo se smazat soubor přílohy", e);
+            }
         }
+        populateGrid(grid);
     }
 
     private void handleInsertAction(AttachmentTO to) {
@@ -463,153 +588,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "$0.$server.handleSelection(\"" + url +
                 "\", \"\", start, finish)";
         UI.getCurrent().getPage().executeJs(js, getElement());
-    }
-
-    private void createAttachmentsGrid(Div layout) {
-        grid = new Grid<>();
-        grid.setColumnReorderingAllowed(true);
-        grid.setSelectionMode(SelectionMode.NONE);
-        UIUtils.applyGrassDefaultStyle(grid);
-        grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        layout.add(grid);
-
-        grid.setHeight("200px");
-
-        grid.addColumn(AttachmentTO::getName).setHeader("Název").setFlexGrow(100).setSortProperty("name");
-        grid.addColumn(AttachmentTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px")
-                .setFlexGrow(0).setSortProperty("size");
-        grid.addColumn(new ComponentRenderer<>(
-                        to -> componentFactory.createInlineButton("Stáhnout", e -> handleDownloadAction(to))))
-                .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
-        grid.addColumn(new ComponentRenderer<>(
-                        to -> componentFactory.createInlineButton("Vložit", e -> handleInsertAction(to)))).setHeader("Vložit")
-                .setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
-        grid.addColumn(
-                        new ComponentRenderer<>(to -> componentFactory.createDeleteInlineButton(e -> handleDeleteAction(to))))
-                .setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
-        grid.addColumn(new LocalDateTimeRenderer<>(AttachmentTO::getLastModified, "d. MM. yyyy HH:mm"))
-                .setHeader("Upraveno").setAutoWidth(true).setTextAlign(ColumnTextAlign.END)
-                .setSortProperty("lastModified");
-
-        grid.addItemClickListener(e -> {
-            if (e.getClickCount() > 1) handleInsertAction(e.getItem());
-        });
-
-        Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
-            AttachmentsOperationResult result =
-                    articleService.saveAttachment(attachmentsDirId, new FileInputStream(file), metadata.fileName());
-            switch (result.getState()) {
-                case SUCCESS:
-                    attachmentsDirId = result.getAttachmentDirId();
-                    populateGrid();
-                    break;
-                case ALREADY_EXISTS:
-                    UIUtils.showWarning("Soubor '" + metadata.fileName() +
-                            "' nebylo možné uložit - soubor s tímto názvem již existuje.");
-                    break;
-                default:
-                    UIUtils.showWarning(
-                            "Soubor '" + metadata.fileName() + "' nebylo možné uložit - došlo k systémové chybě.");
-            }
-            if (existingDraftId == null) saveArticleDraft(false);
-        }));
-        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        layout.add(upload);
-    }
-
-    protected void createRightColumnContent(Div layout) {
-        articleNameField = new TextField();
-        articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
-
-        CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
-        CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagFacade.countByFilter(q.getFilter().get());
-        articleKeywords = new TokenField(fetchItemsCallback, serializableFunction);
-        articleKeywords.isEnabled();
-        articleKeywords.setPlaceholder("klíčové slovo");
-
-        articleTextArea = new TextArea();
-        articleTextArea.setHeight("30em");
-        articleTextArea.setWidthFull();
-        articleTextArea.setValueChangeMode(ValueChangeMode.EAGER);
-        publicatedCheckBox = new Checkbox();
-
-        // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
-        articleTextAreaFocusRegistration = articleTextArea.addFocusListener(event -> {
-            String js = createTextareaGetJS() + "ta.addEventListener('keydown', function(e) {"
-                    /*				*/ + "let keyCode = e.keyCode || e.which;"
-                    /*				*/ + "if (keyCode == 9) {"
-                    /*					*/ + "e.preventDefault();"
-                    /*					*/ + createTextareaGetSelectionJS()
-                    /*					*/ + "$0.$server.handleTab(start, finish, ta.value);"
-                    /*				*/ + "}"
-                    /*			*/ + "}, false);";
-            UI.getCurrent().getPage().executeJs(js, getElement());
-            // je potřeba jenom jednou pro registraci
-            articleTextAreaFocusRegistration.remove();
-        });
-        // aby se zaregistroval JS listener
-        articleTextArea.focus();
-
-        List<ArticleDraftOverviewTO> drafts = articleService.getDraftsForUser(securityService.getCurrentUser().getId());
-        if (drafts.isEmpty()) {
-            // nejsou-li v DB žádné pro přihlášeného uživatele viditelné drafty
-            // článků, otevři editor dle operace (new/edit)
-            defaultCreateContent();
-        } else {
-            // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
-            draftCreateContent(drafts);
-        }
-
-        layout.add(new H3("Název článku"));
-        layout.add(articleNameField);
-        articleNameField.setWidthFull();
-
-        // label
-        layout.add(new H3("Klíčová slova"));
-
-        // menu tagů + textfield tagů
-        layout.add(articleKeywords);
-
-        Button copyFromContentButton = componentFactory.createCopyFromContentButton(
-                e -> new CopyTagsDialog(list -> list.forEach(articleKeywords::addToken)).open());
-        articleKeywords.getChooseElementsDiv().add(copyFromContentButton);
-
-        layout.add(new H3("Obsah článku"));
-        layout.add(articleTextArea);
-
-        layout.add(new H3("Přílohy článku"));
-        createAttachmentsGrid(layout);
-
-        layout.add(new H3("Nastavení článku"));
-        publicatedCheckBox.setLabel("Publikovat článek");
-        layout.add(publicatedCheckBox);
-
-        Div buttonLayout = componentFactory.createButtonLayout();
-        layout.add(buttonLayout);
-
-        // Náhled
-        Button previewButton = createPreviewButton();
-        buttonLayout.add(previewButton);
-
-        // Uložit
-        Button saveButton = createSaveButton();
-        buttonLayout.add(saveButton);
-
-        // Uložit a zavřít
-        Button saveAndCloseButton = createSaveAndCloseButton();
-        buttonLayout.add(saveAndCloseButton);
-
-        // Zrušit
-        Button cancelButton = createCancelButton();
-        buttonLayout.add(cancelButton);
-
-        // Auto-ukládání
-        Span autosaveLabel = createAutosaveLabel();
-        buttonLayout.add(autosaveLabel);
-
-        populateGrid();
     }
 
     private boolean isFormInvalid() {
@@ -621,46 +599,24 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         return false;
     }
 
-    private boolean saveOrUpdateArticle() {
-        try {
-            String text = articleTextArea.getValue();
-
-            ArticlePayloadTO payload =
-                    new ArticlePayloadTO(articleNameField.getValue(), text, articleKeywords.getValues(),
-                            publicatedCheckBox.getValue(), attachmentsDirId, UIUtils.getContextPath());
-            if (existingArticleId == null) {
-                // byl uložen článek, od teď eviduj draft, jako draft
-                // existujícího obsahu
-                existingArticleId =
-                        articleService.saveArticle(payload, node.getId(), securityService.getCurrentUser().getId());
-                this.existingArticleName = articleNameField.getValue();
-            } else {
-                articleService.modifyArticle(existingArticleId, payload);
-            }
-            return true;
-        } catch (Exception e) {
-            logger.error("Při ukládání článku došlo k chybě", e);
-        }
-        return false;
-    }
-
     @ClientCallable
     private void returnToNodeCallback() {
-        UI.getCurrent().navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
+        UI.getCurrent().navigate(NodePage.class,
+                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getNodeId(), articleEditorTO.getNodeName()));
     }
 
     @ClientCallable
     private void returnToArticleCallback() {
         UI.getCurrent().navigate(ArticlesViewer.class,
-                URLIdentifierUtils.createURLIdentifier(existingArticleId, existingArticleName));
+                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getExistingArticleId(),
+                        articleEditorTO.getDraftName()));
     }
 
     /**
      * Zavolá vrácení se na článek
      */
     private void returnToArticle() {
-        // smaž draft, ponechej přílohy, pokud k draftu existuje článek
-        if (existingDraftId != null) articleService.deleteArticle(existingDraftId, existingArticleId == null);
+        deleteDraft();
         UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> returnToArticleCallback());
     }
 
@@ -668,8 +624,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
      * zavolání vrácení se na kategorii
      */
     private void returnToNode() {
-        // smaž draft, ponechej přílohy, pokud k draftu existuje článek
-        if (existingDraftId != null) articleService.deleteArticle(existingDraftId, existingArticleId == null);
+        deleteDraft();
         UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> returnToNodeCallback());
     }
 

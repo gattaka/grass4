@@ -1,6 +1,5 @@
 package cz.gattserver.grass.rest;
 
-import cz.gattserver.grass.articles.editor.parser.interfaces.ArticlePayloadTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleRESTTO;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.modules.ArticlesContentModule;

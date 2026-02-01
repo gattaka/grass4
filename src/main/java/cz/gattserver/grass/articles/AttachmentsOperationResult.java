@@ -1,20 +1,22 @@
 package cz.gattserver.grass.articles;
 
+import cz.gattserver.grass.articles.editor.parser.interfaces.AttachmentTO;
+
 /**
  * Stav zpracování přílohy článku
  */
 public class AttachmentsOperationResult {
 
 	private AttachmentsState state;
-	private String attachmentDirId;
+	private AttachmentTO attachment;
 
 	private AttachmentsOperationResult(AttachmentsState state) {
 		this.state = state;
 	}
 
-	public static AttachmentsOperationResult success(String attachmentDirId) {
+	public static AttachmentsOperationResult success(AttachmentTO attachment) {
 		AttachmentsOperationResult result = new AttachmentsOperationResult(AttachmentsState.SUCCESS);
-		result.attachmentDirId = attachmentDirId;
+		result.attachment = attachment;
 		return result;
 	}
 
@@ -34,7 +36,7 @@ public class AttachmentsOperationResult {
 		return state;
 	}
 
-	public String getAttachmentDirId() {
-		return attachmentDirId;
+	public AttachmentTO getAttachment() {
+		return attachment;
 	}
 }

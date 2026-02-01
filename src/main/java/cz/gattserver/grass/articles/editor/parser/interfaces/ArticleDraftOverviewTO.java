@@ -10,6 +10,11 @@ import cz.gattserver.grass.core.interfaces.ContentNodeTO;
  */
 public class ArticleDraftOverviewTO {
 
+    /**
+     * DB identifikátor
+     */
+    private Long id;
+
 	/**
 	 * Náhled článku
 	 */
@@ -19,29 +24,6 @@ public class ArticleDraftOverviewTO {
 	 * Meta-informace o obsahu
 	 */
 	private ContentNodeTO contentNode;
-
-	/**
-	 * DB identifikátor
-	 */
-	private Long id;
-
-	/**
-	 * Je-li draft a má-li rozpracovanou pouze část článku, pak kterou
-	 */
-	private Integer partNumber;
-
-	/**
-	 * Id úložiště článku
-	 */
-	private String attachmentsDirId;
-
-	public Integer getPartNumber() {
-		return partNumber;
-	}
-
-	public void setPartNumber(Integer partNumber) {
-		this.partNumber = partNumber;
-	}
 
 	public String getText() {
 		return text;
@@ -65,14 +47,6 @@ public class ArticleDraftOverviewTO {
 
 	public void setId(Long id) {
 		this.id = id;
-	}
-
-	public String getAttachmentsDirId() {
-		return attachmentsDirId;
-	}
-
-	public void setAttachmentsDirId(String attachmentsDirId) {
-		this.attachmentsDirId = attachmentsDirId;
 	}
 
 }
