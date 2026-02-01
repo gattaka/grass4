@@ -71,5 +71,5 @@ public interface ArticleService {
 
     Path getAttachmentFilePath(Long articleId, String name);
 
-    int renameAttachmentDirs();
+    int renameAttachmentDirs(String contextRoot);
 }

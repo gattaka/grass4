@@ -442,19 +442,27 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public int renameAttachmentDirs() {
+    public int renameAttachmentDirs(String contextRoot) {
         Path rootPath = findAttachmentsRootPath();
         List<Article> articleList = articleRepository.findWithAttachments();
         int renamed = 0;
         for (Article article : articleList) {
             Path attachmentsDirPath = rootPath.resolve(article.getAttachmentsDirId());
             Path targetPath = rootPath.resolve(ATTACHMENT_DIR_PREFIX + article.getId());
+
+            // Nahraď draft id ve všech attachment odkazech novým id ostrého článku
+            String linkFrom = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getAttachmentsDirId();
+            String linkTo = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getId();
+            article.setText(article.getText().replaceAll(linkFrom, linkTo));
+            article.setAttachmentsDirId(null);
+            reprocessArticle(article, contextRoot);
+
             try {
                 Files.move(attachmentsDirPath, targetPath);
             } catch (IOException e) {
-                logger.error("Nezdařilo se přejmenovat adresář příloh článku {}", article.getId(), e);
+                throw new IllegalStateException("Nezdařilo se přejmenovat adresář příloh článku " + article.getId(), e);
             }
-            articleRepository.clearAttachmentsDirId(article.getId());
+
             renamed++;
         }
         return renamed;

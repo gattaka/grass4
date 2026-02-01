@@ -17,8 +17,4 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     @Query("select a from ARTICLE a where a.attachmentsDirId is not null")
     List<Article> findWithAttachments();
-
-    @Modifying
-    @Query("update ARTICLE a set a.attachmentsDirId = null where a.id = ?1")
-    void clearAttachmentsDirId(Long id);
 }
