@@ -238,6 +238,8 @@ public class MedicServiceImpl implements MedicService {
 		Physician physician = new Physician();
 		physician.setId(to.getId());
 		physician.setName(to.getName());
+        physician.setEmail(to.getEmail());
+        physician.setPhone(to.getPhone());
 		physicianRepository.save(physician);
 	}
 

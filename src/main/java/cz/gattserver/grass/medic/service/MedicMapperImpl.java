@@ -38,9 +38,8 @@ public class MedicMapperImpl implements MedicMapper {
 
 	public List<MedicalInstitutionTO> mapMedicalInstitutions(List<MedicalInstitution> e) {
 		List<MedicalInstitutionTO> list = new ArrayList<>();
-		for (MedicalInstitution i : e) {
+		for (MedicalInstitution i : e)
 			list.add(mapMedicalInstitution(i));
-		}
 		return list;
 	}
 
@@ -69,9 +68,8 @@ public class MedicMapperImpl implements MedicMapper {
 
 	public List<ScheduledVisitTO> mapScheduledVisits(List<ScheduledVisit> e) {
 		List<ScheduledVisitTO> list = new ArrayList<>();
-		for (ScheduledVisit i : e) {
+		for (ScheduledVisit i : e)
 			list.add(mapScheduledVisit(i));
-		}
 		return list;
 	}
 
@@ -92,9 +90,8 @@ public class MedicMapperImpl implements MedicMapper {
 
 	public List<MedicalRecordTO> mapMedicalRecords(List<MedicalRecord> e) {
 		List<MedicalRecordTO> list = new ArrayList<>();
-		for (MedicalRecord i : e) {
+		for (MedicalRecord i : e)
 			list.add(mapMedicalRecord(i));
-		}
 		return list;
 	}
 
@@ -111,9 +108,8 @@ public class MedicMapperImpl implements MedicMapper {
 
 	public Set<MedicamentTO> mapMedicaments(List<Medicament> e) {
 		Set<MedicamentTO> set = new HashSet<>();
-		for (Medicament i : e) {
+		for (Medicament i : e)
 			set.add(mapMedicament(i));
-		}
 		return set;
 	}
 
@@ -124,14 +120,15 @@ public class MedicMapperImpl implements MedicMapper {
 		PhysicianTO to = new PhysicianTO();
 		to.setId(e.getId());
 		to.setName(e.getName());
+        to.setEmail(e.getEmail());
+        to.setPhone(e.getPhone());
 		return to;
 	}
 
 	public Set<PhysicianTO> mapPhysicians(List<Physician> e) {
 		Set<PhysicianTO> set = new HashSet<>();
-		for (Physician i : e) {
+		for (Physician i : e)
 			set.add(mapPhysician(i));
-		}
 		return set;
 	}
 

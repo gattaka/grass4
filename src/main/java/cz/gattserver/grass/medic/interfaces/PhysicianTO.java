@@ -16,6 +16,16 @@ public class PhysicianTO implements Identifiable {
 	@Size(min = 1)
 	private String name = "";
 
+    /**
+     * Email
+     */
+    private String email;
+
+    /**
+     * Telefon
+     */
+    private String phone;
+
 	public Long getId() {
 		return id;
 	}
@@ -31,6 +41,22 @@ public class PhysicianTO implements Identifiable {
 	public void setName(String name) {
 		this.name = name;
 	}
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
 	@Override
 	public String toString() {

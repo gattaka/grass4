@@ -1,5 +1,6 @@
 package cz.gattserver.grass.medic.web;
 
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
@@ -22,16 +23,34 @@ public abstract class PhysicianCreateDialog extends EditWebDialog {
         super("Lékař");
         setWidth("300px");
 
+        VerticalLayout layout = new VerticalLayout();
+        layout.setSpacing(true);
+        layout.setPadding(false);
+        add(layout);
+
         Binder<PhysicianTO> binder = new Binder<>(PhysicianTO.class);
         binder.setBean(new PhysicianTO());
 
         final TextField nameField = new TextField("Jméno");
-        add(nameField);
+        layout.add(nameField);
         nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
         nameField.setWidthFull();
-        binder.forField(nameField).asRequired(componentFactory.createRequiredLabel()).bind("name");
+        binder.forField(nameField).asRequired(componentFactory.createRequiredLabel())
+                .bind(PhysicianTO::getName, PhysicianTO::setName);
 
-        add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
+        final TextField emailField = new TextField("Email");
+        layout.add(emailField);
+        emailField.setWidthFull();
+        binder.forField(emailField).asRequired(componentFactory.createRequiredLabel())
+                .bind(PhysicianTO::getEmail, PhysicianTO::setEmail);
+
+        final TextField phoneField = new TextField("Telefon");
+        layout.add(phoneField);
+        phoneField.setWidthFull();
+        binder.forField(phoneField).asRequired(componentFactory.createRequiredLabel())
+                .bind(PhysicianTO::getPhone, PhysicianTO::setPhone);
+
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             PhysicianTO writeTO = originalTO == null ? new PhysicianTO() : originalTO;
             try {
                 binder.writeBean(writeTO);
