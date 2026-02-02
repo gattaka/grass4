@@ -1,93 +1,67 @@
 package cz.gattserver.grass.medic.web.tabs;
 
-import java.util.ArrayList;
+import java.util.function.Consumer;
 
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Div;
+import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.grass.core.ui.components.GridOperationsTab;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
-import cz.gattserver.grass.medic.web.MedicalInstitutionCreateDialog;
-import cz.gattserver.grass.medic.web.MedicalInstitutionDetailDialog;
+import cz.gattserver.grass.medic.service.MedicService;
+import cz.gattserver.grass.medic.web.MedicalInstitutionDialog;
 
-public class MedicalInstitutionsTab
-		extends MedicPageTab<MedicalInstitutionTO, MedicalInstitutionTO, ArrayList<MedicalInstitutionTO>> {
+public class MedicalInstitutionsTab extends Div {
 
-	private static final long serialVersionUID = -5013459007975657195L;
+    private final MedicService medicService;
+    private final Consumer<MedicalInstitutionTO> onSave;
+    private final MedicalInstitutionTO filterTO;
 
-	@Override
-	protected ArrayList<MedicalInstitutionTO> getItems(MedicalInstitutionTO filterTO) {
-		return new ArrayList<>(medicService.getMedicalInstitutions(filterTO));
-	}
+    public MedicalInstitutionsTab() {
+        medicService = SpringContextHelper.getBean(MedicService.class);
+        filterTO = new MedicalInstitutionTO();
 
-	@Override
-	protected Dialog createCreateDialog() {
-		return new MedicalInstitutionCreateDialog() {
-			private static final long serialVersionUID = 5711665262096833291L;
+        onSave = to -> medicService.saveMedicalInstitution(to);
+        add(new GridOperationsTab<>(MedicalInstitutionTO.class,
+                to -> MedicalInstitutionDialog.detail(medicService.getMedicalInstitutionById(to.getId())).open(),
+                () -> MedicalInstitutionDialog.create(onSave).open(),
+                to -> MedicalInstitutionDialog.edit(medicService.getMedicalInstitutionById(to.getId()), onSave).open(),
+                to -> medicService.deleteMedicalInstitution(to), this::populateGrid, this::customizeGrid));
+    }
 
-			@Override
-			protected void onSuccess() {
-				populateGrid();
-			}
-		};
-	}
+    private void populateGrid(Grid<MedicalInstitutionTO> grid) {
+        grid.setItems(medicService.getMedicalInstitutions(filterTO));
+    }
 
-	@Override
-	protected Dialog createDetailDialog(Long id) {
-		return new MedicalInstitutionDetailDialog(id);
-	}
+    private void customizeGrid(Grid<MedicalInstitutionTO> grid) {
+        grid.removeAllColumns();
+        Grid.Column<MedicalInstitutionTO> nameCol = grid.addColumn("name").setHeader("Název");
+        Grid.Column<MedicalInstitutionTO> addressCol = grid.addColumn("address").setHeader("Adresa");
+        Grid.Column<MedicalInstitutionTO> webCol = grid.addColumn("web").setHeader("Stránky");
+        grid.setWidthFull();
+        grid.setSelectionMode(SelectionMode.SINGLE);
 
-	@Override
-	protected Dialog createModifyDialog(MedicalInstitutionTO to) {
-		return new MedicalInstitutionCreateDialog(to) {
-			private static final long serialVersionUID = -7566950396535469316L;
+        HeaderRow filteringHeader = grid.appendHeaderRow();
 
-			@Override
-			protected void onSuccess() {
-				grid.getDataProvider().refreshItem(to);
-			}
-		};
-	}
+        // Název
+        UIUtils.addHeaderTextField(filteringHeader.getCell(nameCol), e -> {
+            filterTO.setName(e.getValue());
+            populateGrid(grid);
+        });
 
-	@Override
-	protected void deleteEntity(MedicalInstitutionTO dto) {
-		medicService.deleteMedicalInstitution(dto);
-	}
+        // Adresa
+        UIUtils.addHeaderTextField(filteringHeader.getCell(addressCol), e -> {
+            filterTO.setAddress(e.getValue());
+            populateGrid(grid);
+        });
 
-	public MedicalInstitutionsTab() {
-		super(MedicalInstitutionTO.class);
-		filterTO = new MedicalInstitutionTO();
-	}
-
-	@Override
-	protected void customizeGrid(Grid<MedicalInstitutionTO> grid) {
-		grid.removeAllColumns();
-		Grid.Column<MedicalInstitutionTO> nameCol = grid.addColumn("name").setHeader("Název");
-		Grid.Column<MedicalInstitutionTO> addressCol = grid.addColumn("address").setHeader("Adresa");
-		Grid.Column<MedicalInstitutionTO> webCol = grid.addColumn("web").setHeader("Stránky");
-		grid.setWidthFull();
-		grid.setSelectionMode(SelectionMode.SINGLE);
-
-		HeaderRow filteringHeader = grid.appendHeaderRow();
-
-		// Název
-		UIUtils.addHeaderTextField(filteringHeader.getCell(nameCol), e -> {
-			filterTO.setName(e.getValue());
-			populateGrid();
-		});
-
-		// Adresa
-		UIUtils.addHeaderTextField(filteringHeader.getCell(addressCol), e -> {
-			filterTO.setAddress(e.getValue());
-			populateGrid();
-		});
-
-		// Web
-		UIUtils.addHeaderTextField(filteringHeader.getCell(webCol), e -> {
-			filterTO.setWeb(e.getValue());
-			populateGrid();
-		});
-	}
+        // Web
+        UIUtils.addHeaderTextField(filteringHeader.getCell(webCol), e -> {
+            filterTO.setWeb(e.getValue());
+            populateGrid(grid);
+        });
+    }
 }

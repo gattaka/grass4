@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Locale;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -31,21 +30,23 @@ import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitState;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 import cz.gattserver.grass.medic.util.MedicUtil;
-import cz.gattserver.grass.medic.web.MedicalRecordCreateDialog;
+import cz.gattserver.grass.medic.web.MedicalRecordDialog;
 import cz.gattserver.grass.medic.web.Operation;
 import cz.gattserver.grass.medic.web.ScheduledVisitsCreateDialog;
-import cz.gattserver.grass.medic.web.SchuduledVisitDetailDialog;
+import cz.gattserver.grass.medic.web.ScheduledVisitDetailDialog;
 
 public class ScheduledVisitsTab extends Div {
 
     private static final long serialVersionUID = -5013459007975657195L;
 
-    private transient MedicService medicService;
+    private final MedicService medicService;
 
     private Grid<ScheduledVisitTO> toBePlannedGrid = new Grid<>();
     private Grid<ScheduledVisitTO> plannedGrid = new Grid<>();
 
     public ScheduledVisitsTab() {
+        medicService = SpringContextHelper.getBean(MedicService.class);
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("CS"));
         Div div = new HtmlDiv("<strong>Dnes je: </strong>" + LocalDate.now().format(formatter));
         div.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -56,35 +57,24 @@ public class ScheduledVisitsTab extends Div {
     }
 
     private void openCreateWindow(final boolean planned, ScheduledVisitTO scheduledVisitDTO) {
-        new ScheduledVisitsCreateDialog(planned ? Operation.PLANNED : Operation.TO_BE_PLANNED, scheduledVisitDTO) {
-            private static final long serialVersionUID = -7566950396535469316L;
-
-            @Override
-            protected void onSuccess() {
-                populateContainer(planned);
-            }
-        }.open();
+        new ScheduledVisitsCreateDialog(planned ? Operation.PLANNED : Operation.TO_BE_PLANNED, scheduledVisitDTO,
+                to -> {
+                    medicService.saveScheduledVisit(to);
+                    populateContainer(planned);
+                }).open();
     }
 
     private void openCompletedWindow(final ScheduledVisitTO scheduledVisitDTO) {
-        new MedicalRecordCreateDialog(scheduledVisitDTO) {
-            private static final long serialVersionUID = -7566950396535469316L;
-
-            @Override
-            protected void onSuccess() {
-                try {
-                    getMedicFacade().deleteScheduledVisit(scheduledVisitDTO);
-                } catch (Exception e) {
-                    new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
-                }
-                populateContainer(true);
-            }
-        }.open();
+        MedicalRecordDialog.create(scheduledVisitDTO, to -> {
+            medicService.saveMedicalRecord(to);
+            medicService.deleteScheduledVisit(scheduledVisitDTO);
+            populateContainer(true);
+        }).open();
     }
 
     private void openDeleteWindow(final ScheduledVisitTO visit, final boolean planned) {
         try {
-            getMedicFacade().deleteScheduledVisit(visit);
+            medicService.deleteScheduledVisit(visit);
             populateContainer(planned);
         } catch (Exception e) {
             new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
@@ -94,9 +84,9 @@ public class ScheduledVisitsTab extends Div {
     private void populateContainer(boolean planned) {
         Grid<ScheduledVisitTO> grid = planned ? plannedGrid : toBePlannedGrid;
         if (planned) {
-            plannedGrid.setItems(getMedicFacade().getAllScheduledVisits(planned));
+            plannedGrid.setItems(medicService.getAllScheduledVisits(planned));
         } else {
-            toBePlannedGrid.setItems(getMedicFacade().getAllScheduledVisits(planned));
+            toBePlannedGrid.setItems(medicService.getAllScheduledVisits(planned));
         }
         grid.getDataProvider().refreshAll();
         grid.deselectAll();
@@ -115,7 +105,8 @@ public class ScheduledVisitsTab extends Div {
 
         prepareGrid(plannedGrid, true);
         add(plannedGrid);
-        plannedGrid.addItemDoubleClickListener(e -> new SchuduledVisitDetailDialog(e.getItem().getId()).open());
+        plannedGrid.addItemDoubleClickListener(
+                e -> new ScheduledVisitDetailDialog(medicService.getScheduledVisitById(e.getItem().getId())).open());
 
         ComponentFactory componentFactory = new ComponentFactory();
 
@@ -125,8 +116,7 @@ public class ScheduledVisitsTab extends Div {
         /**
          * Založení nové návštěvy
          */
-        final Button newTypeBtn = componentFactory.createCreateButton(event -> openCreateWindow(true, null));
-        buttonLayout.add(newTypeBtn);
+        buttonLayout.add(componentFactory.createCreateButton(event -> openCreateWindow(true, null)));
 
         /**
          * Úprava návštěvy
@@ -141,16 +131,15 @@ public class ScheduledVisitsTab extends Div {
         /**
          * Absolvování návštěvy
          */
-        final Button completedBtn = componentFactory.createGridButton("Absolvováno", VaadinIcon.ARCHIVE.create(),
-                set -> openCompletedWindow(set.iterator().next()), plannedGrid, set -> set.size() == 1);
-        buttonLayout.add(completedBtn);
+        buttonLayout.add(componentFactory.createGridButton("Absolvováno", VaadinIcon.ARCHIVE.create(),
+                set -> openCompletedWindow(set.iterator().next()), plannedGrid, set -> set.size() == 1));
 
         /**
          * Detail
          */
-        buttonLayout.add(
-                componentFactory.createDetailGridButton(item -> new SchuduledVisitDetailDialog(item.getId()).open(),
-                        plannedGrid));
+        buttonLayout.add(componentFactory.createDetailGridButton(
+                item -> new ScheduledVisitDetailDialog(medicService.getScheduledVisitById(item.getId())).open(),
+                plannedGrid));
 
         populateContainer(true);
     }
@@ -195,7 +184,8 @@ public class ScheduledVisitsTab extends Div {
 
         prepareGrid(toBePlannedGrid, false);
         add(toBePlannedGrid);
-        toBePlannedGrid.addItemDoubleClickListener(e -> new SchuduledVisitDetailDialog(e.getItem().getId()).open());
+        toBePlannedGrid.addItemDoubleClickListener(
+                e -> new ScheduledVisitDetailDialog(medicService.getScheduledVisitById(e.getItem().getId())).open());
 
         ComponentFactory componentFactory = new ComponentFactory();
         Div buttonLayout = componentFactory.createButtonLayout();
@@ -204,50 +194,39 @@ public class ScheduledVisitsTab extends Div {
         /**
          * Naplánovat objednání
          */
-        final Button newBtn =
-                componentFactory.createCreateButton("Naplánovat objednání", e -> openCreateWindow(false, null));
-        buttonLayout.add(newBtn);
+        buttonLayout.add(
+                componentFactory.createCreateButton("Naplánovat objednání", e -> openCreateWindow(false, null)));
 
         /**
          * Detail
          */
-        buttonLayout.add(
-                componentFactory.createDetailGridButton(item -> new SchuduledVisitDetailDialog(item.getId()).open(),
-                        toBePlannedGrid));
+        buttonLayout.add(componentFactory.createDetailGridButton(
+                item -> new ScheduledVisitDetailDialog(medicService.getScheduledVisitById(item.getId())).open(),
+                toBePlannedGrid));
 
         /**
          * Objednat návštěvy
          */
-        final Button planBtn = componentFactory.createGridButton("Objednáno", VaadinIcon.CALENDAR.create(), event -> {
-            final ScheduledVisitTO toBePlannedVisitDTO = toBePlannedGrid.getSelectedItems().iterator().next();
-
-            ScheduledVisitTO newDto = getMedicFacade().createPlannedScheduledVisitFromToBePlanned(toBePlannedVisitDTO);
-            new ScheduledVisitsCreateDialog(Operation.PLANNED_FROM_TO_BE_PLANNED, newDto) {
-                private static final long serialVersionUID = -7566950396535469316L;
-
-                @Override
-                protected void onSuccess() {
-                    try {
-                        if (toBePlannedVisitDTO.getPeriod() > 0) {
-                            // posuň plánování a ulož úpravu
-                            toBePlannedVisitDTO.setDate(
-                                    toBePlannedVisitDTO.getDate().plusMonths(toBePlannedVisitDTO.getPeriod()));
-                            getMedicFacade().saveScheduledVisit(toBePlannedVisitDTO);
-                        } else {
-                            // nemá pravidelnost - návštěva byla objednána,
-                            // plánování návštěvy lze smazat
-                            getMedicFacade().deleteScheduledVisit(toBePlannedVisitDTO);
-                        }
-
-                        populateContainer(true);
-                        populateContainer(false);
-                    } catch (Exception ex) {
-                        new ErrorDialog("Nezdařilo se naplánovat příští objednání").open();
-                    }
+        buttonLayout.add(componentFactory.createGridButton("Objednáno", VaadinIcon.CALENDAR.create(), event -> {
+            ScheduledVisitTO toBePlannedVisitDTO = toBePlannedGrid.getSelectedItems().iterator().next();
+            ScheduledVisitTO newTO = medicService.createPlannedScheduledVisitFromToBePlanned(toBePlannedVisitDTO);
+            new ScheduledVisitsCreateDialog(Operation.PLANNED_FROM_TO_BE_PLANNED, newTO, to -> {
+                medicService.saveScheduledVisit(to);
+                if (toBePlannedVisitDTO.getPeriod() > 0) {
+                    // posuň plánování a ulož úpravu
+                    toBePlannedVisitDTO.setDate(
+                            toBePlannedVisitDTO.getDate().plusMonths(toBePlannedVisitDTO.getPeriod()));
+                    medicService.saveScheduledVisit(toBePlannedVisitDTO);
+                } else {
+                    // nemá pravidelnost - návštěva byla objednána,
+                    // plánování návštěvy lze smazat
+                    medicService.deleteScheduledVisit(toBePlannedVisitDTO);
                 }
-            }.open();
-        }, toBePlannedGrid, set -> set.size() == 1);
-        buttonLayout.add(planBtn);
+
+                populateContainer(true);
+                populateContainer(false);
+            }).open();
+        }, toBePlannedGrid, set -> set.size() == 1));
 
         /**
          * Úprava naplánování
@@ -262,10 +241,4 @@ public class ScheduledVisitsTab extends Div {
 
         populateContainer(false);
     }
-
-    protected MedicService getMedicFacade() {
-        if (medicService == null) medicService = SpringContextHelper.getBean(MedicService.class);
-        return medicService;
-    }
-
 }

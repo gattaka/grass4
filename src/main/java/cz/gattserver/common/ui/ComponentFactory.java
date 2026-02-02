@@ -289,6 +289,13 @@ public class ComponentFactory {
         return createDialogSubmitOrStornoLayout(saveClickListener, stornoClickListener, null);
     }
 
+    public HorizontalLayout createDialogSubmitOrStornoLayout(
+            ComponentEventListener<ClickEvent<Button>> saveClickListener,
+            ComponentEventListener<ClickEvent<Button>> stornoClickListener, boolean showSaveButton) {
+        return createDialogSubmitOrStornoLayout(saveClickListener, stornoClickListener,
+                b -> b.setVisible(showSaveButton));
+    }
+
     public Div createButtonLayout(boolean topMargin) {
         Div div = new Div();
         if (topMargin) div.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);

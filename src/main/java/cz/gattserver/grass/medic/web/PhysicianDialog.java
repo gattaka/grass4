@@ -5,21 +5,31 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
 import com.vaadin.flow.data.binder.ValidationException;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 
-public abstract class PhysicianCreateDialog extends EditWebDialog {
+import java.io.Serial;
+import java.util.function.Consumer;
 
+public class PhysicianDialog extends EditWebDialog {
+
+    @Serial
     private static final long serialVersionUID = -6773027334692911384L;
 
-    public PhysicianCreateDialog() {
-        this(null);
+    public static PhysicianDialog detail(PhysicianTO originalTO) {
+        return new PhysicianDialog(originalTO, null, true);
     }
 
-    public PhysicianCreateDialog(PhysicianTO originalTO) {
+    public static PhysicianDialog edit(PhysicianTO originalTO, Consumer<PhysicianTO> onSave) {
+        return new PhysicianDialog(originalTO, onSave, false);
+    }
+
+    public static PhysicianDialog create(Consumer<PhysicianTO> onSave) {
+        return new PhysicianDialog(null, onSave, false);
+    }
+
+    private PhysicianDialog(PhysicianTO originalTO, Consumer<PhysicianTO> onSave, boolean readOnly) {
         super("Lékař");
         setWidth("300px");
 
@@ -35,36 +45,38 @@ public abstract class PhysicianCreateDialog extends EditWebDialog {
         layout.add(nameField);
         nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
         nameField.setWidthFull();
+        nameField.setReadOnly(readOnly);
         binder.forField(nameField).asRequired(componentFactory.createRequiredLabel())
                 .bind(PhysicianTO::getName, PhysicianTO::setName);
 
         final TextField emailField = new TextField("Email");
         layout.add(emailField);
         emailField.setWidthFull();
+        emailField.setReadOnly(readOnly);
         binder.forField(emailField).asRequired(componentFactory.createRequiredLabel())
                 .bind(PhysicianTO::getEmail, PhysicianTO::setEmail);
 
         final TextField phoneField = new TextField("Telefon");
         layout.add(phoneField);
         phoneField.setWidthFull();
+        phoneField.setReadOnly(readOnly);
         binder.forField(phoneField).asRequired(componentFactory.createRequiredLabel())
                 .bind(PhysicianTO::getPhone, PhysicianTO::setPhone);
 
+        if (originalTO != null) binder.readBean(originalTO);
+
         getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
-            PhysicianTO writeTO = originalTO == null ? new PhysicianTO() : originalTO;
             try {
+                PhysicianTO writeTO = originalTO == null ? new PhysicianTO() : originalTO;
                 binder.writeBean(writeTO);
-                SpringContextHelper.getBean(MedicService.class).savePhysician(writeTO);
-                onSuccess(writeTO);
+                onSave.accept(writeTO);
                 close();
             } catch (ValidationException ex) {
                 // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
             }
-        }, e -> close()));
+        }, e -> close(), !readOnly));
 
         if (originalTO != null) binder.readBean(originalTO);
     }
-
-    protected abstract void onSuccess(PhysicianTO to);
 
 }

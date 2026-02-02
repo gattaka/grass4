@@ -13,13 +13,13 @@ public interface MedicService {
 
 	// Instituce
 
-	void deleteMedicalInstitution(MedicalInstitutionTO dto);
+	void deleteMedicalInstitution(MedicalInstitutionTO to);
 
 	List<MedicalInstitutionTO> getMedicalInstitutions(MedicalInstitutionTO filterTO);
 
 	List<MedicalInstitutionTO> getMedicalInstitutions();
 
-	void saveMedicalInstitution(MedicalInstitutionTO dto);
+	void saveMedicalInstitution(MedicalInstitutionTO to);
 
 	MedicalInstitutionTO getMedicalInstitutionById(Long id);
 

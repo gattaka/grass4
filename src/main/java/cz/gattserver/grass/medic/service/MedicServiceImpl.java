@@ -51,8 +51,8 @@ public class MedicServiceImpl implements MedicService {
 	// Instituce
 
 	@Override
-	public void deleteMedicalInstitution(MedicalInstitutionTO institution) {
-		medicalInstitutionRepository.deleteById(institution.getId());
+	public void deleteMedicalInstitution(MedicalInstitutionTO to) {
+		medicalInstitutionRepository.deleteById(to.getId());
 	}
 
 	@Override
@@ -66,13 +66,13 @@ public class MedicServiceImpl implements MedicService {
 	}
 
 	@Override
-	public void saveMedicalInstitution(MedicalInstitutionTO dto) {
+	public void saveMedicalInstitution(MedicalInstitutionTO to) {
 		MedicalInstitution institution = new MedicalInstitution();
-		institution.setId(dto.getId());
-		institution.setAddress(dto.getAddress());
-		institution.setHours(dto.getHours());
-		institution.setName(dto.getName());
-		institution.setWeb(dto.getWeb());
+		institution.setId(to.getId());
+		institution.setAddress(to.getAddress());
+		institution.setHours(to.getHours());
+		institution.setName(to.getName());
+		institution.setWeb(to.getWeb());
 		medicalInstitutionRepository.save(institution);
 	}
 

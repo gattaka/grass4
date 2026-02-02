@@ -3,10 +3,13 @@ package cz.gattserver.grass.medic.web;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.timepicker.TimePicker;
@@ -17,6 +20,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.ui.util.TokenField;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
@@ -24,27 +28,29 @@ import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
-public abstract class MedicalRecordCreateDialog extends EditWebDialog {
+public class MedicalRecordDialog extends EditWebDialog {
 
-    private static final long serialVersionUID = -6773027334692911384L;
+    private final MedicService medicService;
 
-    public MedicalRecordCreateDialog() {
-        this(null, null);
+    public static MedicalRecordDialog detail(MedicalRecordTO originalTO) {
+        return new MedicalRecordDialog(null, originalTO, null, true);
     }
 
-    public MedicalRecordCreateDialog(ScheduledVisitTO scheduledVisitDTO) {
-        this(scheduledVisitDTO, null);
+    public static MedicalRecordDialog edit(MedicalRecordTO originalTO, Consumer<MedicalRecordTO> onSave) {
+        return new MedicalRecordDialog(null, originalTO, onSave, false);
     }
 
-    public MedicalRecordCreateDialog(MedicalRecordTO recordDTO) {
-        this(null, recordDTO);
+    public static MedicalRecordDialog create(ScheduledVisitTO scheduledVisitDTO,
+                                             Consumer<MedicalRecordTO> onSave) {
+        return new MedicalRecordDialog(scheduledVisitDTO, null, onSave, false);
     }
 
-    private MedicalRecordCreateDialog(ScheduledVisitTO scheduledVisitDTO, MedicalRecordTO originalDTO) {
+    private MedicalRecordDialog(ScheduledVisitTO scheduledVisitDTO, MedicalRecordTO originalTO,
+                                Consumer<MedicalRecordTO> onSave, boolean readOnly) {
         super("Záznam");
         setWidth("800px");
 
-        MedicService medicService = SpringContextHelper.getBean(MedicService.class);
+        this.medicService = SpringContextHelper.getBean(MedicService.class);
 
         Binder<MedicalRecordTO> binder = new Binder<>(MedicalRecordTO.class);
         binder.setBean(new MedicalRecordTO());
@@ -52,12 +58,14 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
         final ComboBox<MedicalInstitutionTO> institutionComboBox =
                 new ComboBox<>("Instituce", medicService.getMedicalInstitutions());
         institutionComboBox.setWidthFull();
+        institutionComboBox.setReadOnly(readOnly);
         binder.forField(institutionComboBox).asRequired(componentFactory.createRequiredLabel())
                 .bind(MedicalRecordTO::getInstitution, MedicalRecordTO::setInstitution);
 
         Set<PhysicianTO> physicians = medicService.getPhysicians();
         final ComboBox<PhysicianTO> physicianComboBox = new ComboBox<>("Ošetřující lékař", physicians);
         physicianComboBox.setWidthFull();
+        physicianComboBox.setReadOnly(readOnly);
         binder.forField(physicianComboBox).bind(MedicalRecordTO::getPhysician, MedicalRecordTO::setPhysician);
 
         institutionComboBox.addValueChangeListener(e -> {
@@ -75,10 +83,12 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
         ComponentFactory componentFactory = new ComponentFactory();
 
         final DatePicker dateField = componentFactory.createDatePicker("Datum návštěvy");
+        dateField.setReadOnly(readOnly);
         binder.forField(dateField).asRequired(componentFactory.createRequiredLabel())
                 .bind(MedicalRecordTO::getDate, MedicalRecordTO::setDate);
 
         final TimePicker timeField = componentFactory.createTimePicker("Čas návštěvy");
+        timeField.setReadOnly(readOnly);
         binder.forField(timeField).asRequired(componentFactory.createRequiredLabel())
                 .bind(MedicalRecordTO::getTime, MedicalRecordTO::setTime);
 
@@ -91,6 +101,7 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
         layout.add(recordField);
         recordField.setWidthFull();
         recordField.setHeight("200px");
+        recordField.setReadOnly(readOnly);
         binder.forField(recordField).asRequired(componentFactory.createRequiredLabel())
                 .bind(MedicalRecordTO::getRecord, MedicalRecordTO::setRecord);
 
@@ -101,25 +112,33 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
         TokenField tokenField = new TokenField(medicaments.keySet());
         tokenField.setAllowNewItems(false);
         tokenField.setPlaceholder("Medikamenty");
-        if (originalDTO != null) for (MedicamentTO m : originalDTO.getMedicaments())
+        if (originalTO != null) for (MedicamentTO m : originalTO.getMedicaments())
             tokenField.addToken(m.getName());
-        layout.add(tokenField);
+
+        if (readOnly) {
+            Div tags = componentFactory.createButtonLayout();
+            tags.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
+            originalTO.getMedicaments().forEach(med -> tags.add(new Button(med.getName())));
+            layout.add(tags);
+        } else {
+            layout.add(tokenField);
+        }
 
         layout.add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
-            MedicalRecordTO writeDTO = originalDTO == null ? new MedicalRecordTO() : originalDTO;
             try {
+                MedicalRecordTO writeDTO = originalTO == null ? new MedicalRecordTO() : originalTO;
                 binder.writeBean(writeDTO);
                 writeDTO.setMedicaments(
                         tokenField.getValues().stream().map(medicaments::get).collect(Collectors.toSet()));
                 medicService.saveMedicalRecord(writeDTO);
-                onSuccess();
+                onSave.accept(writeDTO);
                 close();
             } catch (ValidationException ex) {
                 // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
             }
-        }, e -> close()));
+        }, e -> close(), !readOnly));
 
-        if (originalDTO != null) binder.readBean(originalDTO);
+        if (originalTO != null) binder.readBean(originalTO);
 
         if (scheduledVisitDTO != null) {
             dateField.setValue(scheduledVisitDTO.getDate());
@@ -127,7 +146,5 @@ public abstract class MedicalRecordCreateDialog extends EditWebDialog {
             institutionComboBox.setValue(scheduledVisitDTO.getInstitution());
         }
     }
-
-    protected abstract void onSuccess();
 
 }

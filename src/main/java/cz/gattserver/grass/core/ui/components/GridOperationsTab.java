@@ -2,6 +2,7 @@ package cz.gattserver.grass.core.ui.components;
 
 import java.io.Serializable;
 import java.util.Collection;
+import java.util.function.Consumer;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -21,91 +22,47 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
  * @author Hynek
  *
  */
-public abstract class GridOperationsTab<T extends Identifiable, F, C extends Collection<T> & Serializable> extends Div {
+public class GridOperationsTab<T extends Identifiable> extends Div {
 
     private static final long serialVersionUID = 6844434642906509277L;
 
-    protected Grid<T> grid;
-    protected C data;
-    protected F filterTO;
+    private Grid<T> grid;
 
-    /**
-     * Vytvoří okno pro založení entity
-     */
-    protected abstract Dialog createCreateDialog();
-
-    /**
-     * Vytvoří okno pro detail entity
-     */
-    protected abstract Dialog createDetailDialog(Long id);
-
-    /**
-     * Vytvoří okno pro úpravu entity
-     */
-    protected abstract Dialog createModifyDialog(T dto);
-
-    /**
-     * Smaže vybranou entitu
-     */
-    protected abstract void deleteEntity(T dto);
-
-    /**
-     * Upraví tabulku (jmenuje sloupce apod.) - voláno pouze pokud je použit
-     * defaultní Grid - viz metoda createGrid
-     */
-    protected void customizeGrid(Grid<T> grid) {
-    }
-
-    protected abstract C getItems(F filterTO);
-
-    protected void populateGrid() {
-        data = getItems(filterTO);
-        grid.setItems(data);
-    }
-
-    public GridOperationsTab(Class<T> clazz) {
+    // TODO builder?
+    public GridOperationsTab(Class<T> clazz, Consumer<T> onDetail, Runnable onCreate, Consumer<T> onEdit,
+                             Consumer<T> onDelete, Consumer<Grid<T>> onPopulate, Consumer<Grid<T>> gridCustomizer) {
         SpringContextHelper.inject(this);
-
-        init();
 
         grid = new Grid<>(clazz);
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         UIUtils.applyGrassDefaultStyle(grid);
-        populateGrid();
-        customizeGrid(grid);
+        gridCustomizer.accept(grid);
+        onPopulate.accept(grid);
         add(grid);
 
-        grid.addItemClickListener(e -> {
-            if (e.getClickCount() > 1) createDetailDialog(e.getItem().getId()).open();
-        });
+        grid.addItemDoubleClickListener(e -> onDetail.accept(e.getItem()));
 
         ComponentFactory componentFactory = new ComponentFactory();
 
         Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
-        Button createBtn = componentFactory.createCreateButton(e -> createCreateDialog().open());
-        Button detailBtn =
-                componentFactory.createDetailGridButton(item -> createDetailDialog(item.getId()).open(), grid);
-        Button modifyBtn = componentFactory.createEditGridButton(item -> createModifyDialog(item).open(), grid);
+        Button createBtn = componentFactory.createCreateButton(e -> onCreate.run());
+        Button detailBtn = componentFactory.createDetailGridButton(item -> onDetail.accept(item), grid);
+        Button modifyBtn = componentFactory.createEditGridButton(item -> onEdit.accept(item), grid);
         Button deleteBtn = componentFactory.createDeleteGridSetButton(items -> {
-            items.forEach(this::deleteEntity);
-            data.removeAll(items);
-            grid.getDataProvider().refreshAll();
+            items.forEach(onDelete);
+            onPopulate.accept(grid);
         }, grid);
 
         placeButtons(buttonLayout, createBtn, detailBtn, modifyBtn, deleteBtn);
     }
 
-    protected void placeButtons(Div buttonLayout, Button createBtn, Button detailBtn, Button modifyBtn,
-                                Button deleteBtn) {
+    private void placeButtons(Div buttonLayout, Button createBtn, Button detailBtn, Button modifyBtn,
+                              Button deleteBtn) {
         buttonLayout.add(createBtn);
         buttonLayout.add(detailBtn);
         buttonLayout.add(modifyBtn);
         buttonLayout.add(deleteBtn);
     }
-
-    protected void init() {
-    }
-
 }

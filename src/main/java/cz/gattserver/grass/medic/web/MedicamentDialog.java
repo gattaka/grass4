@@ -5,23 +5,29 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
 import com.vaadin.flow.data.binder.ValidationException;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 
-public abstract class MedicamentCreateDialog extends EditWebDialog {
+import java.util.function.Consumer;
+
+public class MedicamentDialog extends EditWebDialog {
 
     private static final long serialVersionUID = -6773027334692911384L;
 
-    private transient MedicService medicService;
-
-    public MedicamentCreateDialog() {
-        this(null);
+    public static MedicamentDialog detail(MedicamentTO originalTO) {
+        return new MedicamentDialog(originalTO, null, true);
     }
 
-    public MedicamentCreateDialog(MedicamentTO originalDTO) {
+    public static MedicamentDialog edit(MedicamentTO originalTO, Consumer<MedicamentTO> onSave) {
+        return new MedicamentDialog(originalTO, onSave, false);
+    }
+
+    public static MedicamentDialog create(Consumer<MedicamentTO> onSave) {
+        return new MedicamentDialog(null, onSave, false);
+    }
+
+    private MedicamentDialog(MedicamentTO originalTO, Consumer<MedicamentTO> onSave, boolean readOnly) {
         super("Medikament");
         setWidth("300px");
 
@@ -33,34 +39,27 @@ public abstract class MedicamentCreateDialog extends EditWebDialog {
         add(nameField);
         nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
         nameField.setWidthFull();
+        nameField.setReadOnly(readOnly);
         binder.forField(nameField).asRequired(componentFactory.createRequiredLabel()).bind("name");
 
         final TextArea toleranceField = new TextArea("Reakce, nežádoucí účinky");
         add(toleranceField);
         toleranceField.setHeight("200px");
         toleranceField.setWidthFull();
+        toleranceField.setReadOnly(readOnly);
         binder.forField(toleranceField).bind("tolerance");
 
         add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
-            MedicamentTO writeDTO = originalDTO == null ? new MedicamentTO() : originalDTO;
             try {
+                MedicamentTO writeDTO = originalTO == null ? new MedicamentTO() : originalTO;
                 binder.writeBean(writeDTO);
-                getMedicFacade().saveMedicament(writeDTO);
-                onSuccess();
+                onSave.accept(writeDTO);
                 close();
             } catch (ValidationException ex) {
                 // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
             }
         }, e -> close()));
 
-        if (originalDTO != null) binder.readBean(originalDTO);
+        if (originalTO != null) binder.readBean(originalTO);
     }
-
-    protected MedicService getMedicFacade() {
-        if (medicService == null) medicService = SpringContextHelper.getBean(MedicService.class);
-        return medicService;
-    }
-
-    protected abstract void onSuccess();
-
 }

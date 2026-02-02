@@ -1,71 +1,46 @@
 package cz.gattserver.grass.medic.web.tabs;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Locale;
+import java.util.function.Consumer;
 
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
+import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.grass.core.ui.components.GridOperationsTab;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
-import cz.gattserver.grass.medic.web.MedicalRecordCreateDialog;
-import cz.gattserver.grass.medic.web.MedicalRecordDetailDialog;
+import cz.gattserver.grass.medic.service.MedicService;
+import cz.gattserver.grass.medic.web.MedicalRecordDialog;
 
-public class MedicalRecordsTab extends MedicPageTab<MedicalRecordTO, MedicalRecordTO, ArrayList<MedicalRecordTO>> {
+public class MedicalRecordsTab extends Div {
 
-	private static final long serialVersionUID = -5013459007975657195L;
+    private final MedicService medicService;
+    private final Consumer<MedicalRecordTO> onSave;
+    private final MedicalRecordTO filterTO;
 
-	public MedicalRecordsTab() {
-		super(MedicalRecordTO.class);
-		filterTO = new MedicalRecordTO();
-	}
+    public MedicalRecordsTab() {
+        medicService = SpringContextHelper.getBean(MedicService.class);
+        filterTO = new MedicalRecordTO();
 
-	@Override
-	protected ArrayList<MedicalRecordTO> getItems(MedicalRecordTO filterTO) {
-		return new ArrayList<>(medicService.getMedicalRecords(filterTO));
-	}
+        onSave = to -> medicService.saveMedicalRecord(to);
+        add(new GridOperationsTab<>(MedicalRecordTO.class,
+                to -> MedicalRecordDialog.detail(medicService.getMedicalRecordById(to.getId())).open(),
+                () -> MedicalRecordDialog.create(null, onSave).open(),
+                to -> MedicalRecordDialog.edit(medicService.getMedicalRecordById(to.getId()), onSave).open(),
+                to -> medicService.deleteMedicalRecord(to), this::populateGrid, this::customizeGrid));
+    }
 
-	@Override
-	protected Dialog createCreateDialog() {
-		return new MedicalRecordCreateDialog() {
-			private static final long serialVersionUID = -7566950396535469316L;
+    private void populateGrid(Grid<MedicalRecordTO> grid) {
+        grid.setItems(medicService.getMedicalRecords(filterTO));
+    }
 
-			@Override
-			protected void onSuccess() {
-				populateGrid();
-			}
-		};
-	}
-
-	@Override
-	protected Dialog createDetailDialog(Long id) {
-		return new MedicalRecordDetailDialog(id);
-	}
-
-	@Override
-	protected Dialog createModifyDialog(MedicalRecordTO to) {
-		return new MedicalRecordCreateDialog(to) {
-			private static final long serialVersionUID = -7566950396535469316L;
-
-			@Override
-			protected void onSuccess() {
-				grid.getDataProvider().refreshItem(to);
-			}
-		};
-	}
-
-	@Override
-	protected void deleteEntity(MedicalRecordTO to) {
-		medicService.deleteMedicalRecord(to);
-	}
-
-	@Override
-	protected void customizeGrid(Grid<MedicalRecordTO> grid) {
+    private void customizeGrid(Grid<MedicalRecordTO> grid) {
 		String fdateID = "fdate";
 		grid.removeAllColumns();
 		Grid.Column<MedicalRecordTO> dateCol = grid.addColumn(new LocalDateTimeRenderer<>(MedicalRecordTO::getDateTime,
@@ -82,20 +57,19 @@ public class MedicalRecordsTab extends MedicPageTab<MedicalRecordTO, MedicalReco
 		// Datum
 		UIUtils.addHeaderDatePicker(filteringHeader.getCell(dateCol), e -> {
 			filterTO.setDate(e.getValue());
-			populateGrid();
+			populateGrid(grid);
 		});
 
 		// Instituce
 		UIUtils.addHeaderTextField(filteringHeader.getCell(instCol), e -> {
 			filterTO.setInstitutionName(e.getValue());
-			populateGrid();
+			populateGrid(grid);
 		});
 
 		// Záznam
 		UIUtils.addHeaderTextField(filteringHeader.getCell(recordCol), e -> {
 			filterTO.setRecord(e.getValue());
-			populateGrid();
+			populateGrid(grid);
 		});
 	}
-
 }

@@ -1,6 +1,7 @@
 package cz.gattserver.grass.medic.web;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -23,21 +24,21 @@ import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitState;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
-public abstract class ScheduledVisitsCreateDialog extends WebDialog {
+public class ScheduledVisitsCreateDialog extends WebDialog {
 
     private static final long serialVersionUID = -6773027334692911384L;
 
     private static final Logger logger = LoggerFactory.getLogger(ScheduledVisitsCreateDialog.class);
 
     public ScheduledVisitsCreateDialog(Operation operation) {
-        this(operation, null);
+        this(operation, null,null);
     }
 
-    public ScheduledVisitsCreateDialog(Operation operation, ScheduledVisitTO originalTO) {
+    public ScheduledVisitsCreateDialog(Operation operation, ScheduledVisitTO originalTO, Consumer<ScheduledVisitTO> onSave) {
         super("Návštěva");
         boolean planned = operation.equals(Operation.PLANNED) || operation.equals(Operation.PLANNED_FROM_TO_BE_PLANNED);
 
-        MedicService medicalFacade = SpringContextHelper.getBean(MedicService.class);
+        MedicService medicService = SpringContextHelper.getBean(MedicService.class);
 
         setWidth("400px");
 
@@ -78,14 +79,14 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
                     .bind(ScheduledVisitTO::getTime, ScheduledVisitTO::setTime);
         }
 
-        List<MedicalInstitutionTO> institutions = medicalFacade.getMedicalInstitutions();
+        List<MedicalInstitutionTO> institutions = medicService.getMedicalInstitutions();
         final ComboBox<MedicalInstitutionTO> institutionComboBox = new ComboBox<>("Instituce", institutions);
         layout.add(institutionComboBox);
         institutionComboBox.setWidthFull();
         binder.forField(institutionComboBox).asRequired(componentFactory.createRequiredLabel())
                 .bind(ScheduledVisitTO::getInstitution, ScheduledVisitTO::setInstitution);
 
-        List<MedicalRecordTO> records = medicalFacade.getMedicalRecords();
+        List<MedicalRecordTO> records = medicService.getMedicalRecords();
         final ComboBox<MedicalRecordTO> recordsComboBox = new ComboBox<>("Navazuje na kontrolu", records);
         layout.add(recordsComboBox);
         recordsComboBox.setWidthFull();
@@ -95,8 +96,7 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
             ScheduledVisitTO writeTO = originalTO == null ? formTO : originalTO;
             try {
                 binder.writeBean(writeTO);
-                medicalFacade.saveScheduledVisit(writeTO);
-                onSuccess();
+                onSave.accept(writeTO);
                 close();
             } catch (ValidationException ex) {
                 // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
@@ -112,7 +112,4 @@ public abstract class ScheduledVisitsCreateDialog extends WebDialog {
             institutionComboBox.setValue(originalTO.getInstitution());
         }
     }
-
-    protected abstract void onSuccess();
-
 }
