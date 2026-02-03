@@ -19,7 +19,8 @@ public class MedicalInstitutionDialog extends EditWebDialog {
         return new MedicalInstitutionDialog(originalTO, null, true);
     }
 
-    public static MedicalInstitutionDialog edit(MedicalInstitutionTO originalTO, Consumer<MedicalInstitutionTO> onSave) {
+    public static MedicalInstitutionDialog edit(MedicalInstitutionTO originalTO,
+                                                Consumer<MedicalInstitutionTO> onSave) {
         return new MedicalInstitutionDialog(originalTO, onSave, false);
     }
 
@@ -27,7 +28,8 @@ public class MedicalInstitutionDialog extends EditWebDialog {
         return new MedicalInstitutionDialog(null, onSave, false);
     }
 
-    private MedicalInstitutionDialog(MedicalInstitutionTO originalTO, Consumer<MedicalInstitutionTO> onSave, boolean readOnly) {
+    private MedicalInstitutionDialog(MedicalInstitutionTO originalTO, Consumer<MedicalInstitutionTO> onSave,
+                                     boolean readOnly) {
         super("Instituce");
         setWidth("500px");
 
@@ -61,19 +63,17 @@ public class MedicalInstitutionDialog extends EditWebDialog {
         hoursField.setReadOnly(readOnly);
         binder.forField(hoursField).bind("hours");
 
-        if (originalTO!= null)
-            binder.readBean(originalTO);
+        if (originalTO != null) binder.readBean(originalTO);
 
         add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
-                MedicalInstitutionTO writeTO =
-                        originalTO == null ? new MedicalInstitutionTO() : originalTO;
+                MedicalInstitutionTO writeTO = originalTO == null ? new MedicalInstitutionTO() : originalTO;
                 binder.writeBean(writeTO);
                 onSave.accept(writeTO);
                 close();
             } catch (ValidationException ex) {
                 // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
             }
-        }, e -> close()));
+        }, e -> close(), !readOnly));
     }
 }

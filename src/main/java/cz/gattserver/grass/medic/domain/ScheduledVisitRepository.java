@@ -6,9 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import cz.gattserver.grass.medic.domain.ScheduledVisit;
 
-public interface ScheduledVisitRepository extends
-		JpaRepository<ScheduledVisit, Long> {
-
-	public List<ScheduledVisit> findByPlanned(boolean planned);
+public interface ScheduledVisitRepository extends JpaRepository<ScheduledVisit, Long>, ScheduledVisitRepositoryCustom {
 
 }

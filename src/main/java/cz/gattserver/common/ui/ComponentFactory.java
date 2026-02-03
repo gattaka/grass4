@@ -14,15 +14,20 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.timepicker.TimePicker;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeLeaveEvent;
+import cz.gattserver.common.Identifiable;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
+import org.vaadin.addons.componentfactory.monthpicker.MonthPicker;
 
-import java.util.Arrays;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class ComponentFactory {
 
@@ -52,6 +57,17 @@ public class ComponentFactory {
         return btn;
     }
 
+    public <T> Button createGridSetButton(String caption, Component icon, Consumer<Set<T>> clickListener, Grid<T> grid,
+                                          Function<Set<T>, Boolean> enableResolver) {
+        Button btn = new Button(caption, e -> clickListener.accept(grid.getSelectedItems()));
+        btn.setIcon(icon);
+        btn.setEnabled(false);
+        if (enableResolver == null) enableResolver = t -> !grid.getSelectedItems().isEmpty();
+        Function<Set<T>, Boolean> finalEnableResolver = enableResolver;
+        grid.addSelectionListener(e -> btn.setEnabled(finalEnableResolver.apply(e.getAllSelectedItems())));
+        return btn;
+    }
+
     private <T> Button createGridSingleButton(
             Function<ComponentEventListener<ClickEvent<Button>>, Button> buttonFactory, Consumer<T> clickListener,
             Grid<T> grid) {
@@ -62,13 +78,11 @@ public class ComponentFactory {
         return btn;
     }
 
-    public <T> Button createGridButton(String caption, Component icon, Consumer<Set<T>> clickListener, Grid<T> grid,
-                                       Function<Set<T>, Boolean> enableResolver) {
-        Button btn = new Button(caption, e -> clickListener.accept(grid.getSelectedItems()));
+    public <T> Button createGridSingleButton(String caption, Component icon, Consumer<T> clickListener, Grid<T> grid) {
+        Button btn = new Button(caption, e -> clickListener.accept(grid.getSelectedItems().iterator().next()));
         btn.setIcon(icon);
         btn.setEnabled(false);
-        if (enableResolver == null) enableResolver = t -> !grid.getSelectedItems().isEmpty();
-        Function<Set<T>, Boolean> finalEnableResolver = enableResolver;
+        Function<Set<T>, Boolean> finalEnableResolver = set -> set.size() == 1;
         grid.addSelectionListener(e -> btn.setEnabled(finalEnableResolver.apply(e.getAllSelectedItems())));
         return btn;
     }
@@ -212,13 +226,16 @@ public class ComponentFactory {
 
     /* Input pole */
 
+    private List<String> createMonthNames() {
+        return Arrays.asList("Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září",
+                "Říjen", "Listopad", "Prosinec");
+    }
+
     public DatePicker.DatePickerI18n createDatePickerI18n() {
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
         i18n.setDateFormats("d. M. yyyy", "d.M.yyyy", "d. M.yyyy", "d. M.yyyy");
         i18n.setFirstDayOfWeek(1);
-        i18n.setMonthNames(
-                Arrays.asList("Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září",
-                        "Říjen", "Listopad", "Prosinec"));
+        i18n.setMonthNames(createMonthNames());
         i18n.setWeekdays(Arrays.asList("Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"));
         i18n.setWeekdaysShort(Arrays.asList("Ne", "Po", "Út", "St", "Čt", "Pá", "So"));
         i18n.setToday("Dnes");
@@ -247,6 +264,16 @@ public class ComponentFactory {
         dateTimeField.setWidthFull();
         dateTimeField.setDatePickerI18n(createDatePickerI18n());
         return dateTimeField;
+    }
+
+    public MonthPicker createMonthPicker(String label) {
+        MonthPicker monthPicker = new MonthPicker();
+        monthPicker.setLabel(label);
+        MonthPicker.MonthPickerI18n i18n = new MonthPicker.MonthPickerI18n();
+        i18n.setFormats("MMM YYYY");
+        i18n.setMonthNames(createMonthNames());
+        monthPicker.seti18n(i18n);
+        return monthPicker;
     }
 
     /**
@@ -342,4 +369,20 @@ public class ComponentFactory {
         return "Toto pole je povinné";
     }
 
+    /*
+     * Binding helpers
+     */
+
+    public <B, T extends Identifiable<I>, I> void bind(Binder.BindingBuilder<B, T> bindingBuilder, Collection<T> items,
+                                                       ValueProvider<B, I> getter, Setter<B, I> setter) {
+        Map<I, T> map = new LinkedHashMap<>();
+        for (T item : items)
+            map.put(item.getId(), item);
+        bindingBuilder.bind(to -> {
+            I id = getter.apply(to);
+            return id == null ? null : map.get(id);
+        }, (to, val) -> {
+            setter.accept(to, val == null ? null : val.getId());
+        });
+    }
 }

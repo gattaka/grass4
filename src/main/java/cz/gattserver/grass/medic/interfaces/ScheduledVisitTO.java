@@ -1,156 +1,197 @@
 package cz.gattserver.grass.medic.interfaces;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
+import com.querydsl.core.annotations.QueryProjection;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import cz.gattserver.common.Identifiable;
 
-public class ScheduledVisitTO implements Identifiable {
+public class ScheduledVisitTO implements Identifiable<Long> {
 
-	private Long id;
+    private Long id;
 
-	/**
-	 * Účel návštěvy
-	 */
-	@NotNull
-	@Size(min = 1)
-	private String purpose;
+    /**
+     * Účel návštěvy
+     */
+    @NotNull
+    @Size(min = 1)
+    private String purpose;
 
-	/**
-	 * Místo, kam se dostavit
-	 */
-	@NotNull
-	private MedicalInstitutionTO institution;
+    /**
+     * Místo, kam se dostavit
+     */
+    @NotNull
+    private Long institutionId;
+    private String institutionCaption;
 
-	/**
-	 * Záznam - návštěva, ze které vzešlo toto datum návštěvy
-	 */
-	private MedicalRecordTO record;
+    /**
+     * Záznam - návštěva, ze které vzešlo toto datum návštěvy
+     */
+    private Long recordId;
+    // Pouze TO
+    private Long recordInstitutionId;
+    private Long recordPhysicianId;
+    private String recordInstitutionCaption;
+    private String recordPhysicianCaption;
 
-	/**
-	 * Stav - čiště kvůli UI
-	 */
-	private ScheduledVisitState state;
+    /**
+     * Objednán ?
+     */
+    private Boolean planned;
 
-	/**
-	 * Objednán ?
-	 */
-	private boolean planned;
+    /**
+     * Datum kontroly
+     */
+    @NotNull
+    private LocalDateTime dateTime;
 
-	/**
-	 * Datum kontroly
-	 */
-	@NotNull
-	private LocalDate date;
+    /**
+     * Perioda v měsících
+     */
+    private int period;
 
-	@NotNull
-	private LocalTime time;
+    @QueryProjection
+    public ScheduledVisitTO(Long id, String purpose, Long institutionId, String institutionCaption, Long recordId,
+                            Long recordInstitutionId, Long recordPhysicianId, String recordInstitutionCaption,
+                            String recordPhysicianCaption, Boolean planned, LocalDateTime dateTime, int period) {
+        this.id = id;
+        this.purpose = purpose;
+        this.institutionId = institutionId;
+        this.institutionCaption = institutionCaption;
+        this.recordId = recordId;
+        this.recordInstitutionId = recordInstitutionId;
+        this.recordPhysicianId = recordPhysicianId;
+        this.recordInstitutionCaption = recordInstitutionCaption;
+        this.recordPhysicianCaption = recordPhysicianCaption;
+        this.planned = planned;
+        this.dateTime = dateTime;
+        this.period = period;
+    }
 
-	/**
-	 * Perioda v měsících
-	 */
-	private int period;
+    public ScheduledVisitTO() {
+    }
 
-	public boolean isPlanned() {
-		return planned;
-	}
+    public ScheduledVisitTO(boolean planned) {
+        this.planned = planned;
+    }
 
-	public void setPlanned(boolean planned) {
-		this.planned = planned;
-	}
+    public Boolean getPlanned() {
+        return planned;
+    }
 
-	public ScheduledVisitState getState() {
-		return state;
-	}
+    public void setPlanned(Boolean planned) {
+        this.planned = planned;
+    }
 
-	public void setState(ScheduledVisitState state) {
-		this.state = state;
-	}
+    public int getPeriod() {
+        return period;
+    }
 
-	public int getPeriod() {
-		return period;
-	}
+    public void setPeriod(int period) {
+        this.period = period;
+    }
 
-	public void setPeriod(int period) {
-		this.period = period;
-	}
+    public String getPurpose() {
+        return purpose;
+    }
 
-	public String getPurpose() {
-		return purpose;
-	}
+    public void setPurpose(String purpose) {
+        this.purpose = purpose;
+    }
 
-	public void setPurpose(String purpose) {
-		this.purpose = purpose;
-	}
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getInstitutionId() {
+        return institutionId;
+    }
 
-	public MedicalInstitutionTO getInstitution() {
-		return institution;
-	}
+    public void setInstitutionId(Long institutionId) {
+        this.institutionId = institutionId;
+    }
 
-	public void setInstitution(MedicalInstitutionTO institution) {
-		this.institution = institution;
-	}
+    public Long getRecordId() {
+        return recordId;
+    }
 
-	public MedicalRecordTO getRecord() {
-		return record;
-	}
+    public void setRecordId(Long recordId) {
+        this.recordId = recordId;
+    }
 
-	public void setRecord(MedicalRecordTO record) {
-		this.record = record;
-	}
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
 
-	public LocalDateTime getDateTime() {
-		return date.atTime(time);
-	}
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
 
-	public void setDateTime(LocalDateTime dateTime) {
-		date = dateTime.toLocalDate();
-		time = dateTime.toLocalTime();
-	}
+    public String getInstitutionCaption() {
+        return institutionCaption;
+    }
 
-	public LocalDate getDate() {
-		return date;
-	}
+    public void setInstitutionCaption(String institutionCaption) {
+        this.institutionCaption = institutionCaption;
+    }
 
-	public void setDate(LocalDate date) {
-		this.date = date;
-	}
+    public Long getRecordInstitutionId() {
+        return recordInstitutionId;
+    }
 
-	public LocalTime getTime() {
-		return time;
-	}
+    public void setRecordInstitutionId(Long recordInstitutionId) {
+        this.recordInstitutionId = recordInstitutionId;
+    }
 
-	public void setTime(LocalTime time) {
-		this.time = time;
-	}
+    public Long getRecordPhysicianId() {
+        return recordPhysicianId;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof ScheduledVisitTO) {
-			ScheduledVisitTO dto = (ScheduledVisitTO) obj;
-			if (dto.getId() == null)
-				return id == null;
-			else
-				return dto.getId().equals(id);
-		}
-		return false;
-	}
+    public void setRecordPhysicianId(Long recordPhysicianId) {
+        this.recordPhysicianId = recordPhysicianId;
+    }
 
-	@Override
-	public int hashCode() {
-		return id == null ? 0 : id.hashCode();
-	}
+    public String getRecordInstitutionCaption() {
+        return recordInstitutionCaption;
+    }
 
+    public void setRecordInstitutionCaption(String recordInstitutionCaption) {
+        this.recordInstitutionCaption = recordInstitutionCaption;
+    }
+
+    public String getRecordPhysicianCaption() {
+        return recordPhysicianCaption;
+    }
+
+    public void setRecordPhysicianCaption(String recordPhysicianCaption) {
+        this.recordPhysicianCaption = recordPhysicianCaption;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof ScheduledVisitTO) {
+            ScheduledVisitTO to = (ScheduledVisitTO) obj;
+            if (to.getId() == null) return id == null;
+            else return to.getId().equals(id);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return id == null ? 0 : id.hashCode();
+    }
+
+    public ScheduledVisitTO copy() {
+        return new ScheduledVisitTO(id, purpose, institutionId, institutionCaption, recordId, recordInstitutionId,
+                recordPhysicianId, recordInstitutionCaption, recordPhysicianCaption, planned, dateTime, period);
+    }
 }

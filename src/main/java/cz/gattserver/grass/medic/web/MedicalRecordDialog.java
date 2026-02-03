@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
+import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
@@ -40,12 +41,11 @@ public class MedicalRecordDialog extends EditWebDialog {
         return new MedicalRecordDialog(null, originalTO, onSave, false);
     }
 
-    public static MedicalRecordDialog create(ScheduledVisitTO scheduledVisitDTO,
-                                             Consumer<MedicalRecordTO> onSave) {
+    public static MedicalRecordDialog create(ScheduledVisitTO scheduledVisitDTO, Consumer<MedicalRecordTO> onSave) {
         return new MedicalRecordDialog(scheduledVisitDTO, null, onSave, false);
     }
 
-    private MedicalRecordDialog(ScheduledVisitTO scheduledVisitDTO, MedicalRecordTO originalTO,
+    private MedicalRecordDialog(ScheduledVisitTO scheduledVisitTO, MedicalRecordTO originalTO,
                                 Consumer<MedicalRecordTO> onSave, boolean readOnly) {
         super("Záznam");
         setWidth("800px");
@@ -82,17 +82,12 @@ public class MedicalRecordDialog extends EditWebDialog {
 
         ComponentFactory componentFactory = new ComponentFactory();
 
-        final DatePicker dateField = componentFactory.createDatePicker("Datum návštěvy");
-        dateField.setReadOnly(readOnly);
-        binder.forField(dateField).asRequired(componentFactory.createRequiredLabel())
-                .bind(MedicalRecordTO::getDate, MedicalRecordTO::setDate);
+        final DateTimePicker dateTimePicker = componentFactory.createDateTimePicker("Datum návštěvy");
+        dateTimePicker.setReadOnly(readOnly);
+        binder.forField(dateTimePicker).asRequired(componentFactory.createRequiredLabel())
+                .bind(MedicalRecordTO::getDateTime, MedicalRecordTO::setDateTime);
 
-        final TimePicker timeField = componentFactory.createTimePicker("Čas návštěvy");
-        timeField.setReadOnly(readOnly);
-        binder.forField(timeField).asRequired(componentFactory.createRequiredLabel())
-                .bind(MedicalRecordTO::getTime, MedicalRecordTO::setTime);
-
-        HorizontalLayout line2 = new HorizontalLayout(dateField, timeField);
+        HorizontalLayout line2 = new HorizontalLayout(dateTimePicker);
         line2.setWidthFull();
         line2.setPadding(false);
         layout.add(line2);
@@ -140,10 +135,9 @@ public class MedicalRecordDialog extends EditWebDialog {
 
         if (originalTO != null) binder.readBean(originalTO);
 
-        if (scheduledVisitDTO != null) {
-            dateField.setValue(scheduledVisitDTO.getDate());
-            timeField.setValue(scheduledVisitDTO.getTime());
-            institutionComboBox.setValue(scheduledVisitDTO.getInstitution());
+        if (scheduledVisitTO != null) {
+            dateTimePicker.setValue(scheduledVisitTO.getDateTime());
+            institutionComboBox.setValue(new MedicalInstitutionTO(scheduledVisitTO.getInstitutionId()));
         }
     }
 

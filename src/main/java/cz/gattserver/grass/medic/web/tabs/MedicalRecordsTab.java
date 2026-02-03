@@ -56,7 +56,7 @@ public class MedicalRecordsTab extends Div {
 
 		// Datum
 		UIUtils.addHeaderDatePicker(filteringHeader.getCell(dateCol), e -> {
-			filterTO.setDate(e.getValue());
+			filterTO.setDateTime(e.getValue() == null ? null : e.getValue().atStartOfDay());
 			populateGrid(grid);
 		});
 

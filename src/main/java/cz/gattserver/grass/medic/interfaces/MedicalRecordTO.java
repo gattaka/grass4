@@ -12,145 +12,137 @@ import jakarta.validation.constraints.Size;
 
 import cz.gattserver.common.Identifiable;
 
-public class MedicalRecordTO implements Identifiable {
+public class MedicalRecordTO implements Identifiable<Long> {
 
-	private Long id;
+    private Long id;
 
-	/**
-	 * Místo ošetření
-	 */
-	@NotNull
-	private MedicalInstitutionTO institution;
+    /**
+     * Místo ošetření
+     */
+    @NotNull
+    private MedicalInstitutionTO institution;
 
-	// filter
-	private String institutionName;
+    // filter
+    private String institutionName;
 
-	/**
-	 * Lékař - ošetřující
-	 */
-	@NotNull
-	private PhysicianTO physician;
+    /**
+     * Lékař - ošetřující
+     */
+    @NotNull
+    private PhysicianTO physician;
 
-	// filter
-	private String physicianName;
+    // filter
+    private String physicianName;
 
-	/**
-	 * Kdy se to stalo
-	 */
-	@NotNull
-	private LocalDate date;
+    /**
+     * Kdy se to stalo
+     */
+    @NotNull
+    private LocalDateTime dateTime;
 
-	@NotNull
-	private LocalTime time;
+    /**
+     * Záznam o vyšetření
+     */
+    @NotNull
+    @Size(min = 1)
+    private String record = "";
 
-	/**
-	 * Záznam o vyšetření
-	 */
-	@NotNull
-	@Size(min = 1)
-	private String record = "";
+    public MedicalRecordTO() {
+    }
 
-	/**
-	 * Napsané léky
-	 */
-	private Set<MedicamentTO> medicaments = new HashSet<>();
+    public MedicalRecordTO(Long id) {
+        this.id = id;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    /**
+     * Napsané léky
+     */
+    private Set<MedicamentTO> medicaments = new HashSet<>();
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    @Override
+    public Long getId() {
+        return id;
+    }
 
-	public MedicalInstitutionTO getInstitution() {
-		return institution;
-	}
+    @Override
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setInstitution(MedicalInstitutionTO institution) {
-		this.institution = institution;
-	}
+    public MedicalInstitutionTO getInstitution() {
+        return institution;
+    }
 
-	public PhysicianTO getPhysician() {
-		return physician;
-	}
+    public void setInstitution(MedicalInstitutionTO institution) {
+        this.institution = institution;
+    }
 
-	public void setPhysician(PhysicianTO physician) {
-		this.physician = physician;
-	}
+    public PhysicianTO getPhysician() {
+        return physician;
+    }
 
-	public LocalDate getDate() {
-		return date;
-	}
+    public void setPhysician(PhysicianTO physician) {
+        this.physician = physician;
+    }
 
-	public void setDate(LocalDate date) {
-		this.date = date;
-	}
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
 
-	public LocalTime getTime() {
-		return time;
-	}
+    public void setDateTime(LocalDateTime dateTime) {
+        this.dateTime = dateTime;
+    }
 
-	public void setTime(LocalTime time) {
-		this.time = time;
-	}
+    public String getRecord() {
+        return record;
+    }
 
-	public LocalDateTime getDateTime() {
-		return date.atTime(time);
-	}
+    public void setRecord(String record) {
+        this.record = record;
+    }
 
-	public String getRecord() {
-		return record;
-	}
+    public Set<MedicamentTO> getMedicaments() {
+        return medicaments;
+    }
 
-	public void setRecord(String record) {
-		this.record = record;
-	}
+    public void setMedicaments(Set<MedicamentTO> medicaments) {
+        this.medicaments = medicaments;
+    }
 
-	public Set<MedicamentTO> getMedicaments() {
-		return medicaments;
-	}
+    public String getInstitutionName() {
+        return institutionName;
+    }
 
-	public void setMedicaments(Set<MedicamentTO> medicaments) {
-		this.medicaments = medicaments;
-	}
+    public void setInstitutionName(String institutionName) {
+        this.institutionName = institutionName;
+    }
 
-	public String getInstitutionName() {
-		return institutionName;
-	}
+    public String getPhysicianName() {
+        return physicianName;
+    }
 
-	public void setInstitutionName(String institutionName) {
-		this.institutionName = institutionName;
-	}
+    public void setPhysicianName(String physicianName) {
+        this.physicianName = physicianName;
+    }
 
-	public String getPhysicianName() {
-		return physicianName;
-	}
+    @Override
+    public String toString() {
+        return dateTime.format(DateTimeFormatter.ofPattern("d. M. yyyy HH:mm")) + " " + physician.getName();
+    }
 
-	public void setPhysicianName(String physicianName) {
-		this.physicianName = physicianName;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof MedicalRecordTO) {
+            MedicalRecordTO dto = (MedicalRecordTO) obj;
+            if (dto.getId() == null) return id == null;
+            else return dto.getId().equals(id);
+        }
+        return false;
+    }
 
-	@Override
-	public String toString() {
-		return getDateTime().format(DateTimeFormatter.ofPattern("d. M. yyyy HH:mm")) + " " + physician.getName();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof MedicalRecordTO) {
-			MedicalRecordTO dto = (MedicalRecordTO) obj;
-			if (dto.getId() == null)
-				return id == null;
-			else
-				return dto.getId().equals(id);
-		}
-		return false;
-	}
-
-	@Override
-	public int hashCode() {
-		return id.hashCode();
-	}
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 
 }

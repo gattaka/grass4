@@ -2,6 +2,7 @@ package cz.gattserver.grass.rest;
 
 import java.util.List;
 
+import cz.gattserver.grass.medic.interfaces.ScheduledVisitOverviewTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class MedicResource {
 
 	@RequestMapping(value = "visit", headers = "Accept=application/json")
 	@ResponseBody
-	public List<ScheduledVisitTO> getInstitutions() {
+	public List<ScheduledVisitOverviewTO> getInstitutions() {
 		return medicService.getAllScheduledVisits();
 	}
 

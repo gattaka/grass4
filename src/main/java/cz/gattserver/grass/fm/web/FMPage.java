@@ -351,7 +351,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
         Div buttonsLayout = componentFactory.createButtonLayout();
         buttonsLayout.add(componentFactory.createCreateDirButton(e -> handleNewDirectory()));
         buttonsLayout.add(componentFactory.createDownloadGridButton(this::handleDownloadAction, grid));
-        buttonsLayout.add(componentFactory.createGridButton("Otevřít", VaadinIcon.FOLDER_OPEN.create(),
+        buttonsLayout.add(componentFactory.createGridSetButton("Otevřít", VaadinIcon.FOLDER_OPEN.create(),
                 items -> handleGotoDirFromCurrentDirAction(items.iterator().next()), grid,
                 items -> items.size() == 1 && items.iterator().next().isDirectory()));
         buttonsLayout.add(componentFactory.createEditGridButton(this::handleRenameAction, grid));

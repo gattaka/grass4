@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Size;
 
 import cz.gattserver.common.Identifiable;
 
-public class PhysicianTO implements Identifiable {
+public class PhysicianTO implements Identifiable<Long> {
 
 	private Long id;
 
@@ -26,10 +26,12 @@ public class PhysicianTO implements Identifiable {
      */
     private String phone;
 
+    @Override
 	public Long getId() {
 		return id;
 	}
 
+    @Override
 	public void setId(Long id) {
 		this.id = id;
 	}

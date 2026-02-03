@@ -66,21 +66,21 @@ public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactor
         layout.add(buttonLayout);
 
         ComponentFactory componentFactory = new ComponentFactory();
-        buttonLayout.add(componentFactory.createGridButton("Aktivovat", VaadinIcon.UNLOCK.create(),
+        buttonLayout.add(componentFactory.createGridSetButton("Aktivovat", VaadinIcon.UNLOCK.create(),
                 selectedUsers -> selectedUsers.forEach(u -> {
                     u.setConfirmed(true);
                     userFacade.activateUser(u.getId());
                     grid.getDataProvider().refreshItem(u);
                 }), grid, selectedUsers -> !selectedUsers.isEmpty() && !selectedUsers.iterator().next().isConfirmed()));
 
-        buttonLayout.add(componentFactory.createGridButton("Zablokovat", VaadinIcon.LOCK.create(),
+        buttonLayout.add(componentFactory.createGridSetButton("Zablokovat", VaadinIcon.LOCK.create(),
                 selectedUsers -> selectedUsers.forEach(user -> {
                     user.setConfirmed(false);
                     userFacade.banUser(user.getId());
                     grid.getDataProvider().refreshItem(user);
                 }), grid, selectedUsers -> !selectedUsers.isEmpty() && selectedUsers.iterator().next().isConfirmed()));
 
-        buttonLayout.add(componentFactory.createGridButton("Upravit oprávnění", VaadinIcon.PENCIL.create(), u -> {
+        buttonLayout.add(componentFactory.createGridSetButton("Upravit oprávnění", VaadinIcon.PENCIL.create(), u -> {
             WebDialog w = new WebDialog("Uživatelské role");
 
             UserInfoTO user = users.iterator().next();

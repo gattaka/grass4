@@ -16,24 +16,20 @@ import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
 public interface MedicMapper {
 
-	public MedicalInstitutionTO mapMedicalInstitution(MedicalInstitution e);
+    MedicalInstitutionTO mapMedicalInstitution(MedicalInstitution e);
 
-	public List<MedicalInstitutionTO> mapMedicalInstitutions(List<MedicalInstitution> e);
+    List<MedicalInstitutionTO> mapMedicalInstitutions(List<MedicalInstitution> e);
 
-	public ScheduledVisitTO mapScheduledVisit(ScheduledVisit e);
+    MedicalRecordTO mapMedicalRecord(MedicalRecord e);
 
-	public List<ScheduledVisitTO> mapScheduledVisits(List<ScheduledVisit> e);
+    List<MedicalRecordTO> mapMedicalRecords(List<MedicalRecord> e);
 
-	public MedicalRecordTO mapMedicalRecord(MedicalRecord e);
+    MedicamentTO mapMedicament(Medicament e);
 
-	public List<MedicalRecordTO> mapMedicalRecords(List<MedicalRecord> e);
+    Set<MedicamentTO> mapMedicaments(List<Medicament> e);
 
-	public MedicamentTO mapMedicament(Medicament e);
+    PhysicianTO mapPhysician(Physician e);
 
-	public Set<MedicamentTO> mapMedicaments(List<Medicament> e);
-
-	public PhysicianTO mapPhysician(Physician e);
-
-	public Set<PhysicianTO> mapPhysicians(List<Physician> e);
+    Set<PhysicianTO> mapPhysicians(List<Physician> e);
 
 }

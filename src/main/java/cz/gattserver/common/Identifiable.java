@@ -1,7 +1,9 @@
 package cz.gattserver.common;
 
-public interface Identifiable {
+public interface Identifiable<T> {
 
-	Long getId();
+    T getId();
+
+    void setId(T id);
 
 }

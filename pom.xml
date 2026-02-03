@@ -93,6 +93,13 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
+        <!-- https://stefan.app.fi/vcf-month-picker-flow-demo -->
+        <dependency>
+            <groupId>org.vaadin.addons.componentfactory</groupId>
+            <artifactId>vcf-month-picker-flow</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
         <!-- JCodec -->
         <dependency>
             <groupId>org.jcodec</groupId>

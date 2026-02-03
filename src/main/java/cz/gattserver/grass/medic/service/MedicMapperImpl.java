@@ -43,44 +43,13 @@ public class MedicMapperImpl implements MedicMapper {
 		return list;
 	}
 
-	public ScheduledVisitTO mapScheduledVisit(ScheduledVisit e) {
-		if (e == null)
-			return null;
-
-		ScheduledVisitTO dto = new ScheduledVisitTO();
-		dto.setId(e.getId());
-		dto.setDate(e.getDate().toLocalDate());
-		dto.setTime(e.getDate().toLocalTime());
-		dto.setInstitution(mapMedicalInstitution(e.getInstitution()));
-		dto.setPeriod(e.getPeriod());
-		dto.setPurpose(e.getPurpose());
-		dto.setRecord(mapMedicalRecord(e.getRecord()));
-		dto.setPlanned(e.isPlanned());
-
-		if (LocalDateTime.now().compareTo(e.getDate()) > 0) {
-			dto.setState(ScheduledVisitState.MISSED);
-		} else {
-			dto.setState(e.isPlanned() ? ScheduledVisitState.PLANNED : ScheduledVisitState.TO_BE_PLANNED);
-		}
-
-		return dto;
-	}
-
-	public List<ScheduledVisitTO> mapScheduledVisits(List<ScheduledVisit> e) {
-		List<ScheduledVisitTO> list = new ArrayList<>();
-		for (ScheduledVisit i : e)
-			list.add(mapScheduledVisit(i));
-		return list;
-	}
-
 	public MedicalRecordTO mapMedicalRecord(MedicalRecord e) {
 		if (e == null)
 			return null;
 
 		MedicalRecordTO dto = new MedicalRecordTO();
 		dto.setId(e.getId());
-		dto.setDate(e.getDate().toLocalDate());
-		dto.setTime(e.getDate().toLocalTime());
+		dto.setDateTime(e.getDate());
 		dto.setInstitution(mapMedicalInstitution(e.getInstitution()));
 		dto.setRecord(e.getRecord());
 		dto.setPhysician(mapPhysician(e.getPhysician()));

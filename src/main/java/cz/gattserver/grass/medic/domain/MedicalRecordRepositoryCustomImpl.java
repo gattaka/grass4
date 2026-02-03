@@ -22,10 +22,10 @@ public class MedicalRecordRepositoryCustomImpl implements MedicalRecordRepositor
 		if (filterTO != null) {
 			builder.iLike(r.record, filterTO.getRecord());
 			builder.iLike(r.institution.name, filterTO.getInstitutionName());
-			if (filterTO.getDate() != null) {
-				builder.eq(r.date.year(), filterTO.getDate().getYear());
-				builder.eq(r.date.month(), filterTO.getDate().getMonthValue());
-				builder.eq(r.date.dayOfMonth(), filterTO.getDate().getDayOfMonth());
+			if (filterTO.getDateTime() != null) {
+				builder.eq(r.date.year(), filterTO.getDateTime().getYear());
+				builder.eq(r.date.month(), filterTO.getDateTime().getMonthValue());
+				builder.eq(r.date.dayOfMonth(), filterTO.getDateTime().getDayOfMonth());
 			}
 			builder.iLike(r.physician.name, filterTO.getPhysicianName());
 		}

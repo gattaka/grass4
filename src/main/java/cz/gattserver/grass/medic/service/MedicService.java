@@ -3,11 +3,7 @@ package cz.gattserver.grass.medic.service;
 import java.util.List;
 import java.util.Set;
 
-import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
-import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
-import cz.gattserver.grass.medic.interfaces.MedicamentTO;
-import cz.gattserver.grass.medic.interfaces.PhysicianTO;
-import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
+import cz.gattserver.grass.medic.interfaces.*;
 
 public interface MedicService {
 
@@ -25,15 +21,13 @@ public interface MedicService {
 
 	// Návštěvy
 
-	void deleteScheduledVisit(ScheduledVisitTO to);
+	void deleteScheduledVisit(Long to);
 
-	List<ScheduledVisitTO> getAllScheduledVisits(boolean planned);
+	List<ScheduledVisitOverviewTO> getAllScheduledVisits(boolean planned);
 
-	List<ScheduledVisitTO> getAllScheduledVisits();
+	List<ScheduledVisitOverviewTO> getAllScheduledVisits();
 
 	void saveScheduledVisit(ScheduledVisitTO dto);
-
-	ScheduledVisitTO createPlannedScheduledVisitFromToBePlanned(ScheduledVisitTO dto);
 
 	ScheduledVisitTO getScheduledVisitById(Long id);
 
