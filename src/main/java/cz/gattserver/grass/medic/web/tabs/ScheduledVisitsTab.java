@@ -203,32 +203,32 @@ public class ScheduledVisitsTab extends Div {
         /**
          * Objednat návštěvy
          */
-        buttonLayout.add(componentFactory.createGridSetButton("Objednáno", VaadinIcon.CALENDAR.create(), event -> {
-            ScheduledVisitTO toBePlannedVisitTO =
-                    medicService.getScheduledVisitById(toBePlannedGrid.getSelectedItems().iterator().next().getId());
-            ScheduledVisitDialog.create(toBePlannedVisitTO, to -> {
-                medicService.saveScheduledVisit(to);
-                if (toBePlannedVisitTO.getPeriod() > 0) {
-                    // posuň plánování a ulož úpravu
-                    toBePlannedVisitTO.setDateTime(
-                            toBePlannedVisitTO.getDateTime().plusMonths(toBePlannedVisitTO.getPeriod()));
-                    medicService.saveScheduledVisit(toBePlannedVisitTO);
-                } else {
-                    // nemá pravidelnost - návštěva byla objednána,
-                    // plánování návštěvy lze smazat
-                    medicService.deleteScheduledVisit(toBePlannedVisitTO.getId());
-                }
+        buttonLayout.add(
+                componentFactory.createGridSingleButton("Objednáno", VaadinIcon.CALENDAR.create(), toBePlannedTO -> {
+                    ScheduledVisitTO toBePlannedVisitTO = medicService.getScheduledVisitById(toBePlannedTO.getId());
+                    ScheduledVisitDialog.create(toBePlannedVisitTO, to -> {
+                        medicService.saveScheduledVisit(to);
+                        if (toBePlannedVisitTO.getPeriod() > 0) {
+                            // posuň plánování a ulož úpravu
+                            toBePlannedVisitTO.setDateTime(
+                                    toBePlannedVisitTO.getDateTime().plusMonths(toBePlannedVisitTO.getPeriod()));
+                            medicService.saveScheduledVisit(toBePlannedVisitTO);
+                        } else {
+                            // nemá pravidelnost - návštěva byla objednána,
+                            // plánování návštěvy lze smazat
+                            medicService.deleteScheduledVisit(toBePlannedVisitTO.getId());
+                        }
 
-                populateContainer(true);
-                populateContainer(false);
-            }).open();
-        }, toBePlannedGrid, set -> set.size() == 1));
+                        populateContainer(true);
+                        populateContainer(false);
+                    }).open();
+                }, toBePlannedGrid));
 
         /**
          * Úprava naplánování
          */
         buttonLayout.add(componentFactory.createEditGridButton(
-                to -> ScheduledVisitDialog.edit(medicService.getScheduledVisitById(to.getId()), onSave),
+                to -> ScheduledVisitDialog.edit(medicService.getScheduledVisitById(to.getId()), onSave).open(),
                 toBePlannedGrid));
 
         /**

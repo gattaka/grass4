@@ -137,7 +137,5 @@ public class ScheduledVisitDialog extends WebDialog {
                 // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
             }
         }, e -> close()));
-
-        binder.readBean(originalOrNewTO);
     }
 }
