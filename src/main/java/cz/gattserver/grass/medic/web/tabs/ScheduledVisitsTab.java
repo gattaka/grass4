@@ -132,6 +132,7 @@ public class ScheduledVisitsTab extends Div {
     }
 
     private void prepareGrid(Grid<ScheduledVisitOverviewTO> grid, boolean fullTime) {
+        ComponentFactory componentFactory = new ComponentFactory();
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         UIUtils.applyGrassDefaultStyle(grid);
         grid.addColumn(new IconRenderer<>(to -> {
@@ -148,9 +149,8 @@ public class ScheduledVisitsTab extends Div {
         if (fullTime) grid.addColumn(new LocalDateTimeRenderer<>(to -> to.getDateTime(),
                         () -> DateTimeFormatter.ofPattern("d. MMMM yyyy H:mm", Locale.forLanguageTag("CS")))).setKey("date")
                 .setHeader("Datum").setSortable(false).setWidth("200px").setFlexGrow(0);
-        else grid.addColumn(new LocalDateTimeRenderer<>(to -> to.getDateTime(),
-                        () -> DateTimeFormatter.ofPattern("MMMM yyyy", Locale.forLanguageTag("CS")))).setKey("date")
-                .setHeader("Datum").setSortable(false).setWidth("150px").setFlexGrow(0);
+        else grid.addColumn(to -> componentFactory.formatMonthYear(to.getDateTime())).setKey("date").setHeader("Datum")
+                .setSortable(false).setWidth("150px").setFlexGrow(0);
         grid.addColumn(to -> to.getInstitutionCaption()).setKey("institution").setHeader("Instituce");
 
         grid.setWidthFull();
@@ -210,7 +210,8 @@ public class ScheduledVisitsTab extends Div {
                 medicService.saveScheduledVisit(to);
                 if (toBePlannedVisitTO.getPeriod() > 0) {
                     // posuň plánování a ulož úpravu
-                    toBePlannedVisitTO.setDateTime(toBePlannedVisitTO.getDateTime().plusMonths(toBePlannedVisitTO.getPeriod()));
+                    toBePlannedVisitTO.setDateTime(
+                            toBePlannedVisitTO.getDateTime().plusMonths(toBePlannedVisitTO.getPeriod()));
                     medicService.saveScheduledVisit(toBePlannedVisitTO);
                 } else {
                     // nemá pravidelnost - návštěva byla objednána,

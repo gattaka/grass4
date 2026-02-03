@@ -24,6 +24,9 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 import org.vaadin.addons.componentfactory.monthpicker.MonthPicker;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -231,6 +234,10 @@ public class ComponentFactory {
                 "Říjen", "Listopad", "Prosinec");
     }
 
+    public String formatMonthYear(LocalDateTime localDateTime) {
+        return createMonthNames().get(localDateTime.getMonthValue() - 1) + " " + localDateTime.getYear();
+    }
+
     public DatePicker.DatePickerI18n createDatePickerI18n() {
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
         i18n.setDateFormats("d. M. yyyy", "d.M.yyyy", "d. M.yyyy", "d. M.yyyy");
@@ -272,6 +279,9 @@ public class ComponentFactory {
         MonthPicker.MonthPickerI18n i18n = new MonthPicker.MonthPickerI18n();
         i18n.setFormats("MMM YYYY");
         i18n.setMonthNames(createMonthNames());
+        i18n.setMonthLabels(createMonthNames());
+        i18n.setFormat("MMMM YYYY");
+        i18n.setShortMonthNames(createMonthNames());
         monthPicker.seti18n(i18n);
         return monthPicker;
     }
