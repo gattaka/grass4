@@ -128,7 +128,7 @@ public class ScheduledVisitDialog extends WebDialog {
         componentFactory.bind(binder.forField(recordsComboBox), records, ScheduledVisitTO::getRecordId,
                 ScheduledVisitTO::setRecordId);
 
-        layout.add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
                 binder.writeBean(formTO);
                 onSave.accept(formTO);

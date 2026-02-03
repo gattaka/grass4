@@ -119,7 +119,7 @@ public class MedicalRecordDialog extends EditWebDialog {
             layout.add(tokenField);
         }
 
-        layout.add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
                 MedicalRecordTO writeDTO = originalTO == null ? new MedicalRecordTO() : originalTO;
                 binder.writeBean(writeDTO);

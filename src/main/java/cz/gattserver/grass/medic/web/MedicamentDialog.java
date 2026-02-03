@@ -1,5 +1,6 @@
 package cz.gattserver.grass.medic.web;
 
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -35,21 +36,24 @@ public class MedicamentDialog extends EditWebDialog {
         Binder<MedicamentTO> binder = new Binder<>(MedicamentTO.class);
         binder.setBean(formDTO);
 
-        final TextField nameField = new TextField("Název");
-        add(nameField);
+        FormLayout formLayout = new FormLayout();
+        add(formLayout);
+
+        TextField nameField = new TextField("Název");
+        formLayout.add(nameField);
         nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
         nameField.setWidthFull();
         nameField.setReadOnly(readOnly);
         binder.forField(nameField).asRequired(componentFactory.createRequiredLabel()).bind("name");
 
-        final TextArea toleranceField = new TextArea("Reakce, nežádoucí účinky");
-        add(toleranceField);
+        TextArea toleranceField = new TextArea("Reakce, nežádoucí účinky");
+        formLayout.add(toleranceField);
         toleranceField.setHeight("200px");
         toleranceField.setWidthFull();
         toleranceField.setReadOnly(readOnly);
         binder.forField(toleranceField).bind("tolerance");
 
-        add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
                 MedicamentTO writeDTO = originalTO == null ? new MedicamentTO() : originalTO;
                 binder.writeBean(writeDTO);

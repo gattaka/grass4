@@ -1,5 +1,6 @@
 package cz.gattserver.grass.medic.web;
 
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
@@ -37,27 +38,30 @@ public class MedicalInstitutionDialog extends EditWebDialog {
         Binder<MedicalInstitutionTO> binder = new Binder<>(MedicalInstitutionTO.class);
         binder.setBean(formDTO);
 
-        final TextField nameField = new TextField("Název");
-        add(nameField);
+        FormLayout form = new FormLayout();
+        add(form);
+
+        TextField nameField = new TextField("Název");
+        form.add(nameField);
         nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
         nameField.setWidthFull();
         nameField.setReadOnly(readOnly);
         binder.forField(nameField).asRequired(componentFactory.createRequiredLabel()).bind("name");
 
-        final TextField addressField = new TextField("Adresa");
-        add(addressField);
+        TextField addressField = new TextField("Adresa");
+        form.add(addressField);
         addressField.setWidthFull();
         addressField.setReadOnly(readOnly);
         binder.forField(addressField).asRequired(componentFactory.createRequiredLabel()).bind("address");
 
-        final TextField webField = new TextField("Webové stránky");
-        add(webField);
+        TextField webField = new TextField("Webové stránky");
+        form.add(webField);
         webField.setWidthFull();
         webField.setReadOnly(readOnly);
         binder.forField(webField).bind("web");
 
-        final TextArea hoursField = new TextArea("Otevírací hodiny");
-        add(hoursField);
+        TextArea hoursField = new TextArea("Otevírací hodiny");
+        form.add(hoursField);
         hoursField.setWidthFull();
         hoursField.setHeight("200px");
         hoursField.setReadOnly(readOnly);
@@ -65,7 +69,7 @@ public class MedicalInstitutionDialog extends EditWebDialog {
 
         if (originalTO != null) binder.readBean(originalTO);
 
-        add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
                 MedicalInstitutionTO writeTO = originalTO == null ? new MedicalInstitutionTO() : originalTO;
                 binder.writeBean(writeTO);
