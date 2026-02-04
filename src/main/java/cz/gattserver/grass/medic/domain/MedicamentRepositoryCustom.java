@@ -1,11 +1,12 @@
 package cz.gattserver.grass.medic.domain;
 
-import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 
-import java.util.List;
+import java.util.Set;
 
 public interface MedicamentRepositoryCustom {
 
-	List<Medicament> findList(MedicamentTO filterTO);
+    Set<MedicamentTO> findByFilter(MedicamentTO filterTO);
+
+    MedicamentTO findAndMapById(Long id);
 }

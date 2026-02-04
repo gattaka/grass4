@@ -1,5 +1,6 @@
 package cz.gattserver.grass.medic.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -25,6 +26,17 @@ public class PhysicianTO implements Identifiable<Long> {
      * Telefon
      */
     private String phone;
+
+    public PhysicianTO() {
+    }
+
+    @QueryProjection
+    public PhysicianTO(Long id, String name, String email, String phone) {
+        this.id = id;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+    }
 
     @Override
 	public Long getId() {

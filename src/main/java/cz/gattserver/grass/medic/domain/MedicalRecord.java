@@ -8,85 +8,85 @@ import jakarta.persistence.*;
 @Entity(name = "MEDICAL_RECORD")
 public class MedicalRecord {
 
-	@Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    private Long id;
 
-	/**
-	 * Místo ošetření
-	 */
-	@ManyToOne
-	private MedicalInstitution institution;
+    /**
+     * Místo ošetření
+     */
+    @Column(name = "INSTITUTION_ID")
+    private Long institutionId;
 
-	/**
-	 * Lékař - ošetřující
-	 */
-	@ManyToOne
-	private Physician physician;
+    /**
+     * Lékař - ošetřující
+     */
+    @Column(name = "PHYSICIAN_ID")
+    private Long physicianId;
 
-	/**
-	 * Kdy se to stalo
-	 */
-	private LocalDateTime date;
+    /**
+     * Kdy se to stalo
+     */
+    private LocalDateTime date;
 
-	/**
-	 * Záznam o vyšetření
-	 */
-	@Column(columnDefinition = "TEXT")
-	private String record;
+    /**
+     * Záznam o vyšetření
+     */
+    @Column(columnDefinition = "TEXT")
+    private String record;
 
-	/**
-	 * Napsané léky
-	 */
-	@ManyToMany
-	private List<Medicament> medicaments;
+    /**
+     * Napsané léky
+     */
+    @ManyToMany
+    private List<Medicament> medicaments;
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public MedicalInstitution getInstitution() {
-		return institution;
-	}
+    public Long getInstitutionId() {
+        return institutionId;
+    }
 
-	public void setInstitution(MedicalInstitution institution) {
-		this.institution = institution;
-	}
+    public void setInstitutionId(Long institutionId) {
+        this.institutionId = institutionId;
+    }
 
-	public Physician getPhysician() {
-		return physician;
-	}
+    public Long getPhysicianId() {
+        return physicianId;
+    }
 
-	public void setPhysician(Physician physician) {
-		this.physician = physician;
-	}
+    public void setPhysicianId(Long physicianId) {
+        this.physicianId = physicianId;
+    }
 
-	public LocalDateTime getDate() {
-		return date;
-	}
+    public LocalDateTime getDate() {
+        return date;
+    }
 
-	public void setDate(LocalDateTime date) {
-		this.date = date;
-	}
+    public void setDate(LocalDateTime date) {
+        this.date = date;
+    }
 
-	public String getRecord() {
-		return record;
-	}
+    public String getRecord() {
+        return record;
+    }
 
-	public void setRecord(String record) {
-		this.record = record;
-	}
+    public void setRecord(String record) {
+        this.record = record;
+    }
 
-	public List<Medicament> getMedicaments() {
-		return medicaments;
-	}
+    public List<Medicament> getMedicaments() {
+        return medicaments;
+    }
 
-	public void setMedicaments(List<Medicament> medicaments) {
-		this.medicaments = medicaments;
-	}
+    public void setMedicaments(List<Medicament> medicaments) {
+        this.medicaments = medicaments;
+    }
 
 }

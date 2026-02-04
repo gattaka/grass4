@@ -8,5 +8,7 @@ import java.util.List;
 
 public interface MedicalRecordRepositoryCustom {
 
-	List<MedicalRecord> findList(MedicalRecordTO filterTO);
+    List<MedicalRecordTO> findByFilter(MedicalRecordTO filterTO);
+
+    MedicalRecordTO findAndMapById(Long id);
 }

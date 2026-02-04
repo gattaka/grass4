@@ -7,6 +7,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 
+import cz.gattserver.grass.medic.interfaces.QPhysicianTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -14,33 +15,45 @@ import java.util.List;
 
 public class PhysicianRepositoryCustomImpl implements PhysicianRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-	private Predicate createPredicate(PhysicianTO filterTO) {
-		QPhysician p = QPhysician.physician;
-		PredicateBuilder builder = new PredicateBuilder();
-		if (filterTO != null) {
-			builder.iLike(p.name, filterTO.getName());
-		}
-		return builder.getBuilder();
-	}
+    private Predicate createPredicate(PhysicianTO filterTO) {
+        QPhysician p = QPhysician.physician;
+        PredicateBuilder builder = new PredicateBuilder();
+        if (filterTO != null) {
+            builder.iLike(p.name, filterTO.getName());
+        }
+        return builder.getBuilder();
+    }
 
-	@Override
-	public List<Physician> findList(PhysicianTO filterTO) {
-		JPAQuery<Physician> query = new JPAQuery<>(entityManager);
-		QPhysician p = QPhysician.physician;
-		return query.select(p).from(p).where(createPredicate(filterTO))
-				.orderBy(new OrderSpecifier[]{new OrderSpecifier<>(Order.DESC, p.name)}).fetch();
-	}
+    @Override
+    public List<PhysicianTO> findByFilter(PhysicianTO filterTO) {
+        JPAQuery<Physician> query = new JPAQuery<>(entityManager);
+        QPhysician p = QPhysician.physician;
+        return query.from(p).where(createPredicate(filterTO)).select(new QPhysicianTO(p.id, p.name, p.email, p.phone))
+                .orderBy(p.name.desc()).fetch();
+    }
 
-	@Override
-	public Physician findPhysicianByLastVisit(Long institutionId) {
-		JPAQuery<Physician> query = new JPAQuery<>(entityManager);
-		QPhysician p = QPhysician.physician;
-		QMedicalRecord r = QMedicalRecord.medicalRecord;
-		return query.select(p).from(r).join(p).on(r.physician.id.eq(p.id)).where(
-						r.institution.id.eq(institutionId))
-				.orderBy(new OrderSpecifier[]{new OrderSpecifier<>(Order.DESC, r.date)}).fetchFirst();
-	}
+    @Override
+    public PhysicianTO findPhysicianByLastVisit(Long institutionId) {
+        JPAQuery<Physician> query = new JPAQuery<>(entityManager);
+        QPhysician p = QPhysician.physician;
+        QMedicalRecord r = QMedicalRecord.medicalRecord;
+        return query.from(p)
+                // join record
+                .join(r).on(r.physicianId.eq(p.id))
+                // where
+                .where(r.institutionId.eq(institutionId)).select(new QPhysicianTO(p.id, p.name, p.email, p.phone))
+                .orderBy(r.date.desc()).fetchFirst();
+    }
+
+    @Override
+    public PhysicianTO findAndMapById(Long id) {
+        JPAQuery<Physician> query = new JPAQuery<>(entityManager);
+        QPhysician p = QPhysician.physician;
+        return query.from(p)
+                // where
+                .where(p.id.eq(id)).select(new QPhysicianTO(p.id, p.name, p.email, p.phone)).fetchOne();
+    }
 }

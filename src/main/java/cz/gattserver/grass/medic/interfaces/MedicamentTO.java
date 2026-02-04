@@ -1,5 +1,6 @@
 package cz.gattserver.grass.medic.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -22,6 +23,16 @@ public class MedicamentTO implements Identifiable<Long> {
     @NotNull
     @Size(min = 1)
     private String tolerance = "V pořádku";
+
+    public MedicamentTO() {
+    }
+
+    @QueryProjection
+    public MedicamentTO(Long id, String name, String tolerance) {
+        this.id = id;
+        this.name = name;
+        this.tolerance = tolerance;
+    }
 
     @Override
     public Long getId() {
@@ -64,4 +75,7 @@ public class MedicamentTO implements Identifiable<Long> {
         return id.hashCode();
     }
 
+    public MedicamentTO copy() {
+        return new MedicamentTO(id, name, tolerance);
+    }
 }

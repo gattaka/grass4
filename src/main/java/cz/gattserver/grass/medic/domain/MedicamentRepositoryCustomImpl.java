@@ -1,36 +1,45 @@
 package cz.gattserver.grass.medic.domain;
 
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 
+import cz.gattserver.grass.medic.interfaces.QMedicamentTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.util.List;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 public class MedicamentRepositoryCustomImpl implements MedicamentRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager entityManager;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-	private Predicate createPredicate(MedicamentTO filterTO) {
-		QMedicament m = QMedicament.medicament;
-		PredicateBuilder builder = new PredicateBuilder();
-		if (filterTO != null) {
-			builder.iLike(m.name, filterTO.getName());
-			builder.iLike(m.tolerance, filterTO.getTolerance());
-		}
-		return builder.getBuilder();
-	}
+    private final QMedicament m = QMedicament.medicament;
 
-	@Override
-	public List<Medicament> findList(MedicamentTO filterTO) {
-		JPAQuery<Medicament> query = new JPAQuery<>(entityManager);
-		QMedicament i = QMedicament.medicament;
-		return query.select(i).from(i).where(createPredicate(filterTO))
-				.orderBy(new OrderSpecifier[] { new OrderSpecifier<>(Order.DESC, i.name) }).fetch();
-	}
+    private Predicate createPredicate(MedicamentTO filterTO) {
+        PredicateBuilder builder = new PredicateBuilder();
+        if (filterTO != null) {
+            builder.iLike(m.name, filterTO.getName());
+            builder.iLike(m.tolerance, filterTO.getTolerance());
+        }
+        return builder.getBuilder();
+    }
+
+    @Override
+    public Set<MedicamentTO> findByFilter(MedicamentTO filterTO) {
+        JPAQuery<MedicamentTO> query = new JPAQuery<>(entityManager);
+        return new LinkedHashSet<>(
+                query.from(m).where(createPredicate(filterTO)).select(new QMedicamentTO(m.id, m.name, m.tolerance))
+                        .orderBy(m.name.asc()).fetch());
+    }
+
+    @Override
+    public MedicamentTO findAndMapById(Long id) {
+        JPAQuery<MedicamentTO> query = new JPAQuery<>(entityManager);
+        return query.from(m).where(m.id.eq(id)).select(new QMedicamentTO(m.id, m.name, m.tolerance))
+                .orderBy(m.name.asc()).fetchOne();
+    }
 }

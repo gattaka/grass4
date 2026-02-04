@@ -59,9 +59,9 @@ public interface MedicService {
 
 	void deletePhysician(PhysicianTO to);
 
-	Set<PhysicianTO> getPhysicians(PhysicianTO filterTO);
+	List<PhysicianTO> getPhysicians(PhysicianTO filterTO);
 
-	Set<PhysicianTO> getPhysicians();
+    List<PhysicianTO> getPhysicians();
 
 	void savePhysician(PhysicianTO to);
 

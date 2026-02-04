@@ -1,6 +1,7 @@
 package cz.gattserver.grass.medic.web;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -55,22 +56,23 @@ public class MedicalRecordDialog extends EditWebDialog {
         Binder<MedicalRecordTO> binder = new Binder<>(MedicalRecordTO.class);
         binder.setBean(new MedicalRecordTO());
 
-        final ComboBox<MedicalInstitutionTO> institutionComboBox =
-                new ComboBox<>("Instituce", medicService.getMedicalInstitutions());
+        List<MedicalInstitutionTO> medicalInstitutionTOList = medicService.getMedicalInstitutions();
+        ComboBox<MedicalInstitutionTO> institutionComboBox = new ComboBox<>("Instituce", medicalInstitutionTOList);
         institutionComboBox.setWidthFull();
         institutionComboBox.setReadOnly(readOnly);
         componentFactory.attachLink(institutionComboBox, f -> MedicalInstitutionDialog.detail(
-                medicService.getMedicalInstitutionById(originalTO.getInstitution().getId())).open());
-        binder.forField(institutionComboBox).asRequired(componentFactory.createRequiredLabel())
-                .bind(MedicalRecordTO::getInstitution, MedicalRecordTO::setInstitution);
+                medicService.getMedicalInstitutionById(originalTO.getInstitutionId())).open());
+        componentFactory.bind(binder.forField(institutionComboBox).asRequired(componentFactory.createRequiredLabel()),
+                medicalInstitutionTOList, MedicalRecordTO::getInstitutionId, MedicalRecordTO::setInstitutionId);
 
-        Set<PhysicianTO> physicians = medicService.getPhysicians();
-        final ComboBox<PhysicianTO> physicianComboBox = new ComboBox<>("Ošetřující lékař", physicians);
+        List<PhysicianTO> physicians = medicService.getPhysicians();
+        ComboBox<PhysicianTO> physicianComboBox = new ComboBox<>("Ošetřující lékař", physicians);
         physicianComboBox.setWidthFull();
         physicianComboBox.setReadOnly(readOnly);
-        componentFactory.attachLink(physicianComboBox, f -> PhysicianDialog.detail(
-                medicService.getPhysicianById(originalTO.getPhysician().getId())).open());
-        binder.forField(physicianComboBox).bind(MedicalRecordTO::getPhysician, MedicalRecordTO::setPhysician);
+        componentFactory.attachLink(physicianComboBox,
+                f -> PhysicianDialog.detail(medicService.getPhysicianById(originalTO.getPhysicianId())).open());
+        componentFactory.bind(binder.forField(physicianComboBox), physicians, MedicalRecordTO::getPhysicianId,
+                MedicalRecordTO::setPhysicianId);
 
         institutionComboBox.addValueChangeListener(e -> {
             if (institutionComboBox.getValue() == null || physicianComboBox.getValue() != null) return;
@@ -86,7 +88,7 @@ public class MedicalRecordDialog extends EditWebDialog {
 
         ComponentFactory componentFactory = new ComponentFactory();
 
-        final DateTimePicker dateTimePicker = componentFactory.createDateTimePicker("Datum návštěvy");
+        DateTimePicker dateTimePicker = componentFactory.createDateTimePicker("Datum návštěvy");
         dateTimePicker.setReadOnly(readOnly);
         binder.forField(dateTimePicker).asRequired(componentFactory.createRequiredLabel())
                 .bind(MedicalRecordTO::getDateTime, MedicalRecordTO::setDateTime);
@@ -96,7 +98,7 @@ public class MedicalRecordDialog extends EditWebDialog {
         line2.setPadding(false);
         layout.add(line2);
 
-        final TextArea recordField = new TextArea("Záznam");
+        TextArea recordField = new TextArea("Záznam");
         layout.add(recordField);
         recordField.setWidthFull();
         recordField.setHeight("200px");

@@ -5,8 +5,6 @@ import cz.gattserver.grass.medic.interfaces.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 
 public class ScheduledVisitRepositoryCustomImpl implements ScheduledVisitRepositoryCustom {
@@ -28,9 +26,9 @@ public class ScheduledVisitRepositoryCustomImpl implements ScheduledVisitReposit
                 // join medical record
                 .leftJoin(r).on(s.recordId.eq(r.id))
                 // join record medical institution
-                .leftJoin(ri).on(r.institution.id.eq(ri.id))
+                .leftJoin(ri).on(r.institutionId.eq(ri.id))
                 // join record physician
-                .leftJoin(rp).on(r.physician.id.eq(rp.id));
+                .leftJoin(rp).on(r.physicianId.eq(rp.id));
         if (filterTO != null) if (filterTO.getPlanned() != null) query.where(s.planned.eq(filterTO.getPlanned()));
         return query.orderBy(s.date.desc())
                 .select(new QScheduledVisitOverviewTO(s.id, s.purpose, s.institutionId, i.name, s.planned, s.date,
@@ -51,9 +49,9 @@ public class ScheduledVisitRepositoryCustomImpl implements ScheduledVisitReposit
                 // join medical record
                 .leftJoin(r).on(s.recordId.eq(r.id))
                 // join record medical institution
-                .leftJoin(ri).on(r.institution.id.eq(ri.id))
+                .leftJoin(ri).on(r.institutionId.eq(ri.id))
                 // join record physician
-                .leftJoin(rp).on(r.physician.id.eq(rp.id));
+                .leftJoin(rp).on(r.physicianId.eq(rp.id));
         return query.where(s.id.eq(id))
                 .select(new QScheduledVisitTO(s.id, s.purpose, s.institutionId, i.name, s.recordId, ri.id, rp.id,
                         ri.name, rp.name, s.planned, s.date, s.period)).orderBy(s.date.desc()).fetchOne();

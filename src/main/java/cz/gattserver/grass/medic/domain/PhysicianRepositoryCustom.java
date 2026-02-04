@@ -6,7 +6,9 @@ import java.util.List;
 
 public interface PhysicianRepositoryCustom {
 
-	List<Physician> findList(PhysicianTO filterTO);
+	List<PhysicianTO> findByFilter(PhysicianTO filterTO);
 
-	Physician findPhysicianByLastVisit(Long institutionId);
+    PhysicianTO findPhysicianByLastVisit(Long institutionId);
+
+    PhysicianTO findAndMapById(Long id);
 }

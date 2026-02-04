@@ -6,7 +6,6 @@ import java.util.Set;
 
 import cz.gattserver.grass.medic.interfaces.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,9 +39,6 @@ public class MedicServiceImpl implements MedicService {
     @Autowired
     private PhysicianRepository physicianRepository;
 
-    @Autowired
-    private MedicMapper medicMapper;
-
     // Instituce
 
     @Override
@@ -52,12 +48,12 @@ public class MedicServiceImpl implements MedicService {
 
     @Override
     public List<MedicalInstitutionTO> getMedicalInstitutions(MedicalInstitutionTO filterTO) {
-        return medicMapper.mapMedicalInstitutions(medicalInstitutionRepository.findList(filterTO));
+        return medicalInstitutionRepository.findByFilter(filterTO);
     }
 
     @Override
     public List<MedicalInstitutionTO> getMedicalInstitutions() {
-        return medicMapper.mapMedicalInstitutions(medicalInstitutionRepository.findAll());
+        return medicalInstitutionRepository.findByFilter(new MedicalInstitutionTO());
     }
 
     @Override
@@ -73,7 +69,7 @@ public class MedicServiceImpl implements MedicService {
 
     @Override
     public MedicalInstitutionTO getMedicalInstitutionById(Long id) {
-        return medicMapper.mapMedicalInstitution(medicalInstitutionRepository.findById(id).orElse(null));
+        return medicalInstitutionRepository.findAndMapById(id);
     }
 
     // Návštěvy
@@ -123,12 +119,12 @@ public class MedicServiceImpl implements MedicService {
 
     @Override
     public List<MedicalRecordTO> getMedicalRecords(MedicalRecordTO filterTO) {
-        return medicMapper.mapMedicalRecords(medicalRecordRepository.findList(filterTO));
+        return medicalRecordRepository.findByFilter(filterTO);
     }
 
     @Override
     public List<MedicalRecordTO> getMedicalRecords() {
-        return medicMapper.mapMedicalRecords(medicalRecordRepository.findAll(Sort.by(Sort.Order.desc("date"))));
+        return medicalRecordRepository.findByFilter(new MedicalRecordTO());
     }
 
     @Override
@@ -137,12 +133,8 @@ public class MedicServiceImpl implements MedicService {
         record.setId(to.getId());
         record.setDate(to.getDateTime());
         record.setRecord(to.getRecord());
-
-        if (to.getPhysician() != null)
-            record.setPhysician(physicianRepository.findById(to.getPhysician().getId()).orElse(null));
-
-        if (to.getInstitution() != null)
-            record.setInstitution(medicalInstitutionRepository.findById(to.getInstitution().getId()).orElse(null));
+        record.setPhysicianId(to.getPhysicianId());
+        record.setInstitutionId(to.getInstitutionId());
 
         List<Medicament> medicaments = new ArrayList<>();
         for (MedicamentTO m : to.getMedicaments()) {
@@ -156,7 +148,7 @@ public class MedicServiceImpl implements MedicService {
 
     @Override
     public MedicalRecordTO getMedicalRecordById(Long id) {
-        return medicMapper.mapMedicalRecord(medicalRecordRepository.findById(id).orElse(null));
+        return medicalRecordRepository.findAndMapById(id);
     }
 
     // Medikamenty
@@ -168,12 +160,12 @@ public class MedicServiceImpl implements MedicService {
 
     @Override
     public Set<MedicamentTO> getMedicaments(MedicamentTO filterTO) {
-        return medicMapper.mapMedicaments(medicamentRepository.findList(filterTO));
+        return medicamentRepository.findByFilter(filterTO);
     }
 
     @Override
     public Set<MedicamentTO> getMedicaments() {
-        return medicMapper.mapMedicaments(medicamentRepository.findAll());
+        return medicamentRepository.findByFilter(new MedicamentTO());
     }
 
     @Override
@@ -187,7 +179,7 @@ public class MedicServiceImpl implements MedicService {
 
     @Override
     public MedicamentTO getMedicamentById(Long id) {
-        return medicMapper.mapMedicament(medicamentRepository.findById(id).orElse(null));
+        return medicamentRepository.findAndMapById(id);
     }
 
     // Doktoři
@@ -198,13 +190,13 @@ public class MedicServiceImpl implements MedicService {
     }
 
     @Override
-    public Set<PhysicianTO> getPhysicians(PhysicianTO filterTO) {
-        return medicMapper.mapPhysicians(physicianRepository.findList(filterTO));
+    public List<PhysicianTO> getPhysicians(PhysicianTO filterTO) {
+        return physicianRepository.findByFilter(filterTO);
     }
 
     @Override
-    public Set<PhysicianTO> getPhysicians() {
-        return medicMapper.mapPhysicians(physicianRepository.findAll());
+    public List<PhysicianTO> getPhysicians() {
+        return physicianRepository.findByFilter(new PhysicianTO());
     }
 
     @Override
@@ -219,12 +211,12 @@ public class MedicServiceImpl implements MedicService {
 
     @Override
     public PhysicianTO getPhysicianById(Long id) {
-        return medicMapper.mapPhysician(physicianRepository.findById(id).orElse(null));
+        return physicianRepository.findAndMapById(id);
     }
 
     @Override
     public PhysicianTO getPhysicianByLastVisit(Long institutionId) {
-        return medicMapper.mapPhysician(physicianRepository.findPhysicianByLastVisit(institutionId));
+        return physicianRepository.findPhysicianByLastVisit(institutionId);
     }
 
 }
