@@ -47,7 +47,7 @@ public class MedicalRecordDialog extends EditWebDialog {
 
     private MedicalRecordDialog(ScheduledVisitTO scheduledVisitTO, MedicalRecordTO originalTO,
                                 Consumer<MedicalRecordTO> onSave, boolean readOnly) {
-        super("Záznam");
+        super("Záznam", readOnly);
         setWidth("800px");
 
         this.medicService = SpringContextHelper.getBean(MedicService.class);
@@ -59,6 +59,8 @@ public class MedicalRecordDialog extends EditWebDialog {
                 new ComboBox<>("Instituce", medicService.getMedicalInstitutions());
         institutionComboBox.setWidthFull();
         institutionComboBox.setReadOnly(readOnly);
+        componentFactory.attachLink(institutionComboBox, f -> MedicalInstitutionDialog.detail(
+                medicService.getMedicalInstitutionById(originalTO.getInstitution().getId())).open());
         binder.forField(institutionComboBox).asRequired(componentFactory.createRequiredLabel())
                 .bind(MedicalRecordTO::getInstitution, MedicalRecordTO::setInstitution);
 
@@ -66,6 +68,8 @@ public class MedicalRecordDialog extends EditWebDialog {
         final ComboBox<PhysicianTO> physicianComboBox = new ComboBox<>("Ošetřující lékař", physicians);
         physicianComboBox.setWidthFull();
         physicianComboBox.setReadOnly(readOnly);
+        componentFactory.attachLink(physicianComboBox, f -> PhysicianDialog.detail(
+                medicService.getPhysicianById(originalTO.getPhysician().getId())).open());
         binder.forField(physicianComboBox).bind(MedicalRecordTO::getPhysician, MedicalRecordTO::setPhysician);
 
         institutionComboBox.addValueChangeListener(e -> {

@@ -1,5 +1,6 @@
 package cz.gattserver.grass.medic.web;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -29,8 +30,8 @@ public class MedicamentDialog extends EditWebDialog {
     }
 
     private MedicamentDialog(MedicamentTO originalTO, Consumer<MedicamentTO> onSave, boolean readOnly) {
-        super("Medikament");
-        setWidth("300px");
+        super("Medikament", readOnly);
+        setWidth(400, Unit.PIXELS);
 
         MedicamentTO formDTO = new MedicamentTO();
         Binder<MedicamentTO> binder = new Binder<>(MedicamentTO.class);

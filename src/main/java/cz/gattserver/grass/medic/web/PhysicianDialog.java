@@ -31,7 +31,7 @@ public class PhysicianDialog extends EditWebDialog {
     }
 
     private PhysicianDialog(PhysicianTO originalTO, Consumer<PhysicianTO> onSave, boolean readOnly) {
-        super("Lékař");
+        super("Lékař", readOnly);
         setWidth("300px");
 
         FormLayout formLayout = new FormLayout();

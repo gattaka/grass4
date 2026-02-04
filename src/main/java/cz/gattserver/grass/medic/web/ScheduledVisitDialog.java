@@ -10,6 +10,7 @@ import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.interfaces.*;
@@ -26,7 +27,7 @@ import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import cz.gattserver.grass.medic.service.MedicService;
 import org.vaadin.addons.componentfactory.monthpicker.MonthPicker;
 
-public class ScheduledVisitDialog extends WebDialog {
+public class ScheduledVisitDialog extends EditWebDialog {
 
     @Serial
     private static final long serialVersionUID = -6773027334692911384L;
@@ -55,7 +56,7 @@ public class ScheduledVisitDialog extends WebDialog {
 
     private ScheduledVisitDialog(ScheduledVisitTO originalOrNewTO, ScheduledVisitTO fromToBePlannedTO,
                                  Consumer<ScheduledVisitTO> onSave, boolean readOnly) {
-        super("Návštěva");
+        super("Návštěva", readOnly);
 
         MedicService medicService = SpringContextHelper.getBean(MedicService.class);
 

@@ -33,6 +33,18 @@ vaadin-text-area[readonly]:focus-within::part(input-field) {
     --vaadin-input-field-border-color: unset;
 }
 
+vaadin-combo-box[readonly][has-link]::part(input-field),
+vaadin-text-field[readonly][has-link]::part(input-field) {
+    color: #045491;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+vaadin-combo-box[readonly][has-link]:hover::part(input-field),
+vaadin-text-field[readonly][has-link]:hover::part(input-field) {
+    text-decoration: underline;
+}
+
 vaadin-dialog::part(header) {
     padding-bottom: 10px;
 }

@@ -1,5 +1,6 @@
 package cz.gattserver.grass.medic.web;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
@@ -31,7 +32,7 @@ public class MedicalInstitutionDialog extends EditWebDialog {
 
     private MedicalInstitutionDialog(MedicalInstitutionTO originalTO, Consumer<MedicalInstitutionTO> onSave,
                                      boolean readOnly) {
-        super("Instituce");
+        super("Instituce", readOnly);
         setWidth("500px");
 
         MedicalInstitutionTO formDTO = new MedicalInstitutionTO();
@@ -58,6 +59,7 @@ public class MedicalInstitutionDialog extends EditWebDialog {
         form.add(webField);
         webField.setWidthFull();
         webField.setReadOnly(readOnly);
+        componentFactory.attachLink(webField, f -> UI.getCurrent().getPage().open(originalTO.getWeb(), "_blank"));
         binder.forField(webField).bind("web");
 
         TextArea hoursField = new TextArea("Otevírací hodiny");

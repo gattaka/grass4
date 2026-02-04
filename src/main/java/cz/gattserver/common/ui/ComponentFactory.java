@@ -3,8 +3,10 @@ package cz.gattserver.common.ui;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.HasValueAndElement;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -21,6 +23,7 @@ import com.vaadin.flow.router.BeforeLeaveEvent;
 import cz.gattserver.common.Identifiable;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 import org.vaadin.addons.componentfactory.monthpicker.MonthPicker;
 
@@ -393,6 +396,14 @@ public class ComponentFactory {
             return id == null ? null : map.get(id);
         }, (to, val) -> {
             setter.accept(to, val == null ? null : val.getId());
+        });
+    }
+
+    public <T extends Component & HasValueAndElement<?,?>> void attachLink(T field, Consumer<T> onClick) {
+        field.getElement().setAttribute("has-link","");
+        field.getElement().addEventListener("click", event -> {
+           if (field.isReadOnly())
+               onClick.accept(field);
         });
     }
 }
