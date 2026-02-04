@@ -47,9 +47,15 @@ public class GridOperationsTab<T extends Identifiable> extends Div {
         Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
-        Button createBtn = componentFactory.createCreateButton(e -> onCreate.run());
+        Button createBtn = componentFactory.createCreateButton(e -> {
+            onCreate.run();
+            onPopulate.accept(grid);
+        });
         Button detailBtn = componentFactory.createDetailGridButton(item -> onDetail.accept(item), grid);
-        Button modifyBtn = componentFactory.createEditGridButton(item -> onEdit.accept(item), grid);
+        Button modifyBtn = componentFactory.createEditGridButton(item -> {
+            onEdit.accept(item);
+            onPopulate.accept(grid);
+        }, grid);
         Button deleteBtn = componentFactory.createDeleteGridSetButton(items -> {
             items.forEach(onDelete);
             onPopulate.accept(grid);

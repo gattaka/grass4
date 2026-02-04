@@ -40,15 +40,25 @@ public class PhysiciansTab extends Div {
 
     private void customizeGrid(Grid<PhysicianTO> grid) {
         grid.removeAllColumns();
-        Grid.Column<PhysicianTO> nameCol = grid.addColumn("name").setHeader("Jméno");
         grid.setWidthFull();
         grid.setSelectionMode(SelectionMode.SINGLE);
 
+        Grid.Column<PhysicianTO> nameCol = grid.addColumn(PhysicianTO::getName).setHeader("Jméno");
+        Grid.Column<PhysicianTO> emailCol = grid.addColumn(PhysicianTO::getEmail).setHeader("Email");
+        Grid.Column<PhysicianTO> phoneCol = grid.addColumn(PhysicianTO::getPhone).setHeader("Telefon");
+
         HeaderRow filteringHeader = grid.appendHeaderRow();
 
-        // Název
         UIUtils.addHeaderTextField(filteringHeader.getCell(nameCol), e -> {
             filterTO.setName(e.getValue());
+            populateGrid(grid);
+        });
+        UIUtils.addHeaderTextField(filteringHeader.getCell(emailCol), e -> {
+            filterTO.setEmail(e.getValue());
+            populateGrid(grid);
+        });
+        UIUtils.addHeaderTextField(filteringHeader.getCell(phoneCol), e -> {
+            filterTO.setPhone(e.getValue());
             populateGrid(grid);
         });
     }
