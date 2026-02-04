@@ -24,6 +24,15 @@ html {
     --vaadin-tabs-border-radius: 5px;
 }
 
+vaadin-combo-box[readonly]:focus-within::part(input-field),
+vaadin-date-picker[readonly]:focus-within::part(input-field),
+vaadin-time-picker[readonly]:focus-within::part(input-field),
+vaadin-text-field[readonly]:focus-within::part(input-field),
+vaadin-text-area[readonly]:focus-within::part(input-field) {
+    outline: none;
+    --vaadin-input-field-border-color: unset;
+}
+
 vaadin-dialog::part(header) {
     padding-bottom: 10px;
 }
