@@ -22,6 +22,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.ui.util.TokenField;
+import cz.gattserver.grass.core.ui.util.TokenField2;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
@@ -31,8 +32,6 @@ import cz.gattserver.grass.medic.interfaces.PhysicianTO;
 import cz.gattserver.grass.medic.interfaces.ScheduledVisitTO;
 
 public class MedicalRecordDialog extends EditWebDialog {
-
-    private final MedicService medicService;
 
     public static MedicalRecordDialog detail(MedicalRecordTO originalTO) {
         return new MedicalRecordDialog(null, originalTO, null, true);
@@ -51,7 +50,7 @@ public class MedicalRecordDialog extends EditWebDialog {
         super("Záznam", readOnly);
         setWidth("800px");
 
-        this.medicService = SpringContextHelper.getBean(MedicService.class);
+        MedicService medicService = SpringContextHelper.getBean(MedicService.class);
 
         Binder<MedicalRecordTO> binder = new Binder<>(MedicalRecordTO.class);
         binder.setBean(new MedicalRecordTO());
@@ -106,20 +105,26 @@ public class MedicalRecordDialog extends EditWebDialog {
         binder.forField(recordField).asRequired(componentFactory.createRequiredLabel())
                 .bind(MedicalRecordTO::getRecord, MedicalRecordTO::setRecord);
 
-        Map<String, MedicamentTO> medicaments = new HashMap<>();
-        for (MedicamentTO mto : medicService.getMedicaments())
-            medicaments.put(mto.getName(), mto);
+        Map<String, Long> medicamentsNameToIdMap = new HashMap<>();
+        Map<Long, String> medicamentIdToNameMap = new HashMap<>();
+        for (MedicamentTO mto : medicService.getMedicaments()) {
+            medicamentsNameToIdMap.put(mto.getName(), mto.getId());
+            medicamentIdToNameMap.put(mto.getId(), mto.getName());
+        }
 
-        TokenField tokenField = new TokenField(medicaments.keySet());
+        TokenField2 tokenField = new TokenField2("Medikamenty", medicamentsNameToIdMap.keySet());
         tokenField.setAllowNewItems(false);
-        tokenField.setPlaceholder("Medikamenty");
-        if (originalTO != null) for (MedicamentTO m : originalTO.getMedicaments())
-            tokenField.addToken(m.getName());
+        binder.forField(tokenField).bind(to -> to.getMedicaments().stream().map(m -> medicamentIdToNameMap.get(m))
+                .collect(Collectors.toSet()), (to, val) -> {
+            to.setMedicaments(val.stream().map(m -> medicamentsNameToIdMap.get(m)).collect(Collectors.toSet()));
+        });
+        if (originalTO != null) for (Long id : originalTO.getMedicaments())
+            tokenField.addToken(medicamentIdToNameMap.get(id));
 
         if (readOnly) {
             Div tags = componentFactory.createButtonLayout();
             tags.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
-            originalTO.getMedicaments().forEach(med -> tags.add(new Button(med.getName())));
+            originalTO.getMedicaments().forEach(id -> tags.add(new Button(medicamentIdToNameMap.get(id))));
             layout.add(tags);
         } else {
             layout.add(tokenField);
@@ -127,12 +132,9 @@ public class MedicalRecordDialog extends EditWebDialog {
 
         getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
-                MedicalRecordTO writeDTO = originalTO == null ? new MedicalRecordTO() : originalTO;
-                binder.writeBean(writeDTO);
-                writeDTO.setMedicaments(
-                        tokenField.getValues().stream().map(medicaments::get).collect(Collectors.toSet()));
-                medicService.saveMedicalRecord(writeDTO);
-                onSave.accept(writeDTO);
+                MedicalRecordTO to = originalTO == null ? new MedicalRecordTO() : originalTO;
+                binder.writeBean(to);
+                onSave.accept(to);
                 close();
             } catch (ValidationException ex) {
                 // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu

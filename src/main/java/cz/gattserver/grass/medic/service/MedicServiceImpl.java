@@ -3,22 +3,15 @@ package cz.gattserver.grass.medic.service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import com.vaadin.copilot.shaded.checkerframework.checker.units.qual.A;
+import cz.gattserver.common.util.ServiceUtils;
+import cz.gattserver.grass.medic.domain.*;
 import cz.gattserver.grass.medic.interfaces.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import cz.gattserver.grass.medic.domain.MedicalInstitutionRepository;
-import cz.gattserver.grass.medic.domain.MedicalRecordRepository;
-import cz.gattserver.grass.medic.domain.MedicamentRepository;
-import cz.gattserver.grass.medic.domain.PhysicianRepository;
-import cz.gattserver.grass.medic.domain.ScheduledVisitRepository;
-import cz.gattserver.grass.medic.domain.MedicalInstitution;
-import cz.gattserver.grass.medic.domain.MedicalRecord;
-import cz.gattserver.grass.medic.domain.Medicament;
-import cz.gattserver.grass.medic.domain.Physician;
-import cz.gattserver.grass.medic.domain.ScheduledVisit;
 
 @Transactional
 @Component
@@ -26,6 +19,9 @@ public class MedicServiceImpl implements MedicService {
 
     @Autowired
     private MedicalInstitutionRepository medicalInstitutionRepository;
+
+    @Autowired
+    private MedicalRecordMedicamentRepository medicalRecordMedicamentRepository;
 
     @Autowired
     private ScheduledVisitRepository scheduledVisitRepository;
@@ -114,7 +110,8 @@ public class MedicServiceImpl implements MedicService {
 
     @Override
     public void deleteMedicalRecord(MedicalRecordTO to) {
-        scheduledVisitRepository.deleteById(to.getId());
+        medicalRecordMedicamentRepository.deleteByRecordId(to.getId());
+        medicalRecordRepository.deleteById(to.getId());
     }
 
     @Override
@@ -136,19 +133,26 @@ public class MedicServiceImpl implements MedicService {
         record.setPhysicianId(to.getPhysicianId());
         record.setInstitutionId(to.getInstitutionId());
 
-        List<Medicament> medicaments = new ArrayList<>();
-        for (MedicamentTO m : to.getMedicaments()) {
-            Medicament medicament = medicamentRepository.findById(m.getId()).orElse(null);
-            medicaments.add(medicament);
+        Set<Long> medicamentsSet = to.getMedicaments();
+        if (to.getId() != null) {
+            medicamentsSet = ServiceUtils.processDependentSetAndDeleteMissing(to.getMedicaments(),
+                    medicalRecordRepository.findMedicamentsByRecordId(to.getId()),
+                    set -> medicalRecordRepository.deleteMedicalRecordMedicament(to.getId(), set));
         }
-        record.setMedicaments(medicaments);
 
-        medicalRecordRepository.save(record);
+        record.setId(medicalRecordRepository.save(record).getId());
+
+        List<MedicalRecordMedicament> medicamentsBatch =
+                medicamentsSet.stream().map(medicamentId -> new MedicalRecordMedicament(record.getId(), medicamentId))
+                        .collect(Collectors.toList());
+        medicalRecordMedicamentRepository.saveAll(medicamentsBatch);
     }
 
     @Override
     public MedicalRecordTO getMedicalRecordById(Long id) {
-        return medicalRecordRepository.findAndMapById(id);
+        MedicalRecordTO to = medicalRecordRepository.findAndMapById(id);
+        to.setMedicaments(medicalRecordRepository.findMedicamentsByRecordId(id));
+        return to;
     }
 
     // Medikamenty

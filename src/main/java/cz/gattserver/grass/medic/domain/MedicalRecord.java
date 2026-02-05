@@ -35,12 +35,6 @@ public class MedicalRecord {
     @Column(columnDefinition = "TEXT")
     private String record;
 
-    /**
-     * Napsané léky
-     */
-    @ManyToMany
-    private List<Medicament> medicaments;
-
     public Long getId() {
         return id;
     }
@@ -79,14 +73,6 @@ public class MedicalRecord {
 
     public void setRecord(String record) {
         this.record = record;
-    }
-
-    public List<Medicament> getMedicaments() {
-        return medicaments;
-    }
-
-    public void setMedicaments(List<Medicament> medicaments) {
-        this.medicaments = medicaments;
     }
 
 }

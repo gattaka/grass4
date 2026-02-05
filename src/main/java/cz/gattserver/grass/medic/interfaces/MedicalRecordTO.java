@@ -45,7 +45,7 @@ public class MedicalRecordTO implements Identifiable<Long> {
     /**
      * Napsané léky
      */
-    private Set<MedicamentTO> medicaments = new HashSet<>();
+    private Set<Long> medicaments = new HashSet<>();
 
     public MedicalRecordTO() {
     }
@@ -108,11 +108,11 @@ public class MedicalRecordTO implements Identifiable<Long> {
         this.record = record;
     }
 
-    public Set<MedicamentTO> getMedicaments() {
+    public Set<Long> getMedicaments() {
         return medicaments;
     }
 
-    public void setMedicaments(Set<MedicamentTO> medicaments) {
+    public void setMedicaments(Set<Long> medicaments) {
         this.medicaments = medicaments;
     }
 
@@ -156,8 +156,7 @@ public class MedicalRecordTO implements Identifiable<Long> {
         MedicalRecordTO to =
                 new MedicalRecordTO(id, institutionId, institutionName, physicianId, physicianName, dateTime, record);
         to.medicaments = new HashSet<>();
-        if (medicaments != null) for (MedicamentTO mTO : medicaments)
-            to.medicaments.add(mTO.copy());
+        if (medicaments != null) to.medicaments.addAll(medicaments);
         return to;
     }
 

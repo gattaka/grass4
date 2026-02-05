@@ -47,8 +47,8 @@ public class MedicalRecordsTab extends Div {
 						() -> DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("CS")))).setHeader(
 								"Datum")
 				.setKey(fdateID).setTextAlign(ColumnTextAlign.END).setWidth("130px").setFlexGrow(0);
-		Grid.Column<MedicalRecordTO> instCol = grid.addColumn("institution").setHeader("Instituce");
-		Grid.Column<MedicalRecordTO> recordCol = grid.addColumn("record").setHeader("Záznam");
+		Grid.Column<MedicalRecordTO> instCol = grid.addColumn(MedicalRecordTO::getInstitutionName).setHeader("Instituce");
+		Grid.Column<MedicalRecordTO> recordCol = grid.addColumn(MedicalRecordTO::getRecord).setHeader("Záznam");
 		grid.setWidthFull();
 		grid.setSelectionMode(SelectionMode.SINGLE);
 

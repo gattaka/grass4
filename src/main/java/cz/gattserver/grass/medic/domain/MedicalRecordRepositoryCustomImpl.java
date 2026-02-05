@@ -1,28 +1,29 @@
 package cz.gattserver.grass.medic.domain;
 
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
 
-import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 import cz.gattserver.grass.medic.interfaces.QMedicalRecordTO;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
-import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-public class MedicalRecordRepositoryCustomImpl implements MedicalRecordRepositoryCustom {
-
-    @PersistenceContext
-    private EntityManager entityManager;
+public class MedicalRecordRepositoryCustomImpl extends QuerydslRepositorySupport implements MedicalRecordRepositoryCustom {
 
     private final QMedicalRecord r = QMedicalRecord.medicalRecord;
     private final QMedicalInstitution i = QMedicalInstitution.medicalInstitution;
     private final QPhysician p = QPhysician.physician;
+    private final QMedicalRecordMedicament rm = QMedicalRecordMedicament.medicalRecordMedicament;
+    private final QMedicament m = QMedicament.medicament;
+
+    public MedicalRecordRepositoryCustomImpl() {
+        super(MedicalRecord.class);
+    }
 
     private Predicate createPredicate(MedicalRecordTO filterTO) {
         PredicateBuilder builder = new PredicateBuilder();
@@ -39,9 +40,8 @@ public class MedicalRecordRepositoryCustomImpl implements MedicalRecordRepositor
         return builder.getBuilder();
     }
 
-    private JPAQuery<MedicalRecordTO> createQuery() {
-        JPAQuery<MedicalRecordTO> query = new JPAQuery<>(entityManager);
-        return query.from(r)
+    private JPQLQuery<MedicalRecordTO> createQuery() {
+        return from(r)
                 // join institution
                 .join(i).on(r.institutionId.eq(i.id))
                 // join physician
@@ -58,5 +58,16 @@ public class MedicalRecordRepositoryCustomImpl implements MedicalRecordRepositor
     @Override
     public MedicalRecordTO findAndMapById(Long id) {
         return createQuery().where(r.id.eq(id)).fetchOne();
+    }
+
+    @Override
+    public Set<Long> findMedicamentsByRecordId(Long id) {
+        return new LinkedHashSet<>(from(rm)
+                // join medicament
+                .join(m).on(rm.id.medicamentId.eq(m.id))
+                // where
+                .where(rm.id.medicalRecordId.eq(id))
+                // select
+                .select(m.id).fetch());
     }
 }

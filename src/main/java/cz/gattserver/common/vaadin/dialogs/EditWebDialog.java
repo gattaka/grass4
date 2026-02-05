@@ -14,6 +14,7 @@ public class EditWebDialog extends WebDialog {
 
     public EditWebDialog(String caption, boolean readOnly) {
         super(caption);
+        setCloseOnEsc(readOnly);
         this.readOnly = readOnly;
     }
 
