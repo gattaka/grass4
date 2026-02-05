@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.util;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.customfield.CustomField;
@@ -30,6 +31,8 @@ public class TokenField2 extends CustomField<Set<String>> {
         ComponentFactory componentFactory = new ComponentFactory();
         tokensLayout = componentFactory.createButtonLayout(false);
         add(tokensLayout);
+
+        setMinWidth(100, Unit.PERCENTAGE);
 
         chooseElementsDiv = new Div();
         chooseElementsDiv.addClassName(UIUtils.FLEX_DIV_CLASS);
@@ -76,9 +79,15 @@ public class TokenField2 extends CustomField<Set<String>> {
     }
 
     public void addTokens(Collection<String> tokens) {
-        if (tokens == null) return;
-        for (String token : tokens)
-            addToken(token);
+        if (isReadOnly() && (tokens == null || tokens.isEmpty())) {
+            Div div = new Div("-žádné položky-");
+            div.addClassName("token-field-item");
+            chooseElementsDiv.add(div);
+            chooseElementsDiv.setVisible(true);
+        } else if (tokens != null) {
+            for (String token : tokens)
+                addToken(token);
+        }
     }
 
     @Override

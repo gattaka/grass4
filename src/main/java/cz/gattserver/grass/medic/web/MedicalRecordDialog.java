@@ -112,7 +112,6 @@ public class MedicalRecordDialog extends EditWebDialog {
                 .collect(Collectors.toSet()), (to, val) -> {
             to.setMedicaments(val.stream().map(m -> medicamentsNameToIdMap.get(m)).collect(Collectors.toSet()));
         });
-
         layout.add(tokenField);
 
         getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
