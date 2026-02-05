@@ -223,3 +223,10 @@ span.label-err {
 #center-content .monitor-content h2 {
     margin-bottom: 5px;
 }
+
+.token-field-item {
+    border: 1px solid lightgray;
+    border-radius: 4px;
+    padding: 6px 11px;
+    background: #fdfdfd;
+}

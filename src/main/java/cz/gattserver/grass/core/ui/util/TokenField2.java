@@ -80,16 +80,30 @@ public class TokenField2 extends CustomField<Set<String>> {
     }
 
     public void addTokens(Collection<String> tokens) {
+        if (tokens == null) return;
         for (String token : tokens)
             addToken(token);
     }
 
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        super.setReadOnly(readOnly);
+        setPresentationValue(getValue());
+        comboBox.setVisible(!readOnly);
+    }
+
     public void addToken(String token) {
         if (!tokens.containsKey(token)) {
-            Button tokenButton = new Button(token, e -> deleteToken(token));
-            tokenButton.setIcon(VaadinIcon.CLOSE.create());
-            tokens.put(token, tokenButton);
-            chooseElementsDiv.add(tokenButton);
+            if (isReadOnly()) {
+                Div div = new Div(token);
+                div.addClassName("token-field-item");
+                chooseElementsDiv.add(div);
+            } else {
+                Button tokenButton = new Button(token, e -> deleteToken(token));
+                tokenButton.setIcon(VaadinIcon.CLOSE.create());
+                tokens.put(token, tokenButton);
+                chooseElementsDiv.add(tokenButton);
+            }
             chooseElementsDiv.setVisible(true);
             comboBox.focus();
             if (addTokenListener != null) addTokenListener.accept(token);
@@ -110,10 +124,6 @@ public class TokenField2 extends CustomField<Set<String>> {
         for (String s : tokens)
             addToken(s);
         return this;
-    }
-
-    public Set<String> getValues() {
-        return new HashSet<>(tokens.keySet());
     }
 
     public void setAllowNewItems(boolean allowNewItems) {
@@ -139,5 +149,4 @@ public class TokenField2 extends CustomField<Set<String>> {
     public void addTokenRemoveListener(Consumer<String> removeTokenListener) {
         this.removeTokenListener = removeTokenListener;
     }
-
 }

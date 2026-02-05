@@ -114,21 +114,13 @@ public class MedicalRecordDialog extends EditWebDialog {
 
         TokenField2 tokenField = new TokenField2("Medikamenty", medicamentsNameToIdMap.keySet());
         tokenField.setAllowNewItems(false);
+        tokenField.setReadOnly(readOnly);
         binder.forField(tokenField).bind(to -> to.getMedicaments().stream().map(m -> medicamentIdToNameMap.get(m))
                 .collect(Collectors.toSet()), (to, val) -> {
             to.setMedicaments(val.stream().map(m -> medicamentsNameToIdMap.get(m)).collect(Collectors.toSet()));
         });
-        if (originalTO != null) for (Long id : originalTO.getMedicaments())
-            tokenField.addToken(medicamentIdToNameMap.get(id));
 
-        if (readOnly) {
-            Div tags = componentFactory.createButtonLayout();
-            tags.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
-            originalTO.getMedicaments().forEach(id -> tags.add(new Button(medicamentIdToNameMap.get(id))));
-            layout.add(tags);
-        } else {
-            layout.add(tokenField);
-        }
+        layout.add(tokenField);
 
         getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
