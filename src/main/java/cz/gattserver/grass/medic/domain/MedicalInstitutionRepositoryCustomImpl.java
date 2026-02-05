@@ -8,16 +8,20 @@ import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.QMedicalInstitutionTO;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
 
-public class MedicalInstitutionRepositoryCustomImpl implements MedicalInstitutionRepositoryCustom {
+public class MedicalInstitutionRepositoryCustomImpl extends QuerydslRepositorySupport
+        implements MedicalInstitutionRepositoryCustom {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final QMedicalInstitution i = QMedicalInstitution.medicalInstitution;
+
+    public MedicalInstitutionRepositoryCustomImpl() {
+        super(MedicalInstitution.class);
+    }
 
     private Predicate createPredicate(MedicalInstitutionTO filterTO) {
-        QMedicalInstitution i = QMedicalInstitution.medicalInstitution;
         PredicateBuilder builder = new PredicateBuilder();
         if (filterTO != null) {
             builder.iLike(i.address, filterTO.getAddress());
@@ -30,17 +34,13 @@ public class MedicalInstitutionRepositoryCustomImpl implements MedicalInstitutio
 
     @Override
     public List<MedicalInstitutionTO> findByFilter(MedicalInstitutionTO filterTO) {
-        JPAQuery<MedicalInstitution> query = new JPAQuery<>(entityManager);
-        QMedicalInstitution i = QMedicalInstitution.medicalInstitution;
-        return query.select(new QMedicalInstitutionTO(i.id, i.name, i.address, i.hours, i.web)).from(i)
+        return from(i).select(new QMedicalInstitutionTO(i.id, i.name, i.address, i.hours, i.web))
                 .where(createPredicate(filterTO)).orderBy(i.name.desc()).fetch();
     }
 
     @Override
     public MedicalInstitutionTO findAndMapById(Long id) {
-        JPAQuery<MedicalInstitution> query = new JPAQuery<>(entityManager);
-        QMedicalInstitution i = QMedicalInstitution.medicalInstitution;
-        return query.select(new QMedicalInstitutionTO(i.id, i.name, i.address, i.hours, i.web)).from(i)
-                .where(i.id.eq(id)).fetchOne();
+        return from(i).select(new QMedicalInstitutionTO(i.id, i.name, i.address, i.hours, i.web)).where(i.id.eq(id))
+                .fetchOne();
     }
 }

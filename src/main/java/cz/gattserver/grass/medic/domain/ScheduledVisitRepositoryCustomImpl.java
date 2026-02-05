@@ -1,26 +1,30 @@
 package cz.gattserver.grass.medic.domain;
 
+import com.querydsl.jpa.JPQLQuery;
 import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.medic.interfaces.*;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
 
-public class ScheduledVisitRepositoryCustomImpl implements ScheduledVisitRepositoryCustom {
+public class ScheduledVisitRepositoryCustomImpl extends QuerydslRepositorySupport
+        implements ScheduledVisitRepositoryCustom {
 
-    @PersistenceContext
-    private EntityManager entityManager;
+    private final QScheduledVisit s = QScheduledVisit.scheduledVisit;
+    private final QMedicalRecord r = QMedicalRecord.medicalRecord;
+    private final QMedicalInstitution i = QMedicalInstitution.medicalInstitution;
+    private final QMedicalInstitution ri = new QMedicalInstitution("record_institution");
+    private final QPhysician rp = QPhysician.physician;
+
+    public ScheduledVisitRepositoryCustomImpl() {
+        super(ScheduledVisit.class);
+    }
 
     @Override
     public List<ScheduledVisitOverviewTO> findByFilter(ScheduledVisitTO filterTO) {
-        JPAQuery<ScheduledVisit> query = new JPAQuery<>(entityManager);
-        QScheduledVisit s = QScheduledVisit.scheduledVisit;
-        QMedicalRecord r = QMedicalRecord.medicalRecord;
-        QMedicalInstitution i = QMedicalInstitution.medicalInstitution;
-        QMedicalInstitution ri = new QMedicalInstitution("record_institution");
-        QPhysician rp = QPhysician.physician;
-        query.from(s)
+        JPQLQuery<ScheduledVisit> query = from(s)
                 // join medical institution
                 .join(i).on(s.institutionId.eq(i.id))
                 // join medical record
@@ -37,13 +41,7 @@ public class ScheduledVisitRepositoryCustomImpl implements ScheduledVisitReposit
 
     @Override
     public ScheduledVisitTO findForDetailById(Long id) {
-        JPAQuery<ScheduledVisit> query = new JPAQuery<>(entityManager);
-        QScheduledVisit s = QScheduledVisit.scheduledVisit;
-        QMedicalRecord r = QMedicalRecord.medicalRecord;
-        QMedicalInstitution i = QMedicalInstitution.medicalInstitution;
-        QMedicalInstitution ri = new QMedicalInstitution("record_institution");
-        QPhysician rp = QPhysician.physician;
-        query.from(s)
+        return from(s)
                 // join medical institution
                 .join(i).on(s.institutionId.eq(i.id))
                 // join medical record
@@ -51,8 +49,10 @@ public class ScheduledVisitRepositoryCustomImpl implements ScheduledVisitReposit
                 // join record medical institution
                 .leftJoin(ri).on(r.institutionId.eq(ri.id))
                 // join record physician
-                .leftJoin(rp).on(r.physicianId.eq(rp.id));
-        return query.where(s.id.eq(id))
+                .leftJoin(rp).on(r.physicianId.eq(rp.id))
+                // where
+                .where(s.id.eq(id))
+                // select
                 .select(new QScheduledVisitTO(s.id, s.purpose, s.institutionId, i.name, s.recordId, ri.id, rp.id,
                         ri.name, rp.name, s.planned, s.date, s.period)).orderBy(s.date.desc()).fetchOne();
     }
