@@ -1,10 +1,7 @@
 package cz.gattserver.grass.medic.domain;
 
 import com.querydsl.jpa.JPQLQuery;
-import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.medic.interfaces.*;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;

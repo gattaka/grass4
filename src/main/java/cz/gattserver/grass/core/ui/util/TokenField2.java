@@ -5,15 +5,11 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.customfield.CustomField;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.data.provider.CallbackDataProvider;
-import cz.gattserver.common.Identifiable;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class TokenField2 extends CustomField<Set<String>> {
 

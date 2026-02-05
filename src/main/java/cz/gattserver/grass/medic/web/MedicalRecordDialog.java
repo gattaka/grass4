@@ -3,27 +3,20 @@ package cz.gattserver.grass.medic.web;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
-import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.TokenField2;
-import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;

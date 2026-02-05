@@ -1,11 +1,9 @@
 package cz.gattserver.grass.medic.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.vaadin.copilot.shaded.checkerframework.checker.units.qual.A;
 import cz.gattserver.common.util.ServiceUtils;
 import cz.gattserver.grass.medic.domain.*;
 import cz.gattserver.grass.medic.interfaces.*;

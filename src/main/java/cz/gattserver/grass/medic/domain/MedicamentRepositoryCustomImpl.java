@@ -1,7 +1,6 @@
 package cz.gattserver.grass.medic.domain;
 
 import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import cz.gattserver.grass.medic.interfaces.MedicamentTO;
 

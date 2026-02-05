@@ -1,13 +1,10 @@
 package cz.gattserver.grass.medic.domain;
 
 import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 
 import cz.gattserver.grass.medic.interfaces.QMedicalInstitutionTO;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
