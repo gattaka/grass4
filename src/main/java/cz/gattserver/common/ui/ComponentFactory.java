@@ -34,6 +34,7 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 public class ComponentFactory {
 
@@ -386,6 +387,7 @@ public class ComponentFactory {
      * Binding helpers
      */
 
+
     public <B, T extends Identifiable<I>, I> void bind(Binder.BindingBuilder<B, T> bindingBuilder, Collection<T> items,
                                                        ValueProvider<B, I> getter, Setter<B, I> setter) {
         Map<I, T> map = new LinkedHashMap<>();
@@ -399,11 +401,10 @@ public class ComponentFactory {
         });
     }
 
-    public <T extends Component & HasValueAndElement<?,?>> void attachLink(T field, Consumer<T> onClick) {
-        field.getElement().setAttribute("has-link","");
+    public <T extends Component & HasValueAndElement<?, ?>> void attachLink(T field, Consumer<T> onClick) {
+        field.getElement().setAttribute("has-link", "");
         field.getElement().addEventListener("click", event -> {
-           if (field.isReadOnly())
-               onClick.accept(field);
+            if (field.isReadOnly()) onClick.accept(field);
         });
     }
 }
