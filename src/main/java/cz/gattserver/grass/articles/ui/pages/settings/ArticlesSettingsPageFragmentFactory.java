@@ -8,6 +8,7 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.NumberField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.articles.config.ArticlesConfiguration;
@@ -22,25 +23,25 @@ import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.DoubleToIntegerConverter;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.UUID;
 
 public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
-    @Autowired
-    private ArticleService articleFacade;
-
-    @Autowired
-    private ConfigurationService configurationService;
-
-    @Autowired
-    private EventBus eventBus;
+    private final ArticleService articleService;
+    private final ConfigurationService configurationService;
+    private final EventBus eventBus;
 
     private ProgressDialog progressIndicatorDialog;
     private UUID uuid;
 
     private Button reprocessButton;
+
+    public ArticlesSettingsPageFragmentFactory() {
+        this.articleService = SpringContextHelper.getBean(ArticleService.class);
+        this.configurationService = SpringContextHelper.getBean(ConfigurationService.class);
+        this.eventBus = SpringContextHelper.getBean(EventBus.class);
+    }
 
     @Override
     public void createFragment(Div div) {
@@ -95,7 +96,8 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
         Button renameAttachmentDirsButton =
                 new Button("Přejmenovat adresáře příloh", VaadinIcon.COG_O.create(), event -> {
                     UIUtils.showSilentInfo(
-                            "Bylo přejmenováno " + articleFacade.renameAttachmentDirs(UIUtils.getContextPath()) + " adresářů příloh");
+                            "Bylo přejmenováno " + articleService.renameAttachmentDirs(UIUtils.getContextPath()) +
+                                    " adresářů příloh");
                 });
 
         reprocessButton = new Button("Přegenerovat všechny články", VaadinIcon.COG_O.create(), event -> {
@@ -105,7 +107,7 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
                         eventBus.subscribe(ArticlesSettingsPageFragmentFactory.this);
                         progressIndicatorDialog = new ProgressDialog();
                         uuid = UUID.randomUUID();
-                        articleFacade.reprocessAllArticles(uuid, UIUtils.getContextPath());
+                        articleService.reprocessAllArticles(uuid, UIUtils.getContextPath());
                     });
             dialog.setWidth("460px");
             dialog.setHeight("230px");

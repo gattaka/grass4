@@ -2,6 +2,7 @@ package cz.gattserver.grass.core.ui.pages;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.vaadin.flow.component.UI;
 import cz.gattserver.common.ui.ComponentFactory;
@@ -40,14 +41,12 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
 
     private static final long serialVersionUID = 1560125362904332256L;
 
-    private ContentNodeService contentNodeService;
-    private NodeService nodeService;
-    private CoreACLService coreACLService;
-    private SecurityService securityService;
+    private final ContentNodeService contentNodeService;
+    private final NodeService nodeService;
+    private final CoreACLService coreACLService;
+    private final SecurityService securityService;
 
-    private TextField searchField;
-
-    private NodeTO node;
+    private NodeTO nodeTO;
 
     public NodePage(ContentNodeService contentNodeService, NodeService nodeService, CoreACLService coreACLService,
                     SecurityService securityService) {
@@ -68,24 +67,24 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        node = nodeService.getNodeByIdForDetail(identifier.getId());
+        nodeTO = nodeService.getNodeByIdForDetail(identifier.getId());
 
         // Navigační breadcrumb
-        createBreadcrumb(layout, node);
+        createBreadcrumb(layout, nodeTO);
 
         // Podkategorie
-        createSubnodesPart(layout, node);
+        createSubnodesPart(layout, nodeTO);
 
         // Obsahy
-        createContentsPart(layout, node);
+        createContentsPart(layout, nodeTO);
     }
 
-    private void createNewNodePanel(Div layout, final NodeTO node) {
+    private void createNewNodePanel(Div layout, final NodeTO nodeTO) {
         ComponentFactory componentFactory = new ComponentFactory();
         Div buttonLayout = componentFactory.createButtonLayout();
         buttonLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(buttonLayout);
-        Button createButton = componentFactory.createCreateButton(e -> createNodeAction(node));
+        Button createButton = componentFactory.createCreateButton(e -> createNodeAction(nodeTO));
         buttonLayout.add(createButton);
     }
 
@@ -104,16 +103,14 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         binder.setBean(to);
 
         ComponentFactory componentFactory = new ComponentFactory();
-        HorizontalLayout saveCloseLayout = componentFactory.createDialogSubmitOrStornoLayout(event -> {
+        dialog.getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(event -> {
             if (binder.validate().isOk()) {
                 Long newNodeId = nodeService.createNewNode(parentNode.getId(), to.getName());
                 UI.getCurrent()
                         .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(newNodeId, to.getName()));
                 dialog.close();
             }
-        }, event -> dialog.close());
-        dialog.add(saveCloseLayout);
-        dialog.setWidth("300px");
+        }, event -> dialog.close()));
 
         dialog.open();
     }
@@ -158,14 +155,10 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         if (coreACLService.canCreateNode(securityService.getCurrentUser())) createNewNodePanel(layout, node);
     }
 
-    private ContentNodeFilterTO createFilterTO() {
-        return new ContentNodeFilterTO().setParentNodeId(node.getId()).setName(searchField.getValue());
-    }
-
-    private void createContentsPart(Div layout, NodeTO node) {
+    private void createContentsPart(Div layout, NodeTO nodeTO) {
         layout.add(new H2("Obsahy"));
 
-        searchField = new TextField();
+        TextField searchField = new TextField();
         searchField.setPlaceholder("Název obsahu");
         searchField.setWidthFull();
         searchField.setValueChangeMode(ValueChangeMode.EAGER);
@@ -176,14 +169,17 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         searchResultsTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(searchResultsTable);
 
+        Supplier<ContentNodeFilterTO> filterSupplier =
+                () -> new ContentNodeFilterTO().setParentNodeId(nodeTO.getId()).setName(searchField.getValue());
+
         searchResultsTable.populate(securityService.getCurrentUser().getId() != null,
-                q -> contentNodeService.getByFilter(createFilterTO(), q.getOffset(), q.getLimit()).stream(),
-                q -> contentNodeService.getCountByFilter(createFilterTO()));
+                q -> contentNodeService.getByFilter(filterSupplier.get(), q.getOffset(), q.getLimit()).stream(),
+                q -> contentNodeService.getCountByFilter(filterSupplier.get()));
 
         searchField.addValueChangeListener(e -> searchResultsTable.getDataProvider().refreshAll());
 
         // Vytvořit obsahy
-        if (coreACLService.canCreateContent(securityService.getCurrentUser())) createNewContentMenu(layout, node);
+        if (coreACLService.canCreateContent(securityService.getCurrentUser())) createNewContentMenu(layout, nodeTO);
     }
 
     private void createNewContentMenu(Div layout, NodeTO node) {
@@ -195,7 +191,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
 
     @Override
     public String getPageTitle() {
-        return node.getName();
+        return nodeTO.getName();
     }
 
 }

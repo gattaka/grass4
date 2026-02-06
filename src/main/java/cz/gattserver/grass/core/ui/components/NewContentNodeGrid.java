@@ -19,35 +19,35 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public class NewContentNodeGrid extends Grid<ContentModule> {
 
-	private static final long serialVersionUID = -2220485504407844582L;
+    private static final long serialVersionUID = -2220485504407844582L;
 
-	public NewContentNodeGrid(final NodeTO node) {
-		// inject nefunguje kvůli něčemu v předkovi
-		final ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);
+    public NewContentNodeGrid(final NodeTO node) {
+        // inject nefunguje kvůli něčemu v předkovi
+        final ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);
 
-		setSelectionMode(SelectionMode.NONE);
-		UIUtils.applyGrassDefaultStyle(this);
+        setSelectionMode(SelectionMode.NONE);
+        UIUtils.applyGrassDefaultStyle(this);
 
-		String iconBind = "customIcon";
-		String nameBind = "customName";
+        final String ICON_BIND = "customIcon";
+        final String NAME_BIND = "customName";
 
-		// jaké služby obsahů mám k dispozici ?
-		List<ContentModule> contentServices = serviceHolder.getContentModules();
-		setItems(contentServices);
+        // jaké služby obsahů mám k dispozici ?
+        List<ContentModule> contentServices = serviceHolder.getContentModules();
+        setItems(contentServices);
 
-		addColumn(new IconRenderer<>(c -> {
-			Image img = c.getContentIcon();
-			img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
-			return img;
-		}, c -> "")).setHeader("").setFlexGrow(0).setWidth("28px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
-				.setKey(iconBind);
+        addColumn(new IconRenderer<>(c -> {
+            Image img = c.getContentIcon();
+            img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
+            return img;
+        }, c -> "")).setHeader("").setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
+                .setKey(ICON_BIND);
 
-		addColumn(new ComponentRenderer<>(c -> {
+        addColumn(new ComponentRenderer<>(c -> {
             String url = UIUtils.getPageURL(c.getContentEditorPageFactory(), DefaultContentOperations.NEW.toString(),
                     URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
             return new Anchor(url, c.getCreateNewContentLabel());
-        })).setHeader("Obsah").setKey(nameBind);
+        })).setHeader("Obsah").setKey(NAME_BIND);
 
-		setHeight(GridUtils.processHeight(contentServices.size()) + "px");
-	}
+        setHeight(GridUtils.processHeight(contentServices.size()) + "px");
+    }
 }
