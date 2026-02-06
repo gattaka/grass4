@@ -17,19 +17,28 @@ import cz.gattserver.grass.medic.web.MedicalInstitutionDialog;
 public class MedicalInstitutionsTab extends Div {
 
     private final MedicService medicService;
-    private final Consumer<MedicalInstitutionTO> onSave;
     private final MedicalInstitutionTO filterTO;
+
+    private GridOperationsTab gridOperationsTab;
 
     public MedicalInstitutionsTab() {
         medicService = SpringContextHelper.getBean(MedicService.class);
         filterTO = new MedicalInstitutionTO();
 
-        onSave = to -> medicService.saveMedicalInstitution(to);
-        add(new GridOperationsTab<>(MedicalInstitutionTO.class,
+        Consumer<MedicalInstitutionTO> onSave = to -> {
+            medicService.saveMedicalInstitution(to);
+            populateGrid(gridOperationsTab.getGrid());
+        };
+        Consumer<MedicalInstitutionTO> onDelete = to -> {
+            medicService.deleteMedicalInstitution(to.getId());
+            populateGrid(gridOperationsTab.getGrid());
+        };
+        gridOperationsTab = new GridOperationsTab<>(MedicalInstitutionTO.class,
                 to -> MedicalInstitutionDialog.detail(medicService.getMedicalInstitutionById(to.getId())).open(),
                 () -> MedicalInstitutionDialog.create(onSave).open(),
                 to -> MedicalInstitutionDialog.edit(medicService.getMedicalInstitutionById(to.getId()), onSave).open(),
-                to -> medicService.deleteMedicalInstitution(to), this::populateGrid, this::customizeGrid));
+                onDelete, this::populateGrid, this::customizeGrid);
+        add(gridOperationsTab);
     }
 
     private void populateGrid(Grid<MedicalInstitutionTO> grid) {

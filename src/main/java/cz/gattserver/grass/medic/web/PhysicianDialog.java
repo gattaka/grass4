@@ -52,15 +52,13 @@ public class PhysicianDialog extends EditWebDialog {
         formLayout.add(emailField);
         emailField.setWidthFull();
         emailField.setReadOnly(readOnly);
-        binder.forField(emailField).asRequired(componentFactory.createRequiredLabel())
-                .bind(PhysicianTO::getEmail, PhysicianTO::setEmail);
+        binder.forField(emailField).bind(PhysicianTO::getEmail, PhysicianTO::setEmail);
 
         TextField phoneField = new TextField("Telefon");
         formLayout.add(phoneField);
         phoneField.setWidthFull();
         phoneField.setReadOnly(readOnly);
-        binder.forField(phoneField).asRequired(componentFactory.createRequiredLabel())
-                .bind(PhysicianTO::getPhone, PhysicianTO::setPhone);
+        binder.forField(phoneField).bind(PhysicianTO::getPhone, PhysicianTO::setPhone);
 
         if (originalTO != null) binder.readBean(originalTO);
 

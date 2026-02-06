@@ -46,7 +46,12 @@ public class MedicalRecordDialog extends EditWebDialog {
         MedicService medicService = SpringContextHelper.getBean(MedicService.class);
 
         Binder<MedicalRecordTO> binder = new Binder<>(MedicalRecordTO.class);
-        binder.setBean(new MedicalRecordTO());
+        MedicalRecordTO beanTO = new MedicalRecordTO();
+        if (scheduledVisitTO != null) {
+            beanTO.setDateTime(scheduledVisitTO.getDateTime());
+            beanTO.setInstitutionId(scheduledVisitTO.getInstitutionId());
+        }
+        binder.setBean(beanTO);
 
         List<MedicalInstitutionTO> medicalInstitutionTOList = medicService.getMedicalInstitutions();
         ComboBox<MedicalInstitutionTO> institutionComboBox = new ComboBox<>("Instituce", medicalInstitutionTOList);
@@ -126,11 +131,6 @@ public class MedicalRecordDialog extends EditWebDialog {
         }, e -> close(), !readOnly));
 
         if (originalTO != null) binder.readBean(originalTO);
-
-        if (scheduledVisitTO != null) {
-            dateTimePicker.setValue(scheduledVisitTO.getDateTime());
-            institutionComboBox.setValue(new MedicalInstitutionTO(scheduledVisitTO.getInstitutionId()));
-        }
     }
 
 }

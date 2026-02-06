@@ -9,7 +9,7 @@ public interface MedicService {
 
 	// Instituce
 
-	void deleteMedicalInstitution(MedicalInstitutionTO to);
+	void deleteMedicalInstitution(Long to);
 
 	List<MedicalInstitutionTO> getMedicalInstitutions(MedicalInstitutionTO filterTO);
 
@@ -33,7 +33,7 @@ public interface MedicService {
 
 	// Záznamy
 
-	void deleteMedicalRecord(MedicalRecordTO to);
+	void deleteMedicalRecord(Long id);
 
 	List<MedicalRecordTO> getMedicalRecords(MedicalRecordTO filterTO);
 
@@ -45,7 +45,7 @@ public interface MedicService {
 
 	// Medikamenty
 
-	void deleteMedicament(MedicamentTO to);
+	void deleteMedicament(Long id);
 
 	Set<MedicamentTO> getMedicaments(MedicamentTO filterTO);
 
@@ -55,9 +55,11 @@ public interface MedicService {
 
 	MedicamentTO getMedicamentById(Long id);
 
+    boolean isMedicamentUsed(Long id);
+
 	// Doktoři
 
-	void deletePhysician(PhysicianTO to);
+	void deletePhysician(Long id);
 
 	List<PhysicianTO> getPhysicians(PhysicianTO filterTO);
 

@@ -34,7 +34,7 @@ public class MedicalRecordsTab extends Div {
             populateGrid(gridOperationsTab.getGrid());
         };
         Consumer<MedicalRecordTO> onDelete = to -> {
-            medicService.deleteMedicalRecord(to);
+            medicService.deleteMedicalRecord(to.getId());
             populateGrid(gridOperationsTab.getGrid());
         };
         gridOperationsTab = new GridOperationsTab<>(MedicalRecordTO.class,

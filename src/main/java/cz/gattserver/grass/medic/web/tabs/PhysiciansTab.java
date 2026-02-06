@@ -19,19 +19,28 @@ public class PhysiciansTab extends Div {
     private static final long serialVersionUID = -5013459007975657195L;
 
     private final MedicService medicService;
-    private final Consumer<PhysicianTO> onSave;
     private final PhysicianTO filterTO;
+
+    private GridOperationsTab gridOperationsTab;
 
     public PhysiciansTab() {
         medicService = SpringContextHelper.getBean(MedicService.class);
         filterTO = new PhysicianTO();
 
-        onSave = to -> medicService.savePhysician(to);
-        add(new GridOperationsTab<>(PhysicianTO.class,
+        Consumer<PhysicianTO> onSave = to -> {
+            medicService.savePhysician(to);
+            populateGrid(gridOperationsTab.getGrid());
+        };
+        Consumer<PhysicianTO> onDelete = to -> {
+            medicService.deletePhysician(to.getId());
+            populateGrid(gridOperationsTab.getGrid());
+        };
+        gridOperationsTab = new GridOperationsTab<>(PhysicianTO.class,
                 to -> PhysicianDialog.detail(medicService.getPhysicianById(to.getId())).open(),
                 () -> PhysicianDialog.create(onSave).open(),
-                to -> PhysicianDialog.edit(medicService.getPhysicianById(to.getId()), onSave).open(),
-                to -> medicService.deletePhysician(to), this::populateGrid, this::customizeGrid));
+                to -> PhysicianDialog.edit(medicService.getPhysicianById(to.getId()), onSave).open(), onDelete,
+                this::populateGrid, this::customizeGrid);
+        add(gridOperationsTab);
     }
 
     private void populateGrid(Grid<PhysicianTO> grid) {

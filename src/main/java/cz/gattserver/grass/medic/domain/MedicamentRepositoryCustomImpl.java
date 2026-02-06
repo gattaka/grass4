@@ -13,6 +13,7 @@ import java.util.Set;
 public class MedicamentRepositoryCustomImpl extends QuerydslRepositorySupport implements MedicamentRepositoryCustom {
 
     private final QMedicament m = QMedicament.medicament;
+    private final QMedicalRecordMedicament mrm = QMedicalRecordMedicament.medicalRecordMedicament;
 
     public MedicamentRepositoryCustomImpl() {
         super(Medicament.class);
@@ -38,5 +39,10 @@ public class MedicamentRepositoryCustomImpl extends QuerydslRepositorySupport im
     public MedicamentTO findAndMapById(Long id) {
         return from(m).where(m.id.eq(id)).select(new QMedicamentTO(m.id, m.name, m.tolerance)).orderBy(m.name.asc())
                 .fetchOne();
+    }
+
+    @Override
+    public boolean isUsed(Long id) {
+        return from(mrm).where(mrm.id.medicamentId.eq(id)).fetchCount() > 0;
     }
 }

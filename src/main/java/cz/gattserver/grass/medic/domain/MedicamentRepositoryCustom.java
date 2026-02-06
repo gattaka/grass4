@@ -9,4 +9,6 @@ public interface MedicamentRepositoryCustom {
     Set<MedicamentTO> findByFilter(MedicamentTO filterTO);
 
     MedicamentTO findAndMapById(Long id);
+
+    boolean isUsed(Long id);
 }

@@ -36,8 +36,8 @@ public class MedicServiceImpl implements MedicService {
     // Instituce
 
     @Override
-    public void deleteMedicalInstitution(MedicalInstitutionTO to) {
-        medicalInstitutionRepository.deleteById(to.getId());
+    public void deleteMedicalInstitution(Long id) {
+        medicalInstitutionRepository.deleteById(id);
     }
 
     @Override
@@ -107,9 +107,9 @@ public class MedicServiceImpl implements MedicService {
     // Záznamy
 
     @Override
-    public void deleteMedicalRecord(MedicalRecordTO to) {
-        medicalRecordMedicamentRepository.deleteByRecordId(to.getId());
-        medicalRecordRepository.deleteById(to.getId());
+    public void deleteMedicalRecord(Long id) {
+        medicalRecordMedicamentRepository.deleteByRecordId(id);
+        medicalRecordRepository.deleteById(id);
     }
 
     @Override
@@ -156,8 +156,8 @@ public class MedicServiceImpl implements MedicService {
     // Medikamenty
 
     @Override
-    public void deleteMedicament(MedicamentTO to) {
-        medicamentRepository.deleteById(to.getId());
+    public void deleteMedicament(Long id) {
+        medicamentRepository.deleteById(id);
     }
 
     @Override
@@ -184,11 +184,17 @@ public class MedicServiceImpl implements MedicService {
         return medicamentRepository.findAndMapById(id);
     }
 
+
+    @Override
+    public boolean isMedicamentUsed(Long id) {
+        return medicamentRepository.isUsed(id);
+    }
+
     // Doktoři
 
     @Override
-    public void deletePhysician(PhysicianTO to) {
-        physicianRepository.deleteById(to.getId());
+    public void deletePhysician(Long id) {
+        physicianRepository.deleteById(id);
     }
 
     @Override
@@ -220,5 +226,4 @@ public class MedicServiceImpl implements MedicService {
     public PhysicianTO getPhysicianByLastVisit(Long institutionId) {
         return physicianRepository.findPhysicianByLastVisit(institutionId);
     }
-
 }
