@@ -3,6 +3,8 @@ package cz.gattserver.grass.core.mock;
 import com.google.common.jimfs.Configuration;
 import com.google.common.jimfs.Jimfs;
 import cz.gattserver.grass.core.services.FileSystemService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,8 @@ import java.util.Date;
 @Component(value = "MockFileSystemService")
 public class MockFileSystemService implements FileSystemService {
 
+    private static final Logger logger = LoggerFactory.getLogger(MockFileSystemService.class);
+
 	private FileSystem fileSystem;
 
 	@PostConstruct
@@ -36,7 +40,7 @@ public class MockFileSystemService implements FileSystemService {
 	@Override
 	public synchronized FileSystem newZipFileSystem(Path path, boolean create) throws IOException {
 		if (create)
-			System.out.println("Creating FS '" + path.toUri() + "'");
+            logger.info("Creating FS '" + path.toUri() + "'");
 		return FileSystems.newFileSystem(URI.create("jar:" + path.toUri()),
 				Collections.singletonMap("create", "" + create), Jimfs.class.getClassLoader());
 	}

@@ -730,7 +730,7 @@ public class PGServiceImplTest extends DBCleanTest {
 			try (FileSystem fs = fileSystemService.newZipFileSystem(zipPath, false)) {
 				zipContents = ZIPUtils.list(fs);
 				for (Path p : zipContents)
-					System.out.println(p);
+                    logger.info(p.toString());
 			}
 		}
 		eventBus.unsubscribe(eventsHandler2);

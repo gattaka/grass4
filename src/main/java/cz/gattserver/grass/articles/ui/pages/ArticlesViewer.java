@@ -134,6 +134,6 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
 
     @Override
     public void beforeLeave(BeforeLeaveEvent event) {
-        System.out.print(event.toString());
+        // TODO unload JS + CSS
     }
 }

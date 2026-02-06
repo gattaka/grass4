@@ -465,7 +465,6 @@ public class MonitorPage extends Div {
 
             @ClientCallable
             private void monitorRefresh(JsonNode jsonObject) {
-                System.out.println(jsonObject);
                 if (!jsonObject.has("type")) return;
                 if (jsonObject.get("type").isNull()) return;
                 String type = jsonObject.get("type").asText();

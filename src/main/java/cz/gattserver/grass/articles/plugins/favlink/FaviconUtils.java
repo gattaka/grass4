@@ -65,7 +65,7 @@ public class FaviconUtils {
 
 					Map<String, List<String>> map = uc.getHeaderFields();
 					for (Map.Entry<String, List<String>> entry : map.entrySet())
-						System.out.println(entry.getKey() + " : " + entry.getValue());
+						logger.info(entry.getKey() + " : " + entry.getValue());
 
 					// Zjisti, zda bude potřeba manuální redirect (URLConnection
 					// to umí samo, dokud se nepřechází mezi
