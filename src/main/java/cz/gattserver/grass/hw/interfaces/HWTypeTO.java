@@ -5,7 +5,7 @@ import com.querydsl.core.annotations.QueryProjection;
 /**
  * Typ hw
  */
-public class HWItemTypeTO {
+public class HWTypeTO {
 
 	/**
 	 * Identifikátor hw
@@ -22,12 +22,12 @@ public class HWItemTypeTO {
 	 */
 	private Integer count;
 
-	public HWItemTypeTO(String name) {
+	public HWTypeTO(String name) {
 		this.name = name;
 	}
 
 	@QueryProjection
-	public HWItemTypeTO(Long id, String name, Integer count) {
+	public HWTypeTO(Long id, String name, Integer count) {
 		this.id = id;
 		this.name = name;
 		this.count = count;
@@ -41,7 +41,7 @@ public class HWItemTypeTO {
 		this.count = count;
 	}
 
-	public HWItemTypeTO() {
+	public HWTypeTO() {
 	}
 
 	public Long getId() {
@@ -60,4 +60,7 @@ public class HWItemTypeTO {
 		this.name = name;
 	}
 
+    public HWTypeTO copy() {
+        return new HWTypeTO(id, name, count);
+    }
 }

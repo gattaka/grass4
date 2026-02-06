@@ -26,7 +26,7 @@ import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemTypeEditDialog;
@@ -41,9 +41,9 @@ public class HWTypesTab extends Div {
 
     private transient HWService hwService;
 
-    private Grid<HWItemTypeTO> grid;
+    private Grid<HWTypeTO> grid;
 
-    private HWItemTypeTO filterTO;
+    private HWTypeTO filterTO;
 
     private HWService getHWService() {
         if (hwService == null) hwService = SpringContextHelper.getBean(HWService.class);
@@ -51,7 +51,7 @@ public class HWTypesTab extends Div {
     }
 
     private void populate() {
-        FetchCallback<HWItemTypeTO, HWItemTypeTO> fetchCallback =
+        FetchCallback<HWTypeTO, HWTypeTO> fetchCallback =
                 q -> getHWService().getHWItemTypes(filterTO, q.getOffset(), q.getLimit(),
                         QuerydslUtil.transformOrdering(q.getSortOrders(), column -> {
                             switch (column) {
@@ -63,12 +63,12 @@ public class HWTypesTab extends Div {
                                     return column;
                             }
                         })).stream();
-        CountCallback<HWItemTypeTO, HWItemTypeTO> countCallback = q -> getHWService().countHWItemTypes(filterTO);
+        CountCallback<HWTypeTO, HWTypeTO> countCallback = q -> getHWService().countHWItemTypes(filterTO);
         grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
     }
 
     public HWTypesTab() {
-        filterTO = new HWItemTypeTO();
+        filterTO = new HWTypeTO();
 
         grid = new Grid<>();
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -76,9 +76,9 @@ public class HWTypesTab extends Div {
 
         ComponentFactory componentFactory = new ComponentFactory();
 
-        grid.addColumn(HWItemTypeTO::getCount).setHeader("Počet").setSortable(true).setKey(COUNT_BIND).setWidth("100px")
+        grid.addColumn(HWTypeTO::getCount).setHeader("Počet").setSortable(true).setKey(COUNT_BIND).setWidth("100px")
                 .setFlexGrow(0);
-        Column<HWItemTypeTO> nameColumn =
+        Column<HWTypeTO> nameColumn =
                 grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton(to.getName(), e -> {
                     HWFilterTO filter = new HWFilterTO();
                     List<String> types = new ArrayList<>();
@@ -138,12 +138,12 @@ public class HWTypesTab extends Div {
         grid.setEnabled(enabled);
     }
 
-    private void openNewTypeWindow(HWItemTypeTO hwItemTypeDTO) {
+    private void openNewTypeWindow(HWTypeTO hwItemTypeDTO) {
         new HWItemTypeEditDialog(hwItemTypeDTO == null ? null : hwItemTypeDTO) {
             private static final long serialVersionUID = -7566950396535469316L;
 
             @Override
-            protected void onSuccess(HWItemTypeTO hwItemTypeDTO) {
+            protected void onSuccess(HWTypeTO hwItemTypeDTO) {
                 if (hwItemTypeDTO != null) {
                     grid.getDataProvider().refreshItem(hwItemTypeDTO);
                 } else {

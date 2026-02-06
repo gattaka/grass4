@@ -6,19 +6,19 @@ import java.util.Set;
 
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
-import cz.gattserver.grass.hw.model.domain.HWItem;
-import cz.gattserver.grass.hw.model.domain.HWItemType;
-import cz.gattserver.grass.hw.model.domain.HWServiceNote;
+import cz.gattserver.grass.hw.model.HWItem;
+import cz.gattserver.grass.hw.model.HWType;
+import cz.gattserver.grass.hw.model.HWServiceNote;
 
 public interface HWMapperService {
 
-	public HWItemTypeTO mapHWItemType(HWItemType e);
+	public HWTypeTO mapHWItemType(HWType e);
 
-	public HWItemType mapHWItem(HWItemTypeTO dto);
+	public HWType mapHWItem(HWTypeTO dto);
 
-	public Set<HWItemTypeTO> mapHWItemTypes(Collection<HWItemType> list);
+	public Set<HWTypeTO> mapHWItemTypes(Collection<HWType> list);
 
 	public HWServiceNoteTO mapServiceNote(HWServiceNote e);
 

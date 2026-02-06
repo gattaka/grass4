@@ -1,12 +1,10 @@
-package cz.gattserver.grass.hw.model.repositories;
+package cz.gattserver.grass.hw.model;
 
 import java.util.Collection;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-
-import cz.gattserver.grass.hw.model.domain.HWItem;
 
 public interface HWItemRepository extends JpaRepository<HWItem, Long>, HWItemRepositoryCustom {
 

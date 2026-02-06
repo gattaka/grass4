@@ -10,8 +10,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-import cz.gattserver.grass.hw.ui.pages.HWPage;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
@@ -28,18 +26,14 @@ public class HWItemsTab extends Div {
 
     private static final long serialVersionUID = -5013459007975657195L;
 
-    @Autowired
-    private HWService hwService;
-
-    @Autowired
-    private SecurityService securityFacade;
+    private final HWService hwService;
+    private final SecurityService securityFacade;
 
     private HWItemsGrid itemsGrid;
-    private HWPage hwPage;
 
-    public HWItemsTab(HWPage hwPage) {
-        SpringContextHelper.inject(this);
-        this.hwPage = hwPage;
+    public HWItemsTab() {
+        this.hwService = SpringContextHelper.getBean(HWService.class);
+        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
 
         itemsGrid = new HWItemsGrid(to -> navigateToDetail(to.getId()));
         itemsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -89,6 +83,7 @@ public class HWItemsTab extends Div {
         HWItemTO hwItem = null;
         if (hwItemOverviewTO != null) hwItem = hwService.getHWItem(hwItemOverviewTO.getId());
         new HWItemEditDialog(hwItem == null ? null : hwService.getHWItem(hwItem.getId()), to -> {
+            to.setId(hwService.saveHWItem(to));
             populate();
             HWItemOverviewTO filterTO = new HWItemOverviewTO();
             filterTO.setId(to.getId());

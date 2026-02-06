@@ -1,11 +1,12 @@
-package cz.gattserver.grass.hw.model.repositories;
+package cz.gattserver.grass.hw.model;
 
 import java.util.List;
 
 import com.querydsl.core.types.Order;
-import cz.gattserver.grass.core.model.util.QuerydslUtil;
-import cz.gattserver.grass.hw.interfaces.QHWItemTypeTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
+import cz.gattserver.grass.hw.interfaces.QHWTypeTO;
 import cz.gattserver.grass.hw.model.domain.QHWItem;
+import cz.gattserver.grass.hw.model.domain.QHWType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -16,38 +17,34 @@ import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
-import cz.gattserver.grass.hw.model.domain.HWItemType;
-import cz.gattserver.grass.hw.model.domain.QHWItemType;
-
 @Repository
-public class HWItemTypeRepositoryCustomImpl implements HWItemTypeRepositoryCustom {
+public class HWTypeRepositoryCustomImpl implements HWTypeRepositoryCustom {
 
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	private Predicate createPredicateHWItemTypes(HWItemTypeTO filter) {
-		QHWItemType t = QHWItemType.hWItemType;
+	private Predicate createPredicateHWItemTypes(HWTypeTO filter) {
+		QHWType t = QHWType.hWType;
 		PredicateBuilder builder = new PredicateBuilder();
 		builder.anyILike(t.name, filter.getName());
 		return builder.getBuilder();
 	}
 
 	@Override
-	public long countHWItemTypes(HWItemTypeTO filter) {
-		JPAQuery<HWItemType> query = new JPAQuery<>(entityManager);
-		QHWItemType t = QHWItemType.hWItemType;
+	public long countHWItemTypes(HWTypeTO filter) {
+		JPAQuery<HWType> query = new JPAQuery<>(entityManager);
+		QHWType t = QHWType.hWType;
 		return query.from(t).where(createPredicateHWItemTypes(filter)).fetchCount();
 	}
 
 	@Override
-	public List<HWItemTypeTO> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
-		JPAQuery<HWItemTypeTO> query = new JPAQuery<>(entityManager);
-		QHWItemType t = QHWItemType.hWItemType;
+	public List<HWTypeTO> getHWItemTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
+		JPAQuery<HWTypeTO> query = new JPAQuery<>(entityManager);
+		QHWType t = QHWType.hWType;
 		QHWItem h = QHWItem.hWItem;
 		query.offset(offset).limit(limit);
 		query.from(h).join(h.types, t).where(createPredicateHWItemTypes(filter))
-				.groupBy(t.id, t.name).select(new QHWItemTypeTO(t.id, t.name, h.id.count().intValue()));
+				.groupBy(t.id, t.name).select(new QHWTypeTO(t.id, t.name, h.id.count().intValue()));
 
 		for (OrderSpecifier<?> os : order) {
 			if ("name".equals(os.getTarget().toString()))

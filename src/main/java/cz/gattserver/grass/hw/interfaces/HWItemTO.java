@@ -1,87 +1,180 @@
 package cz.gattserver.grass.hw.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
 /**
  * HW Objekt
  */
-public class HWItemTO extends HWItemOverviewTO {
+public class HWItemTO {
 
-	private static final long serialVersionUID = 4661359528372859703L;
+    private static final long serialVersionUID = 4661359528372859703L;
 
-	/**
-	 * Typ - klasifikace hw
-	 */
-	private Set<String> types;
+    private Long id;
+    private String name;
+    private LocalDate purchaseDate;
+    private BigDecimal price;
+    private HWItemState state;
+    private Long usedInId;
+    private String usedInName;
+    private String supervizedFor;
+    private Boolean publicItem;
+    private Integer warrantyYears;
+    private String description;
 
-	/**
-	 * Poznámky ke stavu hw - opravy apod.
-	 */
-	private List<HWServiceNoteTO> serviceNotes;
+    private Set<HWTypeTO> types;
+    private List<HWServiceNoteTO> serviceNotes;
 
-	/**
-	 * Počet let záruky
-	 */
-	private Integer warrantyYears;
+    public HWItemTO() {
+    }
 
-	/**
-	 * Součást celku
-	 */
-	private HWItemOverviewTO usedIn;
+    @QueryProjection
+    public HWItemTO(Long id, String name, LocalDate purchaseDate, BigDecimal price, HWItemState state, Long usedInId,
+                    String usedInName, String supervizedFor, Boolean publicItem, Integer warrantyYears,
+                    String description) {
+        this.id = id;
+        this.name = name;
+        this.purchaseDate = purchaseDate;
+        this.price = price;
+        this.state = state;
+        this.usedInId = usedInId;
+        this.usedInName = usedInName;
+        this.supervizedFor = supervizedFor;
+        this.publicItem = publicItem;
+        this.warrantyYears = warrantyYears;
+        this.description = description;
+    }
 
-	/**
-	 * Popis
-	 */
-	private String description;
+    public String getDescription() {
+        return description;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public HWItemOverviewTO getUsedIn() {
-		return usedIn;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public void setUsedIn(HWItemOverviewTO usedIn) {
-		this.usedIn = usedIn;
-	}
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
 
-	public Integer getWarrantyYears() {
-		return warrantyYears;
-	}
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
 
-	public void setWarrantyYears(Integer warrantyYears) {
-		this.warrantyYears = warrantyYears;
-	}
+    public BigDecimal getPrice() {
+        return price;
+    }
 
-	public Set<String> getTypes() {
-		return types;
-	}
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 
-	public void setTypes(Set<String> types) {
-		this.types = types;
-	}
+    public HWItemState getState() {
+        return state;
+    }
 
-	public List<HWServiceNoteTO> getServiceNotes() {
-		return serviceNotes;
-	}
+    public void setState(HWItemState state) {
+        this.state = state;
+    }
 
-	public void setServiceNotes(List<HWServiceNoteTO> serviceNotes) {
-		this.serviceNotes = serviceNotes;
-	}
+    public Long getUsedInId() {
+        return usedInId;
+    }
 
-	@Override
-	public int hashCode() {
-		return super.hashCode();
-	}
+    public void setUsedInId(Long usedInId) {
+        this.usedInId = usedInId;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return super.equals(obj);
-	}
+    public String getUsedInName() {
+        return usedInName;
+    }
+
+    public void setUsedInName(String usedInName) {
+        this.usedInName = usedInName;
+    }
+
+    public String getSupervizedFor() {
+        return supervizedFor;
+    }
+
+    public void setSupervizedFor(String supervizedFor) {
+        this.supervizedFor = supervizedFor;
+    }
+
+    public Boolean getPublicItem() {
+        return publicItem;
+    }
+
+    public void setPublicItem(Boolean publicItem) {
+        this.publicItem = publicItem;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getWarrantyYears() {
+        return warrantyYears;
+    }
+
+    public void setWarrantyYears(Integer warrantyYears) {
+        this.warrantyYears = warrantyYears;
+    }
+
+    public Set<HWTypeTO> getTypes() {
+        return types;
+    }
+
+    public void setTypes(Set<HWTypeTO> types) {
+        this.types = types;
+    }
+
+    public List<HWServiceNoteTO> getServiceNotes() {
+        return serviceNotes;
+    }
+
+    public void setServiceNotes(List<HWServiceNoteTO> serviceNotes) {
+        this.serviceNotes = serviceNotes;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    public HWItemTO copy() {
+        HWItemTO to =
+                new HWItemTO(id, name, purchaseDate, price, state, usedInId, usedInName, supervizedFor, publicItem,
+                        warrantyYears, description);
+        to.setServiceNotes(new ArrayList<>());
+        for (HWServiceNoteTO note : serviceNotes)
+            to.getServiceNotes().add(note.copy());
+        to.setTypes(new LinkedHashSet<>());
+        for (HWTypeTO type : types)
+            to.getTypes().add(type.copy());
+        return to;
+    }
 }

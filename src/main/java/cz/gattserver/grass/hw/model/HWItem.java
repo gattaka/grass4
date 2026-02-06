@@ -1,4 +1,4 @@
-package cz.gattserver.grass.hw.model.domain;
+package cz.gattserver.grass.hw.model;
 
 import java.math.BigDecimal;
 import java.util.Date;
@@ -32,7 +32,7 @@ public class HWItem {
 	 */
 	@ManyToMany(fetch = FetchType.LAZY)
 	@JoinTable(name = "HW_ITEM_HW_ITEM_TYPE")
-	private Set<HWItemType> types;
+	private Set<HWType> types;
 
 	/**
 	 * Datum zakoupení (získání)
@@ -131,11 +131,11 @@ public class HWItem {
 		this.name = name;
 	}
 
-	public Set<HWItemType> getTypes() {
+	public Set<HWType> getTypes() {
 		return types;
 	}
 
-	public void setTypes(Set<HWItemType> types) {
+	public void setTypes(Set<HWType> types) {
 		this.types = types;
 	}
 

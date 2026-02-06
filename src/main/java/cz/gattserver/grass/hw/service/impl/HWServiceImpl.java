@@ -21,6 +21,8 @@ import java.util.stream.Stream;
 import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
+import cz.gattserver.grass.hw.interfaces.*;
+import cz.gattserver.grass.hw.model.*;
 import cz.gattserver.grass.pg.util.PGUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -35,18 +37,8 @@ import com.querydsl.core.types.OrderSpecifier;
 import cz.gattserver.common.util.DateUtils;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.grass.hw.HWConfiguration;
-import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTO;
-import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
-import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
-import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
-import cz.gattserver.grass.hw.model.domain.HWItem;
-import cz.gattserver.grass.hw.model.domain.HWItemType;
-import cz.gattserver.grass.hw.model.domain.HWServiceNote;
-import cz.gattserver.grass.hw.model.repositories.HWItemRepository;
-import cz.gattserver.grass.hw.model.repositories.HWItemTypeRepository;
-import cz.gattserver.grass.hw.model.repositories.HWServiceNoteRepository;
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
+import cz.gattserver.grass.hw.model.HWType;
 import cz.gattserver.grass.hw.service.HWMapperService;
 import cz.gattserver.grass.hw.service.HWService;
 
@@ -69,7 +61,7 @@ public class HWServiceImpl implements HWService {
 	private HWItemRepository hwItemRepository;
 
 	@Autowired
-	private HWItemTypeRepository hwItemTypeRepository;
+	private HWTypeRepository hwTypeRepository;
 
 	@Autowired
 	private HWServiceNoteRepository serviceNoteRepository;
@@ -557,42 +549,42 @@ public class HWServiceImpl implements HWService {
 	 */
 
 	@Override
-	public Long saveHWType(HWItemTypeTO hwItemTypeTO) {
-		HWItemType type = hwMapper.mapHWItem(hwItemTypeTO);
-		type = hwItemTypeRepository.save(type);
+	public Long saveHWType(HWTypeTO hwTypeTO) {
+		HWType type = hwMapper.mapHWItem(hwTypeTO);
+		type = hwTypeRepository.save(type);
 		return type.getId();
 	}
 
 	@Override
-	public Set<HWItemTypeTO> getAllHWTypes() {
-		List<HWItemType> hwItemTypes = hwItemTypeRepository.findListOrderByName();
-		return hwMapper.mapHWItemTypes(hwItemTypes);
+	public Set<HWTypeTO> getAllHWTypes() {
+		List<HWType> hwTypes = hwTypeRepository.findListOrderByName();
+		return hwMapper.mapHWItemTypes(hwTypes);
 	}
 
 	@Override
-	public HWItemTypeTO getHWItemType(Long fixTypeId) {
-		return hwMapper.mapHWItemType(hwItemTypeRepository.findById(fixTypeId).orElse(null));
+	public HWTypeTO getHWItemType(Long fixTypeId) {
+		return hwMapper.mapHWItemType(hwTypeRepository.findById(fixTypeId).orElse(null));
 	}
 
 	@Override
 	public void deleteHWItemType(Long id) {
-		HWItemType itemType = hwItemTypeRepository.findById(id).orElse(null);
+		HWType itemType = hwTypeRepository.findById(id).orElse(null);
 		List<HWItem> items = hwItemRepository.findByTypesId(itemType.getId());
 		for (HWItem item : items) {
 			item.getTypes().remove(itemType);
 			hwItemRepository.save(item);
 		}
-		hwItemTypeRepository.delete(itemType);
+		hwTypeRepository.delete(itemType);
 	}
 
 	@Override
-	public List<HWItemTypeTO> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
-		return hwItemTypeRepository.getHWItemTypes(filter, offset, limit, order);
+	public List<HWTypeTO> getHWItemTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
+		return hwTypeRepository.getHWItemTypes(filter, offset, limit, order);
 	}
 
 	@Override
-	public int countHWItemTypes(HWItemTypeTO filter) {
-		return (int) hwItemTypeRepository.countHWItemTypes(filter);
+	public int countHWItemTypes(HWTypeTO filter) {
+		return (int) hwTypeRepository.countHWItemTypes(filter);
 	}
 
 	/*
@@ -665,10 +657,10 @@ public class HWServiceImpl implements HWService {
 		if (hwItemDTO.getTypes() != null) {
 			item.setTypes(new HashSet<>());
 			for (String typeName : hwItemDTO.getTypes()) {
-				HWItemType type = hwItemTypeRepository.findByName(typeName);
+				HWType type = hwTypeRepository.findByName(typeName);
 				if (type == null) {
-					type = new HWItemType(typeName);
-					type = hwItemTypeRepository.save(type);
+					type = new HWType(typeName);
+					type = hwTypeRepository.save(type);
 				}
 				item.getTypes().add(type);
 			}
@@ -740,7 +732,7 @@ public class HWServiceImpl implements HWService {
 
 		hwItemRepository.deleteById(item.getId());
 
-		hwItemTypeRepository.cleanOrphansName();
+		hwTypeRepository.cleanOrphansName();
 
 		Path hwPath = getHWPath(item.getId());
 		try (Stream<Path> s = Files.walk(hwPath)) {

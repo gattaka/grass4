@@ -1,7 +1,8 @@
-package cz.gattserver.grass.hw.model.repositories;
+package cz.gattserver.grass.hw.model;
 
 import java.util.List;
 
+import cz.gattserver.grass.hw.model.domain.QHWType;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 
@@ -13,10 +14,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.model.domain.HWItem;
-import cz.gattserver.grass.hw.model.domain.HWItemType;
 import cz.gattserver.grass.hw.model.domain.QHWItem;
-import cz.gattserver.grass.hw.model.domain.QHWItemType;
 
 @Repository
 public class HWItemRepositoryCustomImpl implements HWItemRepositoryCustom {
@@ -26,7 +24,7 @@ public class HWItemRepositoryCustomImpl implements HWItemRepositoryCustom {
 
 	private Predicate createPredicateHWItems(HWFilterTO filter) {
 		QHWItem h = QHWItem.hWItem;
-		QHWItemType t = QHWItemType.hWItemType;
+		QHWType t = QHWType.hWType;
 		PredicateBuilder builder = new PredicateBuilder();
 		builder.anyILike(h.name, filter.getName());
 		builder.eq(h.state, filter.getState());
@@ -39,7 +37,7 @@ public class HWItemRepositoryCustomImpl implements HWItemRepositoryCustom {
 			builder.eq(h.publicItem, true);
 		if (filter.getTypes() != null)
 			for (String type : filter.getTypes()) {
-				JPAQuery<HWItemType> subQuery = new JPAQuery<>();
+				JPAQuery<HWType> subQuery = new JPAQuery<>();
 				subQuery.from(t).where(t.name.eq(type), h.types.contains(t));
 				builder.exists(subQuery);
 			}

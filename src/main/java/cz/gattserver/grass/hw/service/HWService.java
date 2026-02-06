@@ -9,12 +9,8 @@ import java.util.Set;
 
 import com.querydsl.core.types.OrderSpecifier;
 
-import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTO;
-import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
-import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
-import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
+import cz.gattserver.grass.hw.interfaces.*;
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 
 public interface HWService {
 
@@ -91,18 +87,18 @@ public interface HWService {
 	/**
 	 * Uloží nebo aktualizuje typ hw položky
 	 *
-	 * @param hwItemTypeTO to položky
+	 * @param hwTypeTO to položky
 	 * @return id uložené položky
 	 */
-	Long saveHWType(HWItemTypeTO hwItemTypeTO);
+	Long saveHWType(HWTypeTO hwTypeTO);
 
-	Set<HWItemTypeTO> getAllHWTypes();
+	Set<HWTypeTO> getAllHWTypes();
 
-	HWItemTypeTO getHWItemType(Long fixTypeId);
+	HWTypeTO getHWItemType(Long fixTypeId);
 
-	List<HWItemTypeTO> getHWItemTypes(HWItemTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
+	List<HWTypeTO> getHWItemTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
 
-	int countHWItemTypes(HWItemTypeTO filter);
+	int countHWItemTypes(HWTypeTO filter);
 
 	void deleteHWItemType(Long id);
 

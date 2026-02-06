@@ -99,8 +99,8 @@ public class HWDetailsInfoTab extends Div {
         ComponentFactory componentFactory = new ComponentFactory();
         Div tagsDiv = new Div();
         tagsDiv.setId("hw-tags-div");
-        hwItem.getTypes().forEach(typeName -> {
-            Div token = new Div(typeName);
+        hwItem.getTypes().forEach(to -> {
+            Div token = new Div(to.getName());
             tagsDiv.add(token);
         });
         add(tagsDiv);
@@ -175,12 +175,12 @@ public class HWDetailsInfoTab extends Div {
         tableLayout.addStrong("Je součástí").setColSpan(5);
         tableLayout.newRow();
 
-        if (hwItem.getUsedIn() == null) {
+        if (hwItem.getUsedInId() == null) {
             tableLayout.add(new Span("-"));
         } else {
             // Samotný button se stále roztahoval, bez ohledu na nastavený width
-            Div usedInBtn = componentFactory.createInlineButton(hwItem.getUsedIn().getName(),
-                    e -> UI.getCurrent().navigate(HWItemPage.class, hwItem.getUsedIn().getId()));
+            Div usedInBtn = componentFactory.createInlineButton(hwItem.getUsedInName(),
+                    e -> UI.getCurrent().navigate(HWItemPage.class, hwItem.getUsedInId()));
             tableLayout.add(usedInBtn);
         }
         tableLayout.setColSpan(5);
@@ -231,8 +231,10 @@ public class HWDetailsInfoTab extends Div {
             add(operationsLayout);
 
             final Button fixBtn = componentFactory.createEditButton(
-                    e -> new HWItemEditDialog(hwService.getHWItem(hwItem.getId()),
-                            to -> UI.getCurrent().getPage().reload()).open());
+                    e -> new HWItemEditDialog(hwService.getHWItem(hwItem.getId()), to -> {
+                        hwService.saveHWItem(to);
+                        UI.getCurrent().getPage().reload();
+                    }).open());
             operationsLayout.add(fixBtn);
 
             final Button deleteBtn = componentFactory.createDeleteButton(ev -> {

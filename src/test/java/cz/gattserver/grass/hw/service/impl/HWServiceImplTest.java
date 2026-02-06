@@ -3,7 +3,6 @@ package cz.gattserver.grass.hw.service.impl;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -18,18 +17,13 @@ import cz.gattserver.grass.core.mock.MockFileSystemService;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.ui.util.ImageComparator;
 import cz.gattserver.grass.core.util.DBCleanTest;
-import org.apache.commons.io.IOUtils;
+import cz.gattserver.grass.hw.interfaces.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
 import cz.gattserver.grass.hw.HWConfiguration;
-import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
-import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
-import cz.gattserver.grass.hw.interfaces.HWItemState;
-import cz.gattserver.grass.hw.interfaces.HWItemTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 
 import org.junit.jupiter.api.Test;
@@ -254,43 +248,43 @@ public class HWServiceImplTest extends DBCleanTest {
 
 	@Test
 	public void saveHWType() {
-		HWItemTypeTO hwItemTypeTO = new HWItemTypeTO();
-		hwItemTypeTO.setName("myš");
-		Long id = hwService.saveHWType(hwItemTypeTO);
+		HWTypeTO hwTypeTO = new HWTypeTO();
+		hwTypeTO.setName("myš");
+		Long id = hwService.saveHWType(hwTypeTO);
 
-		hwItemTypeTO = hwService.getHWItemType(id);
-		assertEquals("myš", hwItemTypeTO.getName());
+		hwTypeTO = hwService.getHWItemType(id);
+		assertEquals("myš", hwTypeTO.getName());
 	}
 
 	@Test
 	public void getAllHWTypes() {
-		HWItemTypeTO hwItemTypeTO = new HWItemTypeTO();
-		hwItemTypeTO.setName("myš");
-		hwService.saveHWType(hwItemTypeTO);
+		HWTypeTO hwTypeTO = new HWTypeTO();
+		hwTypeTO.setName("myš");
+		hwService.saveHWType(hwTypeTO);
 
-		hwItemTypeTO = new HWItemTypeTO();
-		hwItemTypeTO.setName("notebook");
-		hwService.saveHWType(hwItemTypeTO);
+		hwTypeTO = new HWTypeTO();
+		hwTypeTO.setName("notebook");
+		hwService.saveHWType(hwTypeTO);
 
-		Set<HWItemTypeTO> types = hwService.getAllHWTypes();
+		Set<HWTypeTO> types = hwService.getAllHWTypes();
 
 		assertEquals(2, types.size());
-		Iterator<HWItemTypeTO> it = types.iterator();
+		Iterator<HWTypeTO> it = types.iterator();
 		assertEquals("myš", it.next().getName());
 		assertEquals("notebook", it.next().getName());
 	}
 
 	@Test
 	public void deleteHWItemType() {
-		HWItemTypeTO hwItemTypeTO = new HWItemTypeTO();
-		hwItemTypeTO.setName("myš");
-		Long id = hwService.saveHWType(hwItemTypeTO);
+		HWTypeTO hwTypeTO = new HWTypeTO();
+		hwTypeTO.setName("myš");
+		Long id = hwService.saveHWType(hwTypeTO);
 
-		hwItemTypeTO = new HWItemTypeTO();
-		hwItemTypeTO.setName("notebook");
-		hwService.saveHWType(hwItemTypeTO);
+		hwTypeTO = new HWTypeTO();
+		hwTypeTO.setName("notebook");
+		hwService.saveHWType(hwTypeTO);
 
-		Set<HWItemTypeTO> types = hwService.getAllHWTypes();
+		Set<HWTypeTO> types = hwService.getAllHWTypes();
 		assertEquals(2, types.size());
 
 		hwService.deleteHWItemType(id);
@@ -315,12 +309,12 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO.setState(HWItemState.BROKEN);
 		itemTO.setSupervizedFor("Táta");
 
-		HWItemTypeTO hwItemTypeTO = new HWItemTypeTO();
-		hwItemTypeTO.setName("notebook");
-		Long typeId = hwService.saveHWType(hwItemTypeTO);
-		hwItemTypeTO.setId(typeId);
+		HWTypeTO hwTypeTO = new HWTypeTO();
+		hwTypeTO.setName("notebook");
+		Long typeId = hwService.saveHWType(hwTypeTO);
+		hwTypeTO.setId(typeId);
 		Set<String> types = new HashSet<>();
-		types.add(hwItemTypeTO.getName());
+		types.add(hwTypeTO.getName());
 
 		itemTO.setTypes(types);
 		itemTO.setUsedIn(null);
@@ -355,12 +349,12 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO.setState(HWItemState.BROKEN);
 		itemTO.setSupervizedFor("Táta");
 
-		HWItemTypeTO hwItemTypeTO = new HWItemTypeTO();
-		hwItemTypeTO.setName("notebook");
-		Long typeId = hwService.saveHWType(hwItemTypeTO);
-		hwItemTypeTO.setId(typeId);
+		HWTypeTO hwTypeTO = new HWTypeTO();
+		hwTypeTO.setName("notebook");
+		Long typeId = hwService.saveHWType(hwTypeTO);
+		hwTypeTO.setId(typeId);
 		Set<String> types = new HashSet<>();
-		types.add(hwItemTypeTO.getName());
+		types.add(hwTypeTO.getName());
 
 		itemTO.setTypes(types);
 		itemTO.setUsedIn(null);
@@ -377,12 +371,12 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO2.setPurchaseDate(purchDate2);
 		itemTO2.setState(HWItemState.DISASSEMBLED);
 
-		HWItemTypeTO hwItemTypeTO2 = new HWItemTypeTO();
-		hwItemTypeTO2.setName("RAM");
-		Long typeId2 = hwService.saveHWType(hwItemTypeTO2);
-		hwItemTypeTO2.setId(typeId2);
+		HWTypeTO hwTypeTO2 = new HWTypeTO();
+		hwTypeTO2.setName("RAM");
+		Long typeId2 = hwService.saveHWType(hwTypeTO2);
+		hwTypeTO2.setId(typeId2);
 		Set<String> types2 = new HashSet<>();
-		types2.add(hwItemTypeTO2.getName());
+		types2.add(hwTypeTO2.getName());
 
 		List<HWItemOverviewTO> list = hwService.getAllHWItems();
 

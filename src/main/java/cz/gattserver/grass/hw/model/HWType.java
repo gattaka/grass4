@@ -1,4 +1,4 @@
-package cz.gattserver.grass.hw.model.domain;
+package cz.gattserver.grass.hw.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -9,7 +9,7 @@ import jakarta.persistence.Id;
  * Typ hw
  */
 @Entity(name = "HW_ITEM_TYPE")
-public class HWItemType {
+public class HWType {
 
 	/**
 	 * Identifikátor hw
@@ -23,11 +23,11 @@ public class HWItemType {
 	 */
 	private String name;
 
-	public HWItemType(String name) {
+	public HWType(String name) {
 		this.name = name;
 	}
 
-	public HWItemType() {
+	public HWType() {
 	}
 
 	public Long getId() {

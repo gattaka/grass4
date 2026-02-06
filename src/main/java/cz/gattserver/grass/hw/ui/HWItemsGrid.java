@@ -6,8 +6,6 @@ import java.util.function.Consumer;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.internal.AllowInert;
@@ -16,7 +14,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -66,7 +63,7 @@ public class HWItemsGrid extends Div {
     private Grid<HWItemOverviewTO> grid;
     private TokenField hwTypesFilter;
 
-    private Map<String, HWItemTypeTO> tokenMap = new HashMap<>();
+    private Map<String, HWTypeTO> tokenMap = new HashMap<>();
     private Map<Long, Integer> indexMap = new HashMap<>();
     private HWFilterTO filterTO;
 
@@ -90,7 +87,7 @@ public class HWItemsGrid extends Div {
 
         // Filtr na typy HW není veřejný, aby nenapovídal, co vše host nevidí
         if (securityFacade.getCurrentUser().isAdmin()) {
-            for (HWItemTypeTO type : hwService.getAllHWTypes())
+            for (HWTypeTO type : hwService.getAllHWTypes())
                 tokenMap.put(type.getName(), type);
 
             hwTypesFilter = new TokenField(tokenMap.keySet());

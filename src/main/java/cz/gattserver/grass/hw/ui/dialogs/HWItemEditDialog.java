@@ -7,13 +7,14 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.exception.GrassException;
-import cz.gattserver.grass.core.ui.util.TokenField;
+import cz.gattserver.grass.core.ui.util.TokenField2;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -26,42 +27,29 @@ import com.vaadin.flow.data.converter.StringToIntegerConverter;
 
 import cz.gattserver.grass.hw.interfaces.HWItemState;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.UsedInChooser;
-import org.springframework.beans.factory.annotation.Autowired;
 
 public class HWItemEditDialog extends EditWebDialog {
 
     private static final long serialVersionUID = -6773027334692911384L;
 
-    @Autowired
-    private HWService hwService;
+    private final HWService hwService;
 
-    private Consumer<HWItemTO> onSuccessConsumer;
-
-    public HWItemEditDialog(HWItemTO originalTO, Consumer<HWItemTO> onSuccessConsumer) {
+    public HWItemEditDialog(HWItemTO originalTO, Consumer<HWItemTO> onSave) {
         super("Záznam");
-        init(originalTO, onSuccessConsumer);
-    }
+        this.hwService = SpringContextHelper.getBean(HWService.class);
 
-    /**
-     * @param originalTO opravuji údaje existující položky, nebo vytvářím novou (
-     *                   {@code null}) ?
-     */
-    private void init(HWItemTO originalTO, Consumer<HWItemTO> onSuccessConsumer) {
-        SpringContextHelper.inject(this);
         setWidth("900px");
 
-        HWItemTO formTO = new HWItemTO();
-        formTO.setName("");
-        formTO.setPrice(new BigDecimal(0));
-        formTO.setWarrantyYears(0);
-        formTO.setState(HWItemState.NEW);
-        formTO.setPurchaseDate(LocalDate.now());
-        if (originalTO != null) {
-            formTO.setUsedIn(originalTO.getUsedIn());
-            formTO.setUsedInName(originalTO.getUsedInName());
+        HWItemTO formTO = originalTO == null ? new HWItemTO() : originalTO.copy();
+        if (originalTO == null) {
+            formTO.setName("");
+            formTO.setPrice(new BigDecimal(0));
+            formTO.setWarrantyYears(0);
+            formTO.setState(HWItemState.NEW);
+            formTO.setPurchaseDate(LocalDate.now());
         }
 
         Binder<HWItemTO> binder = new Binder<>(HWItemTO.class);
@@ -117,8 +105,10 @@ public class HWItemEditDialog extends EditWebDialog {
         baseLayout.setVerticalComponentAlignment(Alignment.END, publicItemCheckBox);
 
         add(new UsedInChooser(originalTO, to -> {
-            formTO.setUsedIn(to);
-            formTO.setUsedInName(to == null ? null : to.getName());
+            if (to != null) {
+                formTO.setUsedInId(to.getId());
+                formTO.setUsedInName(to.getName());
+            }
         }));
 
         TextArea descriptionArea = new TextArea("Popis");
@@ -129,17 +119,22 @@ public class HWItemEditDialog extends EditWebDialog {
         add(descriptionArea);
         descriptionArea.setHeight("300px");
 
-        Map<String, HWItemTypeTO> tokens = new HashMap<>();
-        hwService.getAllHWTypes().forEach(to -> tokens.put(to.getName(), to));
+        Map<String, HWTypeTO> typeNameMap = new HashMap<>();
+        for (HWTypeTO to : hwService.getAllHWTypes())
+            typeNameMap.put(to.getName(), to);
 
-        TokenField keywords = new TokenField(tokens.keySet());
-        keywords.setAllowNewItems(true);
-        keywords.getInputField().setPlaceholder("klíčové slovo");
+        TokenField2 tokenField = new TokenField2("Klíčová slova", typeNameMap.keySet());
+        tokenField.setAllowNewItems(true);
+        binder.forField(tokenField)
+                .bind(to -> to.getTypes().stream().map(HWTypeTO::getName).collect(Collectors.toSet()),
+                        (to, val) -> to.setTypes(val.stream().map(name -> {
+                            HWTypeTO typeTO = typeNameMap.get(name);
+                            if (typeTO != null) return typeTO;
+                            return new HWTypeTO(name);
+                        }).collect(Collectors.toSet())));
+        layout.add(tokenField);
 
-        if (originalTO != null) keywords.setValues(originalTO.getTypes());
-        add(keywords);
-
-        HorizontalLayout buttons = componentFactory.createDialogSubmitOrStornoLayout(e -> {
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
                 HWItemTO writeTO = originalTO == null ? new HWItemTO() : originalTO;
                 try {
@@ -148,17 +143,15 @@ public class HWItemEditDialog extends EditWebDialog {
                     UIUtils.showError("V údajích jsou chyby");
                     return;
                 }
-                writeTO.setUsedIn(binder.getBean().getUsedIn());
-                writeTO.setUsedInName(binder.getBean().getUsedInName());
-                writeTO.setTypes(keywords.getValues());
-                writeTO.setId(hwService.saveHWItem(writeTO));
-                onSuccessConsumer.accept(writeTO);
+                // TODO
+//                writeTO.setUsedIn(binder.getBean().getUsedIn());
+//                writeTO.setUsedInName(binder.getBean().getUsedInName());
+                onSave.accept(writeTO);
                 close();
             } catch (Exception ve) {
                 throw new GrassException("Uložení se nezdařilo", ve);
             }
-        }, e -> close());
-        add(buttons);
+        }, e -> close()));
 
         if (originalTO != null) binder.readBean(originalTO);
     }

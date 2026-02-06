@@ -1,11 +1,10 @@
-package cz.gattserver.grass.hw.model.repositories;
+package cz.gattserver.grass.hw.model;
 
 import java.util.List;
 
 import com.querydsl.core.types.OrderSpecifier;
 
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.model.domain.HWItem;
 
 public interface HWItemRepositoryCustom {
 

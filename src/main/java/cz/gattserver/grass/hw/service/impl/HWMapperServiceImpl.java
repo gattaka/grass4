@@ -7,44 +7,44 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
+import cz.gattserver.grass.hw.model.HWType;
 import org.springframework.stereotype.Component;
 
 import cz.gattserver.common.util.DateUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
 import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
-import cz.gattserver.grass.hw.model.domain.HWItem;
-import cz.gattserver.grass.hw.model.domain.HWItemType;
-import cz.gattserver.grass.hw.model.domain.HWServiceNote;
+import cz.gattserver.grass.hw.model.HWItem;
+import cz.gattserver.grass.hw.model.HWServiceNote;
 import cz.gattserver.grass.hw.service.HWMapperService;
 
 @Component
 public class HWMapperServiceImpl implements HWMapperService {
 
-	public HWItemTypeTO mapHWItemType(HWItemType e) {
+	public HWTypeTO mapHWItemType(HWType e) {
 		if (e == null)
 			return null;
 
-		HWItemTypeTO dto = new HWItemTypeTO();
+		HWTypeTO dto = new HWTypeTO();
 		dto.setId(e.getId());
 		dto.setName(e.getName());
 		return dto;
 	}
 
-	public HWItemType mapHWItem(HWItemTypeTO dto) {
+	public HWType mapHWItem(HWTypeTO dto) {
 		if (dto == null)
 			return null;
 
-		HWItemType e = new HWItemType();
+		HWType e = new HWType();
 		e.setId(dto.getId());
 		e.setName(dto.getName());
 		return e;
 	}
 
-	public Set<HWItemTypeTO> mapHWItemTypes(Collection<HWItemType> list) {
-		Set<HWItemTypeTO> dtos = new LinkedHashSet<>();
-		for (HWItemType e : list)
+	public Set<HWTypeTO> mapHWItemTypes(Collection<HWType> list) {
+		Set<HWTypeTO> dtos = new LinkedHashSet<>();
+		for (HWType e : list)
 			dtos.add(mapHWItemType(e));
 		return dtos;
 	}
@@ -86,7 +86,7 @@ public class HWMapperServiceImpl implements HWMapperService {
 		dto.setState(e.getState());
 		dto.setPublicItem(e.getPublicItem());
 		Set<String> types = new HashSet<>();
-		for (HWItemType typeTO : e.getTypes())
+		for (HWType typeTO : e.getTypes())
 			types.add(typeTO.getName());
 		dto.setTypes(types);
 		dto.setWarrantyYears(e.getWarrantyYears());

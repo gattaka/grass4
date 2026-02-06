@@ -1,4 +1,4 @@
-package cz.gattserver.grass.hw.model.domain;
+package cz.gattserver.grass.hw.model;
 
 import java.util.Date;
 

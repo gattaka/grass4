@@ -10,81 +10,94 @@ import jakarta.validation.constraints.Size;
  */
 public class HWServiceNoteTO {
 
-	/**
-	 * Identifikátor změny
-	 */
-	private Long id;
+    /**
+     * Identifikátor změny
+     */
+    private Long id;
 
-	/**
-	 * Datum události
-	 */
-	@NotNull
-	private LocalDate date;
+    /**
+     * Datum události
+     */
+    @NotNull
+    private LocalDate date;
 
-	/**
-	 * Popis změny
-	 */
-	@NotNull
-	@Size(min = 1)
-	private String description;
+    /**
+     * Popis změny
+     */
+    @NotNull
+    @Size(min = 1)
+    private String description;
 
-	/**
-	 * Stav do kterého byl HW převeden v souvislosti s popisovanou událostí
-	 */
-	private HWItemState state;
+    /**
+     * Stav do kterého byl HW převeden v souvislosti s popisovanou událostí
+     */
+    private HWItemState state;
 
-	/**
-	 * Součásti
-	 */
-	private String usedInName;
-	private Long usedInId;
+    /**
+     * Součásti
+     */
+    private String usedInName;
+    private Long usedInId;
 
-	public String getUsedInName() {
-		return usedInName;
-	}
+    public HWServiceNoteTO(Long id, LocalDate date, String description, HWItemState state, String usedInName,
+                           Long usedInId) {
+        this.id = id;
+        this.date = date;
+        this.description = description;
+        this.state = state;
+        this.usedInName = usedInName;
+        this.usedInId = usedInId;
+    }
 
-	public void setUsedInName(String usedInName) {
-		this.usedInName = usedInName;
-	}
+    public String getUsedInName() {
+        return usedInName;
+    }
 
-	public Long getUsedInId() {
-		return usedInId;
-	}
+    public void setUsedInName(String usedInName) {
+        this.usedInName = usedInName;
+    }
 
-	public void setUsedInId(Long usedInId) {
-		this.usedInId = usedInId;
-	}
+    public Long getUsedInId() {
+        return usedInId;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public void setUsedInId(Long usedInId) {
+        this.usedInId = usedInId;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public String getDescription() {
-		return description;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public void setDescription(String description) {
-		this.description = description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
-	public LocalDate getDate() {
-		return date;
-	}
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-	public void setDate(LocalDate date) {
-		this.date = date;
-	}
+    public LocalDate getDate() {
+        return date;
+    }
 
-	public HWItemState getState() {
-		return state;
-	}
+    public void setDate(LocalDate date) {
+        this.date = date;
+    }
 
-	public void setState(HWItemState state) {
-		this.state = state;
-	}
+    public HWItemState getState() {
+        return state;
+    }
 
+    public void setState(HWItemState state) {
+        this.state = state;
+    }
+
+    public HWServiceNoteTO copy() {
+        return new HWServiceNoteTO(id, date, description, state, usedInName, usedInId);
+    }
 }

@@ -1,54 +1,26 @@
 package cz.gattserver.grass.hw.interfaces;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
 
 /**
  * HW Objekt
  */
 public class HWItemOverviewTO implements Serializable {
 
+    @Serial
 	private static final long serialVersionUID = 3678406951423588173L;
 
-	/**
-	 * Identifikátor hw
-	 */
 	private Long id;
-
-	/**
-	 * Název
-	 */
 	private String name;
-
-	/**
-	 * Datum zakoupení (získání)
-	 */
+    private HWItemState state;
+    private String usedInName;
+    private String supervizedFor;
+    private BigDecimal price;
 	private LocalDate purchaseDate;
-
-	/**
-	 * Cena
-	 */
-	private BigDecimal price;
-
-	/**
-	 * Stav hw - funkční, rozbitý, poruchový, bližší popis
-	 */
-	private HWItemState state;
-
-	/**
-	 * Součást celku
-	 */
-	private String usedInName;
-
-	/**
-	 * Spravováno pro (spravuju tohle zařízení někomu?)
-	 */
-	private String supervizedFor;
-
-	/**
-	 * Je položka veřejně viditelná?
-	 */
 	private Boolean publicItem;
 
 	public String getSupervizedFor() {
@@ -115,22 +87,15 @@ public class HWItemOverviewTO implements Serializable {
 		this.publicItem = publicItem;
 	}
 
-	@Override
-	public int hashCode() {
-		return id == null ? super.hashCode() : id.hashCode();
-	}
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof HWItemOverviewTO that)) return false;
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj == null)
-			return false;
-		if (obj instanceof HWItemOverviewTO) {
-			HWItemOverviewTO hw = (HWItemOverviewTO) obj;
-			if (getId() != null)
-				return getId().equals(hw.getId());
-			return super.equals(hw);
-		}
-		return false;
-	}
+        return Objects.equals(id, that.id);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
 }

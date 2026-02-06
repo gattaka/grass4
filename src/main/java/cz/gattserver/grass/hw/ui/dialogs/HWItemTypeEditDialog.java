@@ -8,7 +8,7 @@ import com.vaadin.flow.data.binder.Binder;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.hw.interfaces.HWItemTypeTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 
 public abstract class HWItemTypeEditDialog extends EditWebDialog {
@@ -17,7 +17,7 @@ public abstract class HWItemTypeEditDialog extends EditWebDialog {
 
 	private transient HWService hwService;
 
-	public HWItemTypeEditDialog(HWItemTypeTO originalDTO) {
+	public HWItemTypeEditDialog(HWTypeTO originalDTO) {
         super("Typ");
 		init(originalDTO);
 	}
@@ -28,22 +28,22 @@ public abstract class HWItemTypeEditDialog extends EditWebDialog {
 		return hwService;
 	}
 
-	public void init(HWItemTypeTO originalDTO) {
-		HWItemTypeTO formDTO = new HWItemTypeTO();
+	public void init(HWTypeTO originalDTO) {
+		HWTypeTO formDTO = new HWTypeTO();
 		formDTO.setName("");
-		Binder<HWItemTypeTO> binder = new Binder<>(HWItemTypeTO.class);
+		Binder<HWTypeTO> binder = new Binder<>(HWTypeTO.class);
 		binder.setBean(formDTO);
 
 		final TextField nameField = new TextField();
 		nameField.setPlaceholder("Typ HW");
 		nameField.setWidthFull();
-		binder.forField(nameField).asRequired().bind(HWItemTypeTO::getName, HWItemTypeTO::setName);
+		binder.forField(nameField).asRequired().bind(HWTypeTO::getName, HWTypeTO::setName);
 
 		add(nameField);
 
 		HorizontalLayout buttons = componentFactory.createDialogSubmitOrStornoLayout(e -> {
 			try {
-				HWItemTypeTO writeDTO = originalDTO == null ? new HWItemTypeTO() : originalDTO;
+				HWTypeTO writeDTO = originalDTO == null ? new HWTypeTO() : originalDTO;
 				binder.writeBean(writeDTO);
 				getHWService().saveHWType(writeDTO);
 				onSuccess(writeDTO);
@@ -61,6 +61,6 @@ public abstract class HWItemTypeEditDialog extends EditWebDialog {
 		nameField.focus();
 	}
 
-	protected abstract void onSuccess(HWItemTypeTO hwItemTypeDTO);
+	protected abstract void onSuccess(HWTypeTO hwItemTypeDTO);
 
 }

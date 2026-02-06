@@ -49,7 +49,7 @@ public class HWPage extends Div implements HasUrlParameter<Long> {
         Div tabLayout = new Div();
         layout.add(tabLayout);
 
-        HWItemsTab itemsTabContent = new HWItemsTab(this);
+        HWItemsTab itemsTabContent = new HWItemsTab();
 
         tabSheet.addSelectedChangeListener(e -> {
             tabLayout.removeAll();
