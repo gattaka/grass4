@@ -140,7 +140,7 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
     }
 
     private String createServiceNotesTabLabel() {
-        return "Záznamy (" + hwItem.getServiceNotes().size() + ")";
+        return "Záznamy (" + hwItem.getItemRecords().size() + ")";
     }
 
     private String createPhotosTabLabel() {

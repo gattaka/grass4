@@ -6,8 +6,10 @@ import java.util.Set;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.jpa.JPQLQuery;
+import cz.gattserver.grass.hw.interfaces.HWTypeBasicTO;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.interfaces.QHWTypeTO;
+import cz.gattserver.grass.hw.interfaces.QHWTypeBasicTO;
 
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -31,9 +33,12 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
         return builder.getBuilder();
     }
 
-    private JPQLQuery<HWTypeTO> createGroupQuery() {
-        return from(t).leftJoin(it).on(it.id.hwTypeId.eq(t.id)).groupBy(t.id, t.name)
-                .select(new QHWTypeTO(t.id, t.name, i.id.count().intValue()));
+    private JPQLQuery<HWType> createGroupQuery() {
+        return from(t).leftJoin(it).on(it.id.hwTypeId.eq(t.id)).groupBy(t.id, t.name);
+    }
+
+    private JPQLQuery<HWTypeTO> createGroupSelectQuery() {
+        return createGroupQuery().select(new QHWTypeTO(t.id, t.name, it.id.hwItemId.count().intValue()));
     }
 
     @Override
@@ -42,24 +47,31 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public Set<HWTypeTO> findOrderByName() {
-        return new LinkedHashSet<>(createGroupQuery().orderBy(t.name.asc()).fetch());
+    public Set<HWTypeBasicTO> findOrderByName() {
+        return new LinkedHashSet<>(
+                createGroupQuery().select(new QHWTypeBasicTO(t.id, t.name)).orderBy(t.name.asc()).fetch());
     }
 
     @Override
     public HWTypeTO findByName(String name) {
-        return createGroupQuery().where(t.name.eq(name)).fetchOne();
+        return createGroupSelectQuery().where(t.name.eq(name)).fetchOne();
     }
 
     @Override
     public HWTypeTO findByIdAndMap(Long id) {
-        return createGroupQuery().where(t.id.eq(id)).fetchOne();
+        return createGroupSelectQuery().where(t.id.eq(id)).fetchOne();
+    }
+
+    @Override
+    public Set<HWTypeBasicTO> findByItemId(Long itemId) {
+        return new LinkedHashSet<>(
+                createGroupQuery().where(it.id.hwTypeId.eq(itemId)).select(new QHWTypeBasicTO(t.id, t.name)).fetch());
     }
 
     @Override
     public List<HWTypeTO> getHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
         // TODO
-        JPQLQuery<HWTypeTO> query = createGroupQuery();
+        JPQLQuery<HWTypeTO> query = createGroupSelectQuery();
 
         for (OrderSpecifier<?> os : order) {
             if ("name".equals(os.getTarget().toString()))

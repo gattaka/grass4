@@ -1,7 +1,6 @@
 package cz.gattserver.grass.hw.model;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 import jakarta.persistence.*;
 
@@ -45,7 +44,9 @@ public class HWItemRecord {
     /**
      * Součásti
      */
-    private String usage;
+    // TODO přejmenovat sloupec v DB
+    @Column(name = "USAGE")
+    private String usedInName;
 
     public Long getId() {
         return id;
@@ -79,12 +80,12 @@ public class HWItemRecord {
         this.state = state;
     }
 
-    public String getUsage() {
-        return usage;
+    public String getUsedInName() {
+        return usedInName;
     }
 
-    public void setUsage(String usage) {
-        this.usage = usage;
+    public void setUsedInName(String usage) {
+        this.usedInName = usage;
     }
 
     public Long getHwItemId() {
@@ -94,4 +95,5 @@ public class HWItemRecord {
     public void setHwItemId(Long hwItemId) {
         this.hwItemId = hwItemId;
     }
+
 }

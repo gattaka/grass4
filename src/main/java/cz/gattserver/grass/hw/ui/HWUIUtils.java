@@ -48,8 +48,8 @@ public class HWUIUtils {
 			filterQuery.put(SUPERVIZED_FOR_QUERY_TOKEN, filterTO.getSupervizedFor());
 		if (filterTO.getState() != null)
 			filterQuery.put(STATE_QUERY_TOKEN, filterTO.getState().name());
-		if (StringUtils.isNotBlank(filterTO.getUsedIn()))
-			filterQuery.put(USED_IN_QUERY_TOKEN, filterTO.getUsedIn());
+		if (StringUtils.isNotBlank(filterTO.getUsedInName()))
+			filterQuery.put(USED_IN_QUERY_TOKEN, filterTO.getUsedInName());
 
 		if (filterTO.getTypes() != null) {
 			int i = 0;
@@ -78,7 +78,7 @@ public class HWUIUtils {
 					// chybná neexistující konstanta
 				}
 			} else if (USED_IN_QUERY_TOKEN.equals(key)) {
-				filterTO.setUsedIn(values.get(0));
+				filterTO.setUsedInName(values.get(0));
 			} else if (key.startsWith(TYPE_QUERY_TOKEN)) {
 				types.add(values.get(0));
 			}

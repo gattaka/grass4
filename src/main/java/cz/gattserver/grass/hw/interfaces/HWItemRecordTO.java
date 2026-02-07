@@ -11,20 +11,17 @@ import jakarta.validation.constraints.Size;
  */
 public class HWItemRecordTO {
 
-    /**
-     * Identifikátor změny
-     */
     private Long id;
 
-    /**
-     * Datum události
-     */
+    private Long hwItemId;
+
+    private String usedInName;
+    // pouze TO
+    private Long usedInId;
+
     @NotNull
     private LocalDate date;
 
-    /**
-     * Popis změny
-     */
     @NotNull
     @Size(min = 1)
     private String description;
@@ -34,40 +31,29 @@ public class HWItemRecordTO {
      */
     private HWItemState state;
 
-    /**
-     * Součásti
-     */
-    private String usedInName;
-    private Long usedInId;
-
     public HWItemRecordTO() {
     }
 
     @QueryProjection
-    public HWItemRecordTO(Long id, LocalDate date, String description, HWItemState state, String usedInName,
-                          Long usedInId) {
+    public HWItemRecordTO(Long id, Long hwItemId, String usedInName, LocalDate date, String description, HWItemState state) {
         this.id = id;
+        this.hwItemId = hwItemId;
+        this.usedInName = usedInName;
         this.date = date;
         this.description = description;
         this.state = state;
+    }
+
+    // copy constructor
+    public HWItemRecordTO(Long id, Long hwItemId, String usedInName, Long usedInId, LocalDate date, String description,
+                          HWItemState state) {
+        this.id = id;
+        this.hwItemId = hwItemId;
         this.usedInName = usedInName;
         this.usedInId = usedInId;
-    }
-
-    public String getUsedInName() {
-        return usedInName;
-    }
-
-    public void setUsedInName(String usedInName) {
-        this.usedInName = usedInName;
-    }
-
-    public Long getUsedInId() {
-        return usedInId;
-    }
-
-    public void setUsedInId(Long usedInId) {
-        this.usedInId = usedInId;
+        this.date = date;
+        this.description = description;
+        this.state = state;
     }
 
     public Long getId() {
@@ -102,7 +88,31 @@ public class HWItemRecordTO {
         this.state = state;
     }
 
+    public Long getHwItemId() {
+        return hwItemId;
+    }
+
+    public void setHwItemId(Long hwItemId) {
+        this.hwItemId = hwItemId;
+    }
+
+    public String getUsedInName() {
+        return usedInName;
+    }
+
+    public void setUsedInName(String usedInName) {
+        this.usedInName = usedInName;
+    }
+
+    public Long getUsedInId() {
+        return usedInId;
+    }
+
+    public void setUsedInId(Long usedInId) {
+        this.usedInId = usedInId;
+    }
+
     public HWItemRecordTO copy() {
-        return new HWItemRecordTO(id, date, description, state, usedInName, usedInId);
+        return new HWItemRecordTO(id, hwItemId, usedInName,usedInId, date, description, state);
     }
 }

@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.List;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.jpa.JPQLQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import cz.gattserver.grass.hw.interfaces.*;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
@@ -16,7 +18,7 @@ import com.querydsl.jpa.impl.JPAQuery;
 public class HWItemRepositoryCustomImpl extends QuerydslRepositorySupport implements HWItemRepositoryCustom {
 
     private final QHWItem h = QHWItem.hWItem;
-    private final QHWItem u = new QHWItem("used_id");
+    private final QHWItem u = new QHWItem("used_in");
     private final QHWType t = QHWType.hWType;
 
     public HWItemRepositoryCustomImpl() {
@@ -50,23 +52,28 @@ public class HWItemRepositoryCustomImpl extends QuerydslRepositorySupport implem
 
     @Override
     public HWItemTO findByIdAndMapForDetail(Long id) {
-        return from(h).leftJoin(u).on(u.id.eq(h.usedInId))
+        return from(h).leftJoin(u).on(u.id.eq(h.usedInId)).where(h.id.eq(id))
                 .select(new QHWItemTO(h.id, h.name, h.purchaseDate, h.price, h.state, h.usedInId, u.name,
                         h.supervizedFor, h.publicItem, h.warrantyYears, h.description)).fetchOne();
     }
 
     @Override
     public HWItemOverviewTO findByIdAndMap(Long id) {
-        return from(h).leftJoin(u).on(u.id.eq(h.usedInId))
+        return from(h).leftJoin(u).on(u.id.eq(h.usedInId)).where(h.id.eq(id))
                 .select(new QHWItemOverviewTO(h.id, h.name, h.state, u.name, h.supervizedFor, h.price, h.purchaseDate,
                         h.publicItem)).fetchOne();
     }
 
     @Override
     public List<HWItemOverviewTO> findAndMap(HWFilterTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
-        return from(h).leftJoin(u).on(h.usedInId.eq(u.id)).where(createPredicate(filter))
+        JPQLQuery<HWItemOverviewTO> query = from(h).leftJoin(u).on(h.usedInId.eq(u.id)).where(createPredicate(filter))
                 .select(new QHWItemOverviewTO(h.id, h.name, h.state, u.name, h.supervizedFor, h.price, h.purchaseDate,
-                        h.publicItem)).offset(offset).limit(limit).orderBy(order).fetch();
+                        h.publicItem)).offset(offset).limit(limit);
+        for (OrderSpecifier<?> os : order) {
+            if ("name".equals(os.getTarget().toString()))
+                query.orderBy(Order.ASC == os.getOrder() ? h.name.asc() : h.name.desc());
+        }
+        return query.fetch();
     }
 
     @Override

@@ -2,8 +2,10 @@ package cz.gattserver.grass.hw.model;
 
 import jakarta.persistence.*;
 
+import java.io.Serializable;
+
 @Embeddable
-public class HWItemTypeId {
+public class HWItemTypeId implements Serializable {
 
     @Column(name = "HW_ITEM_ID")
     private Long hwItemId;
@@ -25,5 +27,19 @@ public class HWItemTypeId {
 
     public void setHwTypeId(Long hwTypeId) {
         this.hwTypeId = hwTypeId;
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof HWItemTypeId that)) return false;
+
+        return hwItemId.equals(that.hwItemId) && hwTypeId.equals(that.hwTypeId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = hwItemId.hashCode();
+        result = 31 * result + hwTypeId.hashCode();
+        return result;
     }
 }

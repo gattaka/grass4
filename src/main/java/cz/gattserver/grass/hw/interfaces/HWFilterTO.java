@@ -88,8 +88,9 @@ public class HWFilterTO implements Serializable {
         return usedInName;
     }
 
-    public void setUsedInName(String usedInName) {
+    public HWFilterTO setUsedInName(String usedInName) {
         this.usedInName = usedInName;
+        return this;
     }
 
     public Collection<String> getTypes() {

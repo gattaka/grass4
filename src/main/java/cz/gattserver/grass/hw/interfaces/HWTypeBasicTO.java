@@ -5,7 +5,7 @@ import com.querydsl.core.annotations.QueryProjection;
 /**
  * Typ hw
  */
-public class HWTypeTO {
+public class HWTypeBasicTO {
 
 	/**
 	 * Identifikátor hw
@@ -17,32 +17,18 @@ public class HWTypeTO {
 	 */
 	private String name;
 
-	/**
-	 * Počet instancí daného typu
-	 */
-	private Integer count;
-
-	public HWTypeTO(String name) {
+	public HWTypeBasicTO(String name) {
 		this.name = name;
 	}
 
 	@QueryProjection
-	public HWTypeTO(Long id, String name, Integer count) {
+	public HWTypeBasicTO(Long id, String name) {
 		this.id = id;
 		this.name = name;
-		this.count = count;
 	}
 
-    public HWTypeTO() {
+    public HWTypeBasicTO() {
     }
-
-    public Integer getCount() {
-		return count;
-	}
-
-	public void setCount(Integer count) {
-		this.count = count;
-	}
 
 	public Long getId() {
 		return id;
@@ -60,7 +46,7 @@ public class HWTypeTO {
 		this.name = name;
 	}
 
-    public HWTypeTO copy() {
-        return new HWTypeTO(id, name, count);
+    public HWTypeBasicTO copy() {
+        return new HWTypeBasicTO(id, name);
     }
 }

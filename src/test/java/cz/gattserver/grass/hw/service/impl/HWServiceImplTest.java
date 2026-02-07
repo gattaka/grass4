@@ -266,10 +266,10 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwTypeTO.setName("notebook");
 		hwService.saveHWType(hwTypeTO);
 
-		Set<HWTypeTO> types = hwService.getAllHWTypes();
+		Set<HWTypeBasicTO> types = hwService.getAllHWTypes();
 
 		assertEquals(2, types.size());
-		Iterator<HWTypeTO> it = types.iterator();
+		Iterator<HWTypeBasicTO> it = types.iterator();
 		assertEquals("myš", it.next().getName());
 		assertEquals("notebook", it.next().getName());
 	}
@@ -284,7 +284,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwTypeTO.setName("notebook");
 		hwService.saveHWType(hwTypeTO);
 
-		Set<HWTypeTO> types = hwService.getAllHWTypes();
+		Set<HWTypeBasicTO> types = hwService.getAllHWTypes();
 		assertEquals(2, types.size());
 
 		hwService.deleteHWType(id);
@@ -309,16 +309,11 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO.setState(HWItemState.BROKEN);
 		itemTO.setSupervizedFor("Táta");
 
-		HWTypeTO hwTypeTO = new HWTypeTO();
-		hwTypeTO.setName("notebook");
-		Long typeId = hwService.saveHWType(hwTypeTO);
-		hwTypeTO.setId(typeId);
-		Set<String> types = new HashSet<>();
-		types.add(hwTypeTO.getName());
-
+		Set<HWTypeBasicTO> types = new HashSet<>();
+		types.add(new HWTypeBasicTO("notebook"));
 		itemTO.setTypes(types);
-		itemTO.setUsedIn(null);
 		itemTO.setUsedInName(null);
+		itemTO.setUsedInId(null);
 		itemTO.setWarrantyYears(2);
 
 		Long id = hwService.saveHWItem(itemTO);
@@ -349,15 +344,10 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO.setState(HWItemState.BROKEN);
 		itemTO.setSupervizedFor("Táta");
 
-		HWTypeTO hwTypeTO = new HWTypeTO();
-		hwTypeTO.setName("notebook");
-		Long typeId = hwService.saveHWType(hwTypeTO);
-		hwTypeTO.setId(typeId);
-		Set<String> types = new HashSet<>();
-		types.add(hwTypeTO.getName());
-
+        Set<HWTypeBasicTO> types = new HashSet<>();
+        types.add(new HWTypeBasicTO("notebook"));
 		itemTO.setTypes(types);
-		itemTO.setUsedIn(null);
+		itemTO.setUsedInId(null);
 		itemTO.setUsedInName(null);
 		itemTO.setWarrantyYears(2);
 
@@ -371,12 +361,8 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO2.setPurchaseDate(purchDate2);
 		itemTO2.setState(HWItemState.DISASSEMBLED);
 
-		HWTypeTO hwTypeTO2 = new HWTypeTO();
-		hwTypeTO2.setName("RAM");
-		Long typeId2 = hwService.saveHWType(hwTypeTO2);
-		hwTypeTO2.setId(typeId2);
-		Set<String> types2 = new HashSet<>();
-		types2.add(hwTypeTO2.getName());
+		Set<HWTypeBasicTO> types2 = new HashSet<>();
+		types2.add(new HWTypeBasicTO("RAM"));
 
 		List<HWItemOverviewTO> list = hwService.getAllHWItems();
 
@@ -384,7 +370,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		assertEquals(id, list.get(0).getId());
 
 		itemTO2.setTypes(types2);
-		itemTO2.setUsedIn(list.get(0));
+		itemTO2.setUsedInId(list.get(0).getId());
 		itemTO2.setUsedInName(list.get(0).getName());
 		itemTO2.setWarrantyYears(1);
 
@@ -401,11 +387,11 @@ public class HWServiceImplTest extends DBCleanTest {
 		assertEquals(1, savedItemTO2.getTypes().size());
 		assertEquals("RAM", savedItemTO2.getTypes().iterator().next());
 		assertEquals(Integer.valueOf(1), savedItemTO2.getWarrantyYears());
-		assertEquals(id, savedItemTO2.getUsedIn().getId());
+		assertEquals(id, savedItemTO2.getUsedInId());
 		assertEquals("test Name", savedItemTO2.getUsedInName());
 
 		assertEquals(2, hwService.countHWItems(new HWFilterTO()));
-		assertEquals(1, hwService.countHWItems(new HWFilterTO().setUsedIn("test Name")));
+		assertEquals(1, hwService.countHWItems(new HWFilterTO().setUsedInName("test Name")));
 
 		List<HWItemOverviewTO> items = hwService.getAllHWItems();
 		assertEquals(2, items.size());

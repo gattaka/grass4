@@ -534,7 +534,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public Set<HWTypeTO> getAllHWTypes() {
+    public Set<HWTypeBasicTO> getAllHWTypes() {
         return hwTypeRepository.findOrderByName();
     }
 
@@ -568,7 +568,7 @@ public class HWServiceImpl implements HWService {
         HWItemTO item = getHWItem(origId);
         // jde o novou položku, takže prázdné id, žádné záznamy
         item.setId(null);
-        item.setServiceNotes(null);
+        item.setItemRecords(null);
         // TODO
 //		item.setUsedIn(null);
         item.setUsedInName(null);
@@ -652,7 +652,7 @@ public class HWServiceImpl implements HWService {
 
     @Override
     public List<HWItemOverviewTO> getHWItems(HWFilterTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
-        return hwItemRepository.findAndMap(filter, offset, limit, order));
+        return hwItemRepository.findAndMap(filter, offset, limit, order);
     }
 
     @Override
@@ -667,7 +667,10 @@ public class HWServiceImpl implements HWService {
 
     @Override
     public HWItemTO getHWItem(Long itemId) {
-        return hwItemRepository.findByIdAndMap(itemId);
+        HWItemTO to = hwItemRepository.findByIdAndMapForDetail(itemId);
+        to.setItemRecords(hwItemRecordRepository.findByItemId(itemId));
+        to.setTypes(hwTypeRepository.findByItemId(itemId));
+        return to;
     }
 
     @Override
@@ -728,7 +731,7 @@ public class HWServiceImpl implements HWService {
         record.setDate(date);
         record.setDescription(builder.toString());
         record.setState(targetItem.getState());
-        record.setUsage(targetItem.getUsedInId() == null ? "" : targetItem.getUsedInName());
+        record.setUsedInName(targetItem.getUsedInId() == null ? "" : targetItem.getUsedInName());
         record.setHwItemId(targetItem.getId());
         hwItemRecordRepository.save(record);
     }
@@ -739,7 +742,7 @@ public class HWServiceImpl implements HWService {
         serviceNote.setDate(itemRecordTO.getDate());
         serviceNote.setDescription(itemRecordTO.getDescription());
         serviceNote.setState(itemRecordTO.getState());
-        serviceNote.setUsage(itemRecordTO.getUsedInName());
+        serviceNote.setUsedInName(itemRecordTO.getUsedInName());
         serviceNote = hwItemRecordRepository.save(serviceNote);
 
         hwItemRepository.updateState(id, serviceNote.getState());
@@ -750,15 +753,12 @@ public class HWServiceImpl implements HWService {
             // předtím nebyl nikde součástí
             if (usedInId == null) {
                 hwItemRepository.updateUsedInId(id, itemRecordTO.getUsedInId());
-                saveHWPartMoveHWItemRecord(usedInId,name, itemRecordTO.getDate(),
-                        serviceNote.getDescription(), true);
+                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(), serviceNote.getDescription(), true);
             } else if (usedInId != itemRecordTO.getUsedInId()) {
                 // již předtím byl součástí, ale nyní je jinde
-                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(),
-                        serviceNote.getDescription(), false);
+                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(), serviceNote.getDescription(), false);
                 hwItemRepository.updateUsedInId(id, itemRecordTO.getUsedInId());
-                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(),
-                        serviceNote.getDescription(), true);
+                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(), serviceNote.getDescription(), true);
             } else {
                 // nic se nezměnilo - HW je stále součástí stejného HW
             }
@@ -770,21 +770,20 @@ public class HWServiceImpl implements HWService {
                 // nic se nezměnilo - HW stále není nikde evidován jako součást
             } else {
                 // předtím někde byl
-                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(),
-                        serviceNote.getDescription(), false);
+                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(), serviceNote.getDescription(), false);
                 hwItemRepository.updateUsedInId(id, null);
             }
         }
     }
 
     @Override
-    public void modifyServiceNote(HWItemRecordTO serviceNoteDTO) {
-        HWItemRecord serviceNote = hwItemRecordRepository.findById(serviceNoteDTO.getId()).orElse(null);
-        serviceNote.setDate(serviceNoteDTO.getDate());
-        serviceNote.setDescription(serviceNoteDTO.getDescription());
-        serviceNote.setState(serviceNoteDTO.getState());
-        serviceNote.setUsage(serviceNoteDTO.getUsedInName());
-        hwItemRecordRepository.save(serviceNote);
+    public void modifyServiceNote(HWItemRecordTO itemRecordTO) {
+        HWItemRecord itemRecord = hwItemRecordRepository.findById(itemRecordTO.getId()).orElse(null);
+        itemRecord.setDate(itemRecordTO.getDate());
+        itemRecord.setDescription(itemRecordTO.getDescription());
+        itemRecord.setState(itemRecordTO.getState());
+        itemRecord.setUsedInName(itemRecordTO.getUsedInName());
+        hwItemRecordRepository.save(itemRecord);
     }
 
     @Override

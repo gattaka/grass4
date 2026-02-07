@@ -105,7 +105,7 @@ public class HWItemRecordsTab extends Div {
 
                 @Override
                 protected void onSuccess(HWItemRecordTO noteDTO) {
-                    hwItem.getServiceNotes().add(noteDTO);
+                    hwItem.getItemRecords().add(noteDTO);
                     populateServiceNotesGrid();
                     hwItemPage.refreshItem();
                     hwItemPage.switchServiceNotesTab();
@@ -127,7 +127,7 @@ public class HWItemRecordsTab extends Div {
 
             Button deleteNoteBtn = componentFactory.createDeleteGridButton(item -> {
                 getHWService().deleteServiceNote(item.getId());
-                hwItem.getServiceNotes().remove(item);
+                hwItem.getItemRecords().remove(item);
                 populateServiceNotesGrid();
                 hwItemPage.refreshTabLabels();
             }, serviceNotesGrid);
@@ -139,7 +139,7 @@ public class HWItemRecordsTab extends Div {
     }
 
     private void populateServiceNotesGrid() {
-        serviceNotesGrid.setItems(hwItem.getServiceNotes());
+        serviceNotesGrid.setItems(hwItem.getItemRecords());
         serviceNotesGrid.sort(Arrays.asList(new GridSortOrder<>(serviceDateColumn, SortDirection.DESCENDING)));
     }
 }

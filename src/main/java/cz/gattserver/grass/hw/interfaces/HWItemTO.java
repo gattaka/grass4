@@ -28,8 +28,8 @@ public class HWItemTO {
     private Integer warrantyYears;
     private String description;
 
-    private Set<HWTypeTO> types;
-    private List<HWItemRecordTO> serviceNotes;
+    private Set<HWTypeBasicTO> types;
+    private List<HWItemRecordTO> itemRecords;
 
     public HWItemTO() {
     }
@@ -139,20 +139,20 @@ public class HWItemTO {
         this.warrantyYears = warrantyYears;
     }
 
-    public Set<HWTypeTO> getTypes() {
+    public Set<HWTypeBasicTO> getTypes() {
         return types;
     }
 
-    public void setTypes(Set<HWTypeTO> types) {
+    public void setTypes(Set<HWTypeBasicTO> types) {
         this.types = types;
     }
 
-    public List<HWItemRecordTO> getServiceNotes() {
-        return serviceNotes;
+    public List<HWItemRecordTO> getItemRecords() {
+        return itemRecords;
     }
 
-    public void setServiceNotes(List<HWItemRecordTO> serviceNotes) {
-        this.serviceNotes = serviceNotes;
+    public void setItemRecords(List<HWItemRecordTO> itemRecords) {
+        this.itemRecords = itemRecords;
     }
 
     @Override
@@ -169,11 +169,11 @@ public class HWItemTO {
         HWItemTO to =
                 new HWItemTO(id, name, purchaseDate, price, state, usedInId, usedInName, supervizedFor, publicItem,
                         warrantyYears, description);
-        to.setServiceNotes(new ArrayList<>());
-        for (HWItemRecordTO note : serviceNotes)
-            to.getServiceNotes().add(note.copy());
+        to.setItemRecords(new ArrayList<>());
+        for (HWItemRecordTO note : itemRecords)
+            to.getItemRecords().add(note.copy());
         to.setTypes(new LinkedHashSet<>());
-        for (HWTypeTO type : types)
+        for (HWTypeBasicTO type : types)
             to.getTypes().add(type.copy());
         return to;
     }
