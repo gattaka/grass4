@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 /**
  * Typ hw
  */
-@Entity(name = "HW_ITEM_TYPE")
+@Entity(name = "HW_TYPE")
 public class HWType {
 
 	/**

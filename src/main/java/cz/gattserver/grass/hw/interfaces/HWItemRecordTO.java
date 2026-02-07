@@ -2,13 +2,14 @@ package cz.gattserver.grass.hw.interfaces;
 
 import java.time.LocalDate;
 
+import com.querydsl.core.annotations.QueryProjection;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
  * Údaj o opravě, změně součástí apod.
  */
-public class HWServiceNoteTO {
+public class HWItemRecordTO {
 
     /**
      * Identifikátor změny
@@ -39,8 +40,12 @@ public class HWServiceNoteTO {
     private String usedInName;
     private Long usedInId;
 
-    public HWServiceNoteTO(Long id, LocalDate date, String description, HWItemState state, String usedInName,
-                           Long usedInId) {
+    public HWItemRecordTO() {
+    }
+
+    @QueryProjection
+    public HWItemRecordTO(Long id, LocalDate date, String description, HWItemState state, String usedInName,
+                          Long usedInId) {
         this.id = id;
         this.date = date;
         this.description = description;
@@ -97,7 +102,7 @@ public class HWServiceNoteTO {
         this.state = state;
     }
 
-    public HWServiceNoteTO copy() {
-        return new HWServiceNoteTO(id, date, description, state, usedInName, usedInId);
+    public HWItemRecordTO copy() {
+        return new HWItemRecordTO(id, date, description, state, usedInName, usedInId);
     }
 }

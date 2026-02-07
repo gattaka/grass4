@@ -31,11 +31,11 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
-public class HWDetailsPhotosTab extends Div {
+public class HWItemPhotosTab extends Div {
 
     private static final long serialVersionUID = 8602793883158440889L;
 
-    private static final Logger logger = LoggerFactory.getLogger(HWDetailsPhotosTab.class);
+    private static final Logger logger = LoggerFactory.getLogger(HWItemPhotosTab.class);
 
     private transient HWService hwService;
     private transient SecurityService securityFacade;
@@ -44,7 +44,7 @@ public class HWDetailsPhotosTab extends Div {
     private Div containerDiv;
     private HWItemPage hwItemPage;
 
-    public HWDetailsPhotosTab(HWItemTO hwItem, HWItemPage hwItemPage) {
+    public HWItemPhotosTab(HWItemTO hwItem, HWItemPage hwItemPage) {
         SpringContextHelper.inject(this);
         this.hwItem = hwItem;
         this.hwItemPage = hwItemPage;

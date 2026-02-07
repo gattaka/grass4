@@ -1,58 +1,72 @@
 package cz.gattserver.grass.hw.model;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.querydsl.core.types.Order;
+import com.querydsl.jpa.JPQLQuery;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.interfaces.QHWTypeTO;
-import cz.gattserver.grass.hw.model.domain.QHWItem;
-import cz.gattserver.grass.hw.model.domain.QHWType;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.impl.JPAQuery;
 
-@Repository
-public class HWTypeRepositoryCustomImpl implements HWTypeRepositoryCustom {
+public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implements HWTypeRepositoryCustom {
 
-	@PersistenceContext
-	private EntityManager entityManager;
+    private final QHWType t = QHWType.hWType;
+    private final QHWItem i = QHWItem.hWItem;
+    private final QHWItemType it = QHWItemType.hWItemType;
 
-	private Predicate createPredicateHWItemTypes(HWTypeTO filter) {
-		QHWType t = QHWType.hWType;
-		PredicateBuilder builder = new PredicateBuilder();
-		builder.anyILike(t.name, filter.getName());
-		return builder.getBuilder();
-	}
+    public HWTypeRepositoryCustomImpl() {
+        super(HWType.class);
+    }
 
-	@Override
-	public long countHWItemTypes(HWTypeTO filter) {
-		JPAQuery<HWType> query = new JPAQuery<>(entityManager);
-		QHWType t = QHWType.hWType;
-		return query.from(t).where(createPredicateHWItemTypes(filter)).fetchCount();
-	}
+    private Predicate createPredicate(HWTypeTO filter) {
+        PredicateBuilder builder = new PredicateBuilder();
+        builder.anyILike(t.name, filter.getName());
+        return builder.getBuilder();
+    }
 
-	@Override
-	public List<HWTypeTO> getHWItemTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
-		JPAQuery<HWTypeTO> query = new JPAQuery<>(entityManager);
-		QHWType t = QHWType.hWType;
-		QHWItem h = QHWItem.hWItem;
-		query.offset(offset).limit(limit);
-		query.from(h).join(h.types, t).where(createPredicateHWItemTypes(filter))
-				.groupBy(t.id, t.name).select(new QHWTypeTO(t.id, t.name, h.id.count().intValue()));
+    private JPQLQuery<HWTypeTO> createGroupQuery() {
+        return from(t).leftJoin(it).on(it.id.hwTypeId.eq(t.id)).groupBy(t.id, t.name)
+                .select(new QHWTypeTO(t.id, t.name, i.id.count().intValue()));
+    }
 
-		for (OrderSpecifier<?> os : order) {
-			if ("name".equals(os.getTarget().toString()))
-				query.orderBy(Order.ASC == os.getOrder() ? t.name.asc() : t.name.desc());
-			if ("count".equals(os.getTarget().toString()))
-				query.orderBy(Order.ASC == os.getOrder() ? h.id.count().asc() : h.id.count().desc());
-		}
-		return query.fetch();
-	}
+    @Override
+    public long countHWTypes(HWTypeTO filter) {
+        return from(t).where(createPredicate(filter)).fetchCount();
+    }
 
+    @Override
+    public Set<HWTypeTO> findOrderByName() {
+        return new LinkedHashSet<>(createGroupQuery().orderBy(t.name.asc()).fetch());
+    }
+
+    @Override
+    public HWTypeTO findByName(String name) {
+        return createGroupQuery().where(t.name.eq(name)).fetchOne();
+    }
+
+    @Override
+    public HWTypeTO findByIdAndMap(Long id) {
+        return createGroupQuery().where(t.id.eq(id)).fetchOne();
+    }
+
+    @Override
+    public List<HWTypeTO> getHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
+        // TODO
+        JPQLQuery<HWTypeTO> query = createGroupQuery();
+
+        for (OrderSpecifier<?> os : order) {
+            if ("name".equals(os.getTarget().toString()))
+                query.orderBy(Order.ASC == os.getOrder() ? t.name.asc() : t.name.desc());
+            if ("count".equals(os.getTarget().toString()))
+                query.orderBy(Order.ASC == os.getOrder() ? i.id.count().asc() : i.id.count().desc());
+        }
+        return query.offset(offset).limit(limit).fetch();
+    }
 }

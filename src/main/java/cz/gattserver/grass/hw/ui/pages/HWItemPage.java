@@ -15,11 +15,11 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
-import cz.gattserver.grass.hw.ui.tabs.HWDetailsDocsTab;
-import cz.gattserver.grass.hw.ui.tabs.HWDetailsInfoTab;
-import cz.gattserver.grass.hw.ui.tabs.HWDetailsPhotosTab;
-import cz.gattserver.grass.hw.ui.tabs.HWDetailsPrint3dTab;
-import cz.gattserver.grass.hw.ui.tabs.HWDetailsServiceNotesTab;
+import cz.gattserver.grass.hw.ui.tabs.HWItemDocsTab;
+import cz.gattserver.grass.hw.ui.tabs.HWItemInfoTab;
+import cz.gattserver.grass.hw.ui.tabs.HWItemPhotosTab;
+import cz.gattserver.grass.hw.ui.tabs.HWItemPrint3dTab;
+import cz.gattserver.grass.hw.ui.tabs.HWItemRecordsTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
 
 import java.util.function.Consumer;
@@ -162,31 +162,31 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
 
     public void switchInfoTab() {
         tabLayout.removeAll();
-        tabLayout.add(new HWDetailsInfoTab(itemsTab, hwItem));
+        tabLayout.add(new HWItemInfoTab(itemsTab, hwItem));
         tabs.setSelectedTab(infoTab);
     }
 
     public void switchServiceNotesTab() {
         tabLayout.removeAll();
-        tabLayout.add(new HWDetailsServiceNotesTab(hwItem, this));
+        tabLayout.add(new HWItemRecordsTab(hwItem, this));
         tabs.setSelectedTab(serviceNotesTab);
     }
 
     private void switchPhotosTab() {
         tabLayout.removeAll();
-        tabLayout.add(new HWDetailsPhotosTab(hwItem, this));
+        tabLayout.add(new HWItemPhotosTab(hwItem, this));
         tabs.setSelectedTab(photosTab);
     }
 
     private void switchPrint3dTab() {
         tabLayout.removeAll();
-        tabLayout.add(new HWDetailsPrint3dTab(hwItem, this));
+        tabLayout.add(new HWItemPrint3dTab(hwItem, this));
         tabs.setSelectedTab(print3dTab);
     }
 
     private void switchDocsTab() {
         tabLayout.removeAll();
-        tabLayout.add(new HWDetailsDocsTab(hwItem, this));
+        tabLayout.add(new HWItemDocsTab(hwItem, this));
         tabs.setSelectedTab(docsTab);
     }
 }

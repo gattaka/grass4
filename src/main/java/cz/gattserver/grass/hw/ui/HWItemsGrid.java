@@ -54,11 +54,8 @@ public class HWItemsGrid extends Div {
     private static final String STATE_BIND = "stateBind";
     private static final String PURCHASE_DATE_BIND = "purchaseDateBind";
 
-    @Autowired
-    private HWService hwService;
-
-    @Autowired
-    private SecurityService securityFacade;
+    private final HWService hwService;
+    private final SecurityService securityFacade;
 
     private Grid<HWItemOverviewTO> grid;
     private TokenField hwTypesFilter;
@@ -75,7 +72,8 @@ public class HWItemsGrid extends Div {
     private Div iconDiv;
 
     public HWItemsGrid(Consumer<HWItemOverviewTO> onSelect) {
-        SpringContextHelper.inject(this);
+        this.hwService = SpringContextHelper.getBean(HWService.class);
+        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
 
         iconDiv = new Div();
         iconDiv.setVisible(false);
@@ -179,7 +177,7 @@ public class HWItemsGrid extends Div {
 
         // Je součástí
         soucastField = UIUtils.addHeaderTextField(filteringHeader.getCell(usedInColumn), e -> {
-            filterTO.setUsedIn(e.getValue());
+            filterTO.setUsedInName(e.getValue());
             populate();
         });
 
@@ -264,7 +262,7 @@ public class HWItemsGrid extends Div {
     public void setFilterTO(HWFilterTO filterTO) {
         if (filterTO.getName() != null) nameField.setValue(filterTO.getName());
         if (filterTO.getState() != null) stavCombo.setValue(filterTO.getState());
-        if (filterTO.getUsedIn() != null) soucastField.setValue(filterTO.getUsedIn());
+        if (filterTO.getUsedInName() != null) soucastField.setValue(filterTO.getUsedInName());
         if (filterTO.getSupervizedFor() != null) spravovanField.setValue(filterTO.getSupervizedFor());
 
         if (hwTypesFilter != null && filterTO.getTypes() != null) hwTypesFilter.setValues(filterTO.getTypes());

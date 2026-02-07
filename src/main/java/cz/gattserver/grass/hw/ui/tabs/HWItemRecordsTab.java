@@ -19,12 +19,12 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
-import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
+import cz.gattserver.grass.hw.interfaces.HWItemRecordTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-import cz.gattserver.grass.hw.ui.dialogs.HWServiceNoteEditDialog;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemRecordEditDialog;
 
-public class HWDetailsServiceNotesTab extends Div {
+public class HWItemRecordsTab extends Div {
 
     private static final long serialVersionUID = -3236939739462367881L;
 
@@ -33,12 +33,12 @@ public class HWDetailsServiceNotesTab extends Div {
     private transient HWService hwService;
     private transient SecurityService securityFacade;
 
-    private Column<HWServiceNoteTO> serviceDateColumn;
-    private Grid<HWServiceNoteTO> serviceNotesGrid;
+    private Column<HWItemRecordTO> serviceDateColumn;
+    private Grid<HWItemRecordTO> serviceNotesGrid;
     private HWItemTO hwItem;
     private HWItemPage hwItemPage;
 
-    public HWDetailsServiceNotesTab(HWItemTO hwItem, HWItemPage hwItemPage) {
+    public HWItemRecordsTab(HWItemTO hwItem, HWItemPage hwItemPage) {
         SpringContextHelper.inject(this);
         this.hwItem = hwItem;
         this.hwItemPage = hwItemPage;
@@ -62,9 +62,9 @@ public class HWDetailsServiceNotesTab extends Div {
         UIUtils.applyGrassDefaultStyle(serviceNotesGrid);
         serviceNotesGrid.setSelectionMode(SelectionMode.SINGLE);
         serviceNotesGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        Column<HWServiceNoteTO> idColumn =
+        Column<HWItemRecordTO> idColumn =
                 serviceNotesGrid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getId())));
-        serviceDateColumn = serviceNotesGrid.addColumn(new LocalDateRenderer<>(HWServiceNoteTO::getDate, "d.M.yyyy"))
+        serviceDateColumn = serviceNotesGrid.addColumn(new LocalDateRenderer<>(HWItemRecordTO::getDate, "d.M.yyyy"))
                 .setHeader("Datum").setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0);
         serviceNotesGrid.addColumn(hw -> hw.getState().getName()).setHeader("Stav").setWidth("110px").setFlexGrow(0);
         serviceNotesGrid.addColumn(
@@ -88,7 +88,7 @@ public class HWDetailsServiceNotesTab extends Div {
 
         serviceNotesGrid.addSelectionListener(selection -> {
             if (selection.getFirstSelectedItem().isPresent()) {
-                HWServiceNoteTO serviceNoteDTO = selection.getFirstSelectedItem().get();
+                HWItemRecordTO serviceNoteDTO = selection.getFirstSelectedItem().get();
                 serviceNoteDescription.setText((String) serviceNoteDTO.getDescription());
             } else {
                 serviceNoteDescription.setText(DEFAULT_NOTE_LABEL_VALUE);
@@ -100,11 +100,11 @@ public class HWDetailsServiceNotesTab extends Div {
             Div operationsLayout = componentFactory.createButtonLayout();
             add(operationsLayout);
 
-            Button newNoteBtn = componentFactory.createCreateButton(e -> new HWServiceNoteEditDialog(hwItem) {
+            Button newNoteBtn = componentFactory.createCreateButton(e -> new HWItemRecordEditDialog(hwItem) {
                 private static final long serialVersionUID = -5582822648042555576L;
 
                 @Override
-                protected void onSuccess(HWServiceNoteTO noteDTO) {
+                protected void onSuccess(HWItemRecordTO noteDTO) {
                     hwItem.getServiceNotes().add(noteDTO);
                     populateServiceNotesGrid();
                     hwItemPage.refreshItem();
@@ -115,18 +115,18 @@ public class HWDetailsServiceNotesTab extends Div {
 
             Button editNoteBtn = componentFactory.createEditGridButton(event -> {
                 if (serviceNotesGrid.getSelectedItems().isEmpty()) return;
-                new HWServiceNoteEditDialog(hwItem, serviceNotesGrid.getSelectedItems().iterator().next()) {
+                new HWItemRecordEditDialog(hwItem, serviceNotesGrid.getSelectedItems().iterator().next()) {
                     private static final long serialVersionUID = -5582822648042555576L;
 
                     @Override
-                    protected void onSuccess(HWServiceNoteTO noteDTO) {
+                    protected void onSuccess(HWItemRecordTO noteDTO) {
                         populateServiceNotesGrid();
                     }
                 }.open();
             }, serviceNotesGrid);
 
             Button deleteNoteBtn = componentFactory.createDeleteGridButton(item -> {
-                getHWService().deleteServiceNote(item, hwItem.getId());
+                getHWService().deleteServiceNote(item.getId());
                 hwItem.getServiceNotes().remove(item);
                 populateServiceNotesGrid();
                 hwItemPage.refreshTabLabels();

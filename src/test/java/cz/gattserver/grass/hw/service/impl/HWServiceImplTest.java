@@ -252,7 +252,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwTypeTO.setName("myš");
 		Long id = hwService.saveHWType(hwTypeTO);
 
-		hwTypeTO = hwService.getHWItemType(id);
+		hwTypeTO = hwService.getHWType(id);
 		assertEquals("myš", hwTypeTO.getName());
 	}
 
@@ -275,7 +275,7 @@ public class HWServiceImplTest extends DBCleanTest {
 	}
 
 	@Test
-	public void deleteHWItemType() {
+	public void deleteHWType() {
 		HWTypeTO hwTypeTO = new HWTypeTO();
 		hwTypeTO.setName("myš");
 		Long id = hwService.saveHWType(hwTypeTO);
@@ -287,7 +287,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		Set<HWTypeTO> types = hwService.getAllHWTypes();
 		assertEquals(2, types.size());
 
-		hwService.deleteHWItemType(id);
+		hwService.deleteHWType(id);
 
 		types = hwService.getAllHWTypes();
 		assertEquals(1, types.size());

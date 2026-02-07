@@ -1,6 +1,7 @@
 package cz.gattserver.grass.hw.model;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -28,16 +29,9 @@ public class HWItem {
 	private String name;
 
 	/**
-	 * Typ - klasifikace hw
-	 */
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "HW_ITEM_HW_ITEM_TYPE")
-	private Set<HWType> types;
-
-	/**
 	 * Datum zakoupení (získání)
 	 */
-	private Date purchaseDate;
+	private LocalDate purchaseDate;
 
 	/**
 	 * Cena
@@ -50,13 +44,6 @@ public class HWItem {
 	private HWItemState state;
 
 	/**
-	 * Poznámky ke stavu hw - opravy apod.
-	 */
-	@OneToMany(fetch = FetchType.LAZY)
-	@OrderBy("date desc, id desc")
-	private List<HWServiceNote> serviceNotes;
-
-	/**
 	 * Počet let záruky
 	 */
 	private Integer warrantyYears;
@@ -64,8 +51,7 @@ public class HWItem {
 	/**
 	 * Součást celku
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
-	private HWItem usedIn;
+	private Long usedInId;
 
 	/**
 	 * Spravováno pro (spravuju tohle zařízení někomu?)
@@ -99,15 +85,15 @@ public class HWItem {
 		this.supervizedFor = supervizedFor;
 	}
 
-	public HWItem getUsedIn() {
-		return usedIn;
-	}
+    public Long getUsedInId() {
+        return usedInId;
+    }
 
-	public void setUsedIn(HWItem usedIn) {
-		this.usedIn = usedIn;
-	}
+    public void setUsedInId(Long usedInId) {
+        this.usedInId = usedInId;
+    }
 
-	public Integer getWarrantyYears() {
+    public Integer getWarrantyYears() {
 		return warrantyYears;
 	}
 
@@ -131,19 +117,11 @@ public class HWItem {
 		this.name = name;
 	}
 
-	public Set<HWType> getTypes() {
-		return types;
-	}
-
-	public void setTypes(Set<HWType> types) {
-		this.types = types;
-	}
-
-	public Date getPurchaseDate() {
+	public LocalDate getPurchaseDate() {
 		return purchaseDate;
 	}
 
-	public void setPurchaseDate(Date purchaseDate) {
+	public void setPurchaseDate(LocalDate purchaseDate) {
 		this.purchaseDate = purchaseDate;
 	}
 
@@ -161,14 +139,6 @@ public class HWItem {
 
 	public void setState(HWItemState state) {
 		this.state = state;
-	}
-
-	public List<HWServiceNote> getServiceNotes() {
-		return serviceNotes;
-	}
-
-	public void setServiceNotes(List<HWServiceNote> serviceNotes) {
-		this.serviceNotes = serviceNotes;
 	}
 
 	public Boolean getPublicItem() {

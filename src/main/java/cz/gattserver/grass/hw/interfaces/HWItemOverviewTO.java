@@ -1,5 +1,7 @@
 package cz.gattserver.grass.hw.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -12,80 +14,105 @@ import java.util.Objects;
 public class HWItemOverviewTO implements Serializable {
 
     @Serial
-	private static final long serialVersionUID = 3678406951423588173L;
+    private static final long serialVersionUID = 3678406951423588173L;
 
-	private Long id;
-	private String name;
+    private Long id;
+    private String name;
     private HWItemState state;
+    private Long usedInId;
     private String usedInName;
     private String supervizedFor;
     private BigDecimal price;
-	private LocalDate purchaseDate;
-	private Boolean publicItem;
+    private LocalDate purchaseDate;
+    private Boolean publicItem;
 
-	public String getSupervizedFor() {
-		return supervizedFor;
-	}
+    public HWItemOverviewTO() {
+    }
 
-	public void setSupervizedFor(String supervizedFor) {
-		this.supervizedFor = supervizedFor;
-	}
+    @QueryProjection
+    public HWItemOverviewTO(Long id, String name, HWItemState state, String usedInName, String supervizedFor,
+                            BigDecimal price, LocalDate purchaseDate, Boolean publicItem) {
+        this.id = id;
+        this.name = name;
+        this.state = state;
+        this.usedInName = usedInName;
+        this.supervizedFor = supervizedFor;
+        this.price = price;
+        this.purchaseDate = purchaseDate;
+        this.publicItem = publicItem;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public String getSupervizedFor() {
+        return supervizedFor;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setSupervizedFor(String supervizedFor) {
+        this.supervizedFor = supervizedFor;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public LocalDate getPurchaseDate() {
-		return purchaseDate;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setPurchaseDate(LocalDate purchaseDate) {
-		this.purchaseDate = purchaseDate;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
-	public BigDecimal getPrice() {
-		return price;
-	}
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
 
-	public void setPrice(BigDecimal price) {
-		this.price = price;
-	}
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
 
-	public HWItemState getState() {
-		return state;
-	}
+    public BigDecimal getPrice() {
+        return price;
+    }
 
-	public void setState(HWItemState state) {
-		this.state = state;
-	}
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
 
-	public String getUsedInName() {
-		return usedInName;
-	}
+    public HWItemState getState() {
+        return state;
+    }
 
-	public void setUsedInName(String usedInName) {
-		this.usedInName = usedInName;
-	}
+    public void setState(HWItemState state) {
+        this.state = state;
+    }
 
-	public Boolean getPublicItem() {
-		return publicItem;
-	}
+    public String getUsedInName() {
+        return usedInName;
+    }
 
-	public void setPublicItem(Boolean publicItem) {
-		this.publicItem = publicItem;
-	}
+    public void setUsedInName(String usedInName) {
+        this.usedInName = usedInName;
+    }
+
+    public Boolean getPublicItem() {
+        return publicItem;
+    }
+
+    public void setPublicItem(Boolean publicItem) {
+        this.publicItem = publicItem;
+    }
+
+    public Long getUsedInId() {
+        return usedInId;
+    }
+
+    public void setUsedInId(Long usedInId) {
+        this.usedInId = usedInId;
+    }
 
     @Override
     public final boolean equals(Object o) {

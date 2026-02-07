@@ -29,7 +29,7 @@ import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemTypeEditDialog;
+import cz.gattserver.grass.hw.ui.dialogs.HWTypeEditDialog;
 import cz.gattserver.grass.hw.ui.pages.HWPage;
 
 public class HWTypesTab extends Div {
@@ -52,7 +52,7 @@ public class HWTypesTab extends Div {
 
     private void populate() {
         FetchCallback<HWTypeTO, HWTypeTO> fetchCallback =
-                q -> getHWService().getHWItemTypes(filterTO, q.getOffset(), q.getLimit(),
+                q -> getHWService().getHWTypes(filterTO, q.getOffset(), q.getLimit(),
                         QuerydslUtil.transformOrdering(q.getSortOrders(), column -> {
                             switch (column) {
                                 case NAME_BIND:
@@ -63,7 +63,7 @@ public class HWTypesTab extends Div {
                                     return column;
                             }
                         })).stream();
-        CountCallback<HWTypeTO, HWTypeTO> countCallback = q -> getHWService().countHWItemTypes(filterTO);
+        CountCallback<HWTypeTO, HWTypeTO> countCallback = q -> getHWService().countHWTypes(filterTO);
         grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
     }
 
@@ -123,7 +123,7 @@ public class HWTypesTab extends Div {
          */
         buttonLayout.add(componentFactory.createDeleteGridButton(item -> {
             try {
-                getHWService().deleteHWItemType(item.getId());
+                getHWService().deleteHWType(item.getId());
                 populate();
             } catch (Exception ex) {
                 new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
@@ -139,7 +139,7 @@ public class HWTypesTab extends Div {
     }
 
     private void openNewTypeWindow(HWTypeTO hwItemTypeDTO) {
-        new HWItemTypeEditDialog(hwItemTypeDTO == null ? null : hwItemTypeDTO) {
+        new HWTypeEditDialog(hwItemTypeDTO == null ? null : hwItemTypeDTO) {
             private static final long serialVersionUID = -7566950396535469316L;
 
             @Override

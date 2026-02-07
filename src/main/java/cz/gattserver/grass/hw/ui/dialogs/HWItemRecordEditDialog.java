@@ -16,30 +16,29 @@ import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
-import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemState;
-import cz.gattserver.grass.hw.interfaces.HWServiceNoteTO;
+import cz.gattserver.grass.hw.interfaces.HWItemRecordTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.UsedInChooser;
 
-public abstract class HWServiceNoteEditDialog extends EditWebDialog {
+public abstract class HWItemRecordEditDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
 
 	private transient HWService hwService;
 
-	public HWServiceNoteEditDialog(final HWItemTO hwItem) {
+	public HWItemRecordEditDialog(final HWItemTO hwItem) {
 		this(hwItem, null);
 	}
 
-	public HWServiceNoteEditDialog(final HWItemTO hwItem, HWServiceNoteTO originalTO) {
+	public HWItemRecordEditDialog(final HWItemTO hwItem, HWItemRecordTO originalTO) {
         super("Záznam");
-		HWServiceNoteTO formTO = new HWServiceNoteTO();
+		HWItemRecordTO formTO = new HWItemRecordTO();
 		formTO.setDate(LocalDate.now());
 		formTO.setDescription("");
 		formTO.setState(hwItem.getState());
 
-		Binder<HWServiceNoteTO> binder = new Binder<>();
+		Binder<HWItemRecordTO> binder = new Binder<>();
 		binder.setBean(formTO);
 
 		FormLayout winLayout = new FormLayout();
@@ -48,14 +47,14 @@ public abstract class HWServiceNoteEditDialog extends EditWebDialog {
 
 		DatePicker eventDateField = new DatePicker("Datum");
 		eventDateField.setLocale(Locale.forLanguageTag("CS"));
-		binder.forField(eventDateField).asRequired("Datum musí být vyplněno").bind(HWServiceNoteTO::getDate,
-				HWServiceNoteTO::setDate);
+		binder.forField(eventDateField).asRequired("Datum musí být vyplněno").bind(HWItemRecordTO::getDate,
+				HWItemRecordTO::setDate);
 		winLayout.add(eventDateField);
 
 		ComboBox<HWItemState> stateComboBox = new ComboBox<>("Stav", Arrays.asList(HWItemState.values()));
 		// namísto propertyId a captionId jsou funkcionální settery a gettery
 		stateComboBox.setItemLabelGenerator(HWItemState::getName);
-		binder.forField(stateComboBox).bind(HWServiceNoteTO::getState, HWServiceNoteTO::setState);
+		binder.forField(stateComboBox).bind(HWItemRecordTO::getState, HWItemRecordTO::setState);
 		winLayout.add(stateComboBox);
 
 		add(new UsedInChooser(hwItem, to -> {
@@ -63,52 +62,30 @@ public abstract class HWServiceNoteEditDialog extends EditWebDialog {
 			formTO.setUsedInName(to.getName());
 		}));
 
-		ComboBox<HWItemOverviewTO> usedInCombo = new ComboBox<>("Je součástí",
-				getHWService().getHWItemsAvailableForPart(hwItem.getId()));
-		usedInCombo.setSizeFull();
-		usedInCombo.setItemLabelGenerator(HWItemOverviewTO::getName);
-		usedInCombo.setValue(hwItem.getUsedIn());
-		// ekvivalent Convertoru z v7
-		binder.bind(usedInCombo, note -> {
-			if (note.getUsedInName() == null)
-				return null;
-			HWItemOverviewTO to = new HWItemOverviewTO();
-			to.setId(note.getUsedInId());
-			to.setName(note.getUsedInName());
-			return to;
-		}, (note, item) -> {
-			note.setUsedInId(item == null ? null : item.getId());
-			note.setUsedInName(item == null ? null : item.getName());
-		});
-		winLayout.add(usedInCombo, 2);
-
-		if (hwItem.getUsedIn() != null)
-			usedInCombo.setValue(hwItem.getUsedIn());
+        // TODO Je součástí udělat výběrem přes dialog
 
 		TextArea descriptionField = new TextArea("Popis");
 		descriptionField.setWidthFull();
 		descriptionField.setHeight("200px");
-		binder.forField(descriptionField).bind(HWServiceNoteTO::getDescription, HWServiceNoteTO::setDescription);
+		binder.forField(descriptionField).bind(HWItemRecordTO::getDescription, HWItemRecordTO::setDescription);
 		winLayout.add(descriptionField, 2);
 
-		HorizontalLayout buttons = componentFactory.createDialogSubmitOrStornoLayout(e -> {
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
 			try {
-				HWServiceNoteTO writeDTO = originalTO == null ? new HWServiceNoteTO() : originalTO;
-				binder.writeBean(writeDTO);
+				HWItemRecordTO writeTO = originalTO == null ? new HWItemRecordTO() : originalTO;
+				binder.writeBean(writeTO);
 				if (originalTO == null) {
-					getHWService().addServiceNote(writeDTO, hwItem.getId());
-					onSuccess(writeDTO);
+					getHWService().addItemRecord(writeTO, hwItem.getId(),hwItem.getUsedInId(), hwItem.getName());
+					onSuccess(writeTO);
 				} else {
-					getHWService().modifyServiceNote(writeDTO);
-					onSuccess(writeDTO);
+					getHWService().modifyServiceNote(writeTO);
+					onSuccess(writeTO);
 				}
 				close();
 			} catch (Exception ex) {
 				new ErrorDialog("Nezdařilo se zapsat nový servisní záznam").open();
 			}
-		}, e -> close());
-
-		add(buttons);
+		}, e -> close()));
 
 		// Poté, co je form probindován se nastaví hodnoty dle originálu
 		if (originalTO != null)
@@ -121,6 +98,6 @@ public abstract class HWServiceNoteEditDialog extends EditWebDialog {
 		return hwService;
 	}
 
-	protected abstract void onSuccess(HWServiceNoteTO noteDTO);
+	protected abstract void onSuccess(HWItemRecordTO noteDTO);
 
 }

@@ -11,13 +11,13 @@ import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 
-public abstract class HWItemTypeEditDialog extends EditWebDialog {
+public abstract class HWTypeEditDialog extends EditWebDialog {
 
 	private static final long serialVersionUID = -6773027334692911384L;
 
 	private transient HWService hwService;
 
-	public HWItemTypeEditDialog(HWTypeTO originalDTO) {
+	public HWTypeEditDialog(HWTypeTO originalDTO) {
         super("Typ");
 		init(originalDTO);
 	}

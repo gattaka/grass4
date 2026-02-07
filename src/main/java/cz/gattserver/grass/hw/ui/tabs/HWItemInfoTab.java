@@ -49,11 +49,11 @@ import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemEditDialog;
 
-public class HWDetailsInfoTab extends Div {
+public class HWItemInfoTab extends Div {
 
     private static final long serialVersionUID = 8602793883158440889L;
 
-    private static final Logger logger = LoggerFactory.getLogger(HWDetailsInfoTab.class);
+    private static final Logger logger = LoggerFactory.getLogger(HWItemInfoTab.class);
 
     @Autowired
     private HWService hwService;
@@ -66,7 +66,7 @@ public class HWDetailsInfoTab extends Div {
 
     private HWItemsTab itemsTab;
 
-    public HWDetailsInfoTab(HWItemsTab itemsTab, HWItemTO hwItem) {
+    public HWItemInfoTab(HWItemsTab itemsTab, HWItemTO hwItem) {
         SpringContextHelper.inject(this);
         setHeightFull();
         this.itemsTab = itemsTab;

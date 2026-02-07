@@ -2,18 +2,12 @@ package cz.gattserver.grass.core.model.util;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.dsl.BeanPath;
-import com.querydsl.core.types.dsl.BooleanPath;
-import com.querydsl.core.types.dsl.DateTimePath;
-import com.querydsl.core.types.dsl.EnumPath;
-import com.querydsl.core.types.dsl.NumberExpression;
-import com.querydsl.core.types.dsl.NumberPath;
-import com.querydsl.core.types.dsl.StringExpression;
-import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.core.types.dsl.*;
 import com.querydsl.jpa.impl.JPAQuery;
 
 import cz.gattserver.common.util.DateUtils;
@@ -564,6 +558,28 @@ public class PredicateBuilder {
 		}
 		return this;
 	}
+
+    /**
+     * Přidá porovnání SQL between.
+     *
+     * @param path
+     *            cesta k atributu entity
+     * @param from
+     *            hodnota pro porovnání
+     * @param to
+     *            hodnota pro porovnání
+     * @return this pro řetězení
+     */
+    public PredicateBuilder between(DatePath<LocalDate> path, LocalDate from, LocalDate to) {
+        if ((from != null) && to != null) {
+            booleanBuilder.and(path.between(from,to));
+        } else if (from != null) {
+            booleanBuilder.and(path.gt(from));
+        } else if (to != null) {
+            booleanBuilder.and(path.lt(to));
+        }
+        return this;
+    }
 
 	/**
 	 * Vrací celkový objekt predicate pro použítí v dotazu.

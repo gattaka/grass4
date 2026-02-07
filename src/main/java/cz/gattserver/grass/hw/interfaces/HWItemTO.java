@@ -29,7 +29,7 @@ public class HWItemTO {
     private String description;
 
     private Set<HWTypeTO> types;
-    private List<HWServiceNoteTO> serviceNotes;
+    private List<HWItemRecordTO> serviceNotes;
 
     public HWItemTO() {
     }
@@ -147,11 +147,11 @@ public class HWItemTO {
         this.types = types;
     }
 
-    public List<HWServiceNoteTO> getServiceNotes() {
+    public List<HWItemRecordTO> getServiceNotes() {
         return serviceNotes;
     }
 
-    public void setServiceNotes(List<HWServiceNoteTO> serviceNotes) {
+    public void setServiceNotes(List<HWItemRecordTO> serviceNotes) {
         this.serviceNotes = serviceNotes;
     }
 
@@ -170,7 +170,7 @@ public class HWItemTO {
                 new HWItemTO(id, name, purchaseDate, price, state, usedInId, usedInName, supervizedFor, publicItem,
                         warrantyYears, description);
         to.setServiceNotes(new ArrayList<>());
-        for (HWServiceNoteTO note : serviceNotes)
+        for (HWItemRecordTO note : serviceNotes)
             to.getServiceNotes().add(note.copy());
         to.setTypes(new LinkedHashSet<>());
         for (HWTypeTO type : types)
