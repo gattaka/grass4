@@ -47,7 +47,7 @@ import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemEditDialog;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemDialog;
 
 public class HWItemInfoTab extends Div {
 
@@ -231,7 +231,7 @@ public class HWItemInfoTab extends Div {
             add(operationsLayout);
 
             final Button fixBtn = componentFactory.createEditButton(
-                    e -> new HWItemEditDialog(hwService.getHWItem(hwItem.getId()), to -> {
+                    e -> new HWItemDialog(hwService.getHWItem(hwItem.getId()), to -> {
                         hwService.saveHWItem(to);
                         UI.getCurrent().getPage().reload();
                     }).open());

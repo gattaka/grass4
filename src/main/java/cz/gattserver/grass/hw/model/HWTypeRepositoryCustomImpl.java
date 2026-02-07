@@ -65,7 +65,7 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     @Override
     public Set<HWTypeBasicTO> findByItemId(Long itemId) {
         return new LinkedHashSet<>(
-                createGroupQuery().where(it.id.hwTypeId.eq(itemId)).select(new QHWTypeBasicTO(t.id, t.name)).fetch());
+                createGroupQuery().where(it.id.hwItemId.eq(itemId)).select(new QHWTypeBasicTO(t.id, t.name)).fetch());
     }
 
     @Override

@@ -18,7 +18,7 @@ import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWItemsGrid;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemEditDialog;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemDialog;
 
 import java.util.Map;
 
@@ -82,7 +82,7 @@ public class HWItemsTab extends Div {
     private void openItemWindow(HWItemOverviewTO hwItemOverviewTO) {
         HWItemTO hwItem = null;
         if (hwItemOverviewTO != null) hwItem = hwService.getHWItem(hwItemOverviewTO.getId());
-        new HWItemEditDialog(hwItem == null ? null : hwService.getHWItem(hwItem.getId()), to -> {
+        new HWItemDialog(hwItem == null ? null : hwService.getHWItem(hwItem.getId()), to -> {
             to.setId(hwService.saveHWItem(to));
             populate();
             HWItemOverviewTO filterTO = new HWItemOverviewTO();

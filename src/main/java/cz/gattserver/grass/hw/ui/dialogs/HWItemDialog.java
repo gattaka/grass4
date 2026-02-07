@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import com.vaadin.flow.component.Key;
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -28,21 +31,23 @@ import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import cz.gattserver.grass.hw.interfaces.HWItemState;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWTypeBasicTO;
-import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.UsedInChooser;
 
-public class HWItemEditDialog extends EditWebDialog {
+public class HWItemDialog extends EditWebDialog {
 
     private static final long serialVersionUID = -6773027334692911384L;
 
     private final HWService hwService;
 
-    public HWItemEditDialog(HWItemTO originalTO, Consumer<HWItemTO> onSave) {
+    public HWItemDialog(HWItemTO originalTO, Consumer<HWItemTO> onSave) {
         super("Záznam");
         this.hwService = SpringContextHelper.getBean(HWService.class);
 
-        setWidth("900px");
+        layout.setSizeFull();
+        setWidth(900, Unit.PIXELS);
+        setHeight(700, Unit.PIXELS);
+        setResizable(true);
 
         HWItemTO formTO = originalTO == null ? new HWItemTO() : originalTO.copy();
         if (originalTO == null) {
@@ -60,28 +65,28 @@ public class HWItemEditDialog extends EditWebDialog {
         nameField.setWidthFull();
         nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
         binder.forField(nameField).asRequired("Název položky je povinný").bind(HWItemTO::getName, HWItemTO::setName);
-        add(nameField);
+        layout.add(nameField);
 
-        HorizontalLayout baseLayout = new HorizontalLayout();
-        baseLayout.setPadding(false);
-        add(baseLayout);
+        FormLayout baseLayout = new FormLayout();
+        baseLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 6));
+        layout.add(baseLayout);
 
         DatePicker purchaseDateField = new DatePicker("Získáno");
         purchaseDateField.setLocale(Locale.forLanguageTag("CS"));
-        purchaseDateField.setWidth("130px");
+        purchaseDateField.setWidth(130, Unit.PIXELS);
         binder.bind(purchaseDateField, HWItemTO::getPurchaseDate, HWItemTO::setPurchaseDate);
         baseLayout.add(purchaseDateField);
 
         BigDecimalField priceField = new BigDecimalField("Cena");
         priceField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
-        priceField.setWidth("100px");
+        priceField.setWidth(100,Unit.PIXELS);
         priceField.setLocale(new Locale("cs", "CZ"));
         binder.forField(priceField).withNullRepresentation(BigDecimal.ZERO)
                 .bind(HWItemTO::getPrice, HWItemTO::setPrice);
         baseLayout.add(priceField);
 
         ComboBox<HWItemState> stateComboBox = new ComboBox<>("Stav", Arrays.asList(HWItemState.values()));
-        stateComboBox.setWidth("150px");
+        stateComboBox.setWidth(150,Unit.PIXELS);
         stateComboBox.setItemLabelGenerator(HWItemState::getName);
         binder.forField(stateComboBox).asRequired("Stav položky je povinný")
                 .bind(HWItemTO::getState, HWItemTO::setState);
@@ -91,7 +96,7 @@ public class HWItemEditDialog extends EditWebDialog {
         binder.forField(warrantyYearsField).withNullRepresentation("")
                 .withConverter(new StringToIntegerConverter(null, "Záruka musí být celé číslo"))
                 .bind(HWItemTO::getWarrantyYears, HWItemTO::setWarrantyYears);
-        warrantyYearsField.setWidth("100px");
+        warrantyYearsField.setWidth(100,Unit.PIXELS);
         baseLayout.add(warrantyYearsField);
 
         TextField supervizedForField = new TextField("Spravováno pro");
@@ -102,23 +107,23 @@ public class HWItemEditDialog extends EditWebDialog {
         Checkbox publicItemCheckBox = new Checkbox("Veřejné");
         binder.bind(publicItemCheckBox, HWItemTO::getPublicItem, HWItemTO::setPublicItem);
         baseLayout.add(publicItemCheckBox);
-        baseLayout.setWidth(null);
-        baseLayout.setVerticalComponentAlignment(Alignment.END, publicItemCheckBox);
+        baseLayout.setWidthFull();
 
-        add(new UsedInChooser(originalTO, to -> {
+        layout.add(new UsedInChooser(originalTO, to -> {
             if (to != null) {
                 formTO.setUsedInId(to.getId());
                 formTO.setUsedInName(to.getName());
             }
         }));
 
-        TextArea descriptionArea = new TextArea("Popis");
+        TextArea descriptionArea = componentFactory.createTextArea("Popis");
         descriptionArea.setTabIndex(-1);
         descriptionArea.setWidthFull();
         descriptionArea.getStyle().set("font-family", "monospace").set("tab-size", "4").set("font-size", "12px");
         binder.bind(descriptionArea, HWItemTO::getDescription, HWItemTO::setDescription);
-        add(descriptionArea);
-        descriptionArea.setHeight("300px");
+        layout.add(descriptionArea);
+        descriptionArea.setSizeFull();
+        descriptionArea.setMinHeight(300, Unit.PIXELS);
 
         Map<String, HWTypeBasicTO> typeNameMap = new HashMap<>();
         for (HWTypeBasicTO to : hwService.getAllHWTypes())

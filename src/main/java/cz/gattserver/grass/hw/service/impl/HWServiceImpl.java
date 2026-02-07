@@ -539,8 +539,8 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public HWTypeTO getHWType(Long fixTypeId) {
-        return hwTypeRepository.findByIdAndMap(fixTypeId);
+    public HWTypeTO getHWType(Long id) {
+        return hwTypeRepository.findByIdAndMap(id);
     }
 
     @Override

@@ -1,9 +1,6 @@
 package cz.gattserver.common.ui;
 
-import com.vaadin.flow.component.ClickEvent;
-import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.HasValueAndElement;
+import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -15,16 +12,20 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.shared.Registration;
 import cz.gattserver.common.Identifiable;
+import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
+import org.hibernate.internal.util.ValueHolder;
 import org.vaadin.addons.componentfactory.monthpicker.MonthPicker;
 
 import java.time.LocalDate;
@@ -232,6 +233,63 @@ public class ComponentFactory {
     }
 
     /* Input pole */
+
+    public TextArea createTextArea(String caption) {
+        final ReferenceHolder<TextArea> textAreaHolder = new ReferenceHolder<>();
+
+        // Logika musí procházet přes Java Vaadin, aby si změn všimnul binder,
+        // pokud by se vše upravilo pouze v JS, může se během binder commitu přijít o změny
+        TextArea textArea = new TextArea(caption) {
+
+            @ClientCallable
+            private void handleTab(int start, int finish, String origtext, boolean shiftKey) {
+                String preText = origtext.substring(0, start);
+                String tabbedText = origtext.substring(start, finish);
+                String postText = origtext.substring(finish);
+                StringBuilder result = new StringBuilder(preText + '\t');
+                int finishShift = 1;
+                for (int i = 0; i < tabbedText.length(); i++) {
+                    char c = tabbedText.charAt(i);
+                    result.append(c);
+                    if (c == '\n' && i != tabbedText.length() - 1) {
+                        result.append('\t');
+                        finishShift++;
+                    }
+                }
+                result.append(postText);
+                textAreaHolder.getValue().setValue(result.toString());
+                focusOnPosition(start + 1, finish + finishShift);
+            }
+
+            private void focusOnPosition(int start, int finish) {
+                textAreaHolder.getValue().focus();
+                UI.getCurrent().getPage().executeJs(
+                        "let ta = $0.children[2]; $(ta).get(0).setSelectionRange(" + start + "," + finish + ");",
+                        textAreaHolder.getValue().getElement());
+            }
+        };
+        textAreaHolder.setValue(textArea);
+
+        // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
+        final ReferenceHolder<Registration> holder = new ReferenceHolder<>();
+        Registration registration = textArea.addFocusListener(event -> {
+            String js = "let ta = $0.children[2];"
+                    /*          */ + "ta.addEventListener('keydown', e => {"
+                    /*				*/ + "let keyCode = e.keyCode || e.which;"
+                    /*				*/ + "if (keyCode == 9) {"
+                    /*					*/ + "e.preventDefault();"
+                    /*					*/ + "$0.$server.handleTab(ta.selectionStart, ta.selectionEnd, ta.value, e.shiftKey);"
+                    /*				*/ + "}"
+                    /*			*/ + "}, false);";
+            UI.getCurrent().getPage().executeJs(js, textArea.getElement());
+            // je potřeba jenom jednou pro registraci
+            holder.getValue().remove();
+        });
+        holder.setValue(registration);
+        // aby se zaregistroval JS listener
+        textArea.focus();
+        return textArea;
+    }
 
     private List<String> createMonthNames() {
         return Arrays.asList("Leden", "Únor", "Březen", "Duben", "Květen", "Červen", "Červenec", "Srpen", "Září",
