@@ -5,6 +5,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Anchor;
@@ -76,10 +77,11 @@ public class HWItemsGrid extends Div {
         this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
 
         iconDiv = new Div();
+        iconDiv.addClassName("hw-hover-icon");
         iconDiv.setVisible(false);
-        iconDiv.getStyle().set("position", "absolute").set("background", "white").set("padding", "5px")
-                .set("border-radius", "3px").set("border", "1px solid #d5d5d5").set("z-index", "999");
-        add(iconDiv);
+        iconDiv.getElement().setAttribute("popover","manual");
+        iconDiv.getElement().executeJs("this.showPopover()");
+        UI.getCurrent().getElement().appendChild(iconDiv.getElement());
 
         filterTO = new HWFilterTO();
 
@@ -197,8 +199,8 @@ public class HWItemsGrid extends Div {
     private void imgShowCallback(Long id, double x, double y) {
         InputStream iconIs = hwService.getHWItemIconMiniFileInputStream(id);
         if (iconIs == null) return;
-        iconDiv.setVisible(true);
         iconDiv.removeAll();
+        iconDiv.setVisible(true);
         String name = "hw-item-" + id;
         Image img = new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(iconIs, name, null, -1)), name);
         iconDiv.add(img);
@@ -266,5 +268,11 @@ public class HWItemsGrid extends Div {
         if (filterTO.getSupervizedFor() != null) spravovanField.setValue(filterTO.getSupervizedFor());
 
         if (hwTypesFilter != null && filterTO.getTypes() != null) hwTypesFilter.setValues(filterTO.getTypes());
+    }
+
+    @Override
+    protected void onDetach(DetachEvent detachEvent) {
+        iconDiv.getElement().removeFromParent();
+        super.onDetach(detachEvent);
     }
 }

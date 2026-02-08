@@ -29,6 +29,11 @@ public class HWItemOverviewTO implements Serializable {
     public HWItemOverviewTO() {
     }
 
+    public HWItemOverviewTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
     @QueryProjection
     public HWItemOverviewTO(Long id, String name, HWItemState state, String usedInName, String supervizedFor,
                             BigDecimal price, LocalDate purchaseDate, Boolean publicItem) {

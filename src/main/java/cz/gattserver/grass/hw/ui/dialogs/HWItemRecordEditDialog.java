@@ -14,6 +14,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWItemState;
 import cz.gattserver.grass.hw.interfaces.HWItemRecordTO;
@@ -56,12 +57,19 @@ public abstract class HWItemRecordEditDialog extends EditWebDialog {
 		binder.forField(stateComboBox).bind(HWItemRecordTO::getState, HWItemRecordTO::setState);
 		winLayout.add(stateComboBox);
 
-		add(new UsedInChooser(hwItem, to -> {
-			formTO.setUsedInId(to.getId());
-			formTO.setUsedInName(to.getName());
-		}));
-
-        // TODO Je součástí udělat výběrem přes dialog
+        UsedInChooser usedInChooser = new UsedInChooser(formTO.getId());
+        binder.bind(usedInChooser,
+                to -> to.getUsedInId() == null ? null : new HWItemOverviewTO(to.getUsedInId(), to.getUsedInName()),
+                (to, val) -> {
+                    if (val == null) {
+                        to.setUsedInId(null);
+                        to.setUsedInName(null);
+                    } else {
+                        to.setUsedInId(val.getId());
+                        to.setUsedInName(val.getName());
+                    }
+                });
+        layout.add(usedInChooser);
 
 		TextArea descriptionField = new TextArea("Popis");
 		descriptionField.setWidthFull();

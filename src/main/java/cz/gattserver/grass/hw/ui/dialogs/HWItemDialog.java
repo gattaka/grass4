@@ -28,6 +28,7 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
 
+import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemState;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWTypeBasicTO;
@@ -67,54 +68,61 @@ public class HWItemDialog extends EditWebDialog {
         binder.forField(nameField).asRequired("Název položky je povinný").bind(HWItemTO::getName, HWItemTO::setName);
         layout.add(nameField);
 
-        FormLayout baseLayout = new FormLayout();
-        baseLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 6));
-        layout.add(baseLayout);
+        FormLayout topLayout = new FormLayout();
+        topLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 6));
+        layout.add(topLayout);
 
         DatePicker purchaseDateField = new DatePicker("Získáno");
         purchaseDateField.setLocale(Locale.forLanguageTag("CS"));
         purchaseDateField.setWidth(130, Unit.PIXELS);
         binder.bind(purchaseDateField, HWItemTO::getPurchaseDate, HWItemTO::setPurchaseDate);
-        baseLayout.add(purchaseDateField);
+        topLayout.add(purchaseDateField);
 
         BigDecimalField priceField = new BigDecimalField("Cena");
         priceField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
-        priceField.setWidth(100,Unit.PIXELS);
+        priceField.setWidth(100, Unit.PIXELS);
         priceField.setLocale(new Locale("cs", "CZ"));
         binder.forField(priceField).withNullRepresentation(BigDecimal.ZERO)
                 .bind(HWItemTO::getPrice, HWItemTO::setPrice);
-        baseLayout.add(priceField);
+        topLayout.add(priceField);
 
         ComboBox<HWItemState> stateComboBox = new ComboBox<>("Stav", Arrays.asList(HWItemState.values()));
-        stateComboBox.setWidth(150,Unit.PIXELS);
+        stateComboBox.setWidth(150, Unit.PIXELS);
         stateComboBox.setItemLabelGenerator(HWItemState::getName);
         binder.forField(stateComboBox).asRequired("Stav položky je povinný")
                 .bind(HWItemTO::getState, HWItemTO::setState);
-        baseLayout.add(stateComboBox);
+        topLayout.add(stateComboBox);
 
         TextField warrantyYearsField = new TextField("Záruka (roky)");
         binder.forField(warrantyYearsField).withNullRepresentation("")
                 .withConverter(new StringToIntegerConverter(null, "Záruka musí být celé číslo"))
                 .bind(HWItemTO::getWarrantyYears, HWItemTO::setWarrantyYears);
-        warrantyYearsField.setWidth(100,Unit.PIXELS);
-        baseLayout.add(warrantyYearsField);
+        warrantyYearsField.setWidth(100, Unit.PIXELS);
+        topLayout.add(warrantyYearsField);
 
         TextField supervizedForField = new TextField("Spravováno pro");
         supervizedForField.setWidthFull();
         binder.bind(supervizedForField, HWItemTO::getSupervizedFor, HWItemTO::setSupervizedFor);
-        baseLayout.add(supervizedForField);
+        topLayout.add(supervizedForField);
 
         Checkbox publicItemCheckBox = new Checkbox("Veřejné");
         binder.bind(publicItemCheckBox, HWItemTO::getPublicItem, HWItemTO::setPublicItem);
-        baseLayout.add(publicItemCheckBox);
-        baseLayout.setWidthFull();
+        topLayout.add(publicItemCheckBox);
+        topLayout.setWidthFull();
 
-        layout.add(new UsedInChooser(originalTO, to -> {
-            if (to != null) {
-                formTO.setUsedInId(to.getId());
-                formTO.setUsedInName(to.getName());
-            }
-        }));
+        UsedInChooser usedInChooser = new UsedInChooser(formTO.getId());
+        binder.bind(usedInChooser,
+                to -> to.getUsedInId() == null ? null : new HWItemOverviewTO(to.getUsedInId(), to.getUsedInName()),
+                (to, val) -> {
+                    if (val == null) {
+                        to.setUsedInId(null);
+                        to.setUsedInName(null);
+                    } else {
+                        to.setUsedInId(val.getId());
+                        to.setUsedInName(val.getName());
+                    }
+                });
+        layout.add(usedInChooser);
 
         TextArea descriptionArea = componentFactory.createTextArea("Popis");
         binder.bind(descriptionArea, HWItemTO::getDescription, HWItemTO::setDescription);
