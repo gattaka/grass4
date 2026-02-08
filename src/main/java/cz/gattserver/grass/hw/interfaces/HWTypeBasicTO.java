@@ -2,6 +2,8 @@ package cz.gattserver.grass.hw.interfaces;
 
 import com.querydsl.core.annotations.QueryProjection;
 
+import java.util.Objects;
+
 /**
  * Typ hw
  */
@@ -48,5 +50,17 @@ public class HWTypeBasicTO {
 
     public HWTypeBasicTO copy() {
         return new HWTypeBasicTO(id, name);
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof HWTypeBasicTO that)) return false;
+
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

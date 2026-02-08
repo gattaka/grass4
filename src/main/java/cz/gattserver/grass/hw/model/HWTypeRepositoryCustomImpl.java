@@ -69,6 +69,12 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
+    public Set<Long> findTypeIdsByItemId(Long itemId) {
+        return new LinkedHashSet<>(
+                createGroupQuery().where(it.id.hwItemId.eq(itemId)).select(t.id).fetch());
+    }
+
+    @Override
     public List<HWTypeTO> getHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
         // TODO
         JPQLQuery<HWTypeTO> query = createGroupSelectQuery();

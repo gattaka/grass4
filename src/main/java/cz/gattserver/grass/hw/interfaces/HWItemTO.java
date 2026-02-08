@@ -28,8 +28,8 @@ public class HWItemTO {
     private Integer warrantyYears;
     private String description;
 
-    private Set<HWTypeBasicTO> types;
-    private List<HWItemRecordTO> itemRecords;
+    private Set<HWTypeBasicTO> types = new LinkedHashSet<>();
+    private List<HWItemRecordTO> itemRecords = new ArrayList<>();
 
     public HWItemTO() {
     }

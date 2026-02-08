@@ -33,21 +33,26 @@ public class UsedInChooser extends CustomField<HWItemOverviewTO> {
 
         ComponentFactory componentFactory = new ComponentFactory();
 
-        nameField = new TextField();
-        nameField.setReadOnly(true);
-        componentFactory.attachLink(nameField, f -> UI.getCurrent().getPage()
-                .open(RouteConfiguration.forApplicationScope().getUrl(HWItemPage.class, value.getId())));
-        nameField.setVisible(false);
-        add(nameField);
+        HorizontalLayout layout = new HorizontalLayout();
+        layout.setWidthFull();
+        add(layout);
 
         clearBtn = new Button("Odebrat", e -> clear());
-        clearBtn.setIcon(VaadinIcon.CLOSE_SMALL.create());
+        clearBtn.setIcon(VaadinIcon.CLOSE.create());
         clearBtn.setVisible(false);
-        add(clearBtn);
+        layout.add(clearBtn);
 
         chooseUsedInBtn = new Button("Vybrat", VaadinIcon.SEARCH.create(),
                 e -> new HWItemChooseDialog(ignoreId, to -> setValue(to)).open());
-        add(chooseUsedInBtn);
+        layout.add(chooseUsedInBtn);
+
+        nameField = new TextField();
+        nameField.setReadOnly(true);
+        nameField.setWidthFull();
+        componentFactory.attachLink(nameField, f -> UI.getCurrent().getPage()
+                .open(RouteConfiguration.forApplicationScope().getUrl(HWItemPage.class, value.getId())));
+        nameField.setVisible(false);
+        layout.add(nameField);
     }
 
     private void selectItem(HWItemOverviewTO to) {

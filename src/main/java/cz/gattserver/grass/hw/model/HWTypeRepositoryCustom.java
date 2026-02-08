@@ -21,4 +21,7 @@ public interface HWTypeRepositoryCustom {
     HWTypeTO findByIdAndMap(Long id);
 
     Set<HWTypeBasicTO> findByItemId(Long itemId);
+
+    Set<Long> findTypeIdsByItemId(Long itemId);
+
 }

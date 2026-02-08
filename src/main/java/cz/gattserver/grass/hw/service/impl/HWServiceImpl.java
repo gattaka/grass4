@@ -11,18 +11,17 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import cz.gattserver.common.util.ServiceUtils;
 import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.hw.interfaces.*;
 import cz.gattserver.grass.hw.model.*;
+import cz.gattserver.grass.medic.domain.MedicalRecordMedicament;
 import cz.gattserver.grass.pg.util.PGUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
@@ -61,6 +60,9 @@ public class HWServiceImpl implements HWService {
 
     @Autowired
     private HWTypeRepository hwTypeRepository;
+
+    @Autowired
+    private HWItemTypeRepository hwItemTypeRepository;
 
     @Autowired
     private HWItemRecordRepository hwItemRecordRepository;
@@ -606,37 +608,36 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public Long saveHWItem(HWItemTO hwItemDTO) {
-        HWItem item;
-        if (hwItemDTO.getId() == null) item = new HWItem();
-        else item = hwItemRepository.findById(hwItemDTO.getId()).orElse(null);
-        item.setName(hwItemDTO.getName());
-        item.setPurchaseDate(hwItemDTO.getPurchaseDate());
-        logger.info("Price: " + hwItemDTO.getPrice());
-        item.setPrice(hwItemDTO.getPrice());
-        item.setState(hwItemDTO.getState());
-        item.setDescription(hwItemDTO.getDescription());
-        item.setSupervizedFor(hwItemDTO.getSupervizedFor());
-        item.setPublicItem(hwItemDTO.getPublicItem());
-        item.setWarrantyYears(hwItemDTO.getWarrantyYears());
-        // TODO
-//		if (hwItemDTO.getUsedIn() != null) {
-//			HWItem usedIn = hwItemRepository.findById(hwItemDTO.getUsedIn().getId()).orElse(null);
-//			item.setUsedIn(usedIn);
-//		} else {
-//			item.setUsedIn(null);
-//		}
-//		if (hwItemDTO.getTypes() != null) {
-//			item.setTypes(new HashSet<>());
-//			for (String typeName : hwItemDTO.getTypes()) {
-//				HWType type = hwTypeRepository.findByName(typeName);
-//				if (type == null) {
-//					type = new HWType(typeName);
-//					type = hwTypeRepository.save(type);
-//				}
-//				item.getTypes().add(type);
-//			}
-//		}
+    public Long saveHWItem(HWItemTO to) {
+        HWItem item = new HWItem();
+        item.setId(to.getId());
+        item.setName(to.getName());
+        item.setPurchaseDate(to.getPurchaseDate());
+        item.setPrice(to.getPrice());
+        item.setState(to.getState());
+        item.setDescription(to.getDescription());
+        item.setSupervizedFor(to.getSupervizedFor());
+        item.setPublicItem(to.getPublicItem());
+        item.setWarrantyYears(to.getWarrantyYears());
+        item.setUsedInId(to.getUsedInId());
+
+        for (HWTypeBasicTO type : to.getTypes())
+            type.setId(hwTypeRepository.save(new HWType(type.getName())).getId());
+
+        Set<Long> typesIdsSet = to.getTypes().stream().map(HWTypeBasicTO::getId).collect(Collectors.toSet());
+        if (to.getId() != null) {
+            typesIdsSet = ServiceUtils.processDependentSetAndDeleteMissing(typesIdsSet,
+                    hwTypeRepository.findTypeIdsByItemId(to.getId()),
+                    set -> hwItemTypeRepository.deleteItemType(to.getId(), set));
+        }
+
+        item.setId(hwItemRepository.save(item).getId());
+
+        List<HWItemType> itemTypesBatch =
+                typesIdsSet.stream().map(typeId -> new HWItemType(item.getId(), typeId))
+                        .collect(Collectors.toList());
+        hwItemTypeRepository.saveAll(itemTypesBatch);
+
         return hwItemRepository.save(item).getId();
     }
 

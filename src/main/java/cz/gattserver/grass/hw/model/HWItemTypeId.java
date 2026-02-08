@@ -13,6 +13,14 @@ public class HWItemTypeId implements Serializable {
     @Column(name = "HW_TYPE_ID")
     private Long hwTypeId;
 
+    public HWItemTypeId() {
+    }
+
+    public HWItemTypeId(Long hwItemId, Long hwTypeId) {
+        this.hwItemId = hwItemId;
+        this.hwTypeId = hwTypeId;
+    }
+
     public Long getHwItemId() {
         return hwItemId;
     }

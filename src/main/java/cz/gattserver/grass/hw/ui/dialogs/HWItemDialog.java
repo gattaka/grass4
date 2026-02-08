@@ -122,6 +122,7 @@ public class HWItemDialog extends EditWebDialog {
                         to.setUsedInName(val.getName());
                     }
                 });
+        usedInChooser.setWidthFull();
         layout.add(usedInChooser);
 
         TextArea descriptionArea = componentFactory.createTextArea("Popis");
@@ -147,20 +148,11 @@ public class HWItemDialog extends EditWebDialog {
 
         getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
-                HWItemTO writeTO = originalTO == null ? new HWItemTO() : originalTO;
-                try {
-                    binder.writeBean(writeTO);
-                } catch (ValidationException ve) {
-                    UIUtils.showError("V údajích jsou chyby");
-                    return;
-                }
-                // TODO
-//                writeTO.setUsedIn(binder.getBean().getUsedIn());
-//                writeTO.setUsedInName(binder.getBean().getUsedInName());
-                onSave.accept(writeTO);
+                binder.writeBean(formTO);
+                onSave.accept(formTO);
                 close();
-            } catch (Exception ve) {
-                throw new GrassException("Uložení se nezdařilo", ve);
+            } catch (ValidationException ve) {
+                // Chyby z validátoru se zobrazují rovnou v UI
             }
         }, e -> close()));
 
