@@ -46,7 +46,6 @@ public class HWItemsTab extends Div {
         add(buttonLayout);
 
         if (securityFacade.getCurrentUser().isAdmin()) {
-
             // Založení nové položky HW
             Button newHWBtn = componentFactory.createCreateButton(e -> openItemWindow(null));
             buttonLayout.add(newHWBtn);

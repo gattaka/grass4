@@ -154,7 +154,7 @@ public class HWItemDialog extends EditWebDialog {
             } catch (ValidationException ve) {
                 // Chyby z validátoru se zobrazují rovnou v UI
             }
-        }, e -> close()));
+        }, e -> close(), true));
 
         if (originalTO != null) binder.readBean(originalTO);
     }

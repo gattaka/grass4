@@ -315,12 +315,11 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         buttonLayout.add(saveAndCloseButton);
         saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
 
-        buttonLayout.add(componentFactory.createStornoButton(ev -> new ConfirmDialog(
-                "Opravdu si přejete zavřít editor galerie ? Veškeré neuložené změny budou ztraceny.", e -> {
+        buttonLayout.add(componentFactory.createStornoButton(e -> {
             cleanAfterCancelEdit();
             if (editMode) returnToPhotogallery();
             else returnToNode();
-        }).open()));
+        }, true));
     }
 
     private void cleanAfterCancelEdit() {
@@ -368,9 +367,8 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      * Zavolá vrácení se na galerii
      */
     private void returnToPhotogallery() {
-        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent()
-                .navigate(PGViewer.class, URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
-                        photogallery.getContentNode().getName())));
+        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(PGViewer.class,
+                URLIdentifierUtils.createURLIdentifier(photogallery.getId(), photogallery.getContentNode().getName())));
     }
 
     /**

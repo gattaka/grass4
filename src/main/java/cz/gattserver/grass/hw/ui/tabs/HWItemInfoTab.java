@@ -12,6 +12,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -230,11 +231,20 @@ public class HWItemInfoTab extends Div {
             Div operationsLayout = componentFactory.createButtonLayout();
             add(operationsLayout);
 
-            final Button fixBtn = componentFactory.createEditButton(
-                    e -> new HWItemDialog(hwService.getHWItem(hwItem.getId()), to -> {
-                        hwService.saveHWItem(to);
-                        UI.getCurrent().getPage().reload();
-                    }).open());
+            final Button fixBtn = componentFactory.createEditButton(e -> {
+                ReferenceHolder<Boolean> isSavedHolder = new ReferenceHolder<>();
+                isSavedHolder.setValue(false);
+                HWItemDialog dialog = new HWItemDialog(hwService.getHWItem(hwItem.getId()), to -> {
+                    hwService.saveHWItem(to);
+                    isSavedHolder.setValue(true);
+                });
+                // Tohle je tu proto, aby se refresh stránky provedl až poté, co je odebrán onBeforeUnload alert (onClose)
+                // ale zároveň se dialog nezavřel dřív, než se provede save
+                dialog.addClosedListener(ev -> {
+                    if (isSavedHolder.getValue()) UI.getCurrent().getPage().reload();
+                });
+                dialog.open();
+            });
             operationsLayout.add(fixBtn);
 
             final Button deleteBtn = componentFactory.createDeleteButton(ev -> {

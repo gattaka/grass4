@@ -31,7 +31,5 @@ public class HWItemChooseDialog extends EditWebDialog {
         }, e -> close(), saveButton -> itemsGrid.getGrid()
                 .addSelectionListener(e -> saveButton.setEnabled(!e.getAllSelectedItems().isEmpty())));
         add(buttons);
-
     }
-
 }

@@ -211,7 +211,18 @@ public class ComponentFactory {
     }
 
     public Button createStornoButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
-        Button btn = new Button("Storno", clickListener);
+        return createStornoButton(clickListener, false);
+    }
+
+    public Button createStornoButton(ComponentEventListener<ClickEvent<Button>> clickListener, boolean stornoConfirm) {
+        Button btn = new Button("Storno", e -> {
+            if (stornoConfirm) {
+                new ConfirmDialog("Přejete si opravdu zahodit rozpracované změny?",
+                        e2 -> clickListener.onComponentEvent(e));
+            } else {
+                clickListener.onComponentEvent(e);
+            }
+        });
         btn.setIcon(VaadinIcon.CLOSE.create());
         return btn;
     }
@@ -391,18 +402,19 @@ public class ComponentFactory {
 
     public HorizontalLayout createDialogStornoLayout(ComponentEventListener<ClickEvent<Button>> stornoClickListener) {
         HorizontalLayout layout = createDialogButtonLayout();
-        Button stornoButton = createStornoButton(stornoClickListener);
+        Button stornoButton = createStornoButton(stornoClickListener, false);
         layout.add(stornoButton);
         return layout;
     }
 
     public HorizontalLayout createDialogSubmitOrStornoLayout(
             ComponentEventListener<ClickEvent<Button>> saveClickListener,
-            ComponentEventListener<ClickEvent<Button>> stornoClickListener, Consumer<Button> submitButtonDecorator) {
+            ComponentEventListener<ClickEvent<Button>> stornoClickListener, Consumer<Button> submitButtonDecorator,
+            boolean stornoConfirm) {
         HorizontalLayout layout = createDialogButtonLayout();
 
         Button submitButton = createSubmitButton(saveClickListener);
-        Button stornoButton = createStornoButton(stornoClickListener);
+        Button stornoButton = createStornoButton(stornoClickListener, stornoConfirm);
         layout.add(submitButton, stornoButton);
 
         if (submitButtonDecorator != null) submitButtonDecorator.accept(submitButton);
@@ -412,15 +424,21 @@ public class ComponentFactory {
 
     public HorizontalLayout createDialogSubmitOrStornoLayout(
             ComponentEventListener<ClickEvent<Button>> saveClickListener,
+            ComponentEventListener<ClickEvent<Button>> stornoClickListener, Consumer<Button> submitButtonDecorator) {
+        return createDialogSubmitOrStornoLayout(saveClickListener, stornoClickListener, submitButtonDecorator, false);
+    }
+
+    public HorizontalLayout createDialogSubmitOrStornoLayout(
+            ComponentEventListener<ClickEvent<Button>> saveClickListener,
             ComponentEventListener<ClickEvent<Button>> stornoClickListener) {
-        return createDialogSubmitOrStornoLayout(saveClickListener, stornoClickListener, null);
+        return createDialogSubmitOrStornoLayout(saveClickListener, stornoClickListener, null, false);
     }
 
     public HorizontalLayout createDialogSubmitOrStornoLayout(
             ComponentEventListener<ClickEvent<Button>> saveClickListener,
             ComponentEventListener<ClickEvent<Button>> stornoClickListener, boolean showSaveButton) {
         return createDialogSubmitOrStornoLayout(saveClickListener, stornoClickListener,
-                b -> b.setVisible(showSaveButton));
+                b -> b.setVisible(showSaveButton), showSaveButton);
     }
 
     public Div createButtonLayout(boolean topMargin) {
