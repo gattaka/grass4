@@ -242,23 +242,49 @@ public class ComponentFactory {
         TextArea textArea = new TextArea(caption) {
 
             @ClientCallable
-            private void handleTab(int start, int finish, String origtext, boolean shiftKey) {
-                String preText = origtext.substring(0, start);
-                String tabbedText = origtext.substring(start, finish);
-                String postText = origtext.substring(finish);
-                StringBuilder result = new StringBuilder(preText + '\t');
-                int finishShift = 1;
-                for (int i = 0; i < tabbedText.length(); i++) {
-                    char c = tabbedText.charAt(i);
-                    result.append(c);
-                    if (c == '\n' && i != tabbedText.length() - 1) {
-                        result.append('\t');
-                        finishShift++;
+            private void handleTab(int start, int end, String value, boolean shiftKey) {
+                boolean selection = start != end;
+
+                String preText;
+                String editText;
+                String postText = value.substring(end);
+                if (selection) {
+                    int selectionLineStart = -1;
+                    if (start == 0) {
+                        selectionLineStart = 0;
+                    } else {
+                        String preSelectionText = value.substring(0, start);
+                        // hledej zpátky od začátku označení dokud nenajdeš konec předchozích řádku nebo začátek textu
+                        for (int i = preSelectionText.length() - 1; i >= 0; i--) {
+                            if (preSelectionText.charAt(i) == '\n') {
+                                selectionLineStart = i + 1;
+                                break;
+                            }
+                            if (i == 0) {
+                                selectionLineStart = 0;
+                                break;
+                            }
+                        }
                     }
+                    preText = value.substring(0, selectionLineStart);
+                    editText = value.substring(selectionLineStart, end);
+                    String shiftText;
+                    if (shiftKey) {
+                        shiftText = editText.replaceAll("^\t", "").replaceAll("\n\t", "\n");
+                    } else {
+                        shiftText = editText.replaceAll("^", "\t").replaceAll("\n", "\n\t");
+                    }
+                    String newText = preText + shiftText + postText;
+                    if (newText.length() != textAreaHolder.getValue().getValue().length()) {
+                        textAreaHolder.getValue().setValue(newText);
+                        focusOnPosition(start + 1, end + (shiftText.length() - editText.length()));
+                    }
+                } else {
+                    preText = value.substring(0, start);
+                    editText = "\t";
+                    textAreaHolder.getValue().setValue(preText + editText + postText);
+                    focusOnPosition(start + 1, start + 1);
                 }
-                result.append(postText);
-                textAreaHolder.getValue().setValue(result.toString());
-                focusOnPosition(start + 1, finish + finishShift);
             }
 
             private void focusOnPosition(int start, int finish) {
@@ -269,6 +295,7 @@ public class ComponentFactory {
             }
         };
         textAreaHolder.setValue(textArea);
+        textArea.addClassName("tab-text-area");
 
         // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
         final ReferenceHolder<Registration> holder = new ReferenceHolder<>();
@@ -278,7 +305,8 @@ public class ComponentFactory {
                     /*				*/ + "let keyCode = e.keyCode || e.which;"
                     /*				*/ + "if (keyCode == 9) {"
                     /*					*/ + "e.preventDefault();"
-                    /*					*/ + "$0.$server.handleTab(ta.selectionStart, ta.selectionEnd, ta.value, e.shiftKey);"
+                    /*					*/ +
+                    "$0.$server.handleTab(ta.selectionStart, ta.selectionEnd, ta.value, e.shiftKey);"
                     /*				*/ + "}"
                     /*			*/ + "}, false);";
             UI.getCurrent().getPage().executeJs(js, textArea.getElement());

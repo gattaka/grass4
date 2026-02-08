@@ -24,6 +24,12 @@ html {
     --vaadin-tabs-border-radius: 5px;
 }
 
+.tab-text-area {
+    font-family: monospace;
+    tab-size: 4;
+    font-size: 12px;
+}
+
 vaadin-combo-box[readonly]:focus-within::part(input-field),
 vaadin-date-picker[readonly]:focus-within::part(input-field),
 vaadin-time-picker[readonly]:focus-within::part(input-field),

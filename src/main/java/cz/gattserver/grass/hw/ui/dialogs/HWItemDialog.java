@@ -117,9 +117,6 @@ public class HWItemDialog extends EditWebDialog {
         }));
 
         TextArea descriptionArea = componentFactory.createTextArea("Popis");
-        descriptionArea.setTabIndex(-1);
-        descriptionArea.setWidthFull();
-        descriptionArea.getStyle().set("font-family", "monospace").set("tab-size", "4").set("font-size", "12px");
         binder.bind(descriptionArea, HWItemTO::getDescription, HWItemTO::setDescription);
         layout.add(descriptionArea);
         descriptionArea.setSizeFull();
