@@ -368,7 +368,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      * Zavolá vrácení se na galerii
      */
     private void returnToPhotogallery() {
-        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UI.getCurrent()
+        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent()
                 .navigate(PGViewer.class, URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
                         photogallery.getContentNode().getName())));
     }
@@ -377,7 +377,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      * zavolání vrácení se na kategorii
      */
     private void returnToNode() {
-        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> UI.getCurrent()
+        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent()
                 .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
     }
 

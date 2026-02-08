@@ -619,14 +619,14 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
      * Zavolá vrácení se na článek
      */
     private void returnToArticle() {
-        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> returnToArticleCallback());
+        UIUtils.removeOnbeforeunloadWarning().then(e -> returnToArticleCallback());
     }
 
     /**
      * zavolání vrácení se na kategorii
      */
     private void returnToNode() {
-        UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;").then(e -> returnToNodeCallback());
+        UIUtils.removeOnbeforeunloadWarning().then(e -> returnToNodeCallback());
     }
 
     /**

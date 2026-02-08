@@ -113,9 +113,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         Div editorLayout = componentFactory.createOneColumnLayout();
         add(editorLayout);
 
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít - " +
-                        "rozpracovaná data nejsou uložena ?\" };");
+        UIUtils.addOnbeforeunloadWarning();
 
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) {
@@ -358,18 +356,16 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
      * Zavolá vrácení se na obsah
      */
     private void returnToProject() {
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID +
-                        "').$server.returnToProjectCallback();");
+        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(PGViewer.class,
+                URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
     }
 
     /**
      * zavolání vrácení se na kategorii
      */
     private void returnToNode() {
-        UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = null; document.getElementById('" + CLOSE_JS_DIV_ID +
-                        "').$server.returnToNodeCallback();");
+        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent()
+                .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
     }
 
     private void onSaveResult(Long id) {

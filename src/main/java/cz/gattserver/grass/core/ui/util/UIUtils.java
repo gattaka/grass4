@@ -359,8 +359,13 @@ public class UIUtils {
                 """);
     }
 
-    public static void addOnbeforeunloadWarning() {
-        UI.getCurrent().getPage()
+    public static PendingJavaScriptResult removeOnbeforeunloadWarning() {
+        return UI.getCurrent().getPage()
+                .executeJs("window.onbeforeunload = null;");
+    }
+
+    public static PendingJavaScriptResult addOnbeforeunloadWarning() {
+        return UI.getCurrent().getPage()
                 .executeJs("window.onbeforeunload = function() { return \"" + ON_BEFORE_UNLOAD_WARNING + "\" };");
     }
 }

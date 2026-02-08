@@ -1,6 +1,6 @@
 package cz.gattserver.common.vaadin.dialogs;
 
-import com.vaadin.flow.component.UI;
+import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class EditWebDialog extends WebDialog {
 
@@ -21,13 +21,15 @@ public class EditWebDialog extends WebDialog {
     @Override
     public void open() {
         super.open();
-        if (!readOnly) UI.getCurrent().getPage().executeJs(
-                "window.onbeforeunload = function() { return \"Opravdu si přejete ukončit editor a odejít?\" };");
+        if (!readOnly) UIUtils.addOnbeforeunloadWarning();
     }
 
     @Override
     public void close() {
-        super.close();
-        if (!readOnly) UI.getCurrent().getPage().executeJs("window.onbeforeunload = null;");
+        if (!readOnly) {
+            UIUtils.removeOnbeforeunloadWarning().then(e -> super.close());
+        } else {
+            super.close();
+        }
     }
 }
