@@ -356,7 +356,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
      * Zavolá vrácení se na obsah
      */
     private void returnToProject() {
-        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(PGViewer.class,
+        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(Print3DViewer.class,
                 URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
     }
 
