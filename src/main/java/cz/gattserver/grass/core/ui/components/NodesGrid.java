@@ -9,10 +9,12 @@ import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 
+import com.vaadin.flow.router.RouterLink;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -40,11 +42,9 @@ public class NodesGrid extends Grid<NodeOverviewTO> {
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
                 .setKey(iconBind);
 
-        addColumn(new ComponentRenderer<>(node -> {
-            String url = UIUtils.getPageURL(nodePageFactory,
-                    URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
-            return new Anchor(url, node.getName());
-        })).setHeader("Kategorie").setId(nameBind);
+        addColumn(new ComponentRenderer<>(node -> new RouterLink(node.getName(), NodePage.class,
+                URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())))).setHeader("Kategorie")
+                .setId(nameBind);
     }
 
     public void populate(List<NodeOverviewTO> nodes) {

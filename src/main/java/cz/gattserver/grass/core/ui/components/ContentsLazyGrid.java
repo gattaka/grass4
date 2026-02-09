@@ -14,10 +14,12 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
+import com.vaadin.flow.router.RouterLink;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
+import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -94,10 +96,9 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
         addColumn(new ComponentRenderer<>(contentNode -> {
             if (activeLinks) {
-                String url = UIUtils.getPageURL(nodePageFactory,
+                return new RouterLink(contentNode.getParentNodeName(), NodePage.class,
                         URLIdentifierUtils.createURLIdentifier(contentNode.getParentNodeId(),
-                                contentNode.getParentNodeName())) + "'>" + contentNode.getParentNodeName();
-                return new Anchor(url, contentNode.getParentNodeName());
+                                contentNode.getParentNodeName()));
             } else {
                 return new Text(contentNode.getParentNodeName());
             }
