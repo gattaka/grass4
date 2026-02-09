@@ -51,6 +51,7 @@ public class HWItem {
 	/**
 	 * Součást celku
 	 */
+    @Column(name = "USEDIN_ID")
 	private Long usedInId;
 
 	/**
