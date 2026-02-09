@@ -634,8 +634,7 @@ public class HWServiceImpl implements HWService {
         item.setId(hwItemRepository.save(item).getId());
 
         List<HWItemType> itemTypesBatch =
-                typesIdsSet.stream().map(typeId -> new HWItemType(item.getId(), typeId))
-                        .collect(Collectors.toList());
+                typesIdsSet.stream().map(typeId -> new HWItemType(item.getId(), typeId)).collect(Collectors.toList());
         hwItemTypeRepository.saveAll(itemTypesBatch);
 
         return hwItemRepository.save(item).getId();
@@ -648,7 +647,7 @@ public class HWServiceImpl implements HWService {
 
     @Override
     public List<HWItemOverviewTO> getAllHWItems() {
-        return hwItemRepository.findAndMap();
+        return hwItemRepository.findAndMap(null, null, null, null);
     }
 
     @Override
@@ -663,7 +662,9 @@ public class HWServiceImpl implements HWService {
 
     @Override
     public List<HWItemOverviewTO> getHWItemsByTypes(Collection<String> types) {
-        return hwItemRepository.getHWItemsByTypes(types);
+        HWFilterTO filter = new HWFilterTO();
+        filter.setTypes(types);
+        return hwItemRepository.findAndMap(filter, null, null, null);
     }
 
     @Override
@@ -681,12 +682,16 @@ public class HWServiceImpl implements HWService {
 
     @Override
     public List<HWItemOverviewTO> getAllParts(Long usedInItemId) {
-        return hwItemRepository.findByUsedInId(usedInItemId);
+        HWFilterTO filter = new HWFilterTO();
+        filter.setUsedInId(usedInItemId);
+        return hwItemRepository.findAndMap(filter, null, null, null);
     }
 
     @Override
     public List<HWItemOverviewTO> getHWItemsAvailableForPart(Long itemId) {
-        return hwItemRepository.findAllExcept(itemId);
+        HWFilterTO filter = new HWFilterTO();
+        filter.setIgnoreId(itemId);
+        return hwItemRepository.findAndMap(filter, null, null, null);
     }
 
     @Override

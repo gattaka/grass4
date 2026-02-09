@@ -327,7 +327,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		assertEquals(HWItemState.BROKEN, savedItemTO.getState());
 		assertEquals("Táta", savedItemTO.getSupervizedFor());
 		assertEquals(1, savedItemTO.getTypes().size());
-		assertEquals("notebook", savedItemTO.getTypes().iterator().next());
+		assertEquals("notebook", savedItemTO.getTypes().iterator().next().getName());
 		assertEquals(Integer.valueOf(2), savedItemTO.getWarrantyYears());
 	}
 
@@ -385,7 +385,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		assertEquals(HWItemState.DISASSEMBLED, savedItemTO2.getState());
 		assertNull(savedItemTO2.getSupervizedFor());
 		assertEquals(1, savedItemTO2.getTypes().size());
-		assertEquals("RAM", savedItemTO2.getTypes().iterator().next());
+		assertEquals("RAM", savedItemTO2.getTypes().iterator().next().getName());
 		assertEquals(Integer.valueOf(1), savedItemTO2.getWarrantyYears());
 		assertEquals(id, savedItemTO2.getUsedInId());
 		assertEquals("test Name", savedItemTO2.getUsedInName());

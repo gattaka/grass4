@@ -123,11 +123,11 @@ public class HWItemOverviewTO implements Serializable {
     public final boolean equals(Object o) {
         if (!(o instanceof HWItemOverviewTO that)) return false;
 
-        return Objects.equals(id, that.id);
+        return id.equals(that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return id.hashCode();
     }
 }
