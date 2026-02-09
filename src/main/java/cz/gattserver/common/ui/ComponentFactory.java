@@ -218,7 +218,7 @@ public class ComponentFactory {
         Button btn = new Button("Storno", e -> {
             if (stornoConfirm) {
                 new ConfirmDialog("Přejete si opravdu zahodit rozpracované změny?",
-                        e2 -> clickListener.onComponentEvent(e));
+                        e2 -> clickListener.onComponentEvent(e)).open();
             } else {
                 clickListener.onComponentEvent(e);
             }
