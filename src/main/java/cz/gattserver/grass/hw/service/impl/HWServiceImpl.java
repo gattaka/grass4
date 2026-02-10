@@ -676,7 +676,7 @@ public class HWServiceImpl implements HWService {
             }
         }
 
-        if (to.getState() != to.getStateOld()) {
+        if (to.getId() != null && to.getState() != to.getStateOld()) {
             HWItemRecord itemRecord = new HWItemRecord();
             itemRecord.setHwItemId(item.getId());
             itemRecord.setDate(LocalDate.now());
