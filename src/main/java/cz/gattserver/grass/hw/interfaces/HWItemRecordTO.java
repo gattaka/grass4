@@ -15,10 +15,6 @@ public class HWItemRecordTO {
 
     private Long hwItemId;
 
-    private String usedInName;
-    // pouze TO
-    private Long usedInId;
-
     @NotNull
     private LocalDate date;
 
@@ -35,22 +31,9 @@ public class HWItemRecordTO {
     }
 
     @QueryProjection
-    public HWItemRecordTO(Long id, Long hwItemId, String usedInName, LocalDate date, String description, HWItemState state) {
+    public HWItemRecordTO(Long id, Long hwItemId, LocalDate date, String description, HWItemState state) {
         this.id = id;
         this.hwItemId = hwItemId;
-        this.usedInName = usedInName;
-        this.date = date;
-        this.description = description;
-        this.state = state;
-    }
-
-    // copy constructor
-    public HWItemRecordTO(Long id, Long hwItemId, String usedInName, Long usedInId, LocalDate date, String description,
-                          HWItemState state) {
-        this.id = id;
-        this.hwItemId = hwItemId;
-        this.usedInName = usedInName;
-        this.usedInId = usedInId;
         this.date = date;
         this.description = description;
         this.state = state;
@@ -96,23 +79,7 @@ public class HWItemRecordTO {
         this.hwItemId = hwItemId;
     }
 
-    public String getUsedInName() {
-        return usedInName;
-    }
-
-    public void setUsedInName(String usedInName) {
-        this.usedInName = usedInName;
-    }
-
-    public Long getUsedInId() {
-        return usedInId;
-    }
-
-    public void setUsedInId(Long usedInId) {
-        this.usedInId = usedInId;
-    }
-
     public HWItemRecordTO copy() {
-        return new HWItemRecordTO(id, hwItemId, usedInName,usedInId, date, description, state);
+        return new HWItemRecordTO(id, hwItemId, date, description, state);
     }
 }

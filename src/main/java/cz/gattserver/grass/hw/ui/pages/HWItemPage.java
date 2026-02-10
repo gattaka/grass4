@@ -1,6 +1,7 @@
 package cz.gattserver.grass.hw.ui.pages;
 
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 
@@ -68,12 +69,15 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
 
         ComponentFactory componentFactory = new ComponentFactory();
         Div layout = componentFactory.createOneColumnLayout();
+        layout.addClassName("hw-item-layout");
         add(layout);
 
         Breadcrumb breadcrumb = new Breadcrumb();
         breadcrumb.resetBreadcrumb(new Breadcrumb.BreadcrumbElement(hwItem.getName(), HWItemPage.class, hwItem.getId()),
                 new Breadcrumb.BreadcrumbElement("HW list", HWPage.class));
         layout.add(breadcrumb);
+
+        layout.add(new H2(hwItem.getName()));
 
         infoTab = new Tab("Info");
         serviceNotesTab = new Tab(createServiceNotesTabLabel());

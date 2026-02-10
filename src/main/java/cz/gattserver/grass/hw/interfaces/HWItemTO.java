@@ -21,7 +21,9 @@ public class HWItemTO {
     private LocalDate purchaseDate;
     private BigDecimal price;
     private HWItemState state;
+    private HWItemState stateOld; // pouze pro porovnání změny
     private Long usedInId;
+    private Long usedInIdOld; // pouze pro porovnání změny
     private String usedInName;
     private String supervizedFor;
     private Boolean publicItem;
@@ -43,7 +45,9 @@ public class HWItemTO {
         this.purchaseDate = purchaseDate;
         this.price = price;
         this.state = state;
+        this.stateOld = state;
         this.usedInId = usedInId;
+        this.usedInIdOld = usedInId;
         this.usedInName = usedInName;
         this.supervizedFor = supervizedFor;
         this.publicItem = publicItem;
@@ -153,6 +157,22 @@ public class HWItemTO {
 
     public void setItemRecords(List<HWItemRecordTO> itemRecords) {
         this.itemRecords = itemRecords;
+    }
+
+    public Long getUsedInIdOld() {
+        return usedInIdOld;
+    }
+
+    public void setUsedInIdOld(Long usedInIdOld) {
+        this.usedInIdOld = usedInIdOld;
+    }
+
+    public HWItemState getStateOld() {
+        return stateOld;
+    }
+
+    public void setStateOld(HWItemState stateOld) {
+        this.stateOld = stateOld;
     }
 
     @Override

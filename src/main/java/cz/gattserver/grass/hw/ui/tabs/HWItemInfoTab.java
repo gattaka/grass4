@@ -25,7 +25,6 @@ import cz.gattserver.grass.hw.ui.pages.HWPage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -56,11 +55,8 @@ public class HWItemInfoTab extends Div {
 
     private static final Logger logger = LoggerFactory.getLogger(HWItemInfoTab.class);
 
-    @Autowired
-    private HWService hwService;
-
-    @Autowired
-    private SecurityService securityFacade;
+    private final HWService hwService;
+    private final SecurityService securityService;
 
     private VerticalLayout hwImageLayout;
     private HWItemTO hwItem;
@@ -68,7 +64,8 @@ public class HWItemInfoTab extends Div {
     private HWItemsTab itemsTab;
 
     public HWItemInfoTab(HWItemsTab itemsTab, HWItemTO hwItem) {
-        SpringContextHelper.inject(this);
+        securityService = SpringContextHelper.getBean(SecurityService.class);
+        hwService = SpringContextHelper.getBean(HWService.class);
         setHeightFull();
         this.itemsTab = itemsTab;
         this.hwItem = hwItem;
@@ -81,23 +78,16 @@ public class HWItemInfoTab extends Div {
     }
 
     private UserInfoTO getUser() {
-        if (securityFacade == null) securityFacade = SpringContextHelper.getBean(SecurityService.class);
-        return securityFacade.getCurrentUser();
+        return securityService.getCurrentUser();
     }
 
     private String createWarrantyYearsString(Integer warrantyYears) {
         return new CZAmountFormatter("rok", "roky", "let").format(warrantyYears);
     }
 
-    // TODO ellipsis CSS?
-    private String createShortName(String name) {
-        int maxLength = 100;
-        if (name.length() <= maxLength) return name;
-        return name.substring(0, maxLength / 2 - 3) + "..." + name.substring(name.length() - maxLength / 2);
-    }
-
     private void init() {
         ComponentFactory componentFactory = new ComponentFactory();
+
         Div tagsDiv = new Div();
         tagsDiv.setId("hw-tags-div");
         hwItem.getTypes().forEach(to -> {
@@ -186,12 +176,12 @@ public class HWItemInfoTab extends Div {
         }
         tableLayout.setColSpan(5);
 
-        // Tabulka HW
         Grid<HWItemOverviewTO> grid = new Grid<>();
         UIUtils.applyGrassDefaultStyle(grid);
         grid.setSelectionMode(SelectionMode.NONE);
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        grid.setHeight("150px");
+        grid.setAllRowsVisible(true);
+        grid.setMinHeight("150px");
 
         grid.addColumn(new IconRenderer<>(c -> {
             ImageIcon ii = HWUIUtils.chooseImageIcon(c);

@@ -2,7 +2,6 @@ package cz.gattserver.grass.hw.ui.tabs;
 
 import java.util.Arrays;
 
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -15,14 +14,13 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.interfaces.HWItemRecordTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-import cz.gattserver.grass.hw.ui.dialogs.HWItemRecordEditDialog;
+import cz.gattserver.grass.hw.ui.dialogs.HWItemRecordDialog;
 
 public class HWItemRecordsTab extends Div {
 
@@ -30,51 +28,39 @@ public class HWItemRecordsTab extends Div {
 
     private static final String DEFAULT_NOTE_LABEL_VALUE = "- Zvolte servisní záznam -";
 
-    private transient HWService hwService;
-    private transient SecurityService securityFacade;
+    private final HWService hwService;
+    private final SecurityService securityService;
 
-    private Column<HWItemRecordTO> serviceDateColumn;
-    private Grid<HWItemRecordTO> serviceNotesGrid;
+    private Column<HWItemRecordTO> dateColumn;
+    private Grid<HWItemRecordTO> grid;
     private HWItemTO hwItem;
     private HWItemPage hwItemPage;
 
     public HWItemRecordsTab(HWItemTO hwItem, HWItemPage hwItemPage) {
-        SpringContextHelper.inject(this);
+        securityService = SpringContextHelper.getBean(SecurityService.class);
+        hwService = SpringContextHelper.getBean(HWService.class);
+
         this.hwItem = hwItem;
         this.hwItemPage = hwItemPage;
         init();
     }
 
-    private HWService getHWService() {
-        if (hwService == null) hwService = SpringContextHelper.getBean(HWService.class);
-        return hwService;
-    }
-
-    private UserInfoTO getUser() {
-        if (securityFacade == null) securityFacade = SpringContextHelper.getBean(SecurityService.class);
-        return securityFacade.getCurrentUser();
-    }
-
     private void init() {
-        serviceNotesGrid = new Grid<>();
-        add(serviceNotesGrid);
+        grid = new Grid<>();
+        add(grid);
 
-        UIUtils.applyGrassDefaultStyle(serviceNotesGrid);
-        serviceNotesGrid.setSelectionMode(SelectionMode.SINGLE);
-        serviceNotesGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        Column<HWItemRecordTO> idColumn =
-                serviceNotesGrid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getId())));
-        serviceDateColumn = serviceNotesGrid.addColumn(new LocalDateRenderer<>(HWItemRecordTO::getDate, "d.M.yyyy"))
-                .setHeader("Datum").setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0);
-        serviceNotesGrid.addColumn(hw -> hw.getState().getName()).setHeader("Stav").setWidth("110px").setFlexGrow(0);
-        serviceNotesGrid.addColumn(
-                        new TextRenderer<>(to -> to.getUsedInName() == null ? "" : String.valueOf(to.getUsedInName())))
-                .setHeader("Je součástí").setWidth("180px").setFlexGrow(0);
-        serviceNotesGrid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getDescription()))).setHeader("Obsah");
+        UIUtils.applyGrassDefaultStyle(grid);
+        grid.setSelectionMode(SelectionMode.SINGLE);
+        grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        Column<HWItemRecordTO> idColumn = grid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getId())));
+        dateColumn = grid.addColumn(new LocalDateRenderer<>(HWItemRecordTO::getDate, "d. M. yyyy")).setHeader("Datum")
+                .setTextAlign(ColumnTextAlign.END).setWidth("90px").setFlexGrow(0);
+        grid.addColumn(hw -> hw.getState().getName()).setHeader("Stav").setWidth("110px").setFlexGrow(0);
+        grid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getDescription()))).setHeader("Obsah");
         idColumn.setVisible(false);
-        serviceNotesGrid.setHeight("300px");
+        grid.setHeight("300px");
 
-        serviceNotesGrid.sort(Arrays.asList(new GridSortOrder<>(serviceDateColumn, SortDirection.ASCENDING),
+        grid.sort(Arrays.asList(new GridSortOrder<>(dateColumn, SortDirection.ASCENDING),
                 new GridSortOrder<>(idColumn, SortDirection.ASCENDING)));
 
         populateServiceNotesGrid();
@@ -86,60 +72,50 @@ public class HWItemRecordsTab extends Div {
         serviceNoteDescription.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         add(serviceNoteDescription);
 
-        serviceNotesGrid.addSelectionListener(selection -> {
+        grid.addSelectionListener(selection -> {
             if (selection.getFirstSelectedItem().isPresent()) {
                 HWItemRecordTO serviceNoteDTO = selection.getFirstSelectedItem().get();
-                serviceNoteDescription.setText((String) serviceNoteDTO.getDescription());
+                serviceNoteDescription.setText(serviceNoteDTO.getDescription());
             } else {
                 serviceNoteDescription.setText(DEFAULT_NOTE_LABEL_VALUE);
             }
         });
 
-        if (getUser().isAdmin()) {
+        grid.addItemDoubleClickListener(e -> HWItemRecordDialog.detail(e.getItem()).open());
+
+        if (securityService.getCurrentUser().isAdmin()) {
             ComponentFactory componentFactory = new ComponentFactory();
             Div operationsLayout = componentFactory.createButtonLayout();
             add(operationsLayout);
 
-            Button newNoteBtn = componentFactory.createCreateButton(e -> new HWItemRecordEditDialog(hwItem) {
-                private static final long serialVersionUID = -5582822648042555576L;
-
-                @Override
-                protected void onSuccess(HWItemRecordTO noteDTO) {
-                    hwItem.getItemRecords().add(noteDTO);
-                    populateServiceNotesGrid();
-                    hwItemPage.refreshItem();
-                    hwItemPage.switchServiceNotesTab();
-                    serviceNotesGrid.select(noteDTO);
-                }
-            }.open());
-
-            Button editNoteBtn = componentFactory.createEditGridButton(event -> {
-                if (serviceNotesGrid.getSelectedItems().isEmpty()) return;
-                new HWItemRecordEditDialog(hwItem, serviceNotesGrid.getSelectedItems().iterator().next()) {
-                    private static final long serialVersionUID = -5582822648042555576L;
-
-                    @Override
-                    protected void onSuccess(HWItemRecordTO noteDTO) {
+            operationsLayout.add(
+                    componentFactory.createCreateButton(e -> HWItemRecordDialog.create(hwItem.getId(), to -> {
+                        hwService.saveHWItemRecord(hwItem, to);
                         populateServiceNotesGrid();
-                    }
-                }.open();
-            }, serviceNotesGrid);
+                        hwItemPage.refreshItem();
+                        hwItemPage.switchServiceNotesTab();
+                        grid.select(to);
+                    }).open()));
 
-            Button deleteNoteBtn = componentFactory.createDeleteGridButton(item -> {
-                getHWService().deleteServiceNote(item.getId());
+            operationsLayout.add(
+                    componentFactory.createDetailGridButton(item -> HWItemRecordDialog.detail(item).open(), grid));
+
+            operationsLayout.add(componentFactory.createEditGridButton(item -> HWItemRecordDialog.edit(item, to -> {
+                hwService.saveHWItemRecord(hwItem, to);
+                populateServiceNotesGrid();
+            }).open(), grid));
+
+            operationsLayout.add(componentFactory.createDeleteGridButton(item -> {
+                hwService.deleteHWItemRecord(item.getId());
                 hwItem.getItemRecords().remove(item);
                 populateServiceNotesGrid();
                 hwItemPage.refreshTabLabels();
-            }, serviceNotesGrid);
+            }, grid));
 
-            operationsLayout.add(newNoteBtn);
-            operationsLayout.add(editNoteBtn);
-            operationsLayout.add(deleteNoteBtn);
         }
     }
 
     private void populateServiceNotesGrid() {
-        serviceNotesGrid.setItems(hwItem.getItemRecords());
-        serviceNotesGrid.sort(Arrays.asList(new GridSortOrder<>(serviceDateColumn, SortDirection.DESCENDING)));
+        grid.setItems(hwItem.getItemRecords());
     }
 }

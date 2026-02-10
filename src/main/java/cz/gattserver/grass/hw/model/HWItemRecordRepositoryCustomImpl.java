@@ -18,6 +18,7 @@ public class HWItemRecordRepositoryCustomImpl extends QuerydslRepositorySupport
     @Override
     public List<HWItemRecordTO> findByItemId(Long itemId) {
         return from(r).where(r.hwItemId.eq(itemId))
-                .select(new QHWItemRecordTO(r.id, r.hwItemId, r.usedInName, r.date, r.description, r.state)).fetch();
+                .select(new QHWItemRecordTO(r.id, r.hwItemId, r.date, r.description, r.state))
+                .orderBy(r.date.desc(), r.id.desc()).fetch();
     }
 }

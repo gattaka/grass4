@@ -55,20 +55,24 @@ public class UsedInChooser extends CustomField<HWItemOverviewTO> {
         layout.add(nameField);
     }
 
-    private void selectItem(HWItemOverviewTO to) {
-        if (to == null) {
-            value = null;
+    private void refresh() {
+        if (value == null) {
             nameField.clear();
             nameField.setVisible(false);
             clearBtn.setVisible(false);
-            chooseUsedInBtn.setVisible(true);
+            chooseUsedInBtn.setVisible(!isReadOnly());
         } else {
-            value = to;
-            nameField.setValue(to.getName());
+            nameField.setValue(value.getName());
             nameField.setVisible(true);
-            clearBtn.setVisible(true);
+            clearBtn.setVisible(!isReadOnly());
             chooseUsedInBtn.setVisible(false);
         }
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        super.setReadOnly(readOnly);
+        refresh();
     }
 
     @Override
@@ -77,7 +81,8 @@ public class UsedInChooser extends CustomField<HWItemOverviewTO> {
     }
 
     @Override
-    protected void setPresentationValue(HWItemOverviewTO id) {
-        selectItem(id);
+    protected void setPresentationValue(HWItemOverviewTO value) {
+        this.value = value;
+        refresh();
     }
 }

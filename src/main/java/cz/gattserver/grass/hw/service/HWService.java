@@ -145,9 +145,8 @@ public interface HWService {
      * Service notes
      */
 
-    void addItemRecord(HWItemRecordTO itemRecordTO, Long id, Long usedInId, String name);
+    void saveHWItemRecord(HWItemTO hwItemTO, HWItemRecordTO itemRecordTO);
 
-    void modifyServiceNote(HWItemRecordTO serviceNoteDTO);
+    void deleteHWItemRecord(Long id);
 
-    void deleteServiceNote(Long id);
 }

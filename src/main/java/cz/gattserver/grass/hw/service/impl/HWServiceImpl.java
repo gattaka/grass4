@@ -24,6 +24,7 @@ import cz.gattserver.grass.hw.model.*;
 import cz.gattserver.grass.medic.domain.MedicalRecordMedicament;
 import cz.gattserver.grass.pg.util.PGUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -637,7 +638,54 @@ public class HWServiceImpl implements HWService {
                 typesIdsSet.stream().map(typeId -> new HWItemType(item.getId(), typeId)).collect(Collectors.toList());
         hwItemTypeRepository.saveAll(itemTypesBatch);
 
-        return hwItemRepository.save(item).getId();
+        if (to.getUsedInId() != to.getUsedInIdOld()) {
+            if (to.getUsedInIdOld() != null) {
+                HWItem oldParentItem = hwItemRepository.findById(to.getUsedInIdOld()).get();
+
+                HWItemRecord oldParentRecord = new HWItemRecord();
+                oldParentRecord.setHwItemId(to.getUsedInIdOld());
+                oldParentRecord.setState(oldParentItem.getState());
+                oldParentRecord.setDate(LocalDate.now());
+                oldParentRecord.setDescription("Odebráno:\n" + item.getName());
+                hwItemRecordRepository.save(oldParentRecord);
+
+                HWItemRecord childRecord = new HWItemRecord();
+                childRecord.setHwItemId(item.getId());
+                childRecord.setState(to.getState());
+                childRecord.setDate(LocalDate.now());
+                childRecord.setDescription("Odebráno z:\n" + oldParentItem.getName());
+                hwItemRecordRepository.save(childRecord);
+            }
+
+            if (to.getUsedInId() != null) {
+                HWItem newParentItem = hwItemRepository.findById(to.getUsedInId()).get();
+
+                HWItemRecord newParentRecord = new HWItemRecord();
+                newParentRecord.setHwItemId(to.getUsedInId());
+                newParentRecord.setState(newParentItem.getState());
+                newParentRecord.setDate(LocalDate.now());
+                newParentRecord.setDescription("Přidáno:\n" + item.getName());
+                hwItemRecordRepository.save(newParentRecord);
+
+                HWItemRecord childRecord = new HWItemRecord();
+                childRecord.setHwItemId(item.getId());
+                childRecord.setState(to.getState());
+                childRecord.setDate(LocalDate.now());
+                childRecord.setDescription("Přidáno do:\n" + newParentItem.getName());
+                hwItemRecordRepository.save(childRecord);
+            }
+        }
+
+        if (to.getState() != to.getStateOld()) {
+            HWItemRecord itemRecord = new HWItemRecord();
+            itemRecord.setHwItemId(item.getId());
+            itemRecord.setDate(LocalDate.now());
+            itemRecord.setState(to.getState());
+            itemRecord.setDescription("Změna stavu z " + to.getStateOld() + " na " + to.getState());
+            hwItemRecordRepository.save(itemRecord);
+        }
+
+        return item.getId();
     }
 
     @Override
@@ -715,85 +763,24 @@ public class HWServiceImpl implements HWService {
     }
 
     /*
-     * Service notes
+     * Item records
      */
 
-    /**
-     * Vygeneruje {@link HWItemRecord} o přidání/odebrání HW, uloží a přidá k
-     * cílovému HW
-     */
-    private void saveHWPartMoveHWItemRecord(Long targetItemId, String sourceItemName, LocalDate date, String cause,
-                                            boolean added) {
-        HWItemOverviewTO targetItem = hwItemRepository.findByIdAndMap(targetItemId);
-
-        StringBuilder builder = new StringBuilder();
-        builder.append(added ? "Byl přidán:\n" : "Byl odebrán:\n");
-        builder.append(sourceItemName);
-        builder.append("\n\n");
-        builder.append("Důvod:\n");
-        builder.append(cause);
-
-        HWItemRecord record = new HWItemRecord();
-        record.setDate(date);
-        record.setDescription(builder.toString());
-        record.setState(targetItem.getState());
-        record.setUsedInName(targetItem.getUsedInId() == null ? "" : targetItem.getUsedInName());
-        record.setHwItemId(targetItem.getId());
-        hwItemRecordRepository.save(record);
-    }
-
     @Override
-    public void addItemRecord(HWItemRecordTO itemRecordTO, Long id, Long usedInId, String name) {
-        HWItemRecord serviceNote = new HWItemRecord();
-        serviceNote.setDate(itemRecordTO.getDate());
-        serviceNote.setDescription(itemRecordTO.getDescription());
-        serviceNote.setState(itemRecordTO.getState());
-        serviceNote.setUsedInName(itemRecordTO.getUsedInName());
-        serviceNote = hwItemRecordRepository.save(serviceNote);
-
-        hwItemRepository.updateState(id, serviceNote.getState());
-
-        // HW je někde součástí
-        if (itemRecordTO.getUsedInId() != null) {
-
-            // předtím nebyl nikde součástí
-            if (usedInId == null) {
-                hwItemRepository.updateUsedInId(id, itemRecordTO.getUsedInId());
-                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(), serviceNote.getDescription(), true);
-            } else if (usedInId != itemRecordTO.getUsedInId()) {
-                // již předtím byl součástí, ale nyní je jinde
-                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(), serviceNote.getDescription(), false);
-                hwItemRepository.updateUsedInId(id, itemRecordTO.getUsedInId());
-                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(), serviceNote.getDescription(), true);
-            } else {
-                // nic se nezměnilo - HW je stále součástí stejného HW
-            }
-
-        } else { // HW není nikde součástí
-
-            // už předtím nebyl nikde součástí
-            if (usedInId == null) {
-                // nic se nezměnilo - HW stále není nikde evidován jako součást
-            } else {
-                // předtím někde byl
-                saveHWPartMoveHWItemRecord(usedInId, name, itemRecordTO.getDate(), serviceNote.getDescription(), false);
-                hwItemRepository.updateUsedInId(id, null);
-            }
-        }
-    }
-
-    @Override
-    public void modifyServiceNote(HWItemRecordTO itemRecordTO) {
-        HWItemRecord itemRecord = hwItemRecordRepository.findById(itemRecordTO.getId()).orElse(null);
+    public void saveHWItemRecord(HWItemTO hwItemTO, HWItemRecordTO itemRecordTO) {
+        HWItemRecord itemRecord = new HWItemRecord();
+        itemRecord.setId(itemRecordTO.getId());
+        itemRecord.setHwItemId(hwItemTO.getId());
         itemRecord.setDate(itemRecordTO.getDate());
         itemRecord.setDescription(itemRecordTO.getDescription());
         itemRecord.setState(itemRecordTO.getState());
-        itemRecord.setUsedInName(itemRecordTO.getUsedInName());
-        hwItemRecordRepository.save(itemRecord);
+        itemRecord = hwItemRecordRepository.save(itemRecord);
+
+        hwItemRepository.updateState(hwItemTO.getId(), itemRecord.getState());
     }
 
     @Override
-    public void deleteServiceNote(Long id) {
+    public void deleteHWItemRecord(Long id) {
         hwItemRecordRepository.deleteById(id);
     }
 

@@ -41,13 +41,6 @@ public class HWItemRecord {
      */
     private HWItemState state;
 
-    /**
-     * Součásti
-     */
-    // TODO přejmenovat sloupec v DB
-    @Column(name = "USAGE")
-    private String usedInName;
-
     public Long getId() {
         return id;
     }
@@ -78,14 +71,6 @@ public class HWItemRecord {
 
     public void setState(HWItemState state) {
         this.state = state;
-    }
-
-    public String getUsedInName() {
-        return usedInName;
-    }
-
-    public void setUsedInName(String usage) {
-        this.usedInName = usage;
     }
 
     public Long getHwItemId() {
