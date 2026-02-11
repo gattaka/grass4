@@ -23,6 +23,7 @@ import com.vaadin.flow.component.upload.receivers.FileData;
  * https://github.com/vaadin/vaadin-upload-flow/issues/105
  *
  */
+@Deprecated
 public class GrassMultiFileBuffer implements MultiFileReceiver {
 
 	private static final long serialVersionUID = 4556000770880576618L;

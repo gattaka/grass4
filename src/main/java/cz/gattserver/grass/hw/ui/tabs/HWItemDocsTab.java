@@ -1,13 +1,14 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
+import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.slf4j.Logger;
@@ -33,33 +34,28 @@ public class HWItemDocsTab extends Div {
 
     private static final Logger logger = LoggerFactory.getLogger(HWItemDocsTab.class);
 
-    private transient HWService hwService;
-    private transient SecurityService securityFacade;
+    private final HWService hwService;
+    private final SecurityService securityFacade;
 
     private HWItemTO hwItem;
     private HWItemPage hwItemPage;
-    private Grid<HWItemFileTO> docsGrid;
+    private Grid<HWItemFileTO> grid;
 
     public HWItemDocsTab(HWItemTO hwItem, HWItemPage hwItemPage) {
-        SpringContextHelper.inject(this);
+        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
+        this.hwService = SpringContextHelper.getBean(HWService.class);
         this.hwItem = hwItem;
         this.hwItemPage = hwItemPage;
         init();
     }
 
-    private HWService getHWService() {
-        if (hwService == null) hwService = SpringContextHelper.getBean(HWService.class);
-        return hwService;
-    }
-
     private UserInfoTO getUser() {
-        if (securityFacade == null) securityFacade = SpringContextHelper.getBean(SecurityService.class);
         return securityFacade.getCurrentUser();
     }
 
-    private void populateDocsGrid() {
-        docsGrid.setItems(getHWService().getHWItemDocumentsFiles(hwItem.getId()));
-        docsGrid.getDataProvider().refreshAll();
+    private void populateGrid() {
+        grid.setItems(hwService.getHWItemDocumentsFiles(hwItem.getId()));
+        grid.getDataProvider().refreshAll();
     }
 
     private void downloadDocument(HWItemFileTO item) {
@@ -69,40 +65,39 @@ public class HWItemDocsTab extends Div {
     }
 
     private void init() {
-        docsGrid = new Grid<>();
-        docsGrid.setWidthFull();
-        docsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        UIUtils.applyGrassDefaultStyle(docsGrid);
-        docsGrid.addColumn(new TextRenderer<>(HWItemFileTO::getName)).setHeader("Název");
-        docsGrid.addColumn(new LocalDateTimeRenderer<>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
+        grid = new Grid<>();
+        grid.setWidthFull();
+        grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        UIUtils.applyGrassDefaultStyle(grid);
+        grid.addColumn(new TextRenderer<>(HWItemFileTO::getName)).setHeader("Název");
+        grid.addColumn(new LocalDateTimeRenderer<>(HWItemFileTO::getLastModified, "d.MM.yyyy HH:mm"))
                 .setKey("datum").setHeader("Datum");
-        docsGrid.addColumn(new TextRenderer<>(HWItemFileTO::getSize)).setHeader("Velikost")
+        grid.addColumn(new TextRenderer<>(HWItemFileTO::getSize)).setHeader("Velikost")
                 .setTextAlign(ColumnTextAlign.END);
-        add(docsGrid);
+        add(grid);
 
-        populateDocsGrid();
+        populateGrid();
 
         if (getUser().isAdmin()) {
-            GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
-            Upload upload = new Upload(buffer);
-            upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-            upload.addSucceededListener(event -> {
+            Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
                 try {
-                    getHWService().saveDocumentsFile(buffer.getInputStream(event.getFileName()), event.getFileName(),
-                            hwItem.getId());
-                    // refresh listu
-                    populateDocsGrid();
-                    hwItemPage.refreshTabLabels();
+                    hwService.saveDocumentsFile(new FileInputStream(file), metadata.fileName(), hwItem.getId());
                 } catch (IOException e) {
                     String msg = "Nezdařilo se uložit soubor";
                     logger.error(msg, e);
                     new ErrorDialog(msg).open();
                 }
+            }));
+
+            upload.addAllFinishedListener(e -> {
+                populateGrid();
+                hwItemPage.refreshTabLabels();
             });
+            upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
             add(upload);
         }
 
-        docsGrid.addItemClickListener(e -> {
+        grid.addItemClickListener(e -> {
             if (e.getClickCount() > 1) downloadDocument(e.getItem());
         });
 
@@ -110,14 +105,14 @@ public class HWItemDocsTab extends Div {
         Div operationsLayout = componentFactory.createButtonLayout();
         add(operationsLayout);
 
-        operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadDocument(item), docsGrid));
+        operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadDocument(item), grid));
 
         if (getUser().isAdmin()) {
             Button deleteBtn = componentFactory.createDeleteGridButton(item -> {
-                getHWService().deleteHWItemDocumentsFile(hwItem.getId(), item.getName());
-                populateDocsGrid();
+                hwService.deleteHWItemDocumentsFile(hwItem.getId(), item.getName());
+                populateGrid();
                 hwItemPage.refreshTabLabels();
-            }, docsGrid);
+            }, grid);
             operationsLayout.add(deleteBtn);
         }
     }

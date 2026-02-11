@@ -220,7 +220,7 @@ public class ContentViewer extends Div {
             Div publicatedLayout = new Div();
             publicatedLayout.addClassName("not-publicated-info");
             publicatedLayout.add(ImageIcon.INFO_16_ICON.createImage("Info"));
-            publicatedLayout.add(new Strong("Nepublikováno"));
+            publicatedLayout.add("Nepublikováno");
             info.add(publicatedLayout);
         }
 

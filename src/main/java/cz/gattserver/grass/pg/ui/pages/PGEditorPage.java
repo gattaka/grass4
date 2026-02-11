@@ -14,6 +14,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -21,9 +22,7 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
@@ -50,11 +49,13 @@ import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @PageTitle("Editor fotogalerie")
 @Route(value = "pg-editor", layout = MainView.class)
@@ -204,11 +205,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         final Grid<PhotogalleryViewItemTO> grid = new Grid<>(PhotogalleryViewItemTO.class);
         final List<PhotogalleryViewItemTO> items;
         if (editMode) {
-            try {
-                items = pgService.getItems(galleryDir);
-            } catch (IOException e) {
-                throw new GrassPageException(500, e);
-            }
+            items = pgService.getItems(galleryDir);
         } else {
             items = new ArrayList<>();
         }
@@ -257,18 +254,30 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         deleteBtn.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         buttonLayout.add(deleteBtn);
 
-        PGMultiUpload upload = new PGMultiUpload(galleryDir) {
-            private static final long serialVersionUID = 8317049226635860025L;
+        PGUploadBuilder pgUploadBuilder = new PGUploadBuilder();
 
-            @Override
-            protected void fileUploadSuccess(String fileName) {
-                PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
-                itemTO.setName(fileName);
-                newFiles.add(itemTO);
-                items.add(itemTO);
-                grid.setItems(items);
+        // TODO vyřešit práci s přidáváním a odebíráním neuložených souborů atd.
+        Upload upload = pgUploadBuilder.createUpload(set -> {
+            for (PGUploadBuilder.UploadFile uploadFile : set) {
+                try {
+                    pgService.uploadFile(new FileInputStream(uploadFile.file), uploadFile.metadata.fileName(),
+                            galleryDir);
+                    PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
+                    itemTO.setName(uploadFile.metadata.fileName());
+                    newFiles.add(itemTO);
+                    items.add(itemTO);
+                    grid.setItems(items);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
-        };
+        }, () -> {
+            Set<String> files = new  HashSet<>();
+            files.addAll(pgService.getItems(galleryDir).stream().map(PhotogalleryViewItemTO::getName)
+                    .collect(Collectors.toSet()));
+            files.addAll(newFiles.stream().map(PhotogalleryViewItemTO::getName).collect(Collectors.toSet()));
+            return files;
+        });
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         editorLayout.add(upload);
 
@@ -317,6 +326,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         buttonLayout.add(componentFactory.createStornoButton(e -> {
             cleanAfterCancelEdit();
+            leaving = true;
             if (editMode) returnToPhotogallery();
             else returnToNode();
         }, true));

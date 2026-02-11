@@ -13,6 +13,7 @@ import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
@@ -50,6 +51,7 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Route(value = "photogallery", layout = MainView.class)
 public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamicTitle {
@@ -79,7 +81,7 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
 
     private List<PhotogalleryViewItemTO> currentPageItems;
 
-    private PGMultiUpload upload;
+    private Upload upload;
     private Div galleryLayout;
     private HorizontalLayout upperPagingLayout;
     private HorizontalLayout lowerPagingLayout;
@@ -206,25 +208,19 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
         lowerPagingLayout.setPadding(false);
         layout.add(lowerPagingLayout);
 
-        upload = new PGMultiUpload(galleryDir) {
-            private static final long serialVersionUID = 6886131045258035130L;
+        PGUploadBuilder uploadBuilder = new PGUploadBuilder();
+        upload = uploadBuilder.createUpload(set -> {
+            eventBus.subscribe(PGViewer.this);
+            progressIndicatorWindow = new ProgressDialog();
+            PhotogalleryPayloadTO payloadTO =
+                    new PhotogalleryPayloadTO(photogallery.getContentNode().getName(), galleryDir,
+                            photogallery.getContentNode().getContentTagsAsStrings(),
+                            photogallery.getContentNode().isPublicated(), false);
+            pgService.modifyPhotogallery(UUID.randomUUID(), photogallery.getId(), payloadTO,
+                    photogallery.getContentNode().getCreationDate());
+        }, () -> pgService.getItems(galleryDir).stream().map(PhotogalleryViewItemTO::getName)
+                .collect(Collectors.toSet()));
 
-            @Override
-            protected void allFilesUploaded() {
-                eventBus.subscribe(PGViewer.this);
-                progressIndicatorWindow = new ProgressDialog();
-                PhotogalleryPayloadTO payloadTO =
-                        new PhotogalleryPayloadTO(photogallery.getContentNode().getName(), galleryDir,
-                                photogallery.getContentNode().getContentTagsAsStrings(),
-                                photogallery.getContentNode().isPublicated(), false);
-                pgService.modifyPhotogallery(UUID.randomUUID(), photogallery.getId(), payloadTO,
-                        photogallery.getContentNode().getCreationDate());
-            }
-        };
-        Button uploadButton = new Button("Upload");
-        upload.setUploadButton(uploadButton);
-        Span dropLabel = new Span("Drop");
-        upload.setDropLabel(dropLabel);
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         if (coreACLService.canModifyContent(photogallery.getContentNode(), securityService.getCurrentUser()))
             layout.add(upload);

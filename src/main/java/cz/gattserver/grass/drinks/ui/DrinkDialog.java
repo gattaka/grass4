@@ -13,6 +13,7 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.ImageUtils;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -23,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -60,15 +62,11 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
         image.setVisible(false);
 
         // https://vaadin.com/components/vaadin-upload/java-examples
-        MemoryBuffer buffer = new MemoryBuffer();
-        upload = new Upload(buffer);
-        upload.setMaxFileSize(2000000);
-        upload.setAcceptedFileTypes("image/jpg", "image/jpeg", "image/png");
-        upload.addSucceededListener(e -> {
+        upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
             try {
                 // vytvoř miniaturu
                 ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                ImageUtils.resizeImageFile(e.getFileName(), buffer.getInputStream(), bos, 400, 400);
+                ImageUtils.resizeImageFile(metadata.fileName(), new FileInputStream(file), bos, 400, 400);
                 formTO.setImage(bos.toByteArray());
                 placeImage(formTO);
             } catch (IOException ex) {
@@ -76,13 +74,9 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
                 logger.error(err, ex);
                 UIUtils.showError(err);
             }
-        });
-        upload.addFailedListener(e -> {
-            logger.error(e.getFileName() + " upload failed ", e.getReason());
-        });
-        upload.addFileRejectedListener(e -> {
-            logger.error(e.getErrorMessage());
-        });
+        }));
+        upload.setMaxFileSize(2000000);
+        upload.setAcceptedFileTypes("image/jpg", "image/jpeg", "image/png");
 
         if (originalTO == null || originalTO.getImage() == null) placeUpload();
         else {

@@ -14,6 +14,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -25,6 +26,7 @@ import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.FileInputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -148,15 +150,12 @@ public class SongsPage extends Div implements HasUrlParameter<String> {
         }
         populate();
 
-        GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
-
-        Upload upload = new Upload(buffer);
+        Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
+            songsService.importSong(new FileInputStream(file), metadata.fileName());
+            populate();
+        }));
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         upload.setAcceptedFileTypes("text/plain");
-        upload.addSucceededListener(event -> {
-            songsService.importSong(buffer.getInputStream(event.getFileName()), event.getFileName());
-            populate();
-        });
         layout.add(upload);
         upload.setVisible(securityService.getCurrentUser().getRoles().contains(SongsRole.SONGS_EDITOR));
 

@@ -1,14 +1,17 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.slideshow.ImageSlideshow;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
@@ -37,27 +40,23 @@ public class HWItemPhotosTab extends Div {
 
     private static final Logger logger = LoggerFactory.getLogger(HWItemPhotosTab.class);
 
-    private transient HWService hwService;
-    private transient SecurityService securityFacade;
+    private final HWService hwService;
+    private final SecurityService securityFacade;
 
     private HWItemTO hwItem;
     private Div containerDiv;
     private HWItemPage hwItemPage;
 
     public HWItemPhotosTab(HWItemTO hwItem, HWItemPage hwItemPage) {
-        SpringContextHelper.inject(this);
+        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
+        this.hwService = SpringContextHelper.getBean(HWService.class);
         this.hwItem = hwItem;
         this.hwItemPage = hwItemPage;
         init();
     }
 
-    private HWService getHWService() {
-        if (hwService == null) hwService = SpringContextHelper.getBean(HWService.class);
-        return hwService;
-    }
 
     private UserInfoTO getUser() {
-        if (securityFacade == null) securityFacade = SpringContextHelper.getBean(SecurityService.class);
         return securityFacade.getCurrentUser();
     }
 
@@ -69,21 +68,19 @@ public class HWItemPhotosTab extends Div {
         add(containerDiv);
 
         if (getUser().isAdmin()) {
-            GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
-            Upload upload = new Upload(buffer);
-            upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-            upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
-            upload.addSucceededListener(event -> {
+            Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
                 try {
-                    getHWService().saveImagesFile(buffer.getInputStream(event.getFileName()), event.getFileName(),
-                            hwItem);
-                    populateImages();
-                    hwItemPage.refreshTabLabels();
+                    hwService.saveImagesFile(new FileInputStream(file), metadata.fileName(), hwItem);
                 } catch (IOException e) {
                     String msg = "Nezdařilo se uložit obrázek";
                     logger.error(msg, e);
                     new ErrorDialog(msg).open();
                 }
+            }));
+            upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+            upload.addAllFinishedListener(e -> {
+                populateImages();
+                hwItemPage.refreshTabLabels();
             });
             add(upload);
         }
@@ -96,7 +93,7 @@ public class HWItemPhotosTab extends Div {
         gridLayout.addClassName("hw-photos-div");
         containerDiv.add(gridLayout);
 
-        List<HWItemFileTO> images = getHWService().getHWItemImagesMiniFiles(hwItem.getId());
+        List<HWItemFileTO> images = hwService.getHWItemImagesMiniFiles(hwItem.getId());
         for (int i = 0; i < images.size(); i++) {
 
             HWItemFileTO item = images.get(i);
@@ -106,7 +103,7 @@ public class HWItemPhotosTab extends Div {
             gridLayout.add(itemDiv);
 
             Image img = new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(
-                    getHWService().getHWItemImagesMiniFileInputStream(hwItem.getId(), item.getName()), item.getName(),
+                    hwService.getHWItemImagesMiniFileInputStream(hwItem.getId(), item.getName()), item.getName(),
                     null, -1)), item.getName());
             itemDiv.add(img);
 
@@ -125,7 +122,7 @@ public class HWItemPhotosTab extends Div {
 
             if (getUser().isAdmin()) {
                 Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
-                    getHWService().deleteHWItemImagesFile(hwItem.getId(), item.getName());
+                    hwService.deleteHWItemImagesFile(hwItem.getId(), item.getName());
                     populateImages();
                     hwItemPage.refreshTabLabels();
                 }).open());

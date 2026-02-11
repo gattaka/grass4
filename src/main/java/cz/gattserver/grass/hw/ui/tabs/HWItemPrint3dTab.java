@@ -1,13 +1,14 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 
+import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.stlviewer.STLViewer;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
@@ -35,35 +36,30 @@ public class HWItemPrint3dTab extends Div {
 
     private static final Logger logger = LoggerFactory.getLogger(HWItemPrint3dTab.class);
 
-    private transient HWService hwService;
-    private transient SecurityService securityFacade;
+    private final HWService hwService;
+    private final SecurityService securityFacade;
 
     private HWItemTO hwItem;
     private HWItemPage hwItemPage;
-    private Grid<HWItemFileTO> print3dGrid;
+    private Grid<HWItemFileTO> grid;
 
     private STLViewer stlViewer;
 
     public HWItemPrint3dTab(HWItemTO hwItem, HWItemPage hwItemPage) {
-        SpringContextHelper.inject(this);
+        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
+        this.hwService = SpringContextHelper.getBean(HWService.class);
         this.hwItem = hwItem;
         this.hwItemPage = hwItemPage;
         init();
     }
 
-    private HWService getHWService() {
-        if (hwService == null) hwService = SpringContextHelper.getBean(HWService.class);
-        return hwService;
-    }
-
     private UserInfoTO getUser() {
-        if (securityFacade == null) securityFacade = SpringContextHelper.getBean(SecurityService.class);
         return securityFacade.getCurrentUser();
     }
 
-    private void populatePrint3dGrid() {
-        print3dGrid.setItems(getHWService().getHWItemPrint3dFiles(hwItem.getId()));
-        print3dGrid.getDataProvider().refreshAll();
+    private void populateGrid() {
+        grid.setItems(hwService.getHWItemPrint3dFiles(hwItem.getId()));
+        grid.getDataProvider().refreshAll();
     }
 
     private String getFileURL(HWItemFileTO item) {
@@ -76,14 +72,14 @@ public class HWItemPrint3dTab extends Div {
     }
 
     private void init() {
-        print3dGrid = new Grid<>();
-        print3dGrid.setSizeFull();
-        UIUtils.applyGrassDefaultStyle(print3dGrid);
-        print3dGrid.addColumn(new TextRenderer<>(HWItemFileTO::getName)).setHeader("Název").setFlexGrow(1)
+        grid = new Grid<>();
+        grid.setSizeFull();
+        UIUtils.applyGrassDefaultStyle(grid);
+        grid.addColumn(new TextRenderer<>(HWItemFileTO::getName)).setHeader("Název").setFlexGrow(1)
                 .setResizable(true);
-        print3dGrid.addColumn(new LocalDateTimeRenderer<>(HWItemFileTO::getLastModified, "d. MM. yyyy HH:mm"))
+        grid.addColumn(new LocalDateTimeRenderer<>(HWItemFileTO::getLastModified, "d. MM. yyyy HH:mm"))
                 .setKey("datum").setHeader("Datum").setWidth("150px").setFlexGrow(0).setResizable(true);
-        print3dGrid.addColumn(new TextRenderer<>(HWItemFileTO::getSize)).setHeader("Velikost")
+        grid.addColumn(new TextRenderer<>(HWItemFileTO::getSize)).setHeader("Velikost")
                 .setTextAlign(ColumnTextAlign.END).setWidth("100px").setFlexGrow(0).setResizable(true);
 
         stlViewer = new STLViewer(null);
@@ -92,40 +88,38 @@ public class HWItemPrint3dTab extends Div {
         stlViewer.setHeightFull();
         stlViewer.setWidth("600px");
 
-        HorizontalLayout layout = new HorizontalLayout(print3dGrid, stlViewer);
+        HorizontalLayout layout = new HorizontalLayout(grid, stlViewer);
         layout.setPadding(false);
         layout.setSpacing(true);
         layout.setHeight("400px");
         layout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         add(layout);
 
-        populatePrint3dGrid();
+        populateGrid();
 
         if (getUser().isAdmin()) {
-            GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
-            Upload upload = new Upload(buffer);
-            upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-            upload.addSucceededListener(event -> {
+            Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
                 try {
-                    getHWService().savePrint3dFile(buffer.getInputStream(event.getFileName()), event.getFileName(),
-                            hwItem.getId());
-                    // refresh listu
-                    populatePrint3dGrid();
-                    hwItemPage.refreshTabLabels();
+                    hwService.savePrint3dFile(new FileInputStream(file), metadata.fileName(), hwItem.getId());
                 } catch (IOException e) {
                     String msg = "Nezdařilo se uložit soubor";
                     logger.error(msg, e);
                     new ErrorDialog(msg).open();
                 }
+            }));
+            upload.addAllFinishedListener(e -> {
+                populateGrid();
+                hwItemPage.refreshTabLabels();
             });
+            upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
             add(upload);
         }
 
-        print3dGrid.addItemClickListener(e -> {
+        grid.addItemClickListener(e -> {
             if (e.getClickCount() > 1) downloadPrint3d(e.getItem());
         });
 
-        print3dGrid.addSelectionListener(item -> {
+        grid.addSelectionListener(item -> {
             if (!item.getFirstSelectedItem().isPresent()) return;
             HWItemFileTO to = item.getFirstSelectedItem().get();
             stlViewer.show(getFileURL(to));
@@ -135,16 +129,15 @@ public class HWItemPrint3dTab extends Div {
         Div operationsLayout = componentFactory.createButtonLayout();
         add(operationsLayout);
 
-        operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadPrint3d(item), print3dGrid));
+        operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadPrint3d(item), grid));
 
         if (getUser().isAdmin()) {
             Button deleteBtn = componentFactory.createDeleteGridButton(item -> {
-                getHWService().deleteHWItemPrint3dFile(hwItem.getId(), item.getName());
-                populatePrint3dGrid();
+                hwService.deleteHWItemPrint3dFile(hwItem.getId(), item.getName());
+                populateGrid();
                 hwItemPage.refreshTabLabels();
-            }, print3dGrid);
+            }, grid);
             operationsLayout.add(deleteBtn);
         }
     }
-
 }

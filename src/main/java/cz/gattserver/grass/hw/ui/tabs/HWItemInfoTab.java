@@ -1,5 +1,6 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
+import java.io.FileInputStream;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,6 +11,7 @@ import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.ReferenceHolder;
@@ -297,18 +299,16 @@ public class HWItemInfoTab extends Div {
      * Vytváří form pro vložení ikony HW
      */
     private void createHWItemImageUpload(final HWItemTO hwItem) {
-        MemoryBuffer buffer = new MemoryBuffer();
-        Upload upload = new Upload(buffer);
-        // https://vaadin.com/components/vaadin-upload/java-examples
+        Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
+            hwService.createHWItemIcon(new FileInputStream(file), metadata.fileName(), hwItem.getId());
+            tryCreateHWImage(hwItem);
+        }));
         Button uploadButton = new Button("Upload");
         upload.setUploadButton(uploadButton);
         Span dropLabel = new Span("Drop");
         upload.setDropLabel(dropLabel);
         upload.setAcceptedFileTypes("image/jpg", "image/jpeg", "image/png");
-        upload.addSucceededListener(e -> {
-            hwService.createHWItemIcon(buffer.getInputStream(), e.getFileName(), hwItem.getId());
-            tryCreateHWImage(hwItem);
-        });
+
         hwImageLayout.removeAll();
         hwImageLayout.getStyle().set("border", "1px solid lightgray");
         HorizontalLayout hl = new HorizontalLayout();

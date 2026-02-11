@@ -20,6 +20,7 @@ import com.vaadin.flow.data.binder.ValidationException;
 
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
+import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
@@ -36,6 +37,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Consumer;
@@ -46,19 +48,16 @@ public class CampgameDialog extends EditWebDialog {
 
     private static Logger logger = LoggerFactory.getLogger(CampgameDialog.class);
 
-    private transient CampgamesService campgamesService;
+    private final CampgamesService campgamesService;
 
     private CampgameTO originalTO;
     private Consumer<CampgameTO> onSave;
+    private Upload upload;
 
     public CampgameDialog(CampgameTO originalTO, Consumer<CampgameTO> onSave) {
         super("Hra");
+        this.campgamesService = SpringContextHelper.getBean(CampgamesService.class);
         init(originalTO, onSave);
-    }
-
-    private CampgamesService getCampgameService() {
-        if (campgamesService == null) campgamesService = SpringContextHelper.getBean(CampgamesService.class);
-        return campgamesService;
     }
 
     /**
@@ -112,7 +111,7 @@ public class CampgameDialog extends EditWebDialog {
         binder.forField(nameField).asRequired("Název položky je povinný").bind("name");
         detailsLayout.add(nameField);
 
-        TokenField keywords = new TokenField(getCampgameService().getAllCampgameKeywordNames());
+        TokenField keywords = new TokenField(campgamesService.getAllCampgameKeywordNames());
         keywords.isEnabled();
         keywords.setAllowNewItems(true);
         keywords.getInputField().setPlaceholder("klíčové slovo");
@@ -186,19 +185,11 @@ public class CampgameDialog extends EditWebDialog {
 
         boolean isAdmin =
                 SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.ADMIN);
-        GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
-
         // TODO tohle aktuálně bude fungovat jen u existujících záznamů
-        Upload upload = new Upload(buffer);
-        // protože se jinak šířka uplatní bez ohledu na zmenšení o okraje
-        upload.getStyle().set("width", "calc(100% - 2 * var(--lumo-space-m))");
-        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
-        upload.addSucceededListener(event -> {
+        upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
             try {
                 CampgameFileTO to = SpringContextHelper.getBean(CampgamesService.class)
-                        .saveImagesFile(buffer.getInputStream(event.getFileName()), event.getFileName(),
-                                originalTO.getId());
+                        .saveImagesFile(new FileInputStream(file), metadata.fileName(), originalTO.getId());
                 tabLayout.removeAll();
                 Grid<CampgameFileTO> grid = createGrid(tabLayout, isAdmin, upload);
                 tabLayout.add(grid);
@@ -211,7 +202,11 @@ public class CampgameDialog extends EditWebDialog {
                 logger.error(msg, e);
                 new ErrorDialog(msg).open();
             }
-        });
+        }));
+        // protože se jinak šířka uplatní bez ohledu na zmenšení o okraje
+        upload.getStyle().set("width", "calc(100% - 2 * var(--lumo-space-m))");
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        upload.setAcceptedFileTypes("image/jpeg", "image/png", "image/gif");
         upload.setVisible(isAdmin);
 
         tabLayout.add(createGrid(tabLayout, isAdmin, upload));
@@ -257,5 +252,4 @@ public class CampgameDialog extends EditWebDialog {
 
         return grid;
     }
-
 }

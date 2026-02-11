@@ -638,7 +638,7 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public List<PhotogalleryViewItemTO> getItems(String galleryDir) throws IOException {
+    public List<PhotogalleryViewItemTO> getItems(String galleryDir) {
         Path galleryPath = getGalleryPath(galleryDir);
         List<PhotogalleryViewItemTO> items = new ArrayList<>();
         try (Stream<Path> stream = Files.list(galleryPath).sorted(getComparator())) {
@@ -648,6 +648,8 @@ public class PGServiceImpl implements PGService {
                 items.add(itemTO);
             });
 
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
         return items;
     }

@@ -23,6 +23,7 @@ import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.CZAmountFormatter;
@@ -177,30 +178,27 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
 
         layout.add(statusLabel);
 
-        GrassMultiFileBuffer buffer = new GrassMultiFileBuffer();
-
-        Upload upload = new Upload(buffer);
-        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        upload.addSucceededListener(event -> {
-            switch (explorer.saveFile(buffer.getInputStream(event.getFileName()), event.getFileName())) {
+        Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
+            switch (explorer.saveFile(new FileInputStream(file), metadata.fileName())) {
                 case SUCCESS:
                     // refresh
                     populateGrid();
                     break;
                 case ALREADY_EXISTS:
-                    UIUtils.showWarning("Soubor '" + event.getFileName() +
+                    UIUtils.showWarning("Soubor '" + metadata.fileName() +
                             "' nebylo možné uložit - soubor s tímto názvem již existuje.");
                     break;
                 case NOT_VALID:
-                    UIUtils.showWarning("Soubor '" + event.getFileName() +
+                    UIUtils.showWarning("Soubor '" + metadata.fileName() +
                             "' nebylo možné uložit - cílové umístění souboru se nachází mimo povolený rozsah " +
                             "souborů" + " k prohlížení.");
                     break;
                 default:
                     UIUtils.showWarning(
-                            "Soubor '" + event.getFileName() + "' nebylo možné uložit - došlo k systémové chybě.");
+                            "Soubor '" + metadata.fileName() + "' nebylo možné uložit - došlo k systémové chybě.");
             }
-        });
+        }));
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(upload);
 
         createButtonsLayout(layout);
