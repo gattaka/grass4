@@ -131,18 +131,18 @@ public interface PGService {
      *                                  modulu PG
      * @throws IllegalArgumentException pokud předaný adresář podtéká kořen modulu PG
      */
-    List<PhotogalleryViewItemTO> deleteFiles(Set<PhotogalleryViewItemTO> selected, String galleryDir);
+    List<String> deleteFiles(Set<String> selected, String galleryDir);
 
     /**
      * Smaže soubor z fotogalerie.
      *
-     * @param itemTO     soubor
+     * @param name     soubor
      * @param galleryDir adresář galerie
      * @throws IllegalStateException    pokud neexistuje kořenový adresář galerií -- chyba nastavení
      *                                  modulu PG
      * @throws IllegalArgumentException pokud předaný adresář podtéká kořen modulu PG
      */
-    void deleteFile(PhotogalleryViewItemTO itemTO, String galleryDir);
+    void deleteFile(String name, String galleryDir);
 
     /**
      * Získá obrázek z galerie. Nemusí jít o existující galerii, proto je

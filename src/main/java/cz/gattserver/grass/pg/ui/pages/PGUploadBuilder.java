@@ -39,8 +39,8 @@ public class PGUploadBuilder {
 
     public Upload createUpload(Consumer<Set<UploadFile>> onAllUploaded, Supplier<Set<String>> galleryFilesSupplier) {
         Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
-            if (galleryFilesSupplier.get().contains(file.getName())) {
-                existingFiles.add(file.getName());
+            if (galleryFilesSupplier.get().contains(metadata.fileName())) {
+                existingFiles.add(metadata.fileName());
             } else {
                 uploadedFiles.add(new UploadFile(metadata, file));
             }
@@ -58,6 +58,8 @@ public class PGUploadBuilder {
     protected void onDone(Consumer<Set<UploadFile>> onAllUploaded) {
         if (existingFiles.isEmpty()) {
             onAllUploaded.accept(uploadedFiles);
+            uploadedFiles.clear();
+            existingFiles.clear();
         } else {
             WarnDialog warnWindow = new WarnDialog("Následující soubory již existují:") {
                 private static final long serialVersionUID = 3428203680996794639L;
@@ -76,6 +78,8 @@ public class PGUploadBuilder {
                 public void close() {
                     super.close();
                     onAllUploaded.accept(uploadedFiles);
+                    uploadedFiles.clear();
+                    existingFiles.clear();
                 }
             };
             ProgressDialog.runInUI(() -> warnWindow.open(), UI.getCurrent());

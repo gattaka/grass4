@@ -594,28 +594,27 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public List<PhotogalleryViewItemTO> deleteFiles(Set<PhotogalleryViewItemTO> selected, String galleryDir) {
+    public List<String> deleteFiles(Set<String> selected, String galleryDir) {
         Path galleryPath = getGalleryPath(galleryDir);
-        List<PhotogalleryViewItemTO> removed = new ArrayList<>();
-        for (PhotogalleryViewItemTO itemTO : selected) {
-            deleteFile(itemTO, galleryPath);
-            removed.add(itemTO);
+        List<String> removed = new ArrayList<>();
+        for (String name : selected) {
+            deleteFile(name, galleryPath);
+            removed.add(name);
         }
         return removed;
     }
 
     @Override
-    public void deleteFile(PhotogalleryViewItemTO itemTO, String galleryDir) {
+    public void deleteFile(String name, String galleryDir) {
         Path galleryPath = getGalleryPath(galleryDir);
-        deleteFile(itemTO, galleryPath);
+        deleteFile(name, galleryPath);
     }
 
-    public void deleteFile(PhotogalleryViewItemTO itemTO, Path galleryPath) {
-        String file = itemTO.getName();
-        tryDeleteGalleryFile(file, galleryPath, GalleryFileType.MINIATURE);
-        tryDeleteGalleryFile(file, galleryPath, GalleryFileType.SLIDESHOW);
-        tryDeleteGalleryFile(file, galleryPath, GalleryFileType.PREVIEW);
-        tryDeleteGalleryFile(file, galleryPath, GalleryFileType.MAIN_FILE);
+    public void deleteFile(String name, Path galleryPath) {
+        tryDeleteGalleryFile(name, galleryPath, GalleryFileType.MINIATURE);
+        tryDeleteGalleryFile(name, galleryPath, GalleryFileType.SLIDESHOW);
+        tryDeleteGalleryFile(name, galleryPath, GalleryFileType.PREVIEW);
+        tryDeleteGalleryFile(name, galleryPath, GalleryFileType.MAIN_FILE);
     }
 
     @Override

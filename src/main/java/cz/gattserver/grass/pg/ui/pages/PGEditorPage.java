@@ -36,6 +36,7 @@ import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessStartEvent;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryEditorItemTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryPayloadTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
@@ -52,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.List;
@@ -90,7 +92,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
      * smazat.
      */
-    private Set<PhotogalleryViewItemTO> newFiles = new HashSet<>();
+    private Set<PhotogalleryEditorItemTO> newFiles = new HashSet<>();
 
     private String operationToken;
     private String identifierToken;
@@ -202,10 +204,11 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         gridLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         editorLayout.add(gridLayout);
 
-        final Grid<PhotogalleryViewItemTO> grid = new Grid<>(PhotogalleryViewItemTO.class);
-        final List<PhotogalleryViewItemTO> items;
+        final Grid<PhotogalleryEditorItemTO> grid = new Grid<>(PhotogalleryEditorItemTO.class);
+        final List<PhotogalleryEditorItemTO> items;
         if (editMode) {
-            items = pgService.getItems(galleryDir);
+            items = pgService.getItems(galleryDir).stream()
+                    .map(item -> new PhotogalleryEditorItemTO(item.getName(), Path.of(item.getFullPath()))).toList();
         } else {
             items = new ArrayList<>();
         }
@@ -239,9 +242,9 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         Button deleteBtn = componentFactory.createDeleteGridSetButton(selectedItems -> {
             boolean failures = false;
-            for (PhotogalleryViewItemTO itemTO : selectedItems) {
+            for (PhotogalleryEditorItemTO itemTO : selectedItems) {
                 try {
-                    pgService.deleteFile(itemTO, galleryDir);
+                    pgService.deleteFile(itemTO.getName(), galleryDir);
                     items.remove(itemTO);
                 } catch (Exception ex) {
                     failures = true;
@@ -259,23 +262,17 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         // TODO vyřešit práci s přidáváním a odebíráním neuložených souborů atd.
         Upload upload = pgUploadBuilder.createUpload(set -> {
             for (PGUploadBuilder.UploadFile uploadFile : set) {
-                try {
-                    pgService.uploadFile(new FileInputStream(uploadFile.file), uploadFile.metadata.fileName(),
-                            galleryDir);
-                    PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
-                    itemTO.setName(uploadFile.metadata.fileName());
-                    newFiles.add(itemTO);
-                    items.add(itemTO);
-                    grid.setItems(items);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
+                PhotogalleryEditorItemTO itemTO =
+                        new PhotogalleryEditorItemTO(uploadFile.metadata.fileName(), uploadFile.file.toPath());
+                newFiles.add(itemTO);
+                items.add(itemTO);
+                grid.setItems(items);
             }
         }, () -> {
-            Set<String> files = new  HashSet<>();
+            Set<String> files = new HashSet<>();
             files.addAll(pgService.getItems(galleryDir).stream().map(PhotogalleryViewItemTO::getName)
                     .collect(Collectors.toSet()));
-            files.addAll(newFiles.stream().map(PhotogalleryViewItemTO::getName).collect(Collectors.toSet()));
+            files.addAll(newFiles.stream().map(PhotogalleryEditorItemTO::getName).collect(Collectors.toSet()));
             return files;
         });
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -325,24 +322,10 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
 
         buttonLayout.add(componentFactory.createStornoButton(e -> {
-            cleanAfterCancelEdit();
             leaving = true;
             if (editMode) returnToPhotogallery();
             else returnToNode();
         }, true));
-    }
-
-    private void cleanAfterCancelEdit() {
-        if (editMode) {
-            pgService.deleteFiles(newFiles, galleryDir);
-        } else {
-            try {
-                pgService.deleteDraftGallery(galleryDir);
-            } catch (Exception e) {
-                logger.error("Nezdařilo se smazat zrušenou rozpracovanou galerii", e);
-                throw new GrassPageException(500, e);
-            }
-        }
     }
 
     private boolean isFormValid() {
@@ -356,6 +339,15 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     private void saveOrUpdatePhotogallery() {
         logger.info("saveOrUpdatePhotogallery thread: " + Thread.currentThread().threadId());
+
+        for (PhotogalleryEditorItemTO item : newFiles) {
+            try {
+                pgService.uploadFile(Files.newInputStream(item.getPath()), item.getName(), galleryDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(photogalleryNameField.getValue(), galleryDir,
                 photogalleryKeywords.getValues(), publicatedCheckBox.getValue(),
                 reprocessSlideshowAndMiniCheckBox.getValue());

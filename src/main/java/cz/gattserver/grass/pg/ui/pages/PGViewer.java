@@ -46,6 +46,7 @@ import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
@@ -210,6 +211,15 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
 
         PGUploadBuilder uploadBuilder = new PGUploadBuilder();
         upload = uploadBuilder.createUpload(set -> {
+            if (set.isEmpty())
+                return;
+            for (PGUploadBuilder.UploadFile file : set) {
+                try {
+                    pgService.uploadFile(new FileInputStream(file.file),file.metadata.fileName(),galleryDir);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             eventBus.subscribe(PGViewer.this);
             progressIndicatorWindow = new ProgressDialog();
             PhotogalleryPayloadTO payloadTO =
@@ -257,8 +267,7 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
     protected void onProcessResult(final PGProcessResultEvent event) {
         progressIndicatorWindow.runInUI(() -> {
             if (progressIndicatorWindow != null) progressIndicatorWindow.close();
-            UIUtils.redirect(pageURLBase + "/" + URLIdentifierUtils.createURLIdentifier(photogallery.getId(),
-                    photogallery.getContentNode().getName()) + "/" + (currentPage + 1));
+            UI.getCurrent().getPage().reload();
         });
         eventBus.unsubscribe(PGViewer.this);
     }
@@ -368,7 +377,7 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
                 // Smazat
                 if (coreACLService.canModifyContent(photogallery.getContentNode(), securityService.getCurrentUser())) {
                     Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
-                        pgService.deleteFile(item, galleryDir);
+                        pgService.deleteFile(item.getName(), galleryDir);
                         eventBus.subscribe(PGViewer.this);
                         progressIndicatorWindow = new ProgressDialog();
                         PhotogalleryPayloadTO payloadTO =
