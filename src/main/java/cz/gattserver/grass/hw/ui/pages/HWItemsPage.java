@@ -58,8 +58,8 @@ public class HWItemsPage extends Div implements HasUrlParameter<String>, BeforeL
         QueryParameters params = event.getLocation().getQueryParameters();
         Map<String, List<String>> parametersMap = params.getParameters();
         HWFilterTO filterTO = HWUIUtils.processToQueryFilter(parametersMap);
-
         search(filterTO);
+        if (filterTO.getId() != null) select(filterTO.getId());
 
         Div buttonLayout = componentFactory.createButtonLayout();
         layout.add(buttonLayout);

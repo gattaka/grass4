@@ -10,6 +10,7 @@ public class HWFilterTO implements Serializable {
 
     private static final long serialVersionUID = 7979321455877648798L;
 
+    private Long id;
     private String name;
     private HWItemState state;
     private Long usedInId;
@@ -118,4 +119,11 @@ public class HWFilterTO implements Serializable {
         this.ignoreId = ignoreId;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

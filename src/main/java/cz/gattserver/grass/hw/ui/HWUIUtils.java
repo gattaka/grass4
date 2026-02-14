@@ -18,6 +18,7 @@ import java.util.Map;
 
 public class HWUIUtils {
 
+    private static final String ID_QUERY_TOKEN = "id";
     private static final String NAME_QUERY_TOKEN = "n";
     private static final String SUPERVIZED_FOR_QUERY_TOKEN = "sf";
     private static final String STATE_QUERY_TOKEN = "s";
@@ -68,7 +69,9 @@ public class HWUIUtils {
         List<String> types = new ArrayList<>();
         for (String key : parametersMap.keySet()) {
             List<String> values = parametersMap.get(key);
-            if (NAME_QUERY_TOKEN.equals(key)) {
+            if (ID_QUERY_TOKEN.equals(key)) {
+                filterTO.setId(Long.valueOf(values.get(0)));
+            } else if (NAME_QUERY_TOKEN.equals(key)) {
                 filterTO.setName(values.get(0));
             } else if (SUPERVIZED_FOR_QUERY_TOKEN.equals(key)) {
                 filterTO.setSupervizedFor(values.get(0));
