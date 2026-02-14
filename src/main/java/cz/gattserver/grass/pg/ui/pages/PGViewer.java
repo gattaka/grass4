@@ -87,10 +87,6 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
     private HorizontalLayout upperPagingLayout;
     private HorizontalLayout lowerPagingLayout;
 
-    /**
-     * TODO Položka z fotogalerie, která byla dle URL vybrána (nepovinné)
-     */
-    private Integer pgSelected;
     private String galleryDir;
 
     private String pageURLBase;
@@ -244,8 +240,6 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
         layout.add(statusRow);
 
         refreshGrid();
-
-        if (pgSelected != null) showItem(pgSelected);
 
         return layout;
     }
