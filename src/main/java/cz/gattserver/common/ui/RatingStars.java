@@ -11,8 +11,6 @@ import com.vaadin.flow.shared.Registration;
 
 public class RatingStars extends Div implements SingleSelect<RatingStars, Double> {
 
-	private static final long serialVersionUID = -5094708366894280218L;
-
 	private Double value;
 	private HoverIcon[] icons = new HoverIcon[5];
 	private DomListenerRegistration[] mouseOverListeners = new DomListenerRegistration[5];

@@ -9,8 +9,6 @@ import cz.gattserver.grass.core.interfaces.QuoteTO;
 
 public class QuoteDialog extends EditWebDialog {
 
-	private static final long serialVersionUID = -8494081277784752858L;
-
 	public interface SaveAction {
 		void onSave(QuoteTO quoteDTO);
 	}

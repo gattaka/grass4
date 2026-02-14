@@ -14,9 +14,6 @@ import java.io.Serializable;
 @Service
 public class GrassUserDetailServiceImpl implements UserDetailsService, Serializable {
 
-	@Serial
-	private static final long serialVersionUID = 5745870051782226283L;
-
 	@Autowired
 	private UserService userService;
 

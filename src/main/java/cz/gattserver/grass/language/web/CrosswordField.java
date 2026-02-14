@@ -12,8 +12,6 @@ import cz.gattserver.grass.language.model.dto.CrosswordHintTO;
 
 public class CrosswordField extends TextField {
 
-	private static final long serialVersionUID = -6813919720512048177L;
-
 	private CrosswordHintTO hintTO;
 	private List<Input> cellsFields;
 

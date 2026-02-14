@@ -13,8 +13,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public abstract class CampgameKeywordDialog extends EditWebDialog {
 
-    private static final long serialVersionUID = -6773027334692911384L;
-
     private transient CampgamesService campgamesService;
 
     public CampgameKeywordDialog(CampgameKeywordTO originalDTO) {

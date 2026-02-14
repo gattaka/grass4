@@ -4,8 +4,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class EditWebDialog extends WebDialog {
 
-    private static final long serialVersionUID = -7932181495479039816L;
-
     private final boolean readOnly;
 
     public EditWebDialog(String caption) {

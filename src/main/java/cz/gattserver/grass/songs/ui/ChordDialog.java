@@ -15,8 +15,6 @@ import java.util.function.Consumer;
 
 public class ChordDialog extends EditWebDialog {
 
-    private static final long serialVersionUID = 6803519662032576371L;
-
     public ChordDialog(Consumer<ChordTO> onSaveAction) {
         this(null, onSaveAction);
     }

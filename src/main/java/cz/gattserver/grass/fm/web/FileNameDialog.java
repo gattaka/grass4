@@ -7,8 +7,6 @@ import cz.gattserver.grass.fm.interfaces.FMItemTO;
 
 public class FileNameDialog extends WebDialog {
 
-    private static final long serialVersionUID = 9163906666470561249L;
-
     public interface SaveAction {
         void onSave(FMItemTO quoteDTO, FileNameDialog dialog);
     }

@@ -16,8 +16,6 @@ import java.nio.file.Path;
 @WebServlet(urlPatterns = "/" + ArticlesConfiguration.ATTACHMENTS_PATH + "/*")
 public class AttachmentsRequestHandler extends AbstractConfiguratedPathRequestHandler {
 
-    private static final long serialVersionUID = 7154339775034959876L;
-
     @Autowired
     private ArticleService articleService;
 

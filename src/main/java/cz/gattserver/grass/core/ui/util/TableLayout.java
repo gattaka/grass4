@@ -16,8 +16,6 @@ import cz.gattserver.common.vaadin.Strong;
 @Tag("table")
 public class TableLayout extends Component {
 
-	private static final long serialVersionUID = 8940148875365037922L;
-
 	private Element currentRow;
 	private Element currentCell;
 

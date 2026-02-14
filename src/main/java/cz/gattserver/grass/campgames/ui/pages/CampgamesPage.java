@@ -16,8 +16,6 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 @Route(value = "campgames", layout = MainView.class)
 public class CampgamesPage extends Div {
 
-    private static final long serialVersionUID = -5354424168298678698L;
-
     private Tabs tabSheet;
     private Tab overviewTab;
     private Tab keywordsTab;

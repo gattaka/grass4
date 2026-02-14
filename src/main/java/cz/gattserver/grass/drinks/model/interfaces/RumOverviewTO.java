@@ -6,8 +6,6 @@ import cz.gattserver.grass.drinks.model.domain.RumType;
 
 public class RumOverviewTO extends DrinkOverviewTO {
 
-	private static final long serialVersionUID = 8313199525167694475L;
-
 	/**
 	 * DB id
 	 */

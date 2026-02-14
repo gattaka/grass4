@@ -4,8 +4,6 @@ import com.vaadin.flow.component.html.Div;
 
 public class HtmlDiv extends Div {
 
-	private static final long serialVersionUID = 7526089060607305886L;
-
 	public HtmlDiv() {
 	}
 

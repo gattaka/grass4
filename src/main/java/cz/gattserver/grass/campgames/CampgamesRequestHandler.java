@@ -15,8 +15,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 @WebServlet(urlPatterns = "/" + CampgamesConfiguration.CAMPGAMES_PATH + "/*")
 public class CampgamesRequestHandler extends AbstractConfiguratedPathRequestHandler {
 
-    private static final long serialVersionUID = 7154339775034959876L;
-
     @Autowired
     private CampgamesService campgamesService;
 

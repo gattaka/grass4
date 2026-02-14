@@ -4,8 +4,6 @@ import com.vaadin.flow.component.html.Span;
 
 public class HtmlSpan extends Span {
 
-	private static final long serialVersionUID = 7526089060607305886L;
-
 	public HtmlSpan(String value) {
 		super();
 		setValue(value);

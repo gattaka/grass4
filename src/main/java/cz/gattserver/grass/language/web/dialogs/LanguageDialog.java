@@ -8,8 +8,6 @@ import cz.gattserver.grass.language.model.dto.LanguageTO;
 
 public class LanguageDialog extends WebDialog {
 
-	private static final long serialVersionUID = -8494081277784752858L;
-
 	public interface SaveAction {
 		void onSave(LanguageTO langTO);
 	}

@@ -11,10 +11,7 @@ import java.util.Objects;
 /**
  * HW Objekt
  */
-public class HWItemOverviewTO implements Serializable {
-
-    @Serial
-    private static final long serialVersionUID = 3678406951423588173L;
+public class HWItemOverviewTO {
 
     private Long id;
     private String name;
@@ -47,14 +44,6 @@ public class HWItemOverviewTO implements Serializable {
         this.publicItem = publicItem;
     }
 
-    public String getSupervizedFor() {
-        return supervizedFor;
-    }
-
-    public void setSupervizedFor(String supervizedFor) {
-        this.supervizedFor = supervizedFor;
-    }
-
     public Long getId() {
         return id;
     }
@@ -71,44 +60,12 @@ public class HWItemOverviewTO implements Serializable {
         this.name = name;
     }
 
-    public LocalDate getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public void setPurchaseDate(LocalDate purchaseDate) {
-        this.purchaseDate = purchaseDate;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
     public HWItemState getState() {
         return state;
     }
 
     public void setState(HWItemState state) {
         this.state = state;
-    }
-
-    public String getUsedInName() {
-        return usedInName;
-    }
-
-    public void setUsedInName(String usedInName) {
-        this.usedInName = usedInName;
-    }
-
-    public Boolean getPublicItem() {
-        return publicItem;
-    }
-
-    public void setPublicItem(Boolean publicItem) {
-        this.publicItem = publicItem;
     }
 
     public Long getUsedInId() {
@@ -119,15 +76,55 @@ public class HWItemOverviewTO implements Serializable {
         this.usedInId = usedInId;
     }
 
+    public String getUsedInName() {
+        return usedInName;
+    }
+
+    public void setUsedInName(String usedInName) {
+        this.usedInName = usedInName;
+    }
+
+    public String getSupervizedFor() {
+        return supervizedFor;
+    }
+
+    public void setSupervizedFor(String supervizedFor) {
+        this.supervizedFor = supervizedFor;
+    }
+
+    public BigDecimal getPrice() {
+        return price;
+    }
+
+    public void setPrice(BigDecimal price) {
+        this.price = price;
+    }
+
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
+    public Boolean getPublicItem() {
+        return publicItem;
+    }
+
+    public void setPublicItem(Boolean publicItem) {
+        this.publicItem = publicItem;
+    }
+
     @Override
     public final boolean equals(Object o) {
         if (!(o instanceof HWItemOverviewTO that)) return false;
 
-        return id.equals(that.id);
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return id.hashCode();
+        return Objects.hashCode(id);
     }
 }

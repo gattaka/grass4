@@ -38,8 +38,6 @@ import java.util.Map;
 @Route(value = "chords", layout = MainView.class)
 public class ChordsPage extends Div implements HasUrlParameter<String> {
 
-    private static final long serialVersionUID = -6336711256361320029L;
-
     private static final Logger logger = LoggerFactory.getLogger(ChordsPage.class);
 
     private SongsService songsService;

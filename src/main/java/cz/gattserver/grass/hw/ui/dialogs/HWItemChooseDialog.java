@@ -10,8 +10,6 @@ import cz.gattserver.grass.hw.ui.HWItemsGrid;
 
 public class HWItemChooseDialog extends EditWebDialog {
 
-    private static final long serialVersionUID = -6773027334692911384L;
-
     public HWItemChooseDialog(Long ignoreId, Consumer<HWItemOverviewTO> onSelect) {
         super("Výběr");
         SpringContextHelper.inject(this);

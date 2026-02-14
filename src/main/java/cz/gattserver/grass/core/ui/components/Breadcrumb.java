@@ -13,8 +13,6 @@ import com.vaadin.flow.router.internal.HasUrlParameterFormat;
 
 public class Breadcrumb extends Div {
 
-    private static final long serialVersionUID = 3874999284861747099L;
-
     public static class BreadcrumbElement {
         private String caption;
         private String url;

@@ -20,8 +20,6 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 @Route(value = "tag", layout = MainView.class)
 public class TagPage extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
-	private static final long serialVersionUID = -2716406706042922900L;
-
 	private ContentTagService contentTagFacade;
 	private ContentNodeService contentNodeFacade;
     private SecurityService securityService;

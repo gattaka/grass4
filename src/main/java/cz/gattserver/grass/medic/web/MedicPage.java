@@ -24,8 +24,6 @@ import cz.gattserver.grass.medic.web.tabs.ScheduledVisitsTab;
 @Route(value = "medic", layout = MainView.class)
 public class MedicPage extends Div implements BeforeEnterObserver {
 
-    private static final long serialVersionUID = -7969964922025344992L;
-
     private Tabs tabSheet;
     private Div pageLayout;
 

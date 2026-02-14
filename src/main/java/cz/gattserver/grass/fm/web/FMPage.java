@@ -68,8 +68,6 @@ import java.util.*;
 @Route(value = "fm", layout = MainView.class)
 public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterObserver {
 
-    private static final long serialVersionUID = -5884444775720831930L;
-
     private static final Logger logger = LoggerFactory.getLogger(FMPage.class);
 
     @Resource(name = "fmPageFactory")

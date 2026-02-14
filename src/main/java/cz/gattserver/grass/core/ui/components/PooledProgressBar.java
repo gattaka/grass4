@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.components;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -9,8 +10,6 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 import com.vaadin.flow.server.VaadinSession;
 
 public abstract class PooledProgressBar extends ProgressBar {
-
-	private static final long serialVersionUID = 9190321446320873139L;
 
 	private static final int THREAD_POOL_SIZE = 10;
 	private static ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
@@ -55,7 +54,9 @@ public abstract class PooledProgressBar extends ProgressBar {
 	}
 
 	public class ProgressThread implements Runnable, Serializable {
-		private static final long serialVersionUID = -5332437286001073714L;
+
+		@Serial
+        private static final long serialVersionUID = -4546444983833528128L;
 
 		@Override
 		public void run() {

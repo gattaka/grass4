@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 public class CampgameOverviewTO implements Serializable {
 
-	private static final long serialVersionUID = 3678406951423588173L;
-
 	private Long id;
 	
 	/**

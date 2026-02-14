@@ -39,8 +39,6 @@ import java.time.format.DateTimeFormatter;
 @Route(value = "books", layout = MainView.class)
 public class BooksPage extends Div implements HasUrlParameter<String> {
 
-    private static final long serialVersionUID = -5187973603822110627L;
-
     private transient SecurityService securityService;
     private transient BooksService booksService;
 

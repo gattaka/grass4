@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.pages;
 
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,8 +39,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 @RouteAlias("home")
 @PageTitle("Gattserver")
 public class HomePage extends Div {
-
-    private static final long serialVersionUID = 3100924667157515504L;
 
     // Pro scan komponent do NPM
     // https://vaadin.com/forum/thread/17765421/17771093
@@ -96,7 +95,9 @@ public class HomePage extends Div {
 
         // Tag-cloud
         Div tagJsDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
+
+            @Serial
+            private static final long serialVersionUID = -5913404248739828949L;
 
             @ClientCallable
             private void tagCloundCallback() {

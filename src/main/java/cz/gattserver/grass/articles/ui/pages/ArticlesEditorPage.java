@@ -59,9 +59,6 @@ import java.util.Objects;
 @Route(value = "articles-editor", layout = MainView.class)
 public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
-    @Serial
-    private static final long serialVersionUID = -5107777679764121445L;
-
     private static final Logger logger = LoggerFactory.getLogger(ArticlesEditorPage.class);
 
     private final NodeService nodeService;

@@ -30,8 +30,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public class NodeTree extends VerticalLayout {
 
-    private static final long serialVersionUID = -7457362355620092284L;
-
     private static final String SMAZAT_LABEL = "Smazat";
     private static final String PREJMENOVAT_LABEL = "Přejmenovat";
     private static final String VYTVORIT_LABEL = "Vytvořit";

@@ -37,8 +37,6 @@ import cz.gattserver.grass.language.web.dialogs.LanguageItemDialog;
 
 public class ItemsTab extends Div {
 
-    private static final long serialVersionUID = 678133965931216087L;
-
     @Autowired
     private LanguageService languageService;
 

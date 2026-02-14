@@ -8,8 +8,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 
 public class WebDialog extends Dialog {
 
-    private static final long serialVersionUID = -9184044674542039306L;
-
     protected ComponentFactory componentFactory;
     protected VerticalLayout layout = new VerticalLayout();
 

@@ -12,8 +12,6 @@ import cz.gattserver.grass.recipes.model.dto.RecipeDTO;
 
 public abstract class RecipeDialog extends EditWebDialog {
 
-	private static final long serialVersionUID = 6803519662032576371L;
-
 	@Autowired
 	private RecipesService recipesFacade;
 

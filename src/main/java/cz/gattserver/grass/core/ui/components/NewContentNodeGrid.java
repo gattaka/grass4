@@ -19,8 +19,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public class NewContentNodeGrid extends Grid<ContentModule> {
 
-    private static final long serialVersionUID = -2220485504407844582L;
-
     public NewContentNodeGrid(final NodeTO node) {
         // inject nefunguje kvůli něčemu v předkovi
         final ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);

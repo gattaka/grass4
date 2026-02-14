@@ -24,8 +24,6 @@ import cz.gattserver.grass.hw.ui.dialogs.HWItemRecordDialog;
 
 public class HWItemRecordsTab extends Div {
 
-    private static final long serialVersionUID = -3236939739462367881L;
-
     private static final String DEFAULT_NOTE_LABEL_VALUE = "- Zvolte servisní záznam -";
 
     private final HWService hwService;

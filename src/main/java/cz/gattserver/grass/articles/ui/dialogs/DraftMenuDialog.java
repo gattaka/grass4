@@ -19,8 +19,6 @@ import java.util.function.Consumer;
 
 public class DraftMenuDialog extends WebDialog {
 
-    private static final long serialVersionUID = 4105221381350726137L;
-
     private boolean continueFlag = false;
 
     private final Consumer<ArticleDraftOverviewTO> onSelect;

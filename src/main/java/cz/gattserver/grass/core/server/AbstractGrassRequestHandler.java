@@ -29,8 +29,6 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
 
     private transient Logger logger = LoggerFactory.getLogger(AbstractGrassRequestHandler.class);
 
-    private static final long serialVersionUID = 7154339775034959876L;
-
     private static final int DEFAULT_BUFFER_SIZE = 10240; // ..bytes = 10KB.
     private static final long DEFAULT_EXPIRE_TIME = 604800000L; // ..ms = 1
     // week.

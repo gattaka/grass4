@@ -6,8 +6,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 
 public class ExceptionDialog extends MessageDialog {
 
-    private static final long serialVersionUID = -2077736292967107272L;
-
     public ExceptionDialog(Throwable throwable) {
         super("Chyba", "Neočekávaná systémová chyba", ExceptionUtils.getStackTrace(throwable),
                 VaadinIcon.CLOSE_CIRCLE.create());

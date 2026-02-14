@@ -34,8 +34,6 @@ import cz.gattserver.grass.medic.web.ScheduledVisitDialog;
 
 public class ScheduledVisitsTab extends Div {
 
-    private static final long serialVersionUID = -5013459007975657195L;
-
     private final MedicService medicService;
 
     private Grid<ScheduledVisitOverviewTO> toBePlannedGrid = new Grid<>();

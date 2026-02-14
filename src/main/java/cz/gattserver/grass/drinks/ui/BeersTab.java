@@ -18,8 +18,6 @@ import java.util.Locale;
 
 public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
 
-    private static final long serialVersionUID = 594189301140808163L;
-
     @Override
     protected BeerOverviewTO createNewOverviewTO() {
         return new BeerOverviewTO();
@@ -107,8 +105,6 @@ public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton(event -> new BeerDialog() {
-            private static final long serialVersionUID = -4863260002363608014L;
-
             @Override
             protected void onSave(BeerTO to) {
                 to = getDrinksFacade().saveBeer(to);
@@ -118,8 +114,6 @@ public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
         }.open()));
 
         btnLayout.add(componentFactory.createEditGridButton(event -> new BeerDialog(choosenDrink) {
-            private static final long serialVersionUID = 5264621441522056786L;
-
             @Override
             protected void onSave(BeerTO to) {
                 to = getDrinksFacade().saveBeer(to);

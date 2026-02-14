@@ -60,8 +60,6 @@ import java.util.List;
 @Route(value = "print3d", layout = MainView.class)
 public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
-    private static final long serialVersionUID = 7334408385869747381L;
-
     private static final Logger logger = LoggerFactory.getLogger(Print3DViewer.class);
 
     private Print3dService print3dService;

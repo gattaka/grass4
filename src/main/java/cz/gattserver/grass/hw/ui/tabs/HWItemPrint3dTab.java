@@ -32,8 +32,6 @@ import cz.gattserver.grass.hw.service.HWService;
 
 public class HWItemPrint3dTab extends Div {
 
-    private static final long serialVersionUID = 8602793883158440889L;
-
     private static final Logger logger = LoggerFactory.getLogger(HWItemPrint3dTab.class);
 
     private final HWService hwService;

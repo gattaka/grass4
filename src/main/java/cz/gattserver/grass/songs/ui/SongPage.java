@@ -40,6 +40,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -155,7 +156,8 @@ public class SongPage extends Div implements BeforeEnterObserver {
         layout.add(chordDiv);
 
         Div callbackDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
+            @Serial
+            private static final long serialVersionUID = -7346472262736524073L;
 
             @ClientCallable
             private void chordCallback(String chord, double x, double y) {

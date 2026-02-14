@@ -24,8 +24,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
  */
 public class GridOperationsTab<T extends Identifiable> extends Div {
 
-    private static final long serialVersionUID = 6844434642906509277L;
-
     private Grid<T> grid;
 
     // TODO builder?

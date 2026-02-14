@@ -63,8 +63,6 @@ import java.util.stream.Collectors;
 @Route(value = "pg-editor", layout = MainView.class)
 public class PGEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
-    private static final long serialVersionUID = 8685208356478891386L;
-
     private static final Logger logger = LoggerFactory.getLogger(PGEditorPage.class);
 
     private final PGService pgService;

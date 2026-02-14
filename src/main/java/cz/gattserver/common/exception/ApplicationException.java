@@ -8,8 +8,6 @@ import java.util.UUID;
 
 public abstract class ApplicationException extends RuntimeException {
 
-	private static final long serialVersionUID = -1504502969392647247L;
-
 	protected final String id;
 	protected final String timeStamp;
 	protected final String localizedErrorMessage;

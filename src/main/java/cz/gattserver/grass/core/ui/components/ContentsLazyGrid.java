@@ -28,8 +28,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
-    private static final long serialVersionUID = -5648982639686386190L;
-
     private boolean dynamicHeight = true;
     private boolean activeLinks;
 

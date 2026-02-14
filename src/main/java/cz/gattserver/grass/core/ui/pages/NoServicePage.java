@@ -11,8 +11,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 @Route(value = "noservice", layout = MainView.class)
 public class NoServicePage extends Div {
 
-    private static final long serialVersionUID = -3691575066388167709L;
-
     public NoServicePage() {
         removeAll();
         ComponentFactory componentFactory = new ComponentFactory();

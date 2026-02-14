@@ -7,8 +7,6 @@ import java.util.Collection;
  */
 public class CampgameTO extends CampgameOverviewTO {
 
-	private static final long serialVersionUID = 4661359528372859703L;
-
 	/**
 	 * Popis hry
 	 */

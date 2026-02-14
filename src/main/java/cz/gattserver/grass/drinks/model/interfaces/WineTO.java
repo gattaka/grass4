@@ -6,8 +6,6 @@ import cz.gattserver.grass.drinks.model.domain.WineType;
 
 public class WineTO extends DrinkTO {
 
-	private static final long serialVersionUID = -6691404600425123693L;
-
 	/**
 	 * DB id
 	 */

@@ -4,8 +4,6 @@ import java.io.Serializable;
 
 public class CrosswordHintTO implements CrosswordCell, Serializable {
 
-	private static final long serialVersionUID = -9124113483077972310L;
-
 	private int id;
 	private int fromX;
 	private int fromY;

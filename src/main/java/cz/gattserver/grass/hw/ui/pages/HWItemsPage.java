@@ -28,8 +28,6 @@ import java.util.Map;
 @Route(value = "hw", layout = MainView.class)
 public class HWItemsPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
-    private static final long serialVersionUID = 3983638941237624740L;
-
     private final HWService hwService;
     private final SecurityService securityService;
 

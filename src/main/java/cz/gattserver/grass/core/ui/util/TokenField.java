@@ -18,8 +18,6 @@ import com.vaadin.flow.component.html.Div;
 
 public class TokenField extends Div {
 
-    private static final long serialVersionUID = -4556540987839489629L;
-
     private Map<String, Button> tokens = new HashMap<>();
     private Div tokensLayout;
     private boolean allowNewItems = true;

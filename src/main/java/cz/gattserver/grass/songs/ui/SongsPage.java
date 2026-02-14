@@ -35,8 +35,6 @@ import java.util.Map;
 @Route(value = "songs", layout = MainView.class)
 public class SongsPage extends Div implements HasUrlParameter<String> {
 
-    private static final long serialVersionUID = -6336711256361320029L;
-
     public static final String SONG_ID_TAB_VAR = "grass-songs-song-id";
     public static final String SORT_SESSION_VAR = "grass-songs-sort";
     public static final String FILTER_SESSION_VAR = "grass-songs-filter";

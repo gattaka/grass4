@@ -17,8 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 @WebServlet(urlPatterns = "/" + HWConfiguration.HW_PATH + "/*")
 public class HWRequestHandler extends AbstractConfiguratedPathRequestHandler {
 
-	private static final long serialVersionUID = 7154339775034959876L;
-
 	@Autowired
 	private HWService hwService;
 

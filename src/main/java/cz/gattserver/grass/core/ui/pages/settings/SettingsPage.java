@@ -17,8 +17,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 @Route(value = "settings", layout = MainView.class)
 public class SettingsPage extends Div implements HasUrlParameter<String> {
 
-    private static final long serialVersionUID = 935609806962179905L;
-
     private List<ModuleSettingsPageFactory> settingsTabFactories;
     private ModuleSettingsPageFactoriesRegister register;
 

@@ -21,10 +21,10 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.HtmlDiv;
 
+import java.io.Serial;
+
 @Route(value = "articles", layout = MainView.class)
 public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasDynamicTitle, BeforeLeaveListener {
-
-    private static final long serialVersionUID = 7511698289319715316L;
 
     private ArticleService articleService;
     private SecurityService securityService;
@@ -79,7 +79,9 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
 
         String jsInitDivId = "grass-js-init-div";
         Div jsInitDiv = new Div() {
-            private static final long serialVersionUID = -5609636078016625081L;
+
+            @Serial
+            private static final long serialVersionUID = 7826406055666115094L;
 
             @ClientCallable
             private void initJS() {

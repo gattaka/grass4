@@ -16,8 +16,6 @@ import cz.gattserver.grass.medic.web.MedicamentDialog;
 
 public class MedicamentsTab extends Div {
 
-    private static final long serialVersionUID = -5013459007975657195L;
-
     private final MedicService medicService;
     private final MedicamentTO filterTO;
 

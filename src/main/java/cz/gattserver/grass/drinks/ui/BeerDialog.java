@@ -12,6 +12,7 @@ import cz.gattserver.grass.drinks.model.interfaces.BeerTO;
 import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
@@ -79,12 +80,15 @@ public abstract class BeerDialog extends DrinkDialog<BeerTO> {
 		TextField degreeField = new TextField("Stupně (°)");
 		binder.forField(degreeField).withNullRepresentation("")
 				.withConverter(new StringToDoubleConverter(null, "Stupně (°) musí být celé číslo") {
-					private static final long serialVersionUID = -6368685797049169076L;
+
+					@Serial
+                    private static final long serialVersionUID = 6515529337922820217L;
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
 						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
 					}
+
 				}).bind(BeerTO::getDegrees, BeerTO::setDegrees);
 		degreeField.setWidth("80px");
 		layout.add(degreeField);
@@ -93,12 +97,15 @@ public abstract class BeerDialog extends DrinkDialog<BeerTO> {
 		TextField alcoholField = new TextField("Alkohol (%)");
 		binder.forField(alcoholField).withNullRepresentation("")
 				.withConverter(new StringToDoubleConverter(null, "Alkohol (%) musí být celé číslo") {
-					private static final long serialVersionUID = 4910268168530306948L;
+
+					@Serial
+                    private static final long serialVersionUID = -2812838817126081930L;
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
 						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
 					}
+
 				}).bind(BeerTO::getAlcohol, BeerTO::setAlcohol);
 		alcoholField.setWidth("80px");
 		layout.add(alcoholField);

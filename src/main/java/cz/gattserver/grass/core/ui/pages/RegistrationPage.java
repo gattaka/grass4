@@ -24,8 +24,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 @Route(value = "registration", layout = MainView.class)
 public class RegistrationPage extends Div {
 
-    private static final long serialVersionUID = 3104749805983602744L;
-
     private static final int MIN_USERNAME_LENGTH = 2;
     private static final int MAX_USERNAME_LENGTH = 20;
 

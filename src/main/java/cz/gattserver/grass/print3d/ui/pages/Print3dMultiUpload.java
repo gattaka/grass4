@@ -74,8 +74,6 @@ public class Print3dMultiUpload extends Upload {
             allFilesUploaded();
         } else {
             WarnDialog warnWindow = new WarnDialog("Následující soubory již existují:") {
-                private static final long serialVersionUID = 3428203680996794639L;
-
                 @Override
                 protected void createDetails(String details) {
                     HtmlDiv div = new HtmlDiv();

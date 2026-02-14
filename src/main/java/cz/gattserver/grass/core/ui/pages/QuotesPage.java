@@ -24,8 +24,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 @Route(value = "quotes", layout = MainView.class)
 public class QuotesPage extends Div {
 
-    private static final long serialVersionUID = 6209768531464272839L;
-
     public QuotesPage(QuotesService quotesService, CoreACLService coreACLService, SecurityService securityService) {
         removeAll();
         ComponentFactory componentFactory = new ComponentFactory();

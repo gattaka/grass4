@@ -8,8 +8,6 @@ import org.slf4j.LoggerFactory;
 
 public class ApplicationErrorHandler implements ErrorHandler {
 
-	private static final long serialVersionUID = -7739910142600177544L;
-
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationErrorHandler.class);
 
 	@Override

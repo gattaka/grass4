@@ -31,8 +31,6 @@ import cz.gattserver.grass.language.web.CrosswordField;
 
 public class CrosswordTab extends Div {
 
-    private static final long serialVersionUID = 6332893829812704996L;
-
     @Autowired
     private LanguageService languageService;
 

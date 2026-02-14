@@ -30,8 +30,6 @@ import cz.gattserver.grass.hw.service.HWService;
 
 public class HWItemDocsTab extends Div {
 
-    private static final long serialVersionUID = 8602793883158440889L;
-
     private static final Logger logger = LoggerFactory.getLogger(HWItemDocsTab.class);
 
     private final HWService hwService;

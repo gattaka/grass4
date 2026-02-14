@@ -11,8 +11,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 
 public class MessageDialog extends WebDialog {
 
-    private static final long serialVersionUID = 4123506060675738841L;
-
     protected TextArea detailsArea;
 
     /**

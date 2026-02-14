@@ -15,8 +15,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public abstract class ContentMoveDialog extends WebDialog {
 
-    private static final long serialVersionUID = -2550619983411515006L;
-
     private Button moveBtn;
     private NodeTree tree;
 

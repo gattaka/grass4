@@ -52,8 +52,6 @@ import cz.gattserver.grass.hw.ui.dialogs.HWItemDialog;
 
 public class HWItemInfoTab extends Div {
 
-    private static final long serialVersionUID = 8602793883158440889L;
-
     private static final Logger logger = LoggerFactory.getLogger(HWItemInfoTab.class);
 
     private final HWService hwService;

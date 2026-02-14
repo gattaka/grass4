@@ -6,18 +6,14 @@ import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.data.binder.Binder;
 
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemRecordTO;
 
 public class HWItemRecordDialog extends EditWebDialog {
-
-    private static final long serialVersionUID = -6773027334692911384L;
 
     public static HWItemRecordDialog create(Long hwItemId, Consumer<HWItemRecordTO> onSave) {
         return new HWItemRecordDialog(null, onSave, false);

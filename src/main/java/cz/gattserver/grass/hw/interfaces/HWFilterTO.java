@@ -8,8 +8,6 @@ import java.util.Date;
 
 public class HWFilterTO implements Serializable {
 
-    private static final long serialVersionUID = 7979321455877648798L;
-
     private Long id;
     private String name;
     private HWItemState state;

@@ -27,8 +27,6 @@ import cz.gattserver.grass.language.model.domain.ItemType;
 
 public class LanguageItemDialog extends EditWebDialog {
 
-    private static final long serialVersionUID = 6803519662032576371L;
-
     @Autowired
     private LanguageService languageService;
 

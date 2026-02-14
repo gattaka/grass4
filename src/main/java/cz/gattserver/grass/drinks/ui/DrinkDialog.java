@@ -31,8 +31,6 @@ import java.time.format.DateTimeFormatter;
 
 public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
 
-    private static final long serialVersionUID = 6803519662032576371L;
-
     private static final Logger logger = LoggerFactory.getLogger(DrinkDialog.class);
 
     private VerticalLayout imageLayout;

@@ -6,8 +6,6 @@ import cz.gattserver.grass.drinks.model.domain.WhiskeyType;
 
 public class WhiskeyTO extends DrinkTO {
 
-	private static final long serialVersionUID = 2798024764575441743L;
-
 	/**
 	 * DB id
 	 */

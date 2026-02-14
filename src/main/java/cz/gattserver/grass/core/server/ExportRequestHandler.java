@@ -9,8 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 @WebServlet(urlPatterns = "/export/*")
 public class ExportRequestHandler extends AbstractGrassRequestHandler {
 
-    private static final long serialVersionUID = -1704579036933184936L;
-
     public static final String ATTR_PREFIX = "GRASS-JASPER-REPORT-";
 
     @Override

@@ -29,7 +29,6 @@ import java.util.List;
 @JsModule("context://js/jquery.js")
 public class MainView extends Div implements AfterNavigationObserver, RouterLayout {
 
-    private static final long serialVersionUID = 8095742933880807949L;
     private static final Logger log = LoggerFactory.getLogger(MainView.class);
 
     @Resource(name = "nodePageFactory")

@@ -37,8 +37,6 @@ import cz.gattserver.grass.hw.ui.UsedInChooser;
 
 public class HWItemDialog extends EditWebDialog {
 
-    private static final long serialVersionUID = -6773027334692911384L;
-
     private final HWService hwService;
 
     public HWItemDialog(HWItemTO originalTO, Consumer<HWItemTO> onSave) {

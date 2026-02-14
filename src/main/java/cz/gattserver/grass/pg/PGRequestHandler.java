@@ -12,8 +12,6 @@ import java.nio.file.Path;
 @WebServlet(urlPatterns = "/" + PGConfiguration.PG_PATH + "/*")
 public class PGRequestHandler extends AbstractConfiguratedPathRequestHandler {
 
-    private static final long serialVersionUID = 7154339775034959876L;
-
     @Override
     protected Path getPath(String fileName, HttpServletRequest httpRequest) throws FileNotFoundException {
         PGConfiguration configuration = new PGConfiguration();

@@ -68,8 +68,6 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton(event -> new WhiskeyDialog() {
-            private static final long serialVersionUID = -4863260002363608014L;
-
             @Override
             protected void onSave(WhiskeyTO to) {
                 to = getDrinksFacade().saveWhiskey(to);
@@ -79,8 +77,6 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
         }.open()));
 
         btnLayout.add(componentFactory.createEditGridButton(event -> new WhiskeyDialog(choosenDrink) {
-            private static final long serialVersionUID = 5264621441522056786L;
-
             @Override
             protected void onSave(WhiskeyTO to) {
                 to = getDrinksFacade().saveWhiskey(to);

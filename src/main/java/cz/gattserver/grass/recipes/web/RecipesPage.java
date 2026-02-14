@@ -26,8 +26,6 @@ import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 @Route(value = "recipes", layout = MainView.class)
 public class RecipesPage extends Div {
 
-    private static final long serialVersionUID = 1214280599196303350L;
-
     private RecipesService recipesService;
 
     private Grid<RecipeOverviewTO> grid;
@@ -92,7 +90,6 @@ public class RecipesPage extends Div {
 
         btnLayout.add(componentFactory.createCreateButton(event -> {
             new RecipeDialog() {
-                private static final long serialVersionUID = -4863260002363608014L;
 
                 @Override
                 protected void onSave(String name, String desc, Long id) {
@@ -106,7 +103,6 @@ public class RecipesPage extends Div {
 
         btnLayout.add(componentFactory.createEditGridButton(event -> {
             new RecipeDialog(choosenRecipe) {
-                private static final long serialVersionUID = 5264621441522056786L;
 
                 @Override
                 protected void onSave(String name, String desc, Long id) {

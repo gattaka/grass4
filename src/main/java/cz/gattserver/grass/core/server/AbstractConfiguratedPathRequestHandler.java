@@ -6,8 +6,6 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public abstract class AbstractConfiguratedPathRequestHandler extends AbstractGrassRequestHandler {
 
-	private static final long serialVersionUID = -8278020128728088151L;
-
 	private transient ConfigurationService configurationService;
 	private transient FileSystemService fileSystemService;
 

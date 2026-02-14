@@ -57,8 +57,6 @@ import java.util.stream.Collectors;
 @Route(value = "photogallery", layout = MainView.class)
 public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
-    private static final long serialVersionUID = 7334408385869747381L;
-
     private static final Logger logger = LoggerFactory.getLogger(PGViewer.class);
 
     private static final int MAX_PAGE_RADIUS = 2;

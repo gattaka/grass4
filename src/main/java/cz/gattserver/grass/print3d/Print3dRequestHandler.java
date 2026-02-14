@@ -11,8 +11,6 @@ import java.nio.file.Path;
 @WebServlet(urlPatterns = "/" + Print3dConfiguration.PRINT3D_PATH + "/*")
 public class Print3dRequestHandler extends AbstractConfiguratedPathRequestHandler {
 
-	private static final long serialVersionUID = 7154339775034959876L;
-
 	@Override
 	protected Path getPath(String fileName, HttpServletRequest request) throws FileNotFoundException {
 		Print3dConfiguration configuration = new Print3dConfiguration();

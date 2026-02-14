@@ -6,8 +6,6 @@ import com.vaadin.flow.data.converter.Converter;
 
 public class DoubleToIntegerConverter implements Converter<Double, Integer> {
 
-	private static final long serialVersionUID = -1344832908495652879L;
-
 	@Override
 	public Result<Integer> convertToModel(Double value, ValueContext context) {
 		if (value == null)

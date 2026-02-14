@@ -36,8 +36,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class HWItemPhotosTab extends Div {
 
-    private static final long serialVersionUID = 8602793883158440889L;
-
     private static final Logger logger = LoggerFactory.getLogger(HWItemPhotosTab.class);
 
     private final HWService hwService;

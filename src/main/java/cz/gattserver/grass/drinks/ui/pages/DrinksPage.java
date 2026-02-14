@@ -13,8 +13,6 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 @Route(value = "drinks", layout = MainView.class)
 public class DrinksPage extends Div implements HasUrlParameter<String> {
 
-    private static final long serialVersionUID = 2066137985312535506L;
-
     private Tabs tabSheet;
 
     private Tab beerTab;

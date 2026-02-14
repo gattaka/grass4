@@ -19,8 +19,6 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 @ParentLayout(MainView.class)
 public class ErrorPage extends Div implements HasErrorParameter<Exception> {
 
-    private static final long serialVersionUID = 4576353466500365046L;
-
     private static final Logger logger = LoggerFactory.getLogger(ErrorPage.class);
 
     private GrassPageException exception;

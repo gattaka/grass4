@@ -39,8 +39,6 @@ import cz.gattserver.grass.language.web.tabs.StatisticsTab;
 @Route(value = "language", layout = MainView.class)
 public class LanguagePage extends Div {
 
-    private static final long serialVersionUID = 4767207674013382065L;
-
     public static final String PREKLAD_LABEL = "Překlad";
 
     private LanguageService languageService;

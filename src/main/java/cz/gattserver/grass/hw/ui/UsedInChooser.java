@@ -15,8 +15,6 @@ import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 
 public class UsedInChooser extends CustomField<HWItemOverviewTO> {
 
-    private static final long serialVersionUID = -5660237108485881386L;
-
     private HWItemOverviewTO value;
     private Button clearBtn;
     private Button chooseUsedInBtn;

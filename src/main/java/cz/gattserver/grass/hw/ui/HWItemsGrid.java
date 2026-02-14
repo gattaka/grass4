@@ -24,6 +24,8 @@ import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.*;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.ClientCallable;
@@ -49,7 +51,7 @@ import cz.gattserver.grass.hw.service.HWService;
 
 public class HWItemsGrid extends Div {
 
-    private static final long serialVersionUID = -6094970451516214174L;
+    private static final Logger log = LoggerFactory.getLogger(HWItemsGrid.class);
 
     private static final String NAME_BIND = "nameBind";
     private static final String USED_IN_BIND = "usedInBind";
@@ -86,7 +88,7 @@ public class HWItemsGrid extends Div {
         iconDiv = new Div();
         iconDiv.addClassName("hw-hover-icon");
         iconDiv.setVisible(false);
-        iconDiv.getElement().setAttribute("popover","manual");
+        iconDiv.getElement().setAttribute("popover", "manual");
         iconDiv.getElement().executeJs("this.showPopover()");
         UI.getCurrent().getElement().appendChild(iconDiv.getElement());
 
@@ -139,7 +141,8 @@ public class HWItemsGrid extends Div {
             } else {
                 Anchor a = new Anchor();
                 a.setText(to.getName());
-                a.getElement().addEventListener("click", event -> onSelect.accept(hwService.getHWOverviewItem(to.getId())));
+                a.getElement()
+                        .addEventListener("click", event -> onSelect.accept(hwService.getHWOverviewItem(to.getId())));
                 c = a;
             }
 

@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.pages.template;
 
+import java.io.Serial;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,8 +41,6 @@ import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.HtmlSpan;
 
 public class ContentViewer extends Div {
-
-    private static final long serialVersionUID = -1564043277444025560L;
 
     private UserService userService;
     private SecurityService securityService;
@@ -166,7 +165,9 @@ public class ContentViewer extends Div {
         // Změna kategorie
         if (coreACLService.canModifyContent(contentNodeTO, securityService.getCurrentUser())) {
             Button moveBtn = componentFactory.createMoveButton(event -> new ContentMoveDialog(contentNodeTO) {
-                private static final long serialVersionUID = 3748723613020816248L;
+
+                @Serial
+                private static final long serialVersionUID = 8356571950616390549L;
 
                 @Override
                 protected void onMove() {

@@ -27,8 +27,6 @@ import java.util.function.Consumer;
 @Route(value = "hw-item", layout = MainView.class)
 public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
 
-    private static final long serialVersionUID = -6773027334692911384L;
-
     private transient HWService hwService;
 
     private Tabs tabs;

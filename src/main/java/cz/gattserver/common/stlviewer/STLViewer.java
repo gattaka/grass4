@@ -14,8 +14,6 @@ import tools.jackson.databind.JsonNode;
 
 public class STLViewer extends Div {
 
-	private static final long serialVersionUID = 641505669346830262L;
-
 	private static final String JS_PATH = "stl_viewer/";
 	private static final String STL_VIEWER_INSTANCE_JS_VAR = "$.stlViewerInstance";
 

@@ -12,8 +12,6 @@ import com.vaadin.flow.component.html.Anchor;
  */
 public class ComparableLink extends Anchor implements Comparable<ComparableLink> {
 
-	private static final long serialVersionUID = -1066469018592736445L;
-
 	public ComparableLink(String name, String url) {
 		super(name, url);
 	}

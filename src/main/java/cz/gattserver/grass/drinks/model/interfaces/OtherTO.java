@@ -5,8 +5,6 @@ import cz.gattserver.grass.drinks.model.domain.DrinkType;
 
 public class OtherTO extends DrinkTO {
 
-	private static final long serialVersionUID = -6691404600425123693L;
-
 	/**
 	 * DB id
 	 */

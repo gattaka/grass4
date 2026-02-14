@@ -13,8 +13,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
 
-    private static final long serialVersionUID = -8540314953045422691L;
-
     @Override
     protected OtherOverviewTO createNewOverviewTO() {
         return new OtherOverviewTO();
@@ -55,8 +53,6 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton(event -> new OtherDialog() {
-            private static final long serialVersionUID = -4863260002363608014L;
-
             @Override
             protected void onSave(OtherTO to) {
                 to = getDrinksFacade().saveOther(to);
@@ -66,8 +62,6 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
         }.open()));
 
         btnLayout.add(componentFactory.createEditGridButton(event -> new OtherDialog(choosenDrink) {
-            private static final long serialVersionUID = 5264621441522056786L;
-
             @Override
             protected void onSave(OtherTO to) {
                 to = getDrinksFacade().saveOther(to);

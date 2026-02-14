@@ -4,8 +4,6 @@ import com.vaadin.flow.component.progressbar.ProgressBar;
 
 public class BaseProgressBar extends ProgressBar {
 
-	private static final long serialVersionUID = 9190321446320873139L;
-
 	private int total = 0;
 	private int current = 0;
 

@@ -13,13 +13,12 @@ import cz.gattserver.grass.drinks.model.interfaces.WineTO;
 import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
 
 public abstract class WineDialog extends DrinkDialog<WineTO> {
-
-	private static final long serialVersionUID = 6803519662032576371L;
 
 	public WineDialog(WineTO to) {
 		super(to);
@@ -74,7 +73,8 @@ public abstract class WineDialog extends DrinkDialog<WineTO> {
 		TextField alcoholField = new TextField("Alkohol (%)");
 		binder.forField(alcoholField).withNullRepresentation("")
 				.withConverter(new StringToDoubleConverter(null, "Alkohol (%) musí být celé číslo") {
-					private static final long serialVersionUID = 4910268168530306948L;
+					@Serial
+                    private static final long serialVersionUID = -5270872105505337431L;
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {

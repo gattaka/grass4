@@ -11,6 +11,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Serial;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +19,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class ImageSlideshow<T extends SlideshowItem> extends Div {
-
-    private static final long serialVersionUID = 4928404864735034779L;
 
     private static final Logger logger = LoggerFactory.getLogger(ImageSlideshow.class);
 
@@ -64,7 +63,8 @@ public class ImageSlideshow<T extends SlideshowItem> extends Div {
 
         String jsDivId = "image-slideshow-item-div";
         itemLayout = new Div() {
-            private static final long serialVersionUID = -1026900351513446144L;
+            @Serial
+            private static final long serialVersionUID = -604140874889079656L;
 
             @ClientCallable
             private void prev() {

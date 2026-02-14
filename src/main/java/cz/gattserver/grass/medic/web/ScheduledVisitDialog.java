@@ -29,9 +29,6 @@ import org.vaadin.addons.componentfactory.monthpicker.MonthPicker;
 
 public class ScheduledVisitDialog extends EditWebDialog {
 
-    @Serial
-    private static final long serialVersionUID = -6773027334692911384L;
-
     private static final Logger logger = LoggerFactory.getLogger(ScheduledVisitDialog.class);
 
     public static ScheduledVisitDialog detail(ScheduledVisitTO originalTO) {

@@ -13,8 +13,6 @@ import org.apache.commons.lang3.Validate;
  */
 public class TokenException extends RuntimeException {
 
-	private static final long serialVersionUID = -4168431404585234070L;
-
 	private static final String EXPECTED_TOKEN_CHUNK = "Expected Token: ";
 	private static final String ACTUAL_TOKEN_CHUNK = " Actual Token: ";
 	private static final String EXPECTED_CONTENT_CHUNK = "Expected content: ";

@@ -26,8 +26,6 @@ import cz.gattserver.grass.language.web.LanguagePage;
 
 public class StatisticsTab extends Div {
 
-    private static final long serialVersionUID = 2977436873976010065L;
-
     private static final Logger logger = LoggerFactory.getLogger(LanguagePage.class);
 
     @Autowired

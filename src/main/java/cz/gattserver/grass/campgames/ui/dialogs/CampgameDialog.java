@@ -44,8 +44,6 @@ import java.util.function.Consumer;
 
 public class CampgameDialog extends EditWebDialog {
 
-    private static final long serialVersionUID = -6773027334692911384L;
-
     private static Logger logger = LoggerFactory.getLogger(CampgameDialog.class);
 
     private final CampgamesService campgamesService;

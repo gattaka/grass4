@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.FileAlreadyExistsException;
 import java.util.HashSet;
 import java.util.Set;
@@ -62,7 +63,9 @@ public class PGUploadBuilder {
             existingFiles.clear();
         } else {
             WarnDialog warnWindow = new WarnDialog("Následující soubory již existují:") {
-                private static final long serialVersionUID = 3428203680996794639L;
+
+                @Serial
+                private static final long serialVersionUID = 1180457720250214929L;
 
                 @Override
                 protected void createDetails(String details) {

@@ -39,8 +39,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 @Route(value = "category", layout = MainView.class)
 public class NodePage extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
-    private static final long serialVersionUID = 1560125362904332256L;
-
     private final ContentNodeService contentNodeService;
     private final NodeService nodeService;
     private final CoreACLService coreACLService;

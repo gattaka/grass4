@@ -9,12 +9,11 @@ import cz.gattserver.grass.drinks.model.interfaces.OtherTO;
 import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
 import java.text.NumberFormat;
 import java.util.Locale;
 
 public abstract class OtherDialog extends DrinkDialog<OtherTO> {
-
-	private static final long serialVersionUID = 6803519662032576371L;
 
 	public OtherDialog(OtherTO to) {
 		super(to);
@@ -61,12 +60,15 @@ public abstract class OtherDialog extends DrinkDialog<OtherTO> {
 		TextField alcoholField = new TextField("Alkohol (%)");
 		binder.forField(alcoholField).withNullRepresentation("")
 				.withConverter(new StringToDoubleConverter(null, "Alkohol (%) musí být celé číslo") {
-					private static final long serialVersionUID = 4910268168530306948L;
+
+					@Serial
+                    private static final long serialVersionUID = -520043461673844302L;
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
 						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
 					}
+
 				}).bind(OtherTO::getAlcohol, OtherTO::setAlcohol);
 		layout.add(alcoholField);
 		layout.setColspan(alcoholField, 2);

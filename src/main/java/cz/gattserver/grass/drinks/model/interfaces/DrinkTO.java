@@ -6,8 +6,6 @@ import java.io.Serializable;
 
 public abstract class DrinkTO implements Serializable {
 
-	private static final long serialVersionUID = 2262189365795554976L;
-
 	private Long id;
 
 	/**

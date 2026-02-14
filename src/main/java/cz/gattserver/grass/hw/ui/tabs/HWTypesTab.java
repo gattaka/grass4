@@ -34,8 +34,6 @@ import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 
 public class HWTypesTab extends Div {
 
-    private static final long serialVersionUID = -5013459007975657195L;
-
     private static final String NAME_BIND = "nameBind";
     private static final String COUNT_BIND = "countBind";
 
@@ -110,13 +108,13 @@ public class HWTypesTab extends Div {
         /**
          * Založení nového typu
          */
-        Button newTypeBtn = componentFactory.createCreateButton(e -> openNewTypeWindow(null));
+        Button newTypeBtn = componentFactory.createCreateButton(e -> openCreateDialog());
         buttonLayout.add(newTypeBtn);
 
         /**
          * Úprava typu
          */
-        buttonLayout.add(componentFactory.createEditGridButton(item -> openNewTypeWindow(item), grid));
+        buttonLayout.add(componentFactory.createEditGridButton(item -> openEditDialog(item), grid));
 
         /**
          * Smazání typu
@@ -138,19 +136,19 @@ public class HWTypesTab extends Div {
         grid.setEnabled(enabled);
     }
 
-    private void openNewTypeWindow(HWTypeTO hwItemTypeDTO) {
-        new HWTypeEditDialog(hwItemTypeDTO == null ? null : hwItemTypeDTO) {
-            private static final long serialVersionUID = -7566950396535469316L;
-
-            @Override
-            protected void onSuccess(HWTypeTO hwItemTypeDTO) {
-                if (hwItemTypeDTO != null) {
-                    grid.getDataProvider().refreshItem(hwItemTypeDTO);
-                } else {
-                    populate();
-                }
-            }
-        }.open();
+    private void openCreateDialog() {
+        HWTypeEditDialog.create( to -> {
+            hwService.saveHWType(to);
+            grid.getDataProvider().refreshItem(to);
+            populate();
+        }).open();
     }
 
+    private void openEditDialog(HWTypeTO hwItemTypeTO) {
+        HWTypeEditDialog.edit(hwItemTypeTO, to -> {
+            hwService.saveHWType(to);
+            grid.getDataProvider().refreshItem(to);
+            populate();
+        }).open();
+    }
 }

@@ -2,7 +2,6 @@ package cz.gattserver.grass.core.exception;
 
 public class GrassPageException extends RuntimeException {
 
-	private static final long serialVersionUID = -8947153927785372443L;
 	private static final String ERR = "Error: ";
 
 	private final int status;

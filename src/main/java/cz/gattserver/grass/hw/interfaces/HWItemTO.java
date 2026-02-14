@@ -14,8 +14,6 @@ import java.util.Set;
  */
 public class HWItemTO {
 
-    private static final long serialVersionUID = 4661359528372859703L;
-
     private Long id;
     private String name;
     private LocalDate purchaseDate;

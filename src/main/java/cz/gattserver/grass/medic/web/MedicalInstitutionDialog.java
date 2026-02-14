@@ -15,8 +15,6 @@ import java.util.function.Consumer;
 
 public class MedicalInstitutionDialog extends EditWebDialog {
 
-    private static final long serialVersionUID = -6773027334692911384L;
-
     public static MedicalInstitutionDialog detail(MedicalInstitutionTO originalTO) {
         return new MedicalInstitutionDialog(originalTO, null, true);
     }

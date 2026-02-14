@@ -17,7 +17,6 @@ public class ProgressDialog extends WebDialog {
 
 	private static final Logger logger = LoggerFactory.getLogger(ProgressDialog.class);
 
-	private static final long serialVersionUID = 2779568469991016255L;
 	private static DecimalFormat myFormatter = new DecimalFormat("##0.0");
 
 	private BaseProgressBar progressBar;

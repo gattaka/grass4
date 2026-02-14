@@ -56,9 +56,6 @@ import java.util.Set;
 @Route(value = "print3d-editor", layout = MainView.class)
 public class Print3dEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
-    @Serial
-    private static final long serialVersionUID = 8685208356478891386L;
-
     private static final Logger logger = LoggerFactory.getLogger(Print3dEditorPage.class);
 
     private static final String CLOSE_JS_DIV_ID = "close-js-div";
@@ -237,7 +234,8 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         gridLayout.add(grid);
 
         Print3dMultiUpload upload = new Print3dMultiUpload(projectDir) {
-            private static final long serialVersionUID = 8317049226635860025L;
+            @Serial
+            private static final long serialVersionUID = 2727653435609738250L;
 
             @Override
             protected void fileUploadSuccess(String fileName, long size) {
@@ -273,7 +271,9 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
     private void populateButtonsLayout(Div buttonLayout) {
         Div closeJsDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
+
+            @Serial
+            private static final long serialVersionUID = 7034827729435451343L;
 
             @ClientCallable
             private void returnToProjectCallback() {

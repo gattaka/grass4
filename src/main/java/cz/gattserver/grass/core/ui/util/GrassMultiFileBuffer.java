@@ -26,8 +26,6 @@ import com.vaadin.flow.component.upload.receivers.FileData;
 @Deprecated
 public class GrassMultiFileBuffer implements MultiFileReceiver {
 
-	private static final long serialVersionUID = 4556000770880576618L;
-
 	private static final Logger logger = LoggerFactory.getLogger(GrassMultiFileBuffer.class);
 
 	private Map<String, FileData> files = new HashMap<>();

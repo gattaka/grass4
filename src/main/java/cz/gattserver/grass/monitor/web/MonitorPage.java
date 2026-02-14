@@ -1,5 +1,6 @@
 package cz.gattserver.grass.monitor.web;
 
+import java.io.Serial;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import java.util.Map;
@@ -41,8 +42,6 @@ import tools.jackson.databind.JsonNode;
 @PageTitle("System monitor")
 @Route(value = "system-monitor", layout = MainView.class)
 public class MonitorPage extends Div {
-
-    private static final long serialVersionUID = 4862261730750923131L;
 
     @Autowired
     private MonitorService monitorFacade;
@@ -461,7 +460,9 @@ public class MonitorPage extends Div {
 
         String jsDivId = "monitor-js-div";
         Div jsDiv = new Div() {
-            private static final long serialVersionUID = -7319482130016598549L;
+
+            @Serial
+            private static final long serialVersionUID = -7334330138785798774L;
 
             @ClientCallable
             private void monitorRefresh(JsonNode jsonObject) {

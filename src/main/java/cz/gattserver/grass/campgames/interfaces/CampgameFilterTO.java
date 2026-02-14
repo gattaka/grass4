@@ -4,8 +4,6 @@ import java.util.Collection;
 
 public class CampgameFilterTO extends CampgameOverviewTO {
 
-	private static final long serialVersionUID = 3678406951423588173L;
-
 	/**
 	 * Klíčová slova
 	 */
