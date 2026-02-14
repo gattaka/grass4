@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.function.Consumer;
 
+import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
@@ -26,7 +27,6 @@ import cz.gattserver.grass.hw.interfaces.*;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -206,7 +206,6 @@ public class HWItemsGrid extends Div {
         });
 
         populate();
-        grid.sort(Arrays.asList(new GridSortOrder<>(nameColumn, SortDirection.ASCENDING)));
 
         add(grid);
     }
@@ -242,6 +241,11 @@ public class HWItemsGrid extends Div {
                             case SUPERVIZED_FOR_BIND -> "supervizedFor";
                             default -> column;
                         });
+                if (order.length == 0) {
+                    order = new OrderSpecifier[1];
+                    order[0] = QuerydslUtil.transformOrder(true,"name");
+                }
+
                 // potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
                 // jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
                 List<Long> ids = hwService.getHWItemIds(filterTO, order);
@@ -249,8 +253,7 @@ public class HWItemsGrid extends Div {
                 for (Long id : ids)
                     indexMap.put(id, index++);
                 return hwService.getHWItems(filterTO, q.getOffset(), q.getLimit(), order).stream();
-            };
-            CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback = q -> hwService.countHWItems(filterTO);
+            }; CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback = q -> hwService.countHWItems(filterTO);
             grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
         } else {
             grid.getDataProvider().refreshAll();

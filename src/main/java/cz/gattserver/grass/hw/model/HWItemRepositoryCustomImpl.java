@@ -79,8 +79,6 @@ public class HWItemRepositoryCustomImpl extends QuerydslRepositorySupport implem
                 if ("name".equals(os.getTarget().toString()))
                     query.orderBy(Order.ASC == os.getOrder() ? h.name.asc() : h.name.desc());
             }
-        } else {
-            query.orderBy(h.name.asc());
         }
         return query.fetch();
     }
