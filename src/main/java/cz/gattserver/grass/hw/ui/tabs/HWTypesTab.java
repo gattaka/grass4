@@ -30,7 +30,7 @@ import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.dialogs.HWTypeEditDialog;
-import cz.gattserver.grass.hw.ui.pages.HWPage;
+import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 
 public class HWTypesTab extends Div {
 
@@ -85,7 +85,7 @@ public class HWTypesTab extends Div {
                     types.add(to.getName());
                     filter.setTypes(types);
                     Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(filter);
-                    UI.getCurrent().navigate(HWPage.class, QueryParameters.simple(filterQuery));
+                    UI.getCurrent().navigate(HWItemPage.class, QueryParameters.simple(filterQuery));
                 }))).setHeader("Název").setSortable(true).setKey(NAME_BIND).setFlexGrow(1);
         grid.setWidthFull();
         grid.setHeight("500px");

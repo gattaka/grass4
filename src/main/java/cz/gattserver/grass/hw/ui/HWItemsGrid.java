@@ -5,12 +5,14 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import com.querydsl.core.types.OrderSpecifier;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.FieldUtils;
@@ -21,6 +23,7 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.*;
+import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.ClientCallable;
@@ -71,6 +74,10 @@ public class HWItemsGrid extends Div {
     private TextField spravovanField;
 
     private Div iconDiv;
+
+    public HWItemsGrid() {
+        this(null);
+    }
 
     public HWItemsGrid(Consumer<HWItemOverviewTO> onSelect) {
         this.hwService = SpringContextHelper.getBean(HWService.class);
@@ -126,18 +133,24 @@ public class HWItemsGrid extends Div {
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
         Column<HWItemOverviewTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
-            Long id = to.getId();
-            Anchor a = new Anchor();
-            a.getElement().addEventListener("click", event -> onSelect.accept(hwService.getHWOverviewItem(id)));
-            a.setText(to.getName());
+            Component c;
+            if (onSelect == null) {
+                c = new RouterLink(to.getName(), HWItemPage.class, to.getId());
+            } else {
+                Anchor a = new Anchor();
+                a.setText(to.getName());
+                a.getElement().addEventListener("click", event -> onSelect.accept(hwService.getHWOverviewItem(to.getId())));
+                c = a;
+            }
+
             // addEventListener na mouseover má z nějakého důvodu prázdný event -- Vaadin bug?
             UI.getCurrent().getPage().executeJs("$0.onmouseover = function(event) {"
                     /*      */ + "let bound = document.body.getBoundingClientRect(); "
-                    /*      */ + "$1.$server.imgShowCallback(\"" + id
+                    /*      */ + "$1.$server.imgShowCallback(\"" + to.getId()
                     /*      */ + "\", event.clientX - bound.x, event.clientY - bound.y); "
-                    /*  */ + "}", a.getElement(), HWItemsGrid.this.getElement());
-            a.getElement().addEventListener("mouseout", e -> iconDiv.setVisible(false));
-            return a;
+                    /*  */ + "}", c.getElement(), HWItemsGrid.this.getElement());
+            c.getElement().addEventListener("mouseout", e -> iconDiv.setVisible(false));
+            return c;
         })).setHeader("Název").setSortable(true).setKey(NAME_BIND).setResizable(true);
 
         // kontrola na null je tady jenom proto, aby při selectu (kdy se udělá

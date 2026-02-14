@@ -22,8 +22,8 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.ui.HWItemsGrid;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-import cz.gattserver.grass.hw.ui.pages.HWPage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +38,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 
@@ -63,13 +62,10 @@ public class HWItemInfoTab extends Div {
     private VerticalLayout hwImageLayout;
     private HWItemTO hwItem;
 
-    private HWItemsTab itemsTab;
-
-    public HWItemInfoTab(HWItemsTab itemsTab, HWItemTO hwItem) {
+    public HWItemInfoTab( HWItemTO hwItem) {
         securityService = SpringContextHelper.getBean(SecurityService.class);
         hwService = SpringContextHelper.getBean(HWService.class);
         setHeightFull();
-        this.itemsTab = itemsTab;
         this.hwItem = hwItem;
         init();
     }
@@ -242,8 +238,7 @@ public class HWItemInfoTab extends Div {
             final Button deleteBtn = componentFactory.createDeleteButton(ev -> {
                 try {
                     hwService.deleteHWItem(hwItem.getId());
-                    UI.getCurrent().navigate(HWPage.class);
-                    itemsTab.populate();
+                    UI.getCurrent().navigate(HWItemPage.class);
                 } catch (Exception ex) {
                     new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
                 }

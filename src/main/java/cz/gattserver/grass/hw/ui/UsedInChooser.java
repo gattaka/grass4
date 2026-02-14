@@ -1,9 +1,5 @@
 package cz.gattserver.grass.hw.ui;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.customfield.CustomField;
@@ -16,7 +12,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemChooseDialog;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-import cz.gattserver.grass.medic.web.PhysicianDialog;
 
 public class UsedInChooser extends CustomField<HWItemOverviewTO> {
 

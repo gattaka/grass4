@@ -21,7 +21,6 @@ import cz.gattserver.grass.hw.ui.tabs.HWItemInfoTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemPhotosTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemPrint3dTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemRecordsTab;
-import cz.gattserver.grass.hw.ui.tabs.HWItemsTab;
 
 import java.util.function.Consumer;
 
@@ -42,8 +41,6 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
     private Div tabLayout;
 
     private HWItemTO hwItem;
-
-    private HWItemsTab itemsTab;
 
     private Consumer<HWItemTO> onRefreshListener;
 
@@ -74,7 +71,7 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
 
         Breadcrumb breadcrumb = new Breadcrumb();
         breadcrumb.resetBreadcrumb(new Breadcrumb.BreadcrumbElement(hwItem.getName(), HWItemPage.class, hwItem.getId()),
-                new Breadcrumb.BreadcrumbElement("HW list", HWPage.class));
+                new Breadcrumb.BreadcrumbElement("HW list", HWItemsPage.class));
         layout.add(breadcrumb);
 
         layout.add(new H2(hwItem.getName()));
@@ -166,7 +163,7 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
 
     public void switchInfoTab() {
         tabLayout.removeAll();
-        tabLayout.add(new HWItemInfoTab(itemsTab, hwItem));
+        tabLayout.add(new HWItemInfoTab(hwItem));
         tabs.setSelectedTab(infoTab);
     }
 

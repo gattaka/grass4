@@ -6,6 +6,7 @@ import java.nio.file.InvalidPathException;
 
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
@@ -24,14 +25,15 @@ import cz.gattserver.grass.hw.HWConfiguration;
 
 public class HWSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
-    @Autowired
     private ConfigurationService configurationService;
-
-    @Autowired
     private FileSystemService fileSystemService;
-
-    @Autowired
     private HWService hwService;
+
+    public HWSettingsPageFragmentFactory() {
+        this.configurationService = SpringContextHelper.getBean(ConfigurationService.class);
+        this.fileSystemService = SpringContextHelper.getBean(FileSystemService.class);
+        this.hwService = SpringContextHelper.getBean(HWService.class);
+    }
 
     @Override
     public void createFragment(Div div) {

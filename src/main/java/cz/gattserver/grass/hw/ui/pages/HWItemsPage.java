@@ -1,51 +1,70 @@
-package cz.gattserver.grass.hw.ui.tabs;
+package cz.gattserver.grass.hw.ui.pages;
 
+import com.vaadin.flow.component.ComponentUtil;
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.router.QueryParameters;
-import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.hw.interfaces.HWFilterTO;
-import cz.gattserver.grass.hw.ui.HWUIUtils;
-import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
-
+import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.internal.HasUrlParameterFormat;
+import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
+import cz.gattserver.grass.articles.ui.pages.ArticlesViewer;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.MainView;
+import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.HWItemsGrid;
+import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemDialog;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-public class HWItemsTab extends Div {
+@PageTitle("Evidence HW")
+@Route(value = "hw", layout = MainView.class)
+public class HWItemsPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
-    private static final long serialVersionUID = -5013459007975657195L;
+    private static final long serialVersionUID = 3983638941237624740L;
 
     private final HWService hwService;
-    private final SecurityService securityFacade;
+    private final SecurityService securityService;
 
     private HWItemsGrid itemsGrid;
 
-    public HWItemsTab() {
-        this.hwService = SpringContextHelper.getBean(HWService.class);
-        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
+    public HWItemsPage(HWService hwService, SecurityService securityService) {
+        this.hwService = hwService;
+        this.securityService = securityService;
+    }
 
-        itemsGrid = new HWItemsGrid(to -> navigateToDetail(to.getId()));
-        itemsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-
-        add(itemsGrid);
-
+    @Override
+    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+        removeAll();
         ComponentFactory componentFactory = new ComponentFactory();
 
-        Div buttonLayout = componentFactory.createButtonLayout();
-        add(buttonLayout);
+        Div layout = componentFactory.createOneColumnLayout();
+        add(layout);
 
-        if (securityFacade.getCurrentUser().isAdmin()) {
+        layout.add(HWUIUtils.createNavigationLayout());
+
+        itemsGrid = new HWItemsGrid();
+        itemsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        layout.add(itemsGrid);
+
+        // Restore state when returning via back button
+        QueryParameters params = event.getLocation().getQueryParameters();
+        Map<String, List<String>> parametersMap = params.getParameters();
+        HWFilterTO filterTO = HWUIUtils.processToQueryFilter(parametersMap);
+
+        search(filterTO);
+
+        Div buttonLayout = componentFactory.createButtonLayout();
+        layout.add(buttonLayout);
+
+        if (securityService.getCurrentUser().isAdmin()) {
             // Založení nové položky HW
             Button newHWBtn = componentFactory.createCreateButton(e -> openItemWindow(null));
             buttonLayout.add(newHWBtn);
@@ -59,7 +78,7 @@ public class HWItemsTab extends Div {
         buttonLayout.add(
                 componentFactory.createDetailGridButton(item -> navigateToDetail(item.getId()), itemsGrid.getGrid()));
 
-        if (securityFacade.getCurrentUser().isAdmin()) {
+        if (securityService.getCurrentUser().isAdmin()) {
             // Oprava údajů existující položky HW
             buttonLayout.add(componentFactory.createEditGridButton(item -> openItemWindow(item), itemsGrid.getGrid()));
 
@@ -68,6 +87,7 @@ public class HWItemsTab extends Div {
             buttonLayout.add(deleteBtn);
         }
     }
+
 
     private void deleteItem(HWItemOverviewTO item) {
         try {
@@ -91,18 +111,16 @@ public class HWItemsTab extends Div {
         }).open();
     }
 
+    public void navigateToDetail(Long id) {
+        UI.getCurrent().navigate(HWItemPage.class, id);
+    }
+
     private void copyItemWindow(Long id) {
         Long newId = hwService.copyHWItem(id);
         populate();
         HWItemOverviewTO newTO = new HWItemOverviewTO();
         newTO.setId(newId);
         itemsGrid.getGrid().select(newTO);
-        navigateToDetail(newId);
-    }
-
-    public void navigateToDetail(Long id) {
-        Map<String, String> filterQuery = HWUIUtils.processFilterToQuery(itemsGrid.getFilterTO());
-        UI.getCurrent().navigate(HWItemPage.class, id, QueryParameters.simple(filterQuery));
     }
 
     public void openDetailWindow(Long id) {
@@ -119,5 +137,21 @@ public class HWItemsTab extends Div {
 
     public void search(HWFilterTO filterTO) {
         itemsGrid.setFilterTO(filterTO);
+    }
+
+    @Override
+    public void beforeLeave(BeforeLeaveEvent event) {
+        if (event.getNavigationTarget() == HWItemPage.class) {
+            // TODO filtry
+            Long targetId = event.getRouteParameters().getLong(HasUrlParameterFormat.PARAMETER_NAME).get();
+            Map<String, List<String>> params = new HashMap<>();
+            params.put("id", List.of(targetId.toString()));
+            QueryParameters queryParams = new QueryParameters(params);
+            String listURL = RouteConfiguration.forSessionScope().getUrl(HWItemsPage.class);
+            UI.getCurrent().getPage().getHistory().replaceState(null, listURL + "?" + queryParams.getQueryString());
+
+            String detailURL = RouteConfiguration.forSessionScope().getUrl(HWItemPage.class, targetId);
+            UI.getCurrent().getPage().getHistory().pushState(null, detailURL);
+        }
     }
 }

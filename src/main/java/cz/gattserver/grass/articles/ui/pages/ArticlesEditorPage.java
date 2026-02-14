@@ -415,8 +415,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         return componentFactory.createPreviewButton(event -> {
             try {
                 saveDraft(true);
-                String url = RouteConfiguration.forRegistry(ComponentUtil.getRouter(this).getRegistry())
-                        .getUrl(ArticlesViewer.class,
+                String url = RouteConfiguration.forSessionScope().getUrl(ArticlesViewer.class,
                                 URLIdentifierUtils.createURLIdentifier(articleEditorTO.getDraftId(),
                                         articleEditorTO.getDraftName()));
                 UI.getCurrent().getPage().open(url, "_blank");
