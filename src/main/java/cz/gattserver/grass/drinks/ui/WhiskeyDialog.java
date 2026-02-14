@@ -67,13 +67,15 @@ public abstract class WhiskeyDialog extends DrinkDialog<WhiskeyTO> {
 		TextField alcoholField = new TextField("Alkohol (%)");
 		binder.forField(alcoholField)
 				.withConverter(new StringToDoubleConverter(null, "Alkohol (%) musí být celé číslo") {
-					@Serial
+
+                    @Serial
                     private static final long serialVersionUID = -3065677006005053078L;
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
 						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
 					}
+
 				}).asRequired(new DoubleRangeValidator("Obsah alkoholu je mimo rozsah (1-100)", 1d, 100d))
 				.bind(WhiskeyTO::getAlcohol, WhiskeyTO::setAlcohol);
 		layout.add(alcoholField);

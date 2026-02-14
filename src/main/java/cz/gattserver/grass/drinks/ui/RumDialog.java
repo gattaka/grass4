@@ -66,6 +66,7 @@ public abstract class RumDialog extends DrinkDialog<RumTO> {
 		TextField alcoholField = new TextField("Alkohol (%)");
 		binder.forField(alcoholField)
 				.withConverter(new StringToDoubleConverter(null, "Alkohol (%) musí být celé číslo") {
+
 					@Serial
                     private static final long serialVersionUID = -300373818173873640L;
 
@@ -73,6 +74,7 @@ public abstract class RumDialog extends DrinkDialog<RumTO> {
 					protected NumberFormat getFormat(Locale locale) {
 						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
 					}
+
 				}).asRequired(new DoubleRangeValidator("Obsah alkoholu je mimo rozsah (1-100)", 1d, 100d))
 				.bind(RumTO::getAlcohol, RumTO::setAlcohol);
 		alcoholField.setWidth("80px");

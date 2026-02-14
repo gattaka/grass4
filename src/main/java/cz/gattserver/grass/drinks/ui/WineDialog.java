@@ -73,13 +73,15 @@ public abstract class WineDialog extends DrinkDialog<WineTO> {
 		TextField alcoholField = new TextField("Alkohol (%)");
 		binder.forField(alcoholField).withNullRepresentation("")
 				.withConverter(new StringToDoubleConverter(null, "Alkohol (%) musí být celé číslo") {
-					@Serial
+
+                    @Serial
                     private static final long serialVersionUID = -5270872105505337431L;
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
 						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
 					}
+
 				}).bind(WineTO::getAlcohol, WineTO::setAlcohol);
 		layout.add(alcoholField);
 		layout.setColspan(alcoholField, 2);

@@ -156,6 +156,7 @@ public class SongPage extends Div implements BeforeEnterObserver {
         layout.add(chordDiv);
 
         Div callbackDiv = new Div() {
+
             @Serial
             private static final long serialVersionUID = -7346472262736524073L;
 

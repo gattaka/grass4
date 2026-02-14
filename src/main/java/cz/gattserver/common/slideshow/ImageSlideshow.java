@@ -63,6 +63,7 @@ public class ImageSlideshow<T extends SlideshowItem> extends Div {
 
         String jsDivId = "image-slideshow-item-div";
         itemLayout = new Div() {
+
             @Serial
             private static final long serialVersionUID = -604140874889079656L;
 
