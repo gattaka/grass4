@@ -20,6 +20,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.slideshow.ImageSlideshow;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.ui.UploadBuilder;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
@@ -55,9 +56,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Route(value = "photogallery", layout = MainView.class)
-public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamicTitle {
+public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
-    private static final Logger logger = LoggerFactory.getLogger(PGViewer.class);
+    private static final Logger logger = LoggerFactory.getLogger(PGViewerPage.class);
 
     private static final int MAX_PAGE_RADIUS = 2;
     private static final int PAGE_SIZE = 12;
@@ -90,8 +91,8 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
     private String pageURLBase;
     private ComponentFactory componentFactory;
 
-    public PGViewer(PGService pgService, EventBus eventBus, SecurityService securityService,
-                    CoreACLService coreACLService) {
+    public PGViewerPage(PGService pgService, EventBus eventBus, SecurityService securityService,
+                        CoreACLService coreACLService) {
         this.pgService = pgService;
         this.eventBus = eventBus;
         this.securityService = securityService;
@@ -133,14 +134,14 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
         ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
                 e -> UI.getCurrent()
                         .navigate(PGEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(contentNodeTO.getName(), PGViewer.class, parameter));
+                new RouterLink(contentNodeTO.getName(), PGViewerPage.class, parameter));
         add(contentViewer);
 
         Button downloadZip =
                 componentFactory.createZipButton(event -> new ConfirmDialog("Přejete si vytvořit ZIP galerie?", e -> {
                     logger.info("zipPhotogallery thread: {}", Thread.currentThread().threadId());
                     progressIndicatorWindow = new ProgressDialog();
-                    eventBus.subscribe(PGViewer.this);
+                    eventBus.subscribe(PGViewerPage.this);
                     pgService.zipGallery(galleryDir);
                 }).open());
         contentViewer.getOperationsListLayout().add(downloadZip);
@@ -203,18 +204,18 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
         lowerPagingLayout.setPadding(false);
         layout.add(lowerPagingLayout);
 
-        PGUploadBuilder uploadBuilder = new PGUploadBuilder();
+        UploadBuilder uploadBuilder = new UploadBuilder();
         upload = uploadBuilder.createUpload(set -> {
             if (set.isEmpty())
                 return;
-            for (PGUploadBuilder.UploadFile file : set) {
+            for (UploadBuilder.UploadFile file : set) {
                 try {
-                    pgService.uploadFile(new FileInputStream(file.file),file.metadata.fileName(),galleryDir);
+                    pgService.uploadFile(new FileInputStream(file.getFile()),file.getMetadata().fileName(),galleryDir);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
-            eventBus.subscribe(PGViewer.this);
+            eventBus.subscribe(PGViewerPage.this);
             progressIndicatorWindow = new ProgressDialog();
             PhotogalleryPayloadTO payloadTO =
                     new PhotogalleryPayloadTO(photogallery.getContentNode().getName(), galleryDir,
@@ -261,7 +262,7 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
             if (progressIndicatorWindow != null) progressIndicatorWindow.close();
             UI.getCurrent().getPage().reload();
         });
-        eventBus.unsubscribe(PGViewer.this);
+        eventBus.unsubscribe(PGViewerPage.this);
     }
 
     @Handler
@@ -305,7 +306,7 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
                 UIUtils.showWarning(event.getResultDetails());
             }
         });
-        eventBus.unsubscribe(PGViewer.this);
+        eventBus.unsubscribe(PGViewerPage.this);
     }
 
     private void refreshGrid() {
@@ -349,7 +350,7 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
                 itemLayout.add(new Breakline());
 
                 String str = item.getName();
-                if (str.length() > 25) str = str.substring(0, 13) + "..." + str.substring(str.length() - 13);
+                if (str.length() > 20) str = str.substring(0, 13) + "..." + str.substring(str.length() - 13);
                 Span label = new Span(str);
                 label.getStyle().set("font-size", "12px");
                 itemLayout.add(label);
@@ -370,7 +371,7 @@ public class PGViewer extends Div implements HasUrlParameter<String>, HasDynamic
                 if (coreACLService.canModifyContent(photogallery.getContentNode(), securityService.getCurrentUser())) {
                     Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
                         pgService.deleteFile(item.getName(), galleryDir);
-                        eventBus.subscribe(PGViewer.this);
+                        eventBus.subscribe(PGViewerPage.this);
                         progressIndicatorWindow = new ProgressDialog();
                         PhotogalleryPayloadTO payloadTO =
                                 new PhotogalleryPayloadTO(photogallery.getContentNode().getName(), galleryDir,

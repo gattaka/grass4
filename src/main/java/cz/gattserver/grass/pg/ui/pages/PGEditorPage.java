@@ -23,6 +23,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.ui.UploadBuilder;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
@@ -258,13 +259,13 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         deleteBtn.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         buttonLayout.add(deleteBtn);
 
-        PGUploadBuilder pgUploadBuilder = new PGUploadBuilder();
+        UploadBuilder uploadBuilder = new UploadBuilder();
 
         // TODO vyřešit práci s přidáváním a odebíráním neuložených souborů atd.
-        Upload upload = pgUploadBuilder.createUpload(set -> {
-            for (PGUploadBuilder.UploadFile uploadFile : set) {
-                PhotogalleryEditorItemTO itemTO =
-                        new PhotogalleryEditorItemTO(uploadFile.metadata.fileName(), uploadFile.file.toPath());
+        Upload upload = uploadBuilder.createUpload(set -> {
+            for (UploadBuilder.UploadFile uploadFile : set) {
+                PhotogalleryEditorItemTO itemTO = new PhotogalleryEditorItemTO(uploadFile.getMetadata().fileName(),
+                        uploadFile.getFile().toPath());
                 newFiles.add(itemTO);
                 items.add(itemTO);
                 grid.setItems(items);
@@ -275,7 +276,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
                     .collect(Collectors.toSet()));
             files.addAll(newFiles.stream().map(PhotogalleryEditorItemTO::getName).collect(Collectors.toSet()));
             return files;
-        });
+        }, "image/*", "video/*", ".xcf", ".ttf", ".otf");
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         editorLayout.add(upload);
 
@@ -370,7 +371,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      * Zavolá vrácení se na galerii
      */
     private void returnToPhotogallery() {
-        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(PGViewer.class,
+        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(PGViewerPage.class,
                 URLIdentifierUtils.createURLIdentifier(photogallery.getId(), photogallery.getContentNode().getName())));
     }
 

@@ -1,66 +1,78 @@
-package cz.gattserver.grass.pg.ui.pages;
+package cz.gattserver.common.ui;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.server.streams.UploadHandler;
 import com.vaadin.flow.server.streams.UploadMetadata;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
-import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.Serial;
-import java.nio.file.FileAlreadyExistsException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class PGUploadBuilder {
+public class UploadBuilder {
 
-    private static final Logger logger = LoggerFactory.getLogger(PGUploadBuilder.class);
+    private static final Logger logger = LoggerFactory.getLogger(UploadBuilder.class);
 
-    private final Set<String> existingFiles;
+    private final Set<String> refusedFiles;
     private final Set<UploadFile> uploadedFiles;
 
     public static class UploadFile {
-        UploadMetadata metadata;
-        File file;
+        private UploadMetadata metadata;
+        private File file;
 
         public UploadFile(UploadMetadata metadata, File file) {
             this.metadata = metadata;
             this.file = file;
         }
+
+        public UploadMetadata getMetadata() {
+            return metadata;
+        }
+
+        public void setMetadata(UploadMetadata metadata) {
+            this.metadata = metadata;
+        }
+
+        public File getFile() {
+            return file;
+        }
+
+        public void setFile(File file) {
+            this.file = file;
+        }
     }
 
-    public Upload createUpload(Consumer<Set<UploadFile>> onAllUploaded, Supplier<Set<String>> galleryFilesSupplier) {
+    public Upload createUpload(Consumer<Set<UploadFile>> onAllUploaded, Supplier<Set<String>> existingFilesSupplier, String... acceptedFileTypes) {
         Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
-            if (galleryFilesSupplier.get().contains(metadata.fileName())) {
-                existingFiles.add(metadata.fileName());
+            if (existingFilesSupplier.get().contains(metadata.fileName())) {
+                refusedFiles.add(metadata.fileName());
             } else {
                 uploadedFiles.add(new UploadFile(metadata, file));
             }
         }));
-        upload.setAcceptedFileTypes("image/*", "video/*", ".xcf", ".ttf", ".otf");
+        upload.setAcceptedFileTypes(acceptedFileTypes);
         upload.addAllFinishedListener(event -> onDone(onAllUploaded));
         return upload;
     }
 
-    public PGUploadBuilder() {
-        existingFiles = new HashSet<>();
+    public UploadBuilder() {
+        refusedFiles = new HashSet<>();
         uploadedFiles = new HashSet<>();
     }
 
     protected void onDone(Consumer<Set<UploadFile>> onAllUploaded) {
-        if (existingFiles.isEmpty()) {
+        if (refusedFiles.isEmpty()) {
             onAllUploaded.accept(uploadedFiles);
             uploadedFiles.clear();
-            existingFiles.clear();
+            refusedFiles.clear();
         } else {
             WarnDialog warnWindow = new WarnDialog("Následující soubory již existují:") {
 
@@ -71,7 +83,7 @@ public class PGUploadBuilder {
                 protected void createDetails(String details) {
                     HtmlDiv div = new HtmlDiv();
                     String value = "";
-                    for (String existing : existingFiles)
+                    for (String existing : refusedFiles)
                         value += existing + "<br/>";
                     div.setValue(value);
                     addComponent(div);
@@ -82,7 +94,7 @@ public class PGUploadBuilder {
                     super.close();
                     onAllUploaded.accept(uploadedFiles);
                     uploadedFiles.clear();
-                    existingFiles.clear();
+                    refusedFiles.clear();
                 }
             };
             ProgressDialog.runInUI(() -> warnWindow.open(), UI.getCurrent());
