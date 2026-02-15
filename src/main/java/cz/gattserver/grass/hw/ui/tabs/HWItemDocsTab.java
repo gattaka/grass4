@@ -52,7 +52,7 @@ public class HWItemDocsTab extends Div {
     }
 
     private void populateGrid() {
-        grid.setItems(hwService.getHWItemDocumentsFiles(hwItem.getId()));
+        grid.setItems(hwService.findHWItemDocumentsFiles(hwItem.getId()));
         grid.getDataProvider().refreshAll();
     }
 

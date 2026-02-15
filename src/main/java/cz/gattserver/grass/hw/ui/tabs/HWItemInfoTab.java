@@ -22,7 +22,6 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.hw.ui.HWItemsGrid;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -200,7 +199,7 @@ public class HWItemInfoTab extends Div {
         grid.addColumn(hw -> hw.getState() == null ? "" : hw.getState().getName()).setHeader("Stav").setWidth("110px")
                 .setFlexGrow(0);
 
-        grid.setItems(hwService.getAllParts(hwItem.getId()));
+        grid.setItems(hwService.findAllParts(hwItem.getId()));
         itemDetailsLayout.add(grid);
 
         H3 descrptionHeader = new H3("Popis");
@@ -220,7 +219,7 @@ public class HWItemInfoTab extends Div {
             final Button fixBtn = componentFactory.createEditButton(e -> {
                 ReferenceHolder<Boolean> isSavedHolder = new ReferenceHolder<>();
                 isSavedHolder.setValue(false);
-                HWItemDialog dialog = new HWItemDialog(hwService.getHWItem(hwItem.getId()), to -> {
+                HWItemDialog dialog = new HWItemDialog(hwService.findHWItem(hwItem.getId()), to -> {
                     hwService.saveHWItem(to);
                     isSavedHolder.setValue(true);
                 });
@@ -254,7 +253,7 @@ public class HWItemInfoTab extends Div {
      */
     private boolean tryCreateHWImage(final HWItemTO hwItem) {
         InputStream iconIs;
-        iconIs = hwService.getHWItemIconMiniFileInputStream(hwItem.getId());
+        iconIs = hwService.findHWItemIconMiniFileInputStream(hwItem.getId());
         if (iconIs == null) return false;
 
         hwImageLayout.removeAll();

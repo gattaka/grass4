@@ -77,7 +77,7 @@ public class HWServiceImplTest extends DBCleanTest {
 	}
 
 	@Test
-	public void getHWItemImagesFiles() throws IOException {
+	public void findHWItemImagesFiles() throws IOException {
 		prepareFS(fileSystemService.getFileSystem()).resolve("123456");
 
 		HWItemTO itemTO = new HWItemTO();
@@ -86,21 +86,21 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwService.saveImagesFile(this.getClass().getResourceAsStream("large.jpg"), "testImage1.jpg", itemTO);
 		hwService.saveImagesFile(this.getClass().getResourceAsStream("large.jpg"), "testImage2.jpg", itemTO);
 
-		List<HWItemFileTO> files = hwService.getHWItemImagesMiniFiles(itemTO.getId());
+		List<HWItemFileTO> files = hwService.findHWItemImagesMiniFiles(itemTO.getId());
 		assertEquals(2, files.size());
 		assertEquals("testImage1.jpg", files.get(0).getName());
 		assertEquals("testImage2.jpg", files.get(1).getName());
 	}
 
 	@Test
-	public void getHWItemImagesFileInputStream() throws IOException {
+	public void findHWItemImagesFileInputStream() throws IOException {
 		prepareFS(fileSystemService.getFileSystem()).resolve("123456");
 
 		HWItemTO itemTO = new HWItemTO();
 		itemTO.setId(123456L);
 		hwService.saveImagesFile(this.getClass().getResourceAsStream("large.jpg"), "testImage.jpg", itemTO);
 
-		InputStream is = hwService.getHWItemImagesMiniFileInputStream(itemTO.getId(), "testImage.jpg");
+		InputStream is = hwService.findHWItemImagesMiniFileInputStream(itemTO.getId(), "testImage.jpg");
 		assertTrue(ImageComparator.isEqualAsFiles(this.getClass().getResourceAsStream("mini.jpg"), is));
 	}
 
@@ -143,7 +143,7 @@ public class HWServiceImplTest extends DBCleanTest {
 	}
 
 	@Test
-	public void getHWItemDocumentsFiles() throws IOException {
+	public void findHWItemDocumentsFiles() throws IOException {
 		prepareFS(fileSystemService.getFileSystem()).resolve("123456");
 
 		HWItemTO itemTO = new HWItemTO();
@@ -152,21 +152,21 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwService.saveDocumentsFile(this.getClass().getResourceAsStream("large.jpg"), "testDoc1.jpg", itemTO.getId());
 		hwService.saveDocumentsFile(this.getClass().getResourceAsStream("large.jpg"), "testDoc2.jpg", itemTO.getId());
 
-		List<HWItemFileTO> files = hwService.getHWItemDocumentsFiles(itemTO.getId());
+		List<HWItemFileTO> files = hwService.findHWItemDocumentsFiles(itemTO.getId());
 		assertEquals(2, files.size());
 		assertEquals("testDoc1.jpg", files.get(0).getName());
 		assertEquals("testDoc2.jpg", files.get(1).getName());
 	}
 
 	@Test
-	public void getHWItemDocumentsFileInputStream() throws IOException {
+	public void findHWItemDocumentsFileInputStream() throws IOException {
 		prepareFS(fileSystemService.getFileSystem()).resolve("123456");
 
 		HWItemTO itemTO = new HWItemTO();
 		itemTO.setId(123456L);
 		hwService.saveDocumentsFile(this.getClass().getResourceAsStream("large.jpg"), "testDoc.jpg", itemTO.getId());
 
-		InputStream is = hwService.getHWItemDocumentsFileInputStream(itemTO.getId(), "testDoc.jpg");
+		InputStream is = hwService.findHWItemDocumentsFileInputStream(itemTO.getId(), "testDoc.jpg");
 		assertTrue(ImageComparator.isEqualAsFiles(this.getClass().getResourceAsStream("large.jpg"), is));
 	}
 
@@ -210,7 +210,7 @@ public class HWServiceImplTest extends DBCleanTest {
 	}
 
 	@Test
-	public void getHWItemIconFileInputStream() throws IOException {
+	public void findHWItemIconFileInputStream() throws IOException {
 		Path hwDir = prepareFS(fileSystemService.getFileSystem()).resolve("123456");
 		Files.createDirectories(hwDir);
 
@@ -219,7 +219,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwService.createHWItemIcon(this.getClass().getResourceAsStream("large.jpg"), "testIcon.jpg",
 				itemTO.getId());
 
-		InputStream is = hwService.getHWItemIconFileInputStream(itemTO.getId());
+		InputStream is = hwService.findHWItemIconFileInputStream(itemTO.getId());
 		assertTrue(ImageComparator.isEqualAsFiles(this.getClass().getResourceAsStream("large.jpg"), is));
 	}
 
@@ -252,12 +252,12 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwTypeTO.setName("myš");
 		Long id = hwService.saveHWType(hwTypeTO);
 
-		hwTypeTO = hwService.getHWType(id);
+		hwTypeTO = hwService.findHWType(id);
 		assertEquals("myš", hwTypeTO.getName());
 	}
 
 	@Test
-	public void getAllHWTypes() {
+	public void findAllHWTypes() {
 		HWTypeTO hwTypeTO = new HWTypeTO();
 		hwTypeTO.setName("myš");
 		hwService.saveHWType(hwTypeTO);
@@ -266,7 +266,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwTypeTO.setName("notebook");
 		hwService.saveHWType(hwTypeTO);
 
-		Set<HWTypeBasicTO> types = hwService.getAllHWTypes();
+		Set<HWTypeBasicTO> types = hwService.findAllHWTypes();
 
 		assertEquals(2, types.size());
 		Iterator<HWTypeBasicTO> it = types.iterator();
@@ -284,12 +284,12 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwTypeTO.setName("notebook");
 		hwService.saveHWType(hwTypeTO);
 
-		Set<HWTypeBasicTO> types = hwService.getAllHWTypes();
+		Set<HWTypeBasicTO> types = hwService.findAllHWTypes();
 		assertEquals(2, types.size());
 
 		hwService.deleteHWType(id);
 
-		types = hwService.getAllHWTypes();
+		types = hwService.findAllHWTypes();
 		assertEquals(1, types.size());
 		assertEquals("notebook", types.iterator().next().getName());
 	}
@@ -318,7 +318,7 @@ public class HWServiceImplTest extends DBCleanTest {
 
 		Long id = hwService.saveHWItem(itemTO);
 
-		HWItemTO savedItemTO = hwService.getHWItem(id);
+		HWItemTO savedItemTO = hwService.findHWItem(id);
 
 		assertEquals("test Name", savedItemTO.getName());
 		assertEquals("test description", savedItemTO.getDescription());
@@ -364,7 +364,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		Set<HWTypeBasicTO> types2 = new HashSet<>();
 		types2.add(new HWTypeBasicTO("RAM"));
 
-		List<HWItemOverviewTO> list = hwService.getAllHWItems();
+		List<HWItemOverviewTO> list = hwService.findAllHWItems();
 
 		assertEquals(1, list.size());
 		assertEquals(id, list.get(0).getId());
@@ -376,7 +376,7 @@ public class HWServiceImplTest extends DBCleanTest {
 
 		Long id2 = hwService.saveHWItem(itemTO2);
 
-		HWItemTO savedItemTO2 = hwService.getHWItem(id2);
+		HWItemTO savedItemTO2 = hwService.findHWItem(id2);
 
 		assertEquals("test komponenta", savedItemTO2.getName());
 		assertEquals("test description 2", savedItemTO2.getDescription());
@@ -393,26 +393,26 @@ public class HWServiceImplTest extends DBCleanTest {
 		assertEquals(2, hwService.countHWItems(new HWFilterTO()));
 		assertEquals(1, hwService.countHWItems(new HWFilterTO().setUsedInName("test Name")));
 
-		List<HWItemOverviewTO> items = hwService.getAllHWItems();
+		List<HWItemOverviewTO> items = hwService.findAllHWItems();
 		assertEquals(2, items.size());
 		assertEquals(id, items.get(0).getId());
 		assertEquals(id2, items.get(1).getId());
 
-		items = hwService.getAllParts(id);
+		items = hwService.findAllParts(id);
 		assertEquals(1, items.size());
 		assertEquals(id2, items.get(0).getId());
 
-		items = hwService.getHWItemsAvailableForPart(id);
+		items = hwService.findHWItemsAvailableForPart(id);
 		assertEquals(1, items.size());
 		assertEquals(id2, items.get(0).getId());
 
-		items = hwService.getHWItemsAvailableForPart(id2);
+		items = hwService.findHWItemsAvailableForPart(id2);
 		assertEquals(1, items.size());
 		assertEquals(id, items.get(0).getId());
 
 		hwService.deleteHWItem(id);
 
-		items = hwService.getAllHWItems();
+		items = hwService.findAllHWItems();
 		assertEquals(1, items.size());
 		assertEquals(id2, items.get(0).getId());
 	}

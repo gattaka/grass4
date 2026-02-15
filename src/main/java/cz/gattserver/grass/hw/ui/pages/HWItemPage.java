@@ -53,7 +53,7 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
 
     @Override
     public void setParameter(BeforeEvent event, Long parameter) {
-        hwItem = hwService.getHWItem(parameter);
+        hwItem = hwService.findHWItem(parameter);
 
         if (Boolean.TRUE != hwItem.getPublicItem() &&
                 !SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
@@ -124,7 +124,7 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
     }
 
     public HWItemTO refreshItem() {
-        hwItem = getHWService().getHWItem(hwItem.getId());
+        hwItem = getHWService().findHWItem(hwItem.getId());
         refreshTabLabels();
         switchToTab(tabs.getSelectedIndex());
         if (onRefreshListener != null) onRefreshListener.accept(hwItem);
@@ -143,15 +143,15 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
     }
 
     private String createPhotosTabLabel() {
-        return "Fotografie (" + getHWService().getHWItemImagesMiniFilesCount(hwItem.getId()) + ")";
+        return "Fotografie (" + getHWService().findHWItemImagesMiniFilesCount(hwItem.getId()) + ")";
     }
 
     private String createPrint3dTabLabel() {
-        return "3D Modely (" + getHWService().getHWItemPrint3dFilesCount(hwItem.getId()) + ")";
+        return "3D Modely (" + getHWService().findHWItemPrint3dFilesCount(hwItem.getId()) + ")";
     }
 
     private String createDocsTabLabel() {
-        return "Dokumentace (" + getHWService().getHWItemDocumentsFilesCount(hwItem.getId()) + ")";
+        return "Dokumentace (" + getHWService().findHWItemDocumentsFilesCount(hwItem.getId()) + ")";
     }
 
     private HWService getHWService() {

@@ -14,8 +14,6 @@ public interface HWItemRepositoryCustom {
 
     HWItemTO findByIdAndMapForDetail(Long id);
 
-    HWItemOverviewTO findByIdAndMap(Long id);
-
     List<HWItemOverviewTO> findAndMap(HWFilterTO filter, Integer offset, Integer limit, OrderSpecifier<?>[] order);
 
     List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order);

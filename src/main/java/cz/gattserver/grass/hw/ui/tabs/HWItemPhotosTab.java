@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
@@ -31,7 +30,6 @@ import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class HWItemPhotosTab extends Div {
@@ -91,7 +89,7 @@ public class HWItemPhotosTab extends Div {
         gridLayout.addClassName("hw-photos-div");
         containerDiv.add(gridLayout);
 
-        List<HWItemFileTO> images = hwService.getHWItemImagesMiniFiles(hwItem.getId());
+        List<HWItemFileTO> images = hwService.findHWItemImagesMiniFiles(hwItem.getId());
         for (int i = 0; i < images.size(); i++) {
 
             HWItemFileTO item = images.get(i);
@@ -101,7 +99,7 @@ public class HWItemPhotosTab extends Div {
             gridLayout.add(itemDiv);
 
             Image img = new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(
-                    hwService.getHWItemImagesMiniFileInputStream(hwItem.getId(), item.getName()), item.getName(),
+                    hwService.findHWItemImagesMiniFileInputStream(hwItem.getId(), item.getName()), item.getName(),
                     null, -1)), item.getName());
             itemDiv.add(img);
 

@@ -3,7 +3,6 @@ package cz.gattserver.grass.hw.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -20,13 +19,13 @@ public interface HWService {
 
     void saveImagesFile(InputStream in, String fileName, HWItemTO item) throws IOException;
 
-    List<HWItemFileTO> getHWItemImagesMiniFiles(Long id);
+    List<HWItemFileTO> findHWItemImagesMiniFiles(Long id);
 
-    long getHWItemImagesMiniFilesCount(Long id);
+    long findHWItemImagesMiniFilesCount(Long id);
 
-    Path getHWItemImagesFilePath(Long id, String name);
+    Path findHWItemImagesFilePath(Long id, String name);
 
-    InputStream getHWItemImagesMiniFileInputStream(Long id, String name);
+    InputStream findHWItemImagesMiniFileInputStream(Long id, String name);
 
     boolean deleteHWItemImagesFile(Long id, String name);
 
@@ -38,13 +37,11 @@ public interface HWService {
 
     void savePrint3dFile(InputStream in, String fileName, Long id) throws IOException;
 
-    List<HWItemFileTO> getHWItemPrint3dFiles(Long id);
+    List<HWItemFileTO> findHWItemPrint3dFiles(Long id);
 
-    long getHWItemPrint3dFilesCount(Long id);
+    long findHWItemPrint3dFilesCount(Long id);
 
-    Path getHWItemPrint3dFilePath(Long id, String name);
-
-    InputStream getHWItemPrint3dFileInputStream(Long id, String name);
+    Path findHWItemPrint3dFilePath(Long id, String name);
 
     boolean deleteHWItemPrint3dFile(Long id, String name);
 
@@ -54,13 +51,13 @@ public interface HWService {
 
     void saveDocumentsFile(InputStream in, String fileName, Long id) throws IOException;
 
-    List<HWItemFileTO> getHWItemDocumentsFiles(Long id);
+    List<HWItemFileTO> findHWItemDocumentsFiles(Long id);
 
-    long getHWItemDocumentsFilesCount(Long id);
+    long findHWItemDocumentsFilesCount(Long id);
 
-    Path getHWItemDocumentsFilePath(Long id, String name);
+    Path findHWItemDocumentsFilePath(Long id, String name);
 
-    InputStream getHWItemDocumentsFileInputStream(Long id, String name);
+    InputStream findHWItemDocumentsFileInputStream(Long id, String name);
 
     boolean deleteHWItemDocumentsFile(Long id, String name);
 
@@ -70,13 +67,13 @@ public interface HWService {
 
     void createHWItemIcon(InputStream inputStream, String fileName, Long id);
 
-    Path getHWItemIconFile(Long id) throws IOException;
+    Path findHWItemIconFile(Long id) throws IOException;
 
-    Path getHWItemIconMiniFile(Long id) throws IOException;
+    Path findHWItemIconMiniFile(Long id) throws IOException;
 
-    InputStream getHWItemIconFileInputStream(Long id);
+    InputStream findHWItemIconFileInputStream(Long id);
 
-    InputStream getHWItemIconMiniFileInputStream(Long id);
+    InputStream findHWItemIconMiniFileInputStream(Long id);
 
     boolean deleteHWItemIconFile(Long id);
 
@@ -92,13 +89,13 @@ public interface HWService {
      */
     Long saveHWType(HWTypeTO hwTypeTO);
 
-    Set<HWTypeBasicTO> getAllHWTypes();
+    Set<HWTypeBasicTO> findAllHWTypes();
 
-    HWTypeTO getHWType(Long fixTypeId);
+    HWTypeTO findHWType(Long id);
 
-    List<Long> getHWTypeIds(HWTypeTO filterTO, OrderSpecifier<?>[] order);
+    List<Long> findHWTypeIds(HWTypeTO filterTO, OrderSpecifier<?>[] order);
 
-    List<HWTypeTO> getHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
+    List<HWTypeTO> findHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
 
     int countHWTypes(HWTypeTO filter);
 
@@ -119,17 +116,15 @@ public interface HWService {
 
     int countHWItems(HWFilterTO filter);
 
-    List<HWItemOverviewTO> getAllHWItems();
+    List<HWItemOverviewTO> findAllHWItems();
 
-    List<HWItemOverviewTO> getHWItems(HWFilterTO filter, int offset, int limit, OrderSpecifier<?>[] order);
+    List<HWItemOverviewTO> findHWItems(HWFilterTO filter, int offset, int limit, OrderSpecifier<?>[] order);
 
-    List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order);
+    List<Long> findHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order);
 
-    HWItemTO getHWItem(Long itemId);
+    HWItemTO findHWItem(Long itemId);
 
-    HWItemOverviewTO getHWOverviewItem(Long itemId);
-
-    List<HWItemOverviewTO> getAllParts(Long usedInItemId);
+    List<HWItemOverviewTO> findAllParts(Long usedInItemId);
 
     /**
      * Získá všechny předměty, kromě předmětu jehož id je předáno jako parametr
@@ -137,7 +132,7 @@ public interface HWService {
      * @param itemId id předmětu, který má být vyloučen z přehledu
      * @return HW předměty
      */
-    List<HWItemOverviewTO> getHWItemsAvailableForPart(Long itemId);
+    List<HWItemOverviewTO> findHWItemsAvailableForPart(Long itemId);
 
     void deleteHWItem(Long id);
 

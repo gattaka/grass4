@@ -65,13 +65,6 @@ public class HWItemRepositoryCustomImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public HWItemOverviewTO findByIdAndMap(Long id) {
-        return from(h).leftJoin(u).on(u.id.eq(h.usedInId)).where(h.id.eq(id))
-                .select(new QHWItemOverviewTO(h.id, h.name, h.state, u.name, h.supervizedFor, h.price, h.purchaseDate,
-                        h.publicItem)).fetchOne();
-    }
-
-    @Override
     public List<HWItemOverviewTO> findAndMap(HWFilterTO filter, Integer offset, Integer limit,
                                              OrderSpecifier<?>[] order) {
         JPQLQuery<HWItemOverviewTO> query = from(h).leftJoin(u).on(h.usedInId.eq(u.id))

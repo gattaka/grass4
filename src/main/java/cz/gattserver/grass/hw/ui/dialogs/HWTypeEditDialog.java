@@ -1,10 +1,11 @@
 package cz.gattserver.grass.hw.ui.dialogs;
 
 import com.vaadin.flow.component.Key;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 
+import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
@@ -26,35 +27,34 @@ public class HWTypeEditDialog extends EditWebDialog {
     }
 
     private HWTypeEditDialog(HWTypeTO originalTO, Consumer<HWTypeTO> onSave, boolean readOnly) {
-        super("Typ");
+        super("Typ", readOnly);
 
-		HWTypeTO formTO = originalTO == null ? new HWTypeTO() :  originalTO.copy();
-		formTO.setName("");
-		Binder<HWTypeTO> binder = new Binder<>(HWTypeTO.class);
-		binder.setBean(formTO);
+        setWidth(300, Unit.PIXELS);
 
-		final TextField nameField = new TextField();
-		nameField.setPlaceholder("Typ HW");
-		nameField.setWidthFull();
-		binder.forField(nameField).asRequired().bind(HWTypeTO::getName, HWTypeTO::setName);
+        HWTypeTO formTO = originalTO == null ? new HWTypeTO() : originalTO.copy();
+        Binder<HWTypeTO> binder = new Binder<>(HWTypeTO.class);
+        binder.setBean(formTO);
 
-		add(nameField);
+        final TextField nameField = new TextField();
+        nameField.setPlaceholder("Typ HW");
+        nameField.setWidthFull();
+        nameField.setReadOnly(readOnly);
+        binder.forField(nameField).asRequired(componentFactory.createRequiredLabel()).bind(HWTypeTO::getName, HWTypeTO::setName);
 
-		HorizontalLayout buttons = componentFactory.createDialogSubmitOrStornoLayout(e -> {
-			try {
-				binder.writeBean(formTO);
+        add(nameField);
+
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
+            try {
+                binder.writeBean(formTO);
                 onSave.accept(formTO);
-				close();
-			} catch (Exception ex) {
-				new ErrorDialog("Uložení se nezdařilo").open();
-			}
-		}, e -> close(), saveButton -> saveButton.addClickShortcut(Key.ENTER));
-		buttons.setMinWidth("200px");
-		add(buttons);
+                close();
+            } catch (ValidationException ex) {
+                // UI
+            }
+        }, e -> close(), saveButton -> saveButton.addClickShortcut(Key.ENTER)));
 
-		if (formTO != null)
-			binder.readBean(formTO);
+        if (formTO != null) binder.readBean(formTO);
 
-		nameField.focus();
-	}
+        nameField.focus();
+    }
 }

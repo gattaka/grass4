@@ -5,7 +5,6 @@ import java.util.*;
 import java.util.function.Consumer;
 
 import com.querydsl.core.types.OrderSpecifier;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.DetachEvent;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.combobox.ComboBox;
@@ -13,20 +12,15 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationException;
-import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.TokenField2;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.*;
@@ -184,7 +178,7 @@ public class HWItemsGrid extends Div {
 
         // Filtr na typy HW není veřejný, aby nenapovídal, co vše host nevidí
         if (securityFacade.getCurrentUser().isAdmin()) {
-            for (HWTypeBasicTO type : hwService.getAllHWTypes())
+            for (HWTypeBasicTO type : hwService.findAllHWTypes())
                 tokenMap.put(type.getName(), type);
 
             hwTypesFilter = new TokenField2(null, tokenMap.keySet());
@@ -252,7 +246,7 @@ public class HWItemsGrid extends Div {
 
     @ClientCallable
     private void imgShowCallback(Long id, double x, double y) {
-        InputStream iconIs = hwService.getHWItemIconMiniFileInputStream(id);
+        InputStream iconIs = hwService.findHWItemIconMiniFileInputStream(id);
         if (iconIs == null) return;
         iconDiv.removeAll();
         iconDiv.setVisible(true);
@@ -286,11 +280,11 @@ public class HWItemsGrid extends Div {
 
                 // potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
                 // jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
-                List<Long> ids = hwService.getHWItemIds(binder.getBean(), order);
+                List<Long> ids = hwService.findHWItemIds(binder.getBean(), order);
                 int index = 0;
                 for (Long id : ids)
                     indexMap.put(id, index++);
-                return hwService.getHWItems(binder.getBean(), q.getOffset(), q.getLimit(), order).stream();
+                return hwService.findHWItems(binder.getBean(), q.getOffset(), q.getLimit(), order).stream();
             };
             CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback =
                     q -> hwService.countHWItems(binder.getBean());

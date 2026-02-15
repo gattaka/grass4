@@ -56,7 +56,7 @@ public class HWItemPrint3dTab extends Div {
     }
 
     private void populateGrid() {
-        grid.setItems(hwService.getHWItemPrint3dFiles(hwItem.getId()));
+        grid.setItems(hwService.findHWItemPrint3dFiles(hwItem.getId()));
         grid.getDataProvider().refreshAll();
     }
 

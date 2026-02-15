@@ -16,6 +16,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
+import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
@@ -51,6 +52,8 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
     public HWTypesPage(HWService hwService, SecurityService securityService) {
         this.hwService = hwService;
         this.securityService = securityService;
+
+        if (!securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
     }
 
     @Override
@@ -126,7 +129,7 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
         /**
          * Úprava typu
          */
-        buttonLayout.add(componentFactory.createEditGridButton(item -> openEditDialog(item), grid));
+        buttonLayout.add(componentFactory.createEditGridButton(item -> openEditDialog(item.getId()), grid));
 
         /**
          * Smazání typu
@@ -186,11 +189,11 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
 
             // potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
             // jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
-            List<Long> ids = hwService.getHWTypeIds(filterTO, order);
+            List<Long> ids = hwService.findHWTypeIds(filterTO, order);
             int index = 0;
             for (Long id : ids)
                 indexMap.put(id, index++);
-            return hwService.getHWTypes(filterTO, q.getOffset(), q.getLimit(), order).stream();
+            return hwService.findHWTypes(filterTO, q.getOffset(), q.getLimit(), order).stream();
         };
         CallbackDataProvider.CountCallback<HWTypeTO, HWTypeTO> countCallback = q -> hwService.countHWTypes(filterTO);
         grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
@@ -204,8 +207,8 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
         }).open();
     }
 
-    private void openEditDialog(HWTypeTO hwItemTypeTO) {
-        HWTypeEditDialog.edit(hwItemTypeTO, to -> {
+    private void openEditDialog(Long id) {
+        HWTypeEditDialog.edit(hwService.findHWType(id), to -> {
             hwService.saveHWType(to);
             grid.getDataProvider().refreshItem(to);
             populate();

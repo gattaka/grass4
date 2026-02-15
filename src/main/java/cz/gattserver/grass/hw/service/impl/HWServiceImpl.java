@@ -21,10 +21,8 @@ import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.hw.interfaces.*;
 import cz.gattserver.grass.hw.model.*;
-import cz.gattserver.grass.medic.domain.MedicalRecordMedicament;
 import cz.gattserver.grass.pg.util.PGUtils;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -183,7 +181,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public List<HWItemFileTO> getHWItemImagesMiniFiles(Long id) {
+    public List<HWItemFileTO> findHWItemImagesMiniFiles(Long id) {
         Path imagesPath;
         try {
             imagesPath = getHWItemImagesMiniPath(id);
@@ -198,7 +196,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public long getHWItemImagesMiniFilesCount(Long id) {
+    public long findHWItemImagesMiniFilesCount(Long id) {
         Path imagesPath;
         try {
             imagesPath = getHWItemImagesMiniPath(id);
@@ -211,7 +209,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public Path getHWItemImagesFilePath(Long id, String name) {
+    public Path findHWItemImagesFilePath(Long id, String name) {
         try {
             Path images = getHWItemImagesPath(id);
             Path image = images.resolve(name);
@@ -223,7 +221,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public InputStream getHWItemImagesMiniFileInputStream(Long id, String name) {
+    public InputStream findHWItemImagesMiniFileInputStream(Long id, String name) {
         try {
             Path images = getHWItemImagesMiniPath(id);
             Path image = images.resolve(name);
@@ -258,7 +256,7 @@ public class HWServiceImpl implements HWService {
         for (Long id : ids) {
             // icon
             try {
-                Path iconPath = getHWItemIconFile(id);
+                Path iconPath = findHWItemIconFile(id);
                 if (iconPath != null) {
                     Path iconMiniPath = iconPath.getParent()
                             .resolve(iconPath.getFileName().toString().replace("icon", "icon_mini"));
@@ -309,7 +307,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public List<HWItemFileTO> getHWItemPrint3dFiles(Long id) {
+    public List<HWItemFileTO> findHWItemPrint3dFiles(Long id) {
         Path modelsPath;
         try {
             modelsPath = getHWItemPrint3dPath(id);
@@ -324,7 +322,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public long getHWItemPrint3dFilesCount(Long id) {
+    public long findHWItemPrint3dFilesCount(Long id) {
         Path modelsPath;
         try {
             modelsPath = getHWItemPrint3dPath(id);
@@ -337,22 +335,13 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public Path getHWItemPrint3dFilePath(Long id, String name) {
+    public Path findHWItemPrint3dFilePath(Long id, String name) {
         Path models;
         try {
             models = getHWItemPrint3dPath(id);
             Path model = models.resolve(name);
             if (!model.normalize().startsWith(models)) throw new IllegalArgumentException(ILLEGAL_PATH_PRINT_3D_ERR);
             return model;
-        } catch (IOException e) {
-            throw new GrassException("Nezdařilo se získat soubor 3d modelu HW položky", e);
-        }
-    }
-
-    @Override
-    public InputStream getHWItemPrint3dFileInputStream(Long id, String name) {
-        try {
-            return Files.newInputStream(getHWItemPrint3dFilePath(id, name));
         } catch (IOException e) {
             throw new GrassException("Nezdařilo se získat soubor 3d modelu HW položky", e);
         }
@@ -385,7 +374,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public List<HWItemFileTO> getHWItemDocumentsFiles(Long id) {
+    public List<HWItemFileTO> findHWItemDocumentsFiles(Long id) {
         Path docsPath;
         try {
             docsPath = getHWItemDocumentsPath(id);
@@ -400,7 +389,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public long getHWItemDocumentsFilesCount(Long id) {
+    public long findHWItemDocumentsFilesCount(Long id) {
         Path docsPath;
         try {
             docsPath = getHWItemDocumentsPath(id);
@@ -413,7 +402,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public Path getHWItemDocumentsFilePath(Long id, String name) {
+    public Path findHWItemDocumentsFilePath(Long id, String name) {
         Path docs;
         try {
             docs = getHWItemDocumentsPath(id);
@@ -426,9 +415,9 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public InputStream getHWItemDocumentsFileInputStream(Long id, String name) {
+    public InputStream findHWItemDocumentsFileInputStream(Long id, String name) {
         try {
-            return Files.newInputStream(getHWItemDocumentsFilePath(id, name));
+            return Files.newInputStream(findHWItemDocumentsFilePath(id, name));
         } catch (IOException e) {
             throw new GrassException("Nezdařilo se získat soubor dokumentace HW položky", e);
         }
@@ -482,19 +471,19 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public Path getHWItemIconFile(Long id) throws IOException {
+    public Path findHWItemIconFile(Long id) throws IOException {
         return getHWItemIconFile(id, false);
     }
 
     @Override
-    public Path getHWItemIconMiniFile(Long id) throws IOException {
+    public Path findHWItemIconMiniFile(Long id) throws IOException {
         return getHWItemIconFile(id, true);
     }
 
     @Override
-    public InputStream getHWItemIconFileInputStream(Long id) {
+    public InputStream findHWItemIconFileInputStream(Long id) {
         try {
-            Path path = getHWItemIconFile(id);
+            Path path = findHWItemIconFile(id);
             return path != null ? Files.newInputStream(path) : null;
         } catch (IOException e) {
             throw new GrassException("Nezdařilo se získat ikonu HW položky.", e);
@@ -502,9 +491,9 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public InputStream getHWItemIconMiniFileInputStream(Long id) {
+    public InputStream findHWItemIconMiniFileInputStream(Long id) {
         try {
-            Path path = getHWItemIconMiniFile(id);
+            Path path = findHWItemIconMiniFile(id);
             return path != null ? Files.newInputStream(path) : null;
         } catch (IOException e) {
             throw new GrassException("Nezdařilo se získat ikonu HW položky.", e);
@@ -514,10 +503,10 @@ public class HWServiceImpl implements HWService {
     @Override
     public boolean deleteHWItemIconFile(Long id) {
         try {
-            Path image = getHWItemIconFile(id);
+            Path image = findHWItemIconFile(id);
             if (image != null) return Files.deleteIfExists(image);
 
-            Path imageMini = getHWItemIconMiniFile(id);
+            Path imageMini = findHWItemIconMiniFile(id);
             if (imageMini != null) return Files.deleteIfExists(imageMini);
             return false;
         } catch (IOException e) {
@@ -537,12 +526,12 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public Set<HWTypeBasicTO> getAllHWTypes() {
+    public Set<HWTypeBasicTO> findAllHWTypes() {
         return hwTypeRepository.findOrderByName();
     }
 
     @Override
-    public HWTypeTO getHWType(Long id) {
+    public HWTypeTO findHWType(Long id) {
         return hwTypeRepository.findByIdAndMap(id);
     }
 
@@ -553,12 +542,12 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public List<Long> getHWTypeIds(HWTypeTO filterTO, OrderSpecifier<?>[] order) {
+    public List<Long> findHWTypeIds(HWTypeTO filterTO, OrderSpecifier<?>[] order) {
         return hwTypeRepository.findHWTypeIds(filterTO, order);
     }
 
     @Override
-    public List<HWTypeTO> getHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
+    public List<HWTypeTO> findHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
         return hwTypeRepository.getHWTypes(filter, offset, limit, order);
     }
 
@@ -573,7 +562,7 @@ public class HWServiceImpl implements HWService {
 
     @Override
     public Long copyHWItem(Long origId) {
-        HWItemTO item = getHWItem(origId);
+        HWItemTO item = findHWItem(origId);
         // jde o novou položku, takže prázdné id, žádné záznamy
         item.setId(null);
         item.setItemRecords(null);
@@ -699,22 +688,22 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public List<HWItemOverviewTO> getAllHWItems() {
+    public List<HWItemOverviewTO> findAllHWItems() {
         return hwItemRepository.findAndMap(null, null, null, null);
     }
 
     @Override
-    public List<HWItemOverviewTO> getHWItems(HWFilterTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
+    public List<HWItemOverviewTO> findHWItems(HWFilterTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
         return hwItemRepository.findAndMap(filter, offset, limit, order);
     }
 
     @Override
-    public List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order) {
+    public List<Long> findHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order) {
         return hwItemRepository.getHWItemIds(filter, order);
     }
 
     @Override
-    public HWItemTO getHWItem(Long itemId) {
+    public HWItemTO findHWItem(Long itemId) {
         HWItemTO to = hwItemRepository.findByIdAndMapForDetail(itemId);
         to.setItemRecords(hwItemRecordRepository.findByItemId(itemId));
         to.setTypes(hwTypeRepository.findByItemId(itemId));
@@ -722,19 +711,14 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public HWItemOverviewTO getHWOverviewItem(Long itemId) {
-        return hwItemRepository.findByIdAndMap(itemId);
-    }
-
-    @Override
-    public List<HWItemOverviewTO> getAllParts(Long usedInItemId) {
+    public List<HWItemOverviewTO> findAllParts(Long usedInItemId) {
         HWFilterTO filter = new HWFilterTO();
         filter.setUsedInId(usedInItemId);
         return hwItemRepository.findAndMap(filter, null, null, null);
     }
 
     @Override
-    public List<HWItemOverviewTO> getHWItemsAvailableForPart(Long itemId) {
+    public List<HWItemOverviewTO> findHWItemsAvailableForPart(Long itemId) {
         HWFilterTO filter = new HWFilterTO();
         filter.setIgnoreId(itemId);
         return hwItemRepository.findAndMap(filter, null, null, null);

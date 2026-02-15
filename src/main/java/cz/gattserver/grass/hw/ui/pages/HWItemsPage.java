@@ -4,7 +4,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.router.internal.HasUrlParameterFormat;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -91,8 +90,8 @@ public class HWItemsPage extends Div implements HasUrlParameter<String> {
 
     private void onEdit(HWItemOverviewTO hwItemOverviewTO) {
         HWItemTO hwItem = null;
-        if (hwItemOverviewTO != null) hwItem = hwService.getHWItem(hwItemOverviewTO.getId());
-        new HWItemDialog(hwItem == null ? null : hwService.getHWItem(hwItem.getId()), to -> {
+        if (hwItemOverviewTO != null) hwItem = hwService.findHWItem(hwItemOverviewTO.getId());
+        new HWItemDialog(hwItem == null ? null : hwService.findHWItem(hwItem.getId()), to -> {
             to.setId(hwService.saveHWItem(to));
             populate();
             HWItemOverviewTO filterTO = new HWItemOverviewTO();

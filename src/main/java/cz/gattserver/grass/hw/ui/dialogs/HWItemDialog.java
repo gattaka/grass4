@@ -9,22 +9,18 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-import com.vaadin.flow.component.Key;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.ui.util.TokenField2;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.converter.StringToIntegerConverter;
 
@@ -130,7 +126,7 @@ public class HWItemDialog extends EditWebDialog {
         descriptionArea.setMinHeight(300, Unit.PIXELS);
 
         Map<String, HWTypeBasicTO> typeNameMap = new HashMap<>();
-        for (HWTypeBasicTO to : hwService.getAllHWTypes())
+        for (HWTypeBasicTO to : hwService.findAllHWTypes())
             typeNameMap.put(to.getName(), to);
 
         TokenField2 tokenField = new TokenField2("Klíčová slova", typeNameMap.keySet());

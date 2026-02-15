@@ -35,16 +35,16 @@ public class HWRequestHandler extends AbstractConfiguratedPathRequestHandler {
 		String type = chunks[2];
 		String name = chunks[3];
 		if ("print3d".equals(type))
-			return hwService.getHWItemPrint3dFilePath(id, name);
+			return hwService.findHWItemPrint3dFilePath(id, name);
 		if ("img".equals(type))
-			return hwService.getHWItemImagesFilePath(id, name);
+			return hwService.findHWItemImagesFilePath(id, name);
 		if ("icon".equals(type))
 			try {
-				return hwService.getHWItemIconFile(id);
+				return hwService.findHWItemIconFile(id);
 			} catch (IOException e) {
 				throw new GrassPageException(404, "Nezdařilo se načíst požadovaný soubor");
 			}
-		return hwService.getHWItemDocumentsFilePath(id, name);
+		return hwService.findHWItemDocumentsFilePath(id, name);
 	}
 
 
