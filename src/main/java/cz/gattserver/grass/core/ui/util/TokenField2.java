@@ -34,6 +34,7 @@ public class TokenField2 extends CustomField<Set<String>> {
 
         chooseElementsDiv = new Div();
         chooseElementsDiv.addClassName(UIUtils.FLEX_DIV_CLASS);
+        chooseElementsDiv.setVisible(false);
         tokensLayout.add(chooseElementsDiv);
 
         comboBox = new ComboBox<>(null, items);
