@@ -12,6 +12,8 @@ import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.router.QueryParameters;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLink;
@@ -19,10 +21,12 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TokenField;
+import cz.gattserver.grass.core.ui.util.TokenField2;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.*;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
@@ -45,7 +49,6 @@ import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 
 import cz.gattserver.grass.hw.service.HWService;
-import cz.gattserver.grass.hw.ui.pages.HWItemsPage;
 import org.apache.commons.lang3.StringUtils;
 
 public class HWItemsGrid extends Div {
@@ -68,16 +71,11 @@ public class HWItemsGrid extends Div {
     private final SecurityService securityFacade;
 
     private Grid<HWItemOverviewTO> grid;
-    private TokenField hwTypesFilter;
+    private TokenField2 hwTypesFilter;
 
     private Map<String, HWTypeBasicTO> tokenMap = new HashMap<>();
     private Map<Long, Integer> indexMap = new HashMap<>();
-    private HWFilterTO filterTO;
-
-    private TextField nameField;
-    private ComboBox<HWItemState> stavCombo;
-    private TextField soucastField;
-    private TextField spravovanField;
+    private Binder<HWFilterTO> binder;
 
     private Div iconDiv;
 
@@ -92,7 +90,8 @@ public class HWItemsGrid extends Div {
         iconDiv.getElement().executeJs("this.showPopover()");
         UI.getCurrent().getElement().appendChild(iconDiv.getElement());
 
-        this.filterTO = filterTO == null ? new HWFilterTO() : filterTO;
+        binder = new Binder<>(HWFilterTO.class);
+        binder.setBean(filterTO == null ? new HWFilterTO() : filterTO);
 
         // Tabulka HW
         grid = new Grid<>() {
@@ -167,30 +166,24 @@ public class HWItemsGrid extends Div {
         HeaderRow filteringHeader = grid.appendHeaderRow();
 
         // Název
-        nameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
-            this.filterTO.setName(e.getValue());
-            populate();
-        });
+        TextField nameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> populate());
+        binder.bind(nameField, HWFilterTO::getName, HWFilterTO::setName);
 
         // Stav
-        stavCombo =
+        ComboBox<HWItemState> stavCombo =
                 UIUtils.addHeaderComboBox(filteringHeader.getCell(stateColumn), HWItemState.class, HWItemState::getName,
-                        e -> {
-                            this.filterTO.setState(e.getValue());
-                            populate();
-                        });
+                        e -> populate());
+        binder.bind(stavCombo, HWFilterTO::getState, HWFilterTO::setState);
+        stavCombo.setOverlayWidth("150px");
 
         // Je součástí
-        soucastField = UIUtils.addHeaderTextField(filteringHeader.getCell(usedInColumn), e -> {
-            this.filterTO.setUsedInName(e.getValue());
-            populate();
-        });
+        TextField soucastField = UIUtils.addHeaderTextField(filteringHeader.getCell(usedInColumn), e -> populate());
+        binder.bind(soucastField, HWFilterTO::getUsedInName, HWFilterTO::setUsedInName);
 
         // Spravován pro
-        spravovanField = UIUtils.addHeaderTextField(filteringHeader.getCell(supervizedColumn), e -> {
-            this.filterTO.setSupervizedFor(e.getValue());
-            populate();
-        });
+        TextField spravovanField =
+                UIUtils.addHeaderTextField(filteringHeader.getCell(supervizedColumn), e -> populate());
+        binder.bind(spravovanField, HWFilterTO::getSupervizedFor, HWFilterTO::setSupervizedFor);
 
         populate();
 
@@ -199,17 +192,14 @@ public class HWItemsGrid extends Div {
             for (HWTypeBasicTO type : hwService.getAllHWTypes())
                 tokenMap.put(type.getName(), type);
 
-            hwTypesFilter = new TokenField(tokenMap.keySet());
+            hwTypesFilter = new TokenField2(null, tokenMap.keySet());
             hwTypesFilter.getInputField().setWidth("200px");
-            hwTypesFilter.addTokenAddListener(token -> populate());
-            hwTypesFilter.addTokenRemoveListener(e -> populate());
             hwTypesFilter.setAllowNewItems(false);
             hwTypesFilter.getInputField().setPlaceholder("Filtrovat dle typu hw");
+            binder.bind(hwTypesFilter, HWFilterTO::getTypes, HWFilterTO::setTypes);
 
-            if (filterTO.getTypes() != null && !filterTO.getTypes().isEmpty()) {
-                for (String type : filterTO.getTypes())
-                    hwTypesFilter.addToken(type);
-            }
+            hwTypesFilter.addTokenAddListener(token -> populate());
+            hwTypesFilter.addTokenRemoveListener(e -> populate());
 
             add(hwTypesFilter);
         }
@@ -220,7 +210,7 @@ public class HWItemsGrid extends Div {
     public static HWFilterTO processQueryToFilter(Map<String, List<String>> parametersMap) {
         HWFilterTO filterTO = new HWFilterTO();
 
-        List<String> types = new ArrayList<>();
+        Set<String> types = new LinkedHashSet<>();
         for (String key : parametersMap.keySet()) {
             List<String> values = parametersMap.get(key);
             if (ID_QUERY_TOKEN.equals(key)) {
@@ -280,9 +270,7 @@ public class HWItemsGrid extends Div {
     }
 
     public void populate() {
-        if (!securityFacade.getCurrentUser().isAdmin()) filterTO.setPublicItem(true);
-
-        if (hwTypesFilter != null) filterTO.setTypes(hwTypesFilter.getValues());
+        if (!securityFacade.getCurrentUser().isAdmin()) binder.getBean().setPublicItem(true);
 
         if (grid.getDataProvider() == null || !(grid.getDataProvider() instanceof CallbackDataProvider)) {
             FetchCallback<HWItemOverviewTO, HWItemOverviewTO> fetchCallback = q -> {
@@ -303,13 +291,14 @@ public class HWItemsGrid extends Div {
 
                 // potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
                 // jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
-                List<Long> ids = hwService.getHWItemIds(filterTO, order);
+                List<Long> ids = hwService.getHWItemIds(binder.getBean(), order);
                 int index = 0;
                 for (Long id : ids)
                     indexMap.put(id, index++);
-                return hwService.getHWItems(filterTO, q.getOffset(), q.getLimit(), order).stream();
+                return hwService.getHWItems(binder.getBean(), q.getOffset(), q.getLimit(), order).stream();
             };
-            CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback = q -> hwService.countHWItems(filterTO);
+            CountCallback<HWItemOverviewTO, HWItemOverviewTO> countCallback =
+                    q -> hwService.countHWItems(binder.getBean());
             grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
         } else {
             grid.getDataProvider().refreshAll();
@@ -333,16 +322,11 @@ public class HWItemsGrid extends Div {
     }
 
     public HWFilterTO getFilterTO() {
-        return filterTO;
+        return binder.getBean();
     }
 
     public void setFilterTO(HWFilterTO filterTO) {
-        if (filterTO.getName() != null) nameField.setValue(filterTO.getName());
-        if (filterTO.getState() != null) stavCombo.setValue(filterTO.getState());
-        if (filterTO.getUsedInName() != null) soucastField.setValue(filterTO.getUsedInName());
-        if (filterTO.getSupervizedFor() != null) spravovanField.setValue(filterTO.getSupervizedFor());
-
-        if (hwTypesFilter != null && filterTO.getTypes() != null) hwTypesFilter.setValues(filterTO.getTypes());
+        binder.readBean(filterTO);
     }
 
     @Override

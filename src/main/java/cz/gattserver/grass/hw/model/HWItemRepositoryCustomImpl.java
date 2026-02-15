@@ -7,6 +7,7 @@ import com.querydsl.core.types.Order;
 import com.querydsl.jpa.JPQLQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 import cz.gattserver.grass.hw.interfaces.*;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import com.querydsl.core.types.OrderSpecifier;
@@ -30,7 +31,7 @@ public class HWItemRepositoryCustomImpl extends QuerydslRepositorySupport implem
             builder.anyILike(h.name, filter.getName());
             builder.eq(h.state, filter.getState());
             builder.eq(h.usedInId, filter.getUsedInId());
-            if (filter.getUsedInName() != null) {
+            if (StringUtils.isNotBlank(filter.getUsedInName())) {
                 query.join(u).on(u.id.eq(h.usedInId));
                 builder.iLike(u.name, filter.getUsedInName());
             }
@@ -40,9 +41,12 @@ public class HWItemRepositoryCustomImpl extends QuerydslRepositorySupport implem
             builder.between(h.purchaseDate, filter.getPurchaseDateFrom(), filter.getPurchaseDateTo());
             builder.ne(h.id, filter.getIgnoreId());
             if (Boolean.TRUE == filter.getPublicItem()) builder.eq(h.publicItem, true);
-            if (filter.getTypes() != null && !filter.getTypes().isEmpty()) query.where(
-                    new JPAQuery<>().from(it).join(t).on(it.id.hwTypeId.eq(t.id))
-                            .where(it.id.hwItemId.eq(h.id), t.name.in(filter.getTypes())).exists());
+            if (filter.getTypes() != null && !filter.getTypes().isEmpty()) {
+                for (String type : filter.getTypes()) {
+                    query.where(new JPAQuery<>().from(it).join(t).on(it.id.hwTypeId.eq(t.id))
+                            .where(it.id.hwItemId.eq(h.id), t.name.eq(type)).exists());
+                }
+            }
         }
         return builder.getBuilder();
     }
@@ -68,7 +72,8 @@ public class HWItemRepositoryCustomImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public List<HWItemOverviewTO> findAndMap(HWFilterTO filter, Integer offset, Integer limit, OrderSpecifier<?>[] order) {
+    public List<HWItemOverviewTO> findAndMap(HWFilterTO filter, Integer offset, Integer limit,
+                                             OrderSpecifier<?>[] order) {
         JPQLQuery<HWItemOverviewTO> query = from(h).leftJoin(u).on(h.usedInId.eq(u.id))
                 .select(new QHWItemOverviewTO(h.id, h.name, h.state, u.name, h.supervizedFor, h.price, h.purchaseDate,
                         h.publicItem));
@@ -86,7 +91,13 @@ public class HWItemRepositoryCustomImpl extends QuerydslRepositorySupport implem
     @Override
     public List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order) {
         JPQLQuery<HWItem> query = from(h);
-        return query.where(createPredicate(filter, query)).orderBy(order).select(h.id).fetch();
+        if (order != null) {
+            for (OrderSpecifier<?> os : order) {
+                if ("name".equals(os.getTarget().toString()))
+                    query.orderBy(Order.ASC == os.getOrder() ? h.name.asc() : h.name.desc());
+            }
+        }
+        return query.where(createPredicate(filter, query)).select(h.id).fetch();
     }
 
 }

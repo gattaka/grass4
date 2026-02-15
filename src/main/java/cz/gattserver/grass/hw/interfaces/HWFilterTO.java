@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 
 public class HWFilterTO implements Serializable {
 
@@ -17,7 +18,7 @@ public class HWFilterTO implements Serializable {
     private BigDecimal price;
     private LocalDate purchaseDateFrom;
     private LocalDate purchaseDateTo;
-    private Collection<String> types;
+    private Set<String> types;
     private Boolean publicItem;
     private Long ignoreId;
 
@@ -92,11 +93,11 @@ public class HWFilterTO implements Serializable {
         return this;
     }
 
-    public Collection<String> getTypes() {
+    public Set<String> getTypes() {
         return types;
     }
 
-    public HWFilterTO setTypes(Collection<String> types) {
+    public HWFilterTO setTypes(Set<String> types) {
         this.types = types;
         return this;
     }

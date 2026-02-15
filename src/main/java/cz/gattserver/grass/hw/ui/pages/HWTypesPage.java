@@ -81,7 +81,7 @@ public class HWTypesPage extends Div implements HasUrlParameter<String>, BeforeL
                 .setFlexGrow(0);
         Grid.Column<HWTypeTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
             HWFilterTO filter = new HWFilterTO();
-            List<String> types = new ArrayList<>();
+            Set<String> types = new LinkedHashSet<>();
             types.add(to.getName());
             filter.setTypes(types);
             Map<String, String> params = HWItemsGrid.processFilterToQuery(filter);
