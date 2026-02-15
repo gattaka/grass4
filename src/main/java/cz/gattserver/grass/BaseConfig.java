@@ -26,8 +26,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableScheduling
 @ServletComponentScan
 @PropertySource({"classpath:version.properties"})
-@Import({DatabaseConfig.class, EncoderConfig.class, SecurityConfig.class, WebSecurityConfig.class,
-        ServletConfig.class})
+@Import({DatabaseConfig.class, EncoderConfig.class, SecurityConfig.class, WebSecurityConfig.class})
 public class BaseConfig {
 
     @Value("${grass.mail.address}")
