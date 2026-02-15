@@ -210,7 +210,8 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         final List<PhotogalleryEditorItemTO> items;
         if (editMode) {
             items = pgService.getItems(galleryDir).stream()
-                    .map(item -> new PhotogalleryEditorItemTO(item.getName(), Path.of(item.getFullPath()))).toList();
+                    .map(item -> new PhotogalleryEditorItemTO(item.getName(), Path.of(item.getFullPath()))).collect(
+                            Collectors.toList());
         } else {
             items = new ArrayList<>();
         }

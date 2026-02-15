@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
@@ -20,11 +21,11 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.ui.UploadBuilder;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
-import cz.gattserver.grass.articles.ui.pages.ArticlesEditorPage;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
@@ -35,7 +36,6 @@ import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.template.ContentViewer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.print3d.config.Print3dConfiguration;
@@ -52,15 +52,17 @@ import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Route(value = "print3d", layout = MainView.class)
-public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDynamicTitle {
+public class Print3DViewerPage extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
-    private static final Logger logger = LoggerFactory.getLogger(Print3DViewer.class);
+    private static final Logger logger = LoggerFactory.getLogger(Print3DViewerPage.class);
 
     private Print3dService print3dService;
     private EventBus eventBus;
@@ -70,8 +72,6 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
     private ProgressDialog progressIndicatorWindow;
 
     private Print3dTO print3dTO;
-
-    private Print3dMultiUpload upload;
 
     private String projectDir;
 
@@ -85,8 +85,8 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
 
     private ComponentFactory componentFactory;
 
-    public Print3DViewer(Print3dService print3dService, EventBus eventBus, SecurityService securityService,
-                         CoreACLService coreACLService) {
+    public Print3DViewerPage(Print3dService print3dService, EventBus eventBus, SecurityService securityService,
+                             CoreACLService coreACLService) {
         this.print3dService = print3dService;
         this.eventBus = eventBus;
         this.securityService = securityService;
@@ -121,14 +121,14 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
         ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
                 e -> UI.getCurrent()
                         .navigate(Print3dEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(contentNodeTO.getName(), Print3DViewer.class, parameter));
+                new RouterLink(contentNodeTO.getName(), Print3DViewerPage.class, parameter));
 
         add(contentViewer);
         contentViewer.getOperationsListLayout().add(componentFactory.createZipButton(
                 event -> new ConfirmDialog("Přejete si vytvořit ZIP projektu?", e -> {
                     logger.info("zipPrint3dProject thread: {}", Thread.currentThread().threadId());
                     progressIndicatorWindow = new ProgressDialog();
-                    eventBus.subscribe(Print3DViewer.this);
+                    eventBus.subscribe(Print3DViewerPage.this);
                     print3dService.zipProject(projectDir);
                 }).open()));
 
@@ -207,7 +207,7 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
         UIUtils.applyGrassDefaultStyle(grid);
         layout.add(grid);
 
-        Column<Print3dViewItemTO> iconColumn = grid.addColumn(new IconRenderer<Print3dViewItemTO>(p -> {
+        Column<Print3dViewItemTO> iconColumn = grid.addColumn(new IconRenderer<>(p -> {
             ImageIcon icon = ImageIcon.DOCUMENT_16_ICON;
             if (p.getType() == Print3dItemType.IMAGE) icon = ImageIcon.IMG_16_ICON;
             if (p.getType() == Print3dItemType.MODEL) icon = ImageIcon.STOP_16_ICON;
@@ -227,7 +227,7 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
                 grid.getColumnByKey("size").setHeader("Velikost").setWidth("80px").setTextAlign(ColumnTextAlign.END)
                         .setFlexGrow(0).setSortable(true).setComparator((o1, o2) -> {
                             try {
-                                return Long.compare(Files.size(o1.getFile()), Files.size(o2.getFile()));
+                                return Long.compare(Files.size(o1.getPath()), Files.size(o2.getPath()));
                             } catch (IOException e) {
                                 logger.error(
                                         "Nezdařilo se porovnat soubory 3D projektu " + o1.getName() + " a " + o2.getName());
@@ -237,13 +237,13 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
 
         Column<Print3dViewItemTO> fullnameColumn = grid.getColumnByKey("name");
         Column<Print3dViewItemTO> typeColumn = grid.getColumnByKey("type");
-        Column<Print3dViewItemTO> fileColumn = grid.getColumnByKey("file");
+        Column<Print3dViewItemTO> pathColumn = grid.getColumnByKey("path");
 
         fullnameColumn.setVisible(false);
         typeColumn.setVisible(false);
-        fileColumn.setVisible(false);
+        pathColumn.setVisible(false);
 
-        grid.setColumnOrder(Arrays.asList(iconColumn, nameColumn, extensionColumn, sizeColumn, typeColumn, fileColumn,
+        grid.setColumnOrder(Arrays.asList(iconColumn, nameColumn, extensionColumn, sizeColumn, typeColumn, pathColumn,
                 fullnameColumn));
 
         grid.addColumn(new ComponentRenderer<>(item -> {
@@ -254,11 +254,9 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
         })).setHeader("Stáhnout").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
         if (coreACLService.canModifyContent(print3dTO.getContentNode(), securityService.getCurrentUser())) {
-            grid.addColumn(new ComponentRenderer<>(item -> componentFactory.createInlineButton("Smazat", be -> {
-                new ConfirmDialog("Opravdu smazat soubor?", e -> {
-                    print3dService.deleteFile(item, projectDir);
-                    UI.getCurrent().getPage().reload();
-                }).open();
+            grid.addColumn(new ComponentRenderer<>(item -> componentFactory.createDeleteInlineButton(e -> {
+                print3dService.deleteFile(item, projectDir);
+                UI.getCurrent().getPage().reload();
             }))).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
         }
 
@@ -281,20 +279,24 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
             }
         });
 
-        upload = new Print3dMultiUpload(projectDir);
-        Button uploadButton = new Button("Upload");
-        upload.setUploadButton(uploadButton);
-        Span dropLabel = new Span("Drop");
-        upload.setDropLabel(dropLabel);
-        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        upload.addFinishedListener(e -> {
-            eventBus.subscribe(Print3DViewer.this);
-            progressIndicatorWindow = new ProgressDialog();
+        UploadBuilder uploadBuilder = new UploadBuilder();
+        Upload upload = uploadBuilder.createUpload(set -> {
+            if (set.isEmpty()) return;
+            for (UploadBuilder.UploadFile file : set) {
+                try {
+                    print3dService.uploadFile(new FileInputStream(file.getFile()), file.getMetadata().fileName(),
+                            projectDir);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
             Print3dPayloadTO payloadTO = new Print3dPayloadTO(print3dTO.getContentNode().getName(), projectDir,
                     print3dTO.getContentNode().getContentTagsAsStrings(), print3dTO.getContentNode().isPublicated());
             print3dService.modifyProject(print3dTO.getId(), payloadTO);
             UI.getCurrent().getPage().reload();
-        });
+        }, () -> print3dService.getItems(projectDir).stream().map(Print3dViewItemTO::getName)
+                .collect(Collectors.toSet()));
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         if (coreACLService.canModifyContent(print3dTO.getContentNode(), securityService.getCurrentUser()))
             layout.add(upload);
 
@@ -351,7 +353,7 @@ public class Print3DViewer extends Div implements HasUrlParameter<String>, HasDy
                 UIUtils.showWarning(event.getResultDetails());
             }
         });
-        eventBus.unsubscribe(Print3DViewer.this);
+        eventBus.unsubscribe(Print3DViewerPage.this);
     }
 
     private String getItemURL(String file) {

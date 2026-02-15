@@ -133,7 +133,9 @@ public interface Print3dService {
 	 */
 	Path uploadFile(InputStream in, String fileName, String projectDir) throws IOException;
 
-	/**
+    Print3dViewItemTO constructViewItemTO(String name, Path file);
+
+    /**
 	 * Získá list souborů dle projektu
 	 * 
 	 * @param projectDir
@@ -147,7 +149,7 @@ public interface Print3dService {
 	 * @throws IllegalArgumentException
 	 *             pokud předaný adresář podtéká kořen modulu Print3d
 	 */
-	List<Print3dViewItemTO> getItems(String projectDir) throws IOException;
+	List<Print3dViewItemTO> getItems(String projectDir);
 
 	/**
 	 * Smaže vygenerovaný zip soubor

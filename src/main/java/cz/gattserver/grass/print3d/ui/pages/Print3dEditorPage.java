@@ -10,6 +10,7 @@ import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
@@ -18,8 +19,7 @@ import com.vaadin.flow.router.*;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.stlviewer.STLViewer;
 import cz.gattserver.common.ui.ComponentFactory;
-import cz.gattserver.common.util.HumanBytesSizeFormatter;
-import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.ui.UploadBuilder;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
@@ -45,11 +45,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serial;
-import java.nio.file.Paths;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @PageTitle("Editor 3D projektu")
 @Route(value = "print3d-editor", layout = MainView.class)
@@ -59,8 +60,6 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
     private static final long serialVersionUID = -1922351429364968659L;
 
     private static final Logger logger = LoggerFactory.getLogger(Print3dEditorPage.class);
-
-    private static final String CLOSE_JS_DIV_ID = "close-js-div";
 
     private final Print3dService print3dService;
     private final ContentTagService contentTagFacade;
@@ -79,6 +78,8 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
     private boolean editMode;
     private boolean leaving;
 
+    private final ComponentFactory componentFactory;
+
     /**
      * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
      * smazat.
@@ -95,6 +96,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         this.print3dService = print3dService;
         this.contentTagFacade = contentTagFacade;
         this.eventBus = eventBus;
+        this.componentFactory = new ComponentFactory();
     }
 
     @Override
@@ -107,7 +109,6 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         if (chunks.length > 1) identifierToken = chunks[1];
 
         removeAll();
-        ComponentFactory componentFactory = new ComponentFactory();
 
         Div editorLayout = componentFactory.createOneColumnLayout();
         add(editorLayout);
@@ -124,7 +125,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
                 q -> contentTagFacade.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
                 q -> contentTagFacade.countByFilter(q.getFilter());
-        keywords = new TokenField(null,fetchItemsCallback, serializableFunction);
+        keywords = new TokenField(null, fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsDialog(list -> list.forEach(keywords::addToken)).open());
@@ -188,23 +189,14 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         editorLayout.add(gridLayout);
 
         final Grid<Print3dViewItemTO> grid = new Grid<>();
-        final List<Print3dViewItemTO> items;
-        if (editMode) {
-            try {
-                items = print3dService.getItems(projectDir);
-            } catch (IOException e) {
-                throw new GrassPageException(500, e);
-            }
-        } else {
-            items = new ArrayList<>();
-        }
+        final List<Print3dViewItemTO> items = editMode ? print3dService.getItems(projectDir) : new ArrayList<>();
         UIUtils.applyGrassDefaultStyle(grid);
         grid.setItems(items);
 
         grid.setWidthFull();
         grid.setHeight("400px");
 
-        grid.addColumn(new TextRenderer<>(p -> p.getFile().getFileName().toString())).setHeader("Název")
+        grid.addColumn(new TextRenderer<>(p -> p.getName())).setHeader("Název")
                 .setFlexGrow(100);
 
         grid.addColumn(new TextRenderer<>(Print3dViewItemTO::getSize)).setHeader("Velikost").setWidth("80px")
@@ -213,7 +205,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Zobrazit", e -> {
             // TODO funguje aktuálně pouze pro již nahrané
             String url = UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" + projectDir + "/" +
-                    itemTO.getFile().getFileName();
+                    itemTO.getPath().getFileName();
             WebDialog previewDialog = new WebDialog("Náhled");
             STLViewer stlViewer = new STLViewer(instance -> instance.show(url));
             stlViewer.setWidth(500, Unit.PIXELS);
@@ -235,22 +227,24 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
         gridLayout.add(grid);
 
-        Print3dMultiUpload upload = new Print3dMultiUpload(projectDir) {
+        UploadBuilder uploadBuilder = new UploadBuilder();
 
-            @Serial
-            private static final long serialVersionUID = 2727653435609738250L;
-
-            @Override
-            protected void fileUploadSuccess(String fileName, long size) {
-                Print3dViewItemTO itemTO = new Print3dViewItemTO();
-                String sizeText = HumanBytesSizeFormatter.format(size);
-                itemTO.setSize(sizeText);
-                itemTO.setFile(Paths.get(fileName));
+        // TODO vyřešit práci s přidáváním a odebíráním neuložených souborů atd.
+        Upload upload = uploadBuilder.createUpload(set -> {
+            for (UploadBuilder.UploadFile uploadFile : set) {
+                Print3dViewItemTO itemTO = print3dService.constructViewItemTO(uploadFile.getMetadata().fileName(),
+                        uploadFile.getFile().toPath());
                 newFiles.add(itemTO);
                 items.add(itemTO);
                 grid.setItems(items);
             }
-        };
+        }, () -> {
+            Set<String> files = new HashSet<>();
+            files.addAll(print3dService.getItems(projectDir).stream().map(Print3dViewItemTO::getName)
+                    .collect(Collectors.toSet()));
+            files.addAll(newFiles.stream().map(Print3dViewItemTO::getName).collect(Collectors.toSet()));
+            return files;
+        });
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         editorLayout.add(upload);
 
@@ -271,28 +265,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         populateButtonsLayout(buttonsLayout);
     }
 
-
     private void populateButtonsLayout(Div buttonLayout) {
-        Div closeJsDiv = new Div() {
-
-            @Serial
-            private static final long serialVersionUID = 7034827729435451343L;
-
-            @ClientCallable
-            private void returnToProjectCallback() {
-                UI.getCurrent().navigate(Print3DViewer.class,
-                        URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName()));
-            }
-
-            @ClientCallable
-            private void returnToNodeCallback() {
-                UI.getCurrent()
-                        .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName()));
-            }
-        };
-        closeJsDiv.setId(CLOSE_JS_DIV_ID);
-        add(closeJsDiv);
-
         // Uložit
 
         ComponentFactory componentFactory = new ComponentFactory();
@@ -311,25 +284,11 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         buttonLayout.add(saveAndCloseButton);
         saveAndCloseButton.addClickShortcut(Key.KEY_S, KeyModifier.CONTROL).setBrowserDefaultAllowed(false);
 
-        buttonLayout.add(componentFactory.createStornoButton(ev -> new ConfirmDialog(
-                "Opravdu si přejete zavřít editor projektu ? Veškeré neuložené změny budou ztraceny.", e -> {
-            cleanAfterCancelEdit();
+        buttonLayout.add(componentFactory.createStornoButton(ev -> {
+            leaving = true;
             if (editMode) returnToProject();
             else returnToNode();
-        }).open()));
-    }
-
-    private void cleanAfterCancelEdit() {
-        if (editMode) {
-            print3dService.deleteFiles(newFiles, projectDir);
-        } else {
-            try {
-                print3dService.deleteDraft(projectDir);
-            } catch (Exception e) {
-                logger.error("Nezdařilo se smazat zrušený rozpracovaný projekt", e);
-                throw new GrassPageException(500, e);
-            }
-        }
+        }));
     }
 
     private boolean isFormValid() {
@@ -342,6 +301,14 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
     }
 
     private void saveOrUpdateProject() {
+        for (Print3dViewItemTO item : newFiles) {
+            try {
+                print3dService.uploadFile(Files.newInputStream(item.getPath()), item.getName(), projectDir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         Print3dPayloadTO payloadTO = new Print3dPayloadTO(nameField.getValue(), projectDir, keywords.getValue(),
                 publicatedCheckBox.getValue());
 
@@ -359,7 +326,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
      * Zavolá vrácení se na obsah
      */
     private void returnToProject() {
-        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(Print3DViewer.class,
+        UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(Print3DViewerPage.class,
                 URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
     }
 
@@ -396,11 +363,18 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         }
     }
 
+
+    /**
+     * Odchod přes Vaadin routing lze odchytit tímhle -- nejde ale o 100% řešení,
+     * protože všechny ostatní cesty (tab close, refresh, obecně browser manuální URL navigace) tímhle není možné
+     * odchytit, takže jediná možnost -- je tedy potřeba doplnit ještě native browser JS onbeforeunload listenerem
+     *
+     * @param beforeLeaveEvent before navigation event with event details
+     */
     @Override
     public void beforeLeave(BeforeLeaveEvent beforeLeaveEvent) {
         if (leaving) return;
         beforeLeaveEvent.postpone();
-        new ConfirmDialog("Opravdu si přejete ukončit editor a odejít? Rozpracovaná data nebudou uložena.",
-                e -> beforeLeaveEvent.getContinueNavigationAction().proceed()).open();
+        componentFactory.createBeforeLeaveConfirmDialog(beforeLeaveEvent).open();
     }
 }

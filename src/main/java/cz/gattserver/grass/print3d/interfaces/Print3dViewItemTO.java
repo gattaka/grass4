@@ -4,22 +4,27 @@ import java.nio.file.Path;
 
 public class Print3dViewItemTO {
 
-	private Path file;
+	private Path path;
 	private String onlyName;
 	private String extension;
 	private String size;
 	private Print3dItemType type;
 
-	public Print3dViewItemTO(Path file, String onlyName, String extension, String size, Print3dItemType type) {
-		super();
-		this.file = file;
+	public Print3dViewItemTO(Path path, String onlyName, String extension, String size, Print3dItemType type) {
+		this.path = path;
 		this.onlyName = onlyName;
 		this.extension = extension;
 		this.size = size;
 		this.type = type;
 	}
 
-	public Print3dViewItemTO() {
+    public Print3dViewItemTO(Path path, String onlyName, String size) {
+        this.path = path;
+        this.onlyName = onlyName;
+        this.size = size;
+    }
+
+    public Print3dViewItemTO() {
 	}
 
 	public String getOnlyName() {
@@ -57,12 +62,12 @@ public class Print3dViewItemTO {
 		return onlyName + "." + extension;
 	}
 
-	public Path getFile() {
-		return file;
+	public Path getPath() {
+		return path;
 	}
 
-	public Print3dViewItemTO setFile(Path file) {
-		this.file = file;
+	public Print3dViewItemTO setPath(Path path) {
+		this.path = path;
 		return this;
 	}
 

@@ -38,7 +38,6 @@ import cz.gattserver.grass.core.ui.components.Breadcrumb;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
-import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.fm.FMExplorer;
 import cz.gattserver.grass.fm.FMSection;
