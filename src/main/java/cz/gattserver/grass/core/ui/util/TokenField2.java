@@ -47,7 +47,7 @@ public class TokenField2 extends CustomField<Set<String>> {
 
     @Override
     protected Set<String> generateModelValue() {
-        return tokens.keySet();
+        return Set.copyOf(tokens.keySet());
     }
 
     @Override
@@ -120,6 +120,7 @@ public class TokenField2 extends CustomField<Set<String>> {
             chooseElementsDiv.remove(tokenComponent);
             tokens.remove(token);
             chooseElementsDiv.setVisible(tokens.size() > 0);
+            updateValue();
             if (removeTokenListener != null) removeTokenListener.accept(token);
         }
     }
