@@ -553,6 +553,11 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
+    public List<Long> getHWTypeIds(HWTypeTO filterTO, OrderSpecifier<?>[] order) {
+        return hwTypeRepository.findHWTypeIds(filterTO, order);
+    }
+
+    @Override
     public List<HWTypeTO> getHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
         return hwTypeRepository.getHWTypes(filter, offset, limit, order);
     }
@@ -706,13 +711,6 @@ public class HWServiceImpl implements HWService {
     @Override
     public List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order) {
         return hwItemRepository.getHWItemIds(filter, order);
-    }
-
-    @Override
-    public List<HWItemOverviewTO> getHWItemsByTypes(Collection<String> types) {
-        HWFilterTO filter = new HWFilterTO();
-        filter.setTypes(types);
-        return hwItemRepository.findAndMap(filter, null, null, null);
     }
 
     @Override

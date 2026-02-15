@@ -7,60 +7,76 @@ import com.querydsl.core.annotations.QueryProjection;
  */
 public class HWTypeTO {
 
-	/**
-	 * Identifikátor hw
-	 */
-	private Long id;
+    /**
+     * Identifikátor hw
+     */
+    private Long id;
 
-	/**
-	 * Název
-	 */
-	private String name;
+    /**
+     * Název
+     */
+    private String name;
 
-	/**
-	 * Počet instancí daného typu
-	 */
-	private Integer count;
+    /**
+     * Počet instancí daného typu
+     */
+    private Integer count;
 
-	public HWTypeTO(String name) {
-		this.name = name;
-	}
-
-	@QueryProjection
-	public HWTypeTO(Long id, String name, Integer count) {
-		this.id = id;
-		this.name = name;
-		this.count = count;
-	}
+    public HWTypeTO(String name) {
+        this.name = name;
+    }
 
     public HWTypeTO() {
     }
 
+    public HWTypeTO(Long id) {
+        this.id = id;
+    }
+
+    @QueryProjection
+    public HWTypeTO(Long id, String name, Integer count) {
+        this.id = id;
+        this.name = name;
+        this.count = count;
+    }
+
     public Integer getCount() {
-		return count;
-	}
+        return count;
+    }
 
-	public void setCount(Integer count) {
-		this.count = count;
-	}
+    public void setCount(Integer count) {
+        this.count = count;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-	public String getName() {
-		return name;
-	}
+    public String getName() {
+        return name;
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public HWTypeTO copy() {
         return new HWTypeTO(id, name, count);
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (!(o instanceof HWTypeTO hwTypeTO)) return false;
+
+        return id.equals(hwTypeTO.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

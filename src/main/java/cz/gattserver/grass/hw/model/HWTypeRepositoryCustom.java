@@ -16,12 +16,11 @@ public interface HWTypeRepositoryCustom {
 
     Set<HWTypeBasicTO> findOrderByName();
 
-    HWTypeTO findByName(String name);
-
     HWTypeTO findByIdAndMap(Long id);
 
     Set<HWTypeBasicTO> findByItemId(Long itemId);
 
     Set<Long> findTypeIdsByItemId(Long itemId);
 
+    List<Long> findHWTypeIds(HWTypeTO filterTO, OrderSpecifier<?>[] order);
 }

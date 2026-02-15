@@ -53,11 +53,6 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public HWTypeTO findByName(String name) {
-        return createGroupSelectQuery().where(t.name.eq(name)).fetchOne();
-    }
-
-    @Override
     public HWTypeTO findByIdAndMap(Long id) {
         return createGroupSelectQuery().where(t.id.eq(id)).fetchOne();
     }
@@ -72,6 +67,11 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     public Set<Long> findTypeIdsByItemId(Long itemId) {
         return new LinkedHashSet<>(
                 createGroupQuery().where(it.id.hwItemId.eq(itemId)).select(t.id).fetch());
+    }
+
+    @Override
+    public List<Long> findHWTypeIds(HWTypeTO filterTO, OrderSpecifier<?>[] order) {
+        return from(t).where(createPredicate(filterTO)).orderBy(order).select(t.id).fetch();
     }
 
     @Override

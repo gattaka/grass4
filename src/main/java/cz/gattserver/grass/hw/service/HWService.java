@@ -96,6 +96,8 @@ public interface HWService {
 
     HWTypeTO getHWType(Long fixTypeId);
 
+    List<Long> getHWTypeIds(HWTypeTO filterTO, OrderSpecifier<?>[] order);
+
     List<HWTypeTO> getHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order);
 
     int countHWTypes(HWTypeTO filter);
@@ -123,8 +125,6 @@ public interface HWService {
 
     List<Long> getHWItemIds(HWFilterTO filter, OrderSpecifier<?>[] order);
 
-    List<HWItemOverviewTO> getHWItemsByTypes(Collection<String> types);
-
     HWItemTO getHWItem(Long itemId);
 
     HWItemOverviewTO getHWOverviewItem(Long itemId);
@@ -148,5 +148,4 @@ public interface HWService {
     void saveHWItemRecord(HWItemTO hwItemTO, HWItemRecordTO itemRecordTO);
 
     void deleteHWItemRecord(Long id);
-
 }

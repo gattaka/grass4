@@ -16,7 +16,7 @@ public class HWItemChooseDialog extends EditWebDialog {
 
         setWidth("900px");
 
-        HWItemsGrid itemsGrid = new HWItemsGrid(to -> {
+        HWItemsGrid itemsGrid = new HWItemsGrid(null, to -> {
             onSelect.accept(to);
             close();
         });

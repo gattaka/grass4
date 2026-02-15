@@ -1,14 +1,16 @@
 package cz.gattserver.grass.hw.ui;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.RouterLink;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.hw.interfaces.HWFilterTO;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemState;
 import cz.gattserver.grass.hw.ui.pages.HWItemsPage;
+import cz.gattserver.grass.hw.ui.pages.HWTypesPage;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -17,13 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 public class HWUIUtils {
-
-    private static final String ID_QUERY_TOKEN = "id";
-    private static final String NAME_QUERY_TOKEN = "n";
-    private static final String SUPERVIZED_FOR_QUERY_TOKEN = "sf";
-    private static final String STATE_QUERY_TOKEN = "s";
-    private static final String USED_IN_QUERY_TOKEN = "ui";
-    private static final String TYPE_QUERY_TOKEN = "t";
 
     public static ImageIcon chooseImageIcon(HWItemOverviewTO to) {
         if (to.getState() == null) return null;
@@ -44,59 +39,17 @@ public class HWUIUtils {
         }
     }
 
-    public static Map<String, String> processFilterToQuery(HWFilterTO filterTO) {
-        Map<String, String> filterQuery = new HashMap<>();
-        if (StringUtils.isNotBlank(filterTO.getName())) filterQuery.put(NAME_QUERY_TOKEN, filterTO.getName());
-        if (StringUtils.isNotBlank(filterTO.getSupervizedFor()))
-            filterQuery.put(SUPERVIZED_FOR_QUERY_TOKEN, filterTO.getSupervizedFor());
-        if (filterTO.getState() != null) filterQuery.put(STATE_QUERY_TOKEN, filterTO.getState().name());
-        if (StringUtils.isNotBlank(filterTO.getUsedInName()))
-            filterQuery.put(USED_IN_QUERY_TOKEN, filterTO.getUsedInName());
-
-        if (filterTO.getTypes() != null) {
-            int i = 0;
-            for (String type : filterTO.getTypes()) {
-                i++;
-                filterQuery.put(TYPE_QUERY_TOKEN + i, type);
-            }
-        }
-        return filterQuery;
-    }
-
-    public static HWFilterTO processToQueryFilter(Map<String, List<String>> parametersMap) {
-        HWFilterTO filterTO = new HWFilterTO();
-
-        List<String> types = new ArrayList<>();
-        for (String key : parametersMap.keySet()) {
-            List<String> values = parametersMap.get(key);
-            if (ID_QUERY_TOKEN.equals(key)) {
-                filterTO.setId(Long.valueOf(values.get(0)));
-            } else if (NAME_QUERY_TOKEN.equals(key)) {
-                filterTO.setName(values.get(0));
-            } else if (SUPERVIZED_FOR_QUERY_TOKEN.equals(key)) {
-                filterTO.setSupervizedFor(values.get(0));
-            } else if (STATE_QUERY_TOKEN.equals(key)) {
-                try {
-                    filterTO.setState(HWItemState.valueOf(values.get(0)));
-                } catch (IllegalArgumentException e) {
-                    // chybná neexistující konstanta
-                }
-            } else if (USED_IN_QUERY_TOKEN.equals(key)) {
-                filterTO.setUsedInName(values.get(0));
-            } else if (key.startsWith(TYPE_QUERY_TOKEN)) {
-                types.add(values.get(0));
-            }
-        }
-        if (!types.isEmpty()) filterTO.setTypes(types);
-
-        return filterTO;
-    }
-
     public static Component createNavigationLayout() {
         HorizontalLayout navigatorLayout = new HorizontalLayout();
         RouterLink itemsLink = new RouterLink("Přehled", HWItemsPage.class);
-        RouterLink typesLink = new RouterLink("Typy zařízení", HWItemsPage.class);
-        navigatorLayout.add(itemsLink, typesLink);
+        navigatorLayout.add(itemsLink);
+
+        // Typy HW nejsou veřejné, aby nenapovídaly, co vše host nevidí
+        if (SpringContextHelper.getBean(SecurityService.class).getCurrentUser().isAdmin()) {
+            RouterLink typesLink = new RouterLink("Typy zařízení", HWTypesPage.class);
+            navigatorLayout.add(typesLink);
+        }
+
         return navigatorLayout;
     }
 }
