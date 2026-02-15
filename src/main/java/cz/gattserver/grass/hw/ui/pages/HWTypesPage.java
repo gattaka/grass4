@@ -6,6 +6,7 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.textfield.TextField;
@@ -30,7 +31,7 @@ import java.util.*;
 
 @PageTitle("Evidence HW")
 @Route(value = "hw-types", layout = MainView.class)
-public class HWTypesPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
+public class HWTypesPage extends Div implements HasUrlParameter<String> {
 
     private static final String ID_QUERY_TOKEN = "id";
     private static final String NAME_QUERY_TOKEN = "name";
@@ -46,8 +47,6 @@ public class HWTypesPage extends Div implements HasUrlParameter<String>, BeforeL
 
     private TextField nameField;
     private Map<Long, Integer> indexMap = new HashMap<>();
-
-    private Long lastId;
 
     public HWTypesPage(HWService hwService, SecurityService securityService) {
         this.hwService = hwService;
@@ -85,10 +84,21 @@ public class HWTypesPage extends Div implements HasUrlParameter<String>, BeforeL
             types.add(to.getName());
             filter.setTypes(types);
             Map<String, String> params = HWItemsGrid.processFilterToQuery(filter);
-            RouterLink routerLink = new RouterLink(to.getName(), HWItemsPage.class);
-            routerLink.setQueryParameters(QueryParameters.simple(params));
-            routerLink.getElement().addEventListener("click", e -> lastId = to.getId());
-            return routerLink;
+            QueryParameters queryParams = QueryParameters.simple(params);
+            Anchor anchor = componentFactory.createAnchor(to.getName(), e -> {
+                Map<String, String> replaceParams = new HashMap<>();
+                replaceParams.put(ID_QUERY_TOKEN, to.getId().toString());
+                if (nameField.getValue() != null) replaceParams.put(NAME_QUERY_TOKEN, nameField.getValue());
+                String replaceURL = RouteConfiguration.forSessionScope().getUrl(HWTypesPage.class);
+                UI.getCurrent().getPage().getHistory()
+                        .replaceState(null, replaceURL + "?" + QueryParameters.simple(replaceParams).getQueryString());
+                UI.getCurrent().navigate(HWItemsPage.class, queryParams);
+            }, e -> {
+                String query = queryParams.getQueryString();
+                String url = RouteConfiguration.forSessionScope().getUrl(HWItemsPage.class) + "?" + query;
+                UI.getCurrent().getPage().open(url, "_blank");
+            });
+            return anchor;
         })).setHeader("Název").setSortable(true).setKey(NAME_BIND).setFlexGrow(1);
         grid.setWidthFull();
         grid.setHeight("500px");
@@ -200,20 +210,5 @@ public class HWTypesPage extends Div implements HasUrlParameter<String>, BeforeL
             grid.getDataProvider().refreshItem(to);
             populate();
         }).open();
-    }
-
-    @Override
-    public void beforeLeave(BeforeLeaveEvent event) {
-        Map<String, List<String>> params = new HashMap<>();
-        if (lastId != null) params.put(ID_QUERY_TOKEN, List.of(lastId.toString()));
-        if (filterTO.getName() != null) params.put(NAME_QUERY_TOKEN, List.of(filterTO.getName()));
-        QueryParameters queryParams = new QueryParameters(params);
-        lastId = null;
-
-        String listURL = RouteConfiguration.forSessionScope().getUrl(HWTypesPage.class);
-        UI.getCurrent().getPage().getHistory().replaceState(null, listURL + "?" + queryParams.getQueryString());
-
-        if (NavigationTrigger.ROUTER_LINK == event.getTrigger())
-            UI.getCurrent().getPage().getHistory().pushState(null, event.getLocation().getPathWithQueryParameters());
     }
 }

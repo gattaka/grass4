@@ -3,11 +3,11 @@ package cz.gattserver.common.ui;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.datetimepicker.DateTimePicker;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -16,30 +16,42 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.timepicker.TimePicker;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.Setter;
+import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeLeaveEvent;
+import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.shared.Registration;
 import cz.gattserver.common.Identifiable;
 import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
-import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
-import org.hibernate.internal.util.ValueHolder;
+import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.vaadin.addons.componentfactory.monthpicker.MonthPicker;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class ComponentFactory {
 
     // https://vaadin.com/docs/latest/components/icons/default-icons
+
+    /* Anchor */
+
+    public Anchor createAnchor(String name, Consumer<DomEvent> onLeftClick, Consumer<DomEvent> onMiddleClick) {
+        Anchor anchor = new Anchor();
+        anchor.setText(name);
+        anchor.getElement().addEventListener("mousedown", event -> {
+            int button = event.getEventData().get("event.button").asInt();
+            if (button == 1) {
+                onMiddleClick.accept(event);
+            } else {
+                onLeftClick.accept(event);
+            }
+        }).addEventData("event.button").preventDefault();
+        return anchor;
+    }
 
     /* Tlačítka */
 

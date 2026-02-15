@@ -21,6 +21,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.FieldUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
@@ -119,18 +120,12 @@ public class HWItemsGrid extends Div {
             }
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
+        ComponentFactory componentFactory = new ComponentFactory();
+
         Column<HWItemOverviewTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
-            Anchor anchor = new Anchor();
-            anchor.setText(to.getName());
-            anchor.getElement().addEventListener("mousedown", event -> {
-                int button = event.getEventData().get("event.button").asInt();
-                if (button == 1) {
-                    UI.getCurrent().getPage()
-                            .open(RouteConfiguration.forSessionScope().getUrl(HWItemPage.class, to.getId()), "_blank");
-                } else {
-                    onSelect.accept(to);
-                }
-            }).addEventData("event.button").preventDefault();
+            Anchor anchor = componentFactory.createAnchor(to.getName(), e -> onSelect.accept(to),
+                    e -> UI.getCurrent().getPage()
+                            .open(RouteConfiguration.forSessionScope().getUrl(HWItemPage.class, to.getId()), "_blank"));
 
             // addEventListener na mouseover má z nějakého důvodu prázdný event -- Vaadin bug?
             UI.getCurrent().getPage().executeJs("$0.onmouseover = function(event) {"

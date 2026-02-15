@@ -75,8 +75,7 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public List<HWTypeTO> getHWTypes(HWTypeTO filter, int offset, int limit, OrderSpecifier<?>[] order) {
-        // TODO
+    public List<HWTypeTO> getHWTypes(HWTypeTO filterTO, int offset, int limit, OrderSpecifier<?>[] order) {
         JPQLQuery<HWTypeTO> query = createGroupSelectQuery();
 
         for (OrderSpecifier<?> os : order) {
@@ -85,6 +84,6 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
             if ("count".equals(os.getTarget().toString()))
                 query.orderBy(Order.ASC == os.getOrder() ? i.id.count().asc() : i.id.count().desc());
         }
-        return query.offset(offset).limit(limit).fetch();
+        return query.where(createPredicate(filterTO)).offset(offset).limit(limit).fetch();
     }
 }
