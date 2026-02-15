@@ -644,6 +644,7 @@ public class PGServiceImpl implements PGService {
             stream.filter(file -> !Files.isDirectory(file)).forEach(file -> {
                 PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
                 itemTO.setName(file.getFileName().toString());
+                itemTO.setFullPath(itemTO.getName());
                 items.add(itemTO);
             });
 
