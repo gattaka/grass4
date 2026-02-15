@@ -33,6 +33,7 @@ import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
+import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessStartEvent;
@@ -44,14 +45,13 @@ import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
-import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -63,13 +63,16 @@ import java.util.stream.Collectors;
 @Route(value = "pg-editor", layout = MainView.class)
 public class PGEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
 
+    @Serial
+    private static final long serialVersionUID = 2801021108823739183L;
+
     private static final Logger logger = LoggerFactory.getLogger(PGEditorPage.class);
 
     private final PGService pgService;
     private final ContentTagService contentTagFacade;
     private final EventBus eventBus;
-    private NodeService nodeService;
-    private SecurityService securityService;
+    private final NodeService nodeService;
+    private final SecurityService securityService;
 
     private ProgressDialog progressDialog;
 
@@ -90,12 +93,12 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
      * smazat.
      */
-    private Set<PhotogalleryEditorItemTO> newFiles = new HashSet<>();
+    private final Set<PhotogalleryEditorItemTO> newFiles = new HashSet<>();
 
     private String operationToken;
     private String identifierToken;
 
-    private ComponentFactory componentFactory;
+    private final ComponentFactory componentFactory;
 
     public PGEditorPage(PGService pgService, ContentTagService contentTagFacade, EventBus eventBus,
                         NodeService nodeService, SecurityService securityService) {
@@ -129,10 +132,10 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         add(editorLayout);
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+                q -> contentTagFacade.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagFacade.countByFilter(q.getFilter().get());
-        photogalleryKeywords = new TokenField(fetchItemsCallback, serializableFunction);
+                q -> contentTagFacade.countByFilter(q.getFilter());
+        photogalleryKeywords = new TokenField(null, fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsDialog(list -> list.forEach(photogalleryKeywords::addToken)).open());
@@ -305,14 +308,14 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         // Uložit
         Button saveButton = componentFactory.createSaveButton(event -> {
-            if (!isFormValid()) return;
+            if (isFormInvalid()) return;
             saveOrUpdatePhotogallery();
         });
         buttonLayout.add(saveButton);
 
         // Uložit a zavřít
         Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
-            if (!isFormValid()) return;
+            if (isFormInvalid()) return;
             leaving = true;
             saveOrUpdatePhotogallery();
         });
@@ -326,13 +329,13 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         }, true));
     }
 
-    private boolean isFormValid() {
+    private boolean isFormInvalid() {
         String name = photogalleryNameField.getValue();
         if (name == null || name.isEmpty()) {
             UIUtils.showWarning("Název galerie nemůže být prázdný");
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     private void saveOrUpdatePhotogallery() {
@@ -346,9 +349,9 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             }
         }
 
-        PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(photogalleryNameField.getValue(), galleryDir,
-                photogalleryKeywords.getValues(), publicatedCheckBox.getValue(),
-                reprocessSlideshowAndMiniCheckBox.getValue());
+        PhotogalleryPayloadTO payloadTO =
+                new PhotogalleryPayloadTO(photogalleryNameField.getValue(), galleryDir, photogalleryKeywords.getValue(),
+                        publicatedCheckBox.getValue(), reprocessSlideshowAndMiniCheckBox.getValue());
 
         eventBus.subscribe(PGEditorPage.this);
         progressDialog = new ProgressDialog();

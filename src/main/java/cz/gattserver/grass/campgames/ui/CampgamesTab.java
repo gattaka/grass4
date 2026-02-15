@@ -1,6 +1,7 @@
 package cz.gattserver.grass.campgames.ui;
 
-import java.util.Arrays;
+import java.io.Serial;
+import java.util.List;
 import java.util.Set;
 
 import com.vaadin.flow.component.button.Button;
@@ -12,9 +13,7 @@ import cz.gattserver.grass.campgames.interfaces.CampgameOverviewTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.campgames.ui.dialogs.CampgameDialog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import cz.gattserver.grass.core.ui.util.TokenField;
 
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -29,34 +28,33 @@ import com.vaadin.flow.data.provider.SortDirection;
 
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 
 public class CampgamesTab extends Div {
 
-    private static final long serialVersionUID = -5013459007975657195L;
+    @Serial
+    private static final long serialVersionUID = 113673548368521663L;
 
     private static final String NAME_BIND = "nameBind";
     private static final String PLAYERS_BIND = "playersBind";
     private static final String PREPARATIONTIME_BIND = "preparationTimeBind";
     private static final String PLAYTIME_BIND = "playTimeBind";
 
-    @Autowired
-    private CampgamesService campgamesService;
+    private final CampgamesService campgamesService;
 
-    private Grid<CampgameOverviewTO> grid;
-    private TokenField keywordsFilter;
+    private final Grid<CampgameOverviewTO> grid;
+    private final TokenField keywordsFilter;
 
-    private CampgameFilterTO filterDTO;
+    private final CampgameFilterTO filterDTO;
 
     public CampgamesTab() {
-        SpringContextHelper.inject(this);
+        campgamesService = SpringContextHelper.getBean(CampgamesService.class);
 
         filterDTO = new CampgameFilterTO();
 
         // Filtr na klíčová slova
-        keywordsFilter = new TokenField(campgamesService.getAllCampgameKeywordNames());
+        keywordsFilter = new TokenField(null, campgamesService.getAllCampgameKeywordNames());
         keywordsFilter.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         keywordsFilter.setPlaceholder("Filtrovat dle klíčových slov");
         keywordsFilter.getInputField().setWidth("200px");
@@ -111,7 +109,7 @@ public class CampgamesTab extends Div {
         });
 
         populate();
-        grid.sort(Arrays.asList(new GridSortOrder<CampgameOverviewTO>(nameColumn, SortDirection.ASCENDING)));
+        grid.sort(List.of(new GridSortOrder<>(nameColumn, SortDirection.ASCENDING)));
         grid.addItemClickListener(event -> {
             if (event.getClickCount() > 2) openDetailWindow(event.getItem().getId());
         });
@@ -135,7 +133,7 @@ public class CampgamesTab extends Div {
                 e -> openDetailWindow(grid.getSelectedItems().iterator().next().getId()), grid));
 
         // Oprava údajů existující hry
-        Button fixBtn = componentFactory.createEditGridButton(e -> openItemWindow(e), grid);
+        Button fixBtn = componentFactory.createEditGridButton(this::openItemWindow, grid);
         fixBtn.setVisible(editor);
         buttonLayout.add(fixBtn);
 
@@ -147,24 +145,17 @@ public class CampgamesTab extends Div {
     }
 
     private void populate() {
-        Set<String> types = keywordsFilter.getValues();
+        Set<String> types = keywordsFilter.getValue();
         filterDTO.setKeywords(types);
 
         FetchCallback<CampgameOverviewTO, Void> fetchCallback =
                 q -> campgamesService.getCampgames(filterDTO, q.getOffset(), q.getLimit(),
-                        QuerydslUtil.transformOrdering(q.getSortOrders(), column -> {
-                            switch (column) {
-                                case NAME_BIND:
-                                    return "name";
-                                case PLAYERS_BIND:
-                                    return "players";
-                                case PLAYTIME_BIND:
-                                    return "playTime";
-                                case PREPARATIONTIME_BIND:
-                                    return "preparationTime";
-                                default:
-                                    return column;
-                            }
+                        QuerydslUtil.transformOrdering(q.getSortOrders(), column -> switch (column) {
+                            case NAME_BIND -> "name";
+                            case PLAYERS_BIND -> "players";
+                            case PLAYTIME_BIND -> "playTime";
+                            case PREPARATIONTIME_BIND -> "preparationTime";
+                            default -> column;
                         })).stream();
         CountCallback<CampgameOverviewTO, Void> countCallback = q -> campgamesService.countCampgames(filterDTO);
         grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
@@ -176,8 +167,7 @@ public class CampgamesTab extends Div {
             if (grid.getSelectedItems().isEmpty()) return;
             campgame = campgamesService.getCampgame(selectedTO.getId());
         }
-        new CampgameDialog(campgame == null ? null : campgamesService.getCampgame(campgame.getId()),
-                to -> onSave(to)).open();
+        new CampgameDialog(campgame == null ? null : campgamesService.getCampgame(campgame.getId()), this::onSave).open();
     }
 
     private void refreshGrid() {
@@ -195,7 +185,7 @@ public class CampgamesTab extends Div {
     }
 
     private void openDetailWindow(Long id) {
-        new CampgameDialog(campgamesService.getCampgame(id), to -> onSave(to)).open();
+        new CampgameDialog(campgamesService.getCampgame(id), this::onSave).open();
     }
 
     private void openDeleteWindow() {

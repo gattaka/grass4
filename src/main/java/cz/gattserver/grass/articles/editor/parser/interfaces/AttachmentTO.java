@@ -1,9 +1,14 @@
 package cz.gattserver.grass.articles.editor.parser.interfaces;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
-public class AttachmentTO {
+public class AttachmentTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -5487862259841530666L;
 
     private String name;
     private String size;

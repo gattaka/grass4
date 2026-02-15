@@ -30,7 +30,6 @@ import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.GrassMultiFileBuffer;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -109,7 +108,7 @@ public class CampgameDialog extends EditWebDialog {
         binder.forField(nameField).asRequired("Název položky je povinný").bind("name");
         detailsLayout.add(nameField);
 
-        TokenField keywords = new TokenField(campgamesService.getAllCampgameKeywordNames());
+        TokenField keywords = new TokenField(null, campgamesService.getAllCampgameKeywordNames());
         keywords.isEnabled();
         keywords.setAllowNewItems(true);
         keywords.getInputField().setPlaceholder("klíčové slovo");
@@ -158,7 +157,7 @@ public class CampgameDialog extends EditWebDialog {
             try {
                 CampgameTO beanTO = originalTO == null ? new CampgameTO() : originalTO;
                 binder.writeBean(beanTO);
-                beanTO.setKeywords(keywords.getValues());
+                beanTO.setKeywords(keywords.getValue());
                 onSave.accept(beanTO);
                 close();
             } catch (Exception ve) {

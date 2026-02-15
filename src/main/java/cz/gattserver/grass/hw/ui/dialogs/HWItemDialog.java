@@ -15,7 +15,7 @@ import com.vaadin.flow.component.textfield.*;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.grass.core.ui.util.TokenField2;
+import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -129,7 +129,7 @@ public class HWItemDialog extends EditWebDialog {
         for (HWTypeBasicTO to : hwService.findAllHWTypes())
             typeNameMap.put(to.getName(), to);
 
-        TokenField2 tokenField = new TokenField2("Klíčová slova", typeNameMap.keySet());
+        TokenField tokenField = new TokenField("Klíčová slova", typeNameMap.keySet());
         tokenField.setAllowNewItems(true);
         binder.forField(tokenField)
                 .bind(to -> to.getTypes().stream().map(HWTypeBasicTO::getName).collect(Collectors.toSet()),

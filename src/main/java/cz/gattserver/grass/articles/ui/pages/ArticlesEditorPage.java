@@ -41,6 +41,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.HtmlSpan;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +59,9 @@ import java.util.Objects;
 @PageTitle("Editor článku")
 @Route(value = "articles-editor", layout = MainView.class)
 public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
+
+    @Serial
+    private static final long serialVersionUID = 7025393827351970836L;
 
     private static final Logger logger = LoggerFactory.getLogger(ArticlesEditorPage.class);
 
@@ -87,9 +91,9 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
     private boolean leaving;
 
-    public ArticlesEditorPage(ArticleService articleService, ContentTagService contentTagFacade,
-                              PluginRegisterService pluginRegisterService, SecurityService securityService,
-                              NodeService nodeService, ContentTagService contentTagService) {
+    public ArticlesEditorPage(ArticleService articleService, PluginRegisterService pluginRegisterService,
+                              SecurityService securityService, NodeService nodeService,
+                              ContentTagService contentTagService) {
         this.articleService = articleService;
         this.pluginRegister = pluginRegisterService;
         this.securityService = securityService;
@@ -258,16 +262,16 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 ComponentEventListener<ClickEvent<Button>> clickListener =
                         event -> UI.getCurrent().getPage().executeJs(js, getElement());
 
+                Button btn;
                 if (resourceBundle.getImagePath() != null) {
-                    Button btn = new Button(resourceBundle.getDescription(),
+                    btn = new Button(resourceBundle.getDescription(),
                             new Image(resourceBundle.getImagePath(), resourceBundle.getDescription()), clickListener);
                     btn.setTooltipText(resourceBundle.getTag());
-                    familyToolsLayout.add(btn);
                 } else {
-                    Button btn = new Button(resourceBundle.getDescription(), clickListener);
+                    btn = new Button(resourceBundle.getDescription(), clickListener);
                     btn.getElement().setProperty("title", resourceBundle.getTag());
-                    familyToolsLayout.add(btn);
                 }
+                familyToolsLayout.add(btn);
             }
         }
 
@@ -279,10 +283,10 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagService.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+                q -> contentTagService.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagService.countByFilter(q.getFilter().get());
-        articleKeywords = new TokenField(fetchItemsCallback, serializableFunction);
+                q -> contentTagService.countByFilter(q.getFilter());
+        articleKeywords = new TokenField(null, fetchItemsCallback, serializableFunction);
         articleKeywords.isEnabled();
         articleKeywords.setPlaceholder("klíčové slovo");
 
@@ -353,7 +357,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         buttonLayout.add(autosaveLabel);
     }
 
-    private Grid<AttachmentTO> createAttachmentsGrid(Div layout) {
+    private void createAttachmentsGrid(Div layout) {
         attachmentsGrid = new Grid<>();
         attachmentsGrid.setColumnReorderingAllowed(true);
         attachmentsGrid.setSelectionMode(SelectionMode.NONE);
@@ -383,6 +387,11 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             if (e.getClickCount() > 1) handleInsertAction(e.getItem());
         });
 
+        Upload upload = getUpload();
+        layout.add(upload);
+    }
+
+    private @NonNull Upload getUpload() {
         Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
             // vždy ukládá do draft adresáře; při ostrém uložení se přesune
             AttachmentsOperationResult result = articleService.saveDraftAttachment(articleEditorTO.getDraftId(),
@@ -403,9 +412,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             }
         }));
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        layout.add(upload);
-
-        return attachmentsGrid;
+        return upload;
     }
 
     private Button createPreviewButton() {
@@ -413,8 +420,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             try {
                 saveDraft(true);
                 String url = RouteConfiguration.forSessionScope().getUrl(ArticlesViewer.class,
-                                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getDraftId(),
-                                        articleEditorTO.getDraftName()));
+                        URLIdentifierUtils.createURLIdentifier(articleEditorTO.getDraftId(),
+                                articleEditorTO.getDraftName()));
                 UI.getCurrent().getPage().open(url, "_blank");
             } catch (Exception e) {
                 logger.error("Při ukládání náhledu článku došlo k chybě", e);
@@ -471,7 +478,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     private void gatherFields() {
         articleEditorTO.setDraftName(articleNameField.getValue());
         articleEditorTO.setDraftText(articleTextArea.getValue());
-        articleEditorTO.setDraftTags(articleKeywords.getValues());
+        articleEditorTO.setDraftTags(articleKeywords.getValue());
         articleEditorTO.setDraftPublicated(publicatedCheckBox.getValue());
     }
 

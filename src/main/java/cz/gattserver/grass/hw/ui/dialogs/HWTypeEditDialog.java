@@ -7,7 +7,6 @@ import com.vaadin.flow.data.binder.Binder;
 
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 
 import java.util.function.Consumer;

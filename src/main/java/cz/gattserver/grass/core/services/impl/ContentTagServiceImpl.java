@@ -1,15 +1,7 @@
 package cz.gattserver.grass.core.services.impl;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
@@ -168,12 +160,12 @@ public class ContentTagServiceImpl implements ContentTagService {
 	}
 
 	@Override
-	public List<String> findByFilter(String filter, int offset, int limit) {
+	public List<String> findByFilter(Optional<String> filter, int offset, int limit) {
 		return contentTagRepository.findByFilter(filter, offset, limit);
 	}
 
 	@Override
-	public Integer countByFilter(String filter) {
+	public Integer countByFilter(Optional<String> filter) {
 		return contentTagRepository.countByFilter(filter);
 	}
 

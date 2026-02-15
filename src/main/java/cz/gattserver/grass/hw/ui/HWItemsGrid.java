@@ -21,7 +21,7 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.util.TokenField2;
+import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.*;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
@@ -66,7 +66,7 @@ public class HWItemsGrid extends Div {
     private final SecurityService securityFacade;
 
     private Grid<HWItemOverviewTO> grid;
-    private TokenField2 hwTypesFilter;
+    private TokenField hwTypesFilter;
 
     private Map<String, HWTypeBasicTO> tokenMap = new HashMap<>();
     private Map<Long, Integer> indexMap = new HashMap<>();
@@ -181,7 +181,7 @@ public class HWItemsGrid extends Div {
             for (HWTypeBasicTO type : hwService.findAllHWTypes())
                 tokenMap.put(type.getName(), type);
 
-            hwTypesFilter = new TokenField2(null, tokenMap.keySet());
+            hwTypesFilter = new TokenField(null, tokenMap.keySet());
             hwTypesFilter.getInputField().setWidth("200px");
             hwTypesFilter.setAllowNewItems(false);
             hwTypesFilter.getInputField().setPlaceholder("Filtrovat dle typu hw");

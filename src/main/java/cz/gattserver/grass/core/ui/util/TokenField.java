@@ -1,22 +1,19 @@
 package cz.gattserver.grass.core.ui.util;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-
+import com.vaadin.flow.component.Unit;
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.combobox.ComboBox;
+import com.vaadin.flow.component.customfield.CustomField;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider;
 import cz.gattserver.common.ui.ComponentFactory;
 import org.apache.commons.lang3.StringUtils;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.combobox.ComboBox;
-import com.vaadin.flow.component.html.Div;
+import java.util.*;
+import java.util.function.Consumer;
 
-public class TokenField extends Div {
+public class TokenField extends CustomField<Set<String>> {
 
     private Map<String, Button> tokens = new HashMap<>();
     private Div tokensLayout;
@@ -28,35 +25,50 @@ public class TokenField extends Div {
     private Div chooseElementsDiv;
     private ComboBox<String> comboBox;
 
-    public TokenField(CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback,
+    public TokenField(String label, CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback,
                       CallbackDataProvider.CountCallback<String, String> countCallback) {
         comboBox = new ComboBox<>();
         comboBox.setItems(fetchItemsCallback, countCallback);
-        comboBox.addAttachListener(e -> comboBox.focus());
-        init();
+        init(label);
     }
 
-    public TokenField(Collection<String> values) {
-        comboBox = new ComboBox<>(null, values);
-        init();
+    public TokenField(String label, Collection<String> items) {
+        comboBox = new ComboBox<>(null, items);
+        init(label);
     }
 
-    private void init() {
+    private void init(String label) {
+        setLabel(label);
         ComponentFactory componentFactory = new ComponentFactory();
         tokensLayout = componentFactory.createButtonLayout(false);
         add(tokensLayout);
 
+        setMinWidth(100, Unit.PERCENTAGE);
+
         chooseElementsDiv = new Div();
         chooseElementsDiv.addClassName(UIUtils.FLEX_DIV_CLASS);
+        chooseElementsDiv.setVisible(false);
         tokensLayout.add(chooseElementsDiv);
 
+
         comboBox.addCustomValueSetListener(e -> {
-            if (allowNewItems) {
-                commitValue(e.getDetail());
-            }
+            if (allowNewItems) commitValue(e.getDetail());
         });
         comboBox.addValueChangeListener(e -> commitValue(e.getValue()));
-        chooseElementsDiv.add(comboBox);
+        tokensLayout.add(comboBox);
+    }
+
+    @Override
+    protected Set<String> generateModelValue() {
+        return Set.copyOf(tokens.keySet());
+    }
+
+    @Override
+    protected void setPresentationValue(Set<String> value) {
+        tokens.clear();
+        chooseElementsDiv.removeAll();
+        chooseElementsDiv.setVisible(false);
+        addTokens(value);
     }
 
     public TokenField setPlaceholder(String placeholder) {
@@ -79,18 +91,37 @@ public class TokenField extends Div {
     }
 
     public void addTokens(Collection<String> tokens) {
-        for (String token : tokens)
-            addToken(token);
+        if (isReadOnly() && (tokens == null || tokens.isEmpty())) {
+            Div div = new Div("-žádné položky-");
+            div.addClassName("token-field-item");
+            chooseElementsDiv.add(div);
+            chooseElementsDiv.setVisible(true);
+        } else if (tokens != null) {
+            for (String token : tokens)
+                addToken(token);
+        }
+    }
+
+    @Override
+    public void setReadOnly(boolean readOnly) {
+        super.setReadOnly(readOnly);
+        setPresentationValue(getValue());
+        comboBox.setVisible(!readOnly);
     }
 
     public void addToken(String token) {
         if (!tokens.containsKey(token)) {
-            Button tokenButton = new Button(token, e -> deleteToken(token));
-            tokenButton.setIcon(VaadinIcon.CLOSE.create());
-            tokens.put(token, tokenButton);
-            tokensLayout.add(tokenButton);
-            tokensLayout.remove(chooseElementsDiv);
-            tokensLayout.add(chooseElementsDiv);
+            if (isReadOnly()) {
+                Div div = new Div(token);
+                div.addClassName("token-field-item");
+                chooseElementsDiv.add(div);
+            } else {
+                Button tokenButton = new Button(token, e -> deleteToken(token));
+                tokenButton.setIcon(VaadinIcon.CLOSE.create());
+                tokens.put(token, tokenButton);
+                chooseElementsDiv.add(tokenButton);
+            }
+            chooseElementsDiv.setVisible(true);
             comboBox.focus();
             if (addTokenListener != null) addTokenListener.accept(token);
         }
@@ -99,8 +130,10 @@ public class TokenField extends Div {
     public void deleteToken(String token) {
         Button tokenComponent = tokens.get(token);
         if (tokenComponent != null) {
-            tokensLayout.remove(tokenComponent);
+            chooseElementsDiv.remove(tokenComponent);
             tokens.remove(token);
+            chooseElementsDiv.setVisible(tokens.size() > 0);
+            updateValue();
             if (removeTokenListener != null) removeTokenListener.accept(token);
         }
     }
@@ -109,10 +142,6 @@ public class TokenField extends Div {
         for (String s : tokens)
             addToken(s);
         return this;
-    }
-
-    public Set<String> getValues() {
-        return new HashSet<>(tokens.keySet());
     }
 
     public void setAllowNewItems(boolean allowNewItems) {
@@ -138,5 +167,4 @@ public class TokenField extends Div {
     public void addTokenRemoveListener(Consumer<String> removeTokenListener) {
         this.removeTokenListener = removeTokenListener;
     }
-
 }

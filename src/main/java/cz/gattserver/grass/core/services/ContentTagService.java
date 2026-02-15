@@ -1,9 +1,6 @@
 package cz.gattserver.grass.core.services;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
@@ -114,7 +111,7 @@ public interface ContentTagService {
 	 * @param limit
 	 * @return stránkovaný filtrovaný seznam tagů
 	 */
-	List<String> findByFilter(String filter, int offset, int limit);
+	List<String> findByFilter(Optional<String> filter, int offset, int limit);
 
 	/**
 	 * Získá počet tagů dle filtru
@@ -122,5 +119,5 @@ public interface ContentTagService {
 	 * @param filter
 	 * @return filtrovaný počet tagů
 	 */
-	Integer countByFilter(String filter);
+	Integer countByFilter(Optional<String> filter);
 }

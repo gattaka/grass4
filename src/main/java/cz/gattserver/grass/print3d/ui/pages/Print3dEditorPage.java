@@ -16,7 +16,6 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.*;
 import cz.gattserver.common.server.URLIdentifierUtils;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.stlviewer.STLViewer;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
@@ -55,6 +54,9 @@ import java.util.Set;
 @PageTitle("Editor 3D projektu")
 @Route(value = "print3d-editor", layout = MainView.class)
 public class Print3dEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
+
+    @Serial
+    private static final long serialVersionUID = -1922351429364968659L;
 
     private static final Logger logger = LoggerFactory.getLogger(Print3dEditorPage.class);
 
@@ -119,10 +121,10 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         }
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagFacade.findByFilter(q.getFilter().get(), q.getOffset(), q.getLimit()).stream();
+                q -> contentTagFacade.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagFacade.countByFilter(q.getFilter().get());
-        keywords = new TokenField(fetchItemsCallback, serializableFunction);
+                q -> contentTagFacade.countByFilter(q.getFilter());
+        keywords = new TokenField(null,fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsDialog(list -> list.forEach(keywords::addToken)).open());
@@ -340,7 +342,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
     }
 
     private void saveOrUpdateProject() {
-        Print3dPayloadTO payloadTO = new Print3dPayloadTO(nameField.getValue(), projectDir, keywords.getValues(),
+        Print3dPayloadTO payloadTO = new Print3dPayloadTO(nameField.getValue(), projectDir, keywords.getValue(),
                 publicatedCheckBox.getValue());
 
         eventBus.subscribe(Print3dEditorPage.this);

@@ -16,7 +16,7 @@ import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.grass.core.ui.util.TokenField2;
+import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.medic.service.MedicService;
 import cz.gattserver.grass.medic.interfaces.MedicalInstitutionTO;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
@@ -110,7 +110,7 @@ public class MedicalRecordDialog extends EditWebDialog {
             medicamentIdToNameMap.put(mto.getId(), mto.getName());
         }
 
-        TokenField2 tokenField = new TokenField2("Medikamenty", medicamentsNameToIdMap.keySet());
+        TokenField tokenField = new TokenField("Medikamenty", medicamentsNameToIdMap.keySet());
         tokenField.setAllowNewItems(false);
         tokenField.setReadOnly(readOnly);
         binder.forField(tokenField).bind(to -> to.getMedicaments().stream().map(m -> medicamentIdToNameMap.get(m))
