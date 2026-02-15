@@ -25,46 +25,47 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 @EnableAsync
 @EnableScheduling
 @ServletComponentScan
-@PropertySource({ "classpath:version.properties"})
-@Import({ DatabaseConfig.class, EncoderConfig.class, SecurityConfig.class, WebSecurityConfig.class })
+@PropertySource({"classpath:version.properties"})
+@Import({DatabaseConfig.class, EncoderConfig.class, SecurityConfig.class, WebSecurityConfig.class,
+        ServletConfig.class})
 public class BaseConfig {
 
-	@Value("${grass.mail.address}")
-	private String grassMailAddress;
+    @Value("${grass.mail.address}")
+    private String grassMailAddress;
 
-	@Value("${grass.mail.password}")
-	private String grassMailPassword;
+    @Value("${grass.mail.password}")
+    private String grassMailPassword;
 
-	@Value("${grass.notification.address}")
-	private String grassNotificationAddress;
+    @Value("${grass.notification.address}")
+    private String grassNotificationAddress;
 
-	@Value("${version}")
-	private String version;
+    @Value("${version}")
+    private String version;
 
-	@Bean(name = "taskExecutor")
-	public ThreadPoolTaskExecutor taskExecutor() {
-		ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-		executor.setCorePoolSize(5);
-		executor.setMaxPoolSize(10);
-		executor.setQueueCapacity(25);
-		return executor;
-	}
+    @Bean(name = "taskExecutor")
+    public ThreadPoolTaskExecutor taskExecutor() {
+        ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
+        executor.setCorePoolSize(5);
+        executor.setMaxPoolSize(10);
+        executor.setQueueCapacity(25);
+        return executor;
+    }
 
 
-	@Bean(name = "grassMailService")
-	public MailService grassMailService() {
-		MailServiceImpl mailService = new MailServiceImpl();
-		mailService.setGrassMailAddress(grassMailAddress);
-		mailService.setGrassMailPassword(grassMailPassword);
-		mailService.setGrassNotificationAddress(grassNotificationAddress);
-		return mailService;
-	}
+    @Bean(name = "grassMailService")
+    public MailService grassMailService() {
+        MailServiceImpl mailService = new MailServiceImpl();
+        mailService.setGrassMailAddress(grassMailAddress);
+        mailService.setGrassMailPassword(grassMailPassword);
+        mailService.setGrassNotificationAddress(grassNotificationAddress);
+        return mailService;
+    }
 
-	@Bean
-	public VersionInfoService versionInfoService() {
-		VersionInfoServiceImpl infoService = new VersionInfoServiceImpl();
-		infoService.setVersionProperties(version);
-		return infoService;
-	}
+    @Bean
+    public VersionInfoService versionInfoService() {
+        VersionInfoServiceImpl infoService = new VersionInfoServiceImpl();
+        infoService.setVersionProperties(version);
+        return infoService;
+    }
 
 }

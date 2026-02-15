@@ -1,6 +1,5 @@
 package cz.gattserver.grass.hw.model;
 
-import java.util.Collection;
 import java.util.List;
 
 import com.querydsl.core.types.Order;

@@ -30,9 +30,6 @@ public class Print3dSettingsPageFragmentFactory extends AbstractPageFragmentFact
     @Autowired
     private FileSystemService fileSystemService;
 
-    @Resource(name = "print3dViewerPageFactory")
-    private PageFactory print3dViewerPageFactory;
-
     @Override
     public void createFragment(Div div) {
         final Print3dConfiguration configuration = pgService.loadConfiguration();

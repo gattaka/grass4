@@ -1,23 +1,26 @@
 package cz.gattserver.grass.articles;
 
-import cz.gattserver.grass.articles.config.ArticlesConfiguration;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.server.AbstractConfiguratedPathRequestHandler;
 import org.apache.hc.core5.http.HttpStatus;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 
-@WebServlet(urlPatterns = "/" + ArticlesConfiguration.ATTACHMENTS_PATH + "/*")
+// Registrace servletu přesunuta do cz.gattserver.grass.ServletConfig, protože tranzitivně vznikal problém s vytvářením instance jakarta.persistence.EntityManager
+@Component
 public class AttachmentsRequestHandler extends AbstractConfiguratedPathRequestHandler {
 
-    @Autowired
-    private ArticleService articleService;
+    private final ArticleService articleService;
+
+    public AttachmentsRequestHandler(@Lazy ArticleService articleService) {
+        this.articleService = articleService;
+    }
 
     @Override
     protected Path getPath(String fileName, HttpServletRequest request) throws FileNotFoundException {

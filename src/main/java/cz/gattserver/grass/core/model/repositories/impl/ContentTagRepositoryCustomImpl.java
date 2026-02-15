@@ -4,14 +4,12 @@ import java.util.List;
 import java.util.Optional;
 
 import com.querydsl.jpa.JPQLQuery;
-import cz.gattserver.grass.core.model.domain.ContentTag;
 
+import cz.gattserver.grass.core.model.domain.ContentTag;
 import cz.gattserver.grass.core.model.domain.QContentTag;
 import cz.gattserver.grass.core.model.repositories.ContentTagRepositoryCustom;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
-import org.springframework.stereotype.Repository;
 
-@Repository
 public class ContentTagRepositoryCustomImpl extends QuerydslRepositorySupport implements ContentTagRepositoryCustom {
 
     private static final QContentTag c = QContentTag.contentTag;
@@ -40,5 +38,4 @@ public class ContentTagRepositoryCustomImpl extends QuerydslRepositorySupport im
     public Integer countByFilter(Optional<String> filterOptional) {
         return Math.toIntExact(createQuery(filterOptional).fetchCount());
     }
-
 }
