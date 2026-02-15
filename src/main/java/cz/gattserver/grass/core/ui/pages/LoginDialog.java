@@ -39,6 +39,7 @@ public class LoginDialog extends WebDialog {
         TextField usernameField = new TextField("Login");
         binder.forField(usernameField).asRequired("Pole je povinné").bind(UserFieldsTO::getName, UserFieldsTO::setName);
         usernameField.setWidthFull();
+        usernameField.focus();
         layout.add(usernameField);
 
         PasswordField passwordField = new PasswordField("Heslo");
