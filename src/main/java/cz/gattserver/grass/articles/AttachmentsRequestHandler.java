@@ -1,22 +1,16 @@
 package cz.gattserver.grass.articles;
 
-import com.vaadin.copilot.shaded.checkerframework.checker.units.qual.C;
-import cz.gattserver.grass.articles.config.ArticlesConfiguration;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.server.AbstractGrassRequestHandler;
-import cz.gattserver.grass.core.server.AbstractGrassRequestHandlerConfig;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.hc.core5.http.HttpStatus;
-import org.springframework.boot.web.servlet.ServletRegistrationBean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
 
-// Registrace servletu přesunuta do cz.gattserver.grass.ServletConfig, protože tranzitivně vznikal problém s vytvářením instance jakarta.persistence.EntityManager
 @Component
 public class AttachmentsRequestHandler extends AbstractGrassRequestHandler {
 

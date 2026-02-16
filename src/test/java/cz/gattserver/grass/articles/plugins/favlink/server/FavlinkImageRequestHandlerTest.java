@@ -18,40 +18,42 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class FavlinkImageRequestHandlerTest extends DBCleanTest {
 
-	@Autowired
-	private MockFileSystemService fileSystemService;
+    @Autowired
+    private MockFileSystemService fileSystemService;
 
-	@Autowired
-	private ConfigurationService configurationService;
+    @Autowired
+    private ConfigurationService configurationService;
 
-	@BeforeEach
-	public void init() {
-		fileSystemService.init();
-	}
+    @Autowired
+    private FavlinkImageRequestHandler favlinkImageRequestHandler;
 
-	private Path prepareFS(FileSystem fs) throws IOException {
-		Path outputDir = fs.getPath("/some/path/favlink/cache/");
-		Files.createDirectories(outputDir);
+    @BeforeEach
+    public void init() {
+        fileSystemService.init();
+    }
 
-		FavlinkConfiguration configuration = new FavlinkConfiguration();
-		configuration.setOutputPath(outputDir.toString());
-		configurationService.saveConfiguration(configuration);
+    private Path prepareFS(FileSystem fs) throws IOException {
+        Path outputDir = fs.getPath("/some/path/favlink/cache/");
+        Files.createDirectories(outputDir);
 
-		return outputDir;
-	}
+        FavlinkConfiguration configuration = new FavlinkConfiguration();
+        configuration.setOutputPath(outputDir.toString());
+        configurationService.saveConfiguration(configuration);
 
-	@Test
-	public void test() throws IOException {
-		FileSystem fs = fileSystemService.getFileSystem();
-		Path outputDir = prepareFS(fs);
-		Path testFile = Files.createFile(outputDir.resolve("testFile"));
-		Files.write(testFile, new byte[] { 1, 1, 1 });
+        return outputDir;
+    }
 
-		Path file = new FavlinkImageRequestHandler().getPath("testFile", null);
-		assertTrue(Files.exists(file));
-		assertEquals(3L, Files.size(file));
-		assertEquals("testFile", file.getFileName().toString());
-		assertEquals("/some/path/favlink/cache/testFile", file.toString());
-	}
+    @Test
+    public void test() throws IOException {
+        FileSystem fs = fileSystemService.getFileSystem();
+        Path outputDir = prepareFS(fs);
+        Path testFile = Files.createFile(outputDir.resolve("testFile"));
+        Files.write(testFile, new byte[]{1, 1, 1});
 
+        Path file = favlinkImageRequestHandler.getPath("testFile", null);
+        assertTrue(Files.exists(file));
+        assertEquals(3L, Files.size(file));
+        assertEquals("testFile", file.getFileName().toString());
+        assertEquals("/some/path/favlink/cache/testFile", file.toString());
+    }
 }

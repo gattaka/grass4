@@ -25,6 +25,9 @@ public class FMRequestHandlerTest {
     @Autowired
     private ConfigurationService configurationService;
 
+    @Autowired
+    private FMRequestHandler fmRequestHandler;
+
     @BeforeEach
     public void init() {
         fileSystemService.init();
@@ -48,11 +51,10 @@ public class FMRequestHandlerTest {
         Path testFile = Files.createFile(rootDir.resolve("testFile"));
         Files.write(testFile, new byte[]{1, 1, 1});
 
-        Path file = new FMRequestHandler().getPath("testFile", null);
+        Path file = fmRequestHandler.getPath("testFile", null);
         assertTrue(Files.exists(file));
         assertEquals(3L, Files.size(file));
         assertEquals("testFile", file.getFileName().toString());
         assertEquals("/some/path/fm/root/testFile", file.toString());
     }
-
 }

@@ -25,6 +25,11 @@ import org.apache.tika.Tika;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Registrace servletu, které z tohoto dědí by měly být namísto přes {@link jakarta.servlet.annotation.WebServlet}
+ * provedeny přes Spring {@link org.springframework.boot.web.servlet.ServletRegistrationBean}
+ * Důvodem je pořadí vytváření Spring beans, u kterých takhle vznikal problém s vytvářením jakarta.persistence.EntityManager
+ */
 public abstract class AbstractGrassRequestHandler extends HttpServlet {
 
     private transient Logger logger = LoggerFactory.getLogger(AbstractGrassRequestHandler.class);
@@ -353,9 +358,9 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
     private static boolean accepts(String acceptHeader, String toAccept) {
         String[] acceptValues = acceptHeader.split("\\s*(,|;)\\s*");
         Arrays.sort(acceptValues);
-        return Arrays.binarySearch(acceptValues, toAccept) > -1
-                || Arrays.binarySearch(acceptValues, toAccept.replaceAll("/.*$", "/*")) > -1
-                || Arrays.binarySearch(acceptValues, "*/*") > -1;
+        return Arrays.binarySearch(acceptValues, toAccept) > -1 ||
+                Arrays.binarySearch(acceptValues, toAccept.replaceAll("/.*$", "/*")) > -1 ||
+                Arrays.binarySearch(acceptValues, "*/*") > -1;
     }
 
     /**
