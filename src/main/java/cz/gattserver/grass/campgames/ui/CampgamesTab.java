@@ -111,29 +111,36 @@ public class CampgamesTab extends Div {
         populate();
         grid.sort(List.of(new GridSortOrder<>(nameColumn, SortDirection.ASCENDING)));
         grid.addItemClickListener(event -> {
-            if (event.getClickCount() > 2) openDetailWindow(event.getItem().getId());
+            if (event.getClickCount() > 2) onDetail(event.getItem().getId());
         });
         add(grid);
+
+        boolean editor = SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
+                .contains(CampgamesRole.CAMPGAME_EDITOR);
+
+        grid.addItemDoubleClickListener(e -> {
+            if (editor) {
+                onEdit(e.getItem().getId());
+            } else {
+                onDetail(e.getItem().getId());
+            }
+        });
 
         ComponentFactory componentFactory = new ComponentFactory();
 
         Div buttonLayout = componentFactory.createButtonLayout();
         add(buttonLayout);
 
-        boolean editor = SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
-                .contains(CampgamesRole.CAMPGAME_EDITOR);
-
         // Založení nové hry
-        Button newCampgameBtn = componentFactory.createCreateButton(e -> openItemWindow(null));
+        Button newCampgameBtn = componentFactory.createCreateButton(e -> onCreate());
         buttonLayout.add(newCampgameBtn);
         newCampgameBtn.setVisible(editor);
 
         // Zobrazení detailů hry
-        buttonLayout.add(componentFactory.createDetailGridButton(
-                e -> openDetailWindow(grid.getSelectedItems().iterator().next().getId()), grid));
+        buttonLayout.add(componentFactory.createDetailGridButton(to -> onDetail(to.getId()), grid));
 
         // Oprava údajů existující hry
-        Button fixBtn = componentFactory.createEditGridButton(this::openItemWindow, grid);
+        Button fixBtn = componentFactory.createEditGridButton(to -> onEdit(to.getId()), grid);
         fixBtn.setVisible(editor);
         buttonLayout.add(fixBtn);
 
@@ -161,13 +168,16 @@ public class CampgamesTab extends Div {
         grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
     }
 
-    private void openItemWindow(CampgameOverviewTO selectedTO) {
-        CampgameTO campgame = null;
-        if (selectedTO != null) {
-            if (grid.getSelectedItems().isEmpty()) return;
-            campgame = campgamesService.getCampgame(selectedTO.getId());
-        }
-        new CampgameDialog(campgame == null ? null : campgamesService.getCampgame(campgame.getId()), this::onSave).open();
+    private void onCreate() {
+        CampgameDialog.create(this::onSave).open();
+    }
+
+    private void onEdit(Long id) {
+        CampgameDialog.edit(campgamesService.getCampgame(id), this::onSave).open();
+    }
+
+    private void onDetail(Long id) {
+        CampgameDialog.detail(campgamesService.getCampgame(id)).open();
     }
 
     private void refreshGrid() {
@@ -184,9 +194,6 @@ public class CampgamesTab extends Div {
         refreshGrid();
     }
 
-    private void openDetailWindow(Long id) {
-        new CampgameDialog(campgamesService.getCampgame(id), this::onSave).open();
-    }
 
     private void openDeleteWindow() {
         if (grid.getSelectedItems().isEmpty()) return;

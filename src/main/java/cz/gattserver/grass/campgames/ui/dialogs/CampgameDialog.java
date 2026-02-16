@@ -2,6 +2,7 @@ package cz.gattserver.grass.campgames.ui.dialogs;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -33,6 +34,8 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.grass.medic.interfaces.MedicamentTO;
+import cz.gattserver.grass.medic.web.MedicamentDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,23 +54,33 @@ public class CampgameDialog extends EditWebDialog {
     private Consumer<CampgameTO> onSave;
     private Upload upload;
 
-    public CampgameDialog(CampgameTO originalTO, Consumer<CampgameTO> onSave) {
-        super("Hra");
-        this.campgamesService = SpringContextHelper.getBean(CampgamesService.class);
-        init(originalTO, onSave);
+    public static CampgameDialog detail(CampgameTO originalTO) {
+        return new CampgameDialog(originalTO, null, true);
     }
 
-    /**
-     * @param originalTO opravuji údaje existující položky, nebo vytvářím novou (
-     *                   {@code null}) ?
-     */
-    private void init(CampgameTO originalTO, Consumer<CampgameTO> onSave) {
+    public static CampgameDialog edit(CampgameTO originalTO, Consumer<CampgameTO> onSave) {
+        return new CampgameDialog(originalTO, onSave, false);
+    }
+
+    public static CampgameDialog create(Consumer<CampgameTO> onSave) {
+        return new CampgameDialog(null, onSave, false);
+    }
+
+    private CampgameDialog(CampgameTO originalTO, Consumer<CampgameTO> onSave, boolean readOnly) {
+        super("Hra", readOnly);
+
+        setResizable(true);
+        setWidth(800, Unit.PIXELS);
+        setHeight(700, Unit.PIXELS);
+
+        this.campgamesService = SpringContextHelper.getBean(CampgamesService.class);
         this.originalTO = originalTO;
         this.onSave = onSave;
 
         Tabs tabs = new Tabs();
         tabs.setWidthFull();
         layout.add(tabs);
+        layout.setSizeFull();
 
         Tab detailsTab = new Tab("Info");
         tabs.add(detailsTab);
@@ -75,85 +88,79 @@ public class CampgameDialog extends EditWebDialog {
         Tab imgTab = new Tab("Přílohy");
         tabs.add(imgTab);
 
-        VerticalLayout tabLayout = new VerticalLayout();
-        tabLayout.setPadding(false);
-        layout.add(tabLayout);
-
         tabs.addSelectedChangeListener(e -> {
-            tabLayout.removeAll();
+            layout.removeAll();
+            layout.add(tabs); // musí být taky layout, jinak začne blbnout výška textarea
             switch (tabs.getSelectedIndex()) {
                 default:
                 case 0:
-                    tabLayout.add(createItemDetailsLayout());
+                    createItemDetailsLayout(layout);
                     break;
                 case 1:
-                    tabLayout.add(createImgTab());
+                    createImgTab(layout);
                     break;
             }
         });
-        tabLayout.add(createItemDetailsLayout());
+        createItemDetailsLayout(layout);
     }
 
-    private Component createItemDetailsLayout() {
-        VerticalLayout detailsLayout = new VerticalLayout();
-        detailsLayout.setPadding(false);
-
+    private void createItemDetailsLayout(VerticalLayout tabLayout) {
         CampgameTO formTO = new CampgameTO();
         Binder<CampgameTO> binder = new Binder<>(CampgameTO.class);
         binder.setBean(formTO);
 
         TextField nameField = new TextField("Název");
         nameField.setWidthFull();
+        nameField.setReadOnly(readOnly);
         nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
-        binder.forField(nameField).asRequired("Název položky je povinný").bind("name");
-        detailsLayout.add(nameField);
+        binder.forField(nameField).asRequired(componentFactory.createRequiredLabel())
+                .bind(CampgameTO::getName, CampgameTO::setName);
+        tabLayout.add(nameField);
 
         TokenField keywords = new TokenField(null, campgamesService.getAllCampgameKeywordNames());
-        keywords.isEnabled();
         keywords.setAllowNewItems(true);
+        keywords.setReadOnly(readOnly);
         keywords.getInputField().setPlaceholder("klíčové slovo");
+        binder.forField(keywords).bind(CampgameTO::getKeywords, CampgameTO::setKeywords);
+        tabLayout.add(keywords);
 
-        if (originalTO != null) for (String keyword : originalTO.getKeywords())
-            keywords.addToken(keyword);
-        detailsLayout.add(keywords);
-
-        FormLayout winLayout = new FormLayout();
-        winLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("600px", 4));
-        winLayout.setWidth("600px");
-        detailsLayout.add(winLayout);
+        HorizontalLayout itemDetailsLayout = new HorizontalLayout();
+        itemDetailsLayout.setWidthFull();
+        tabLayout.add(itemDetailsLayout);
 
         TextField originField = new TextField("Původ hry");
         originField.setWidthFull();
-        binder.forField(originField).bind("origin");
-        winLayout.add(originField);
+        originField.setReadOnly(readOnly);
+        binder.forField(originField).bind(CampgameTO::getOrigin, CampgameTO::setOrigin);
+        itemDetailsLayout.add(originField);
 
         TextField playersField = new TextField("Počet hráčů");
         playersField.setWidthFull();
-        binder.forField(playersField).bind("players");
-        winLayout.add(playersField);
+        playersField.setReadOnly(readOnly);
+        binder.forField(playersField).bind(CampgameTO::getPlayers, CampgameTO::setPlayers);
+        itemDetailsLayout.add(playersField);
 
         TextField playTimeField = new TextField("Délka hry");
         playTimeField.setWidthFull();
-        binder.forField(playTimeField).bind("playTime");
-        winLayout.add(playTimeField);
+        playTimeField.setReadOnly(readOnly);
+        binder.forField(playTimeField).bind(CampgameTO::getPlayTime, CampgameTO::setPlayTime);
+        itemDetailsLayout.add(playTimeField);
 
         TextField preparationTimeField = new TextField("Délka přípravy");
         preparationTimeField.setWidthFull();
-        binder.forField(preparationTimeField).bind("preparationTime");
-        winLayout.add(preparationTimeField);
+        preparationTimeField.setReadOnly(readOnly);
+        binder.forField(preparationTimeField).bind(CampgameTO::getPreparationTime, CampgameTO::setPreparationTime);
+        itemDetailsLayout.add(preparationTimeField);
 
         TextArea descriptionField = new TextArea("Popis");
-        descriptionField.setHeight("300px");
-        binder.forField(descriptionField).bind("description");
-        winLayout.add(descriptionField, 2);
+        descriptionField.setSizeFull();
+        descriptionField.setMinHeight("0"); // magie, která řeší roztahování na výšku dle obsahu, namísto scrollbaru
+        descriptionField.setReadOnly(readOnly);
+        binder.forField(descriptionField).bind(CampgameTO::getDescription, CampgameTO::setDescription);
+        tabLayout.add(descriptionField);
 
-        HorizontalLayout buttonLayout = new HorizontalLayout();
-        buttonLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        buttonLayout.setSpacing(false);
-        buttonLayout.setWidthFull();
-        layout.add(buttonLayout);
-
-        Button createBtn = componentFactory.createSaveButton(e -> {
+        getFooter().removeAll();
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e -> {
             try {
                 CampgameTO beanTO = originalTO == null ? new CampgameTO() : originalTO;
                 binder.writeBean(beanTO);
@@ -164,25 +171,14 @@ public class CampgameDialog extends EditWebDialog {
                 if (!(ve instanceof ValidationException))
                     new ErrorDialog("Uložení se nezdařilo" + ve.getMessage()).open();
             }
-        });
-        buttonLayout.add(createBtn);
-
-        buttonLayout.add(componentFactory.createStornoButton(e -> close()));
+        }, e -> close(), !readOnly));
 
         if (originalTO != null) binder.readBean(originalTO);
-
-        return detailsLayout;
     }
 
-    private Component createImgTab() {
-        VerticalLayout tabLayout = new VerticalLayout();
-        tabLayout.setSizeFull();
-        tabLayout.setPadding(false);
-        tabLayout.setSpacing(false);
-
+    private void createImgTab(VerticalLayout tabLayout) {
         boolean isAdmin =
                 SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles().contains(CoreRole.ADMIN);
-        // TODO tohle aktuálně bude fungovat jen u existujících záznamů
         upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
             try {
                 CampgameFileTO to = SpringContextHelper.getBean(CampgamesService.class)
@@ -208,8 +204,6 @@ public class CampgameDialog extends EditWebDialog {
 
         tabLayout.add(createGrid(tabLayout, isAdmin, upload));
         tabLayout.add(upload);
-
-        return tabLayout;
     }
 
     private Grid<CampgameFileTO> createGrid(VerticalLayout tabLayout, boolean isAdmin, Upload upload) {
@@ -229,23 +223,25 @@ public class CampgameDialog extends EditWebDialog {
                                 .open(CampgamesConfiguration.CAMPGAMES_PATH + "/" + originalTO.getId() + "/" + to.getName()))))
                 .setHeader("Detail").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-        grid.addColumn(new ComponentRenderer<>(to -> {
-            Div button = componentFactory.createInlineButton("Smazat", be -> {
-                new ConfirmDialog("Opravdu smazat?", e -> {
-                    SpringContextHelper.getBean(CampgamesService.class)
-                            .deleteCampgameImagesFile(originalTO.getId(), to.getName());
-                    tabLayout.removeAll();
-                    tabLayout.add(createGrid(tabLayout, isAdmin, upload));
-                    tabLayout.add(upload);
-                    // TODO
-                    //imgTab.setLabel(createImgTabCaption());
-                }).open();
-            });
-            button.setVisible(isAdmin);
-            return button;
-        })).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
+        if (isAdmin) {
+            grid.addColumn(new ComponentRenderer<>(to -> {
+                Div button = componentFactory.createInlineButton("Smazat", be -> {
+                    new ConfirmDialog("Opravdu smazat?", e -> {
+                        SpringContextHelper.getBean(CampgamesService.class)
+                                .deleteCampgameImagesFile(originalTO.getId(), to.getName());
+                        tabLayout.removeAll();
+                        tabLayout.add(createGrid(tabLayout, isAdmin, upload));
+                        tabLayout.add(upload);
+                        // TODO
+                        //imgTab.setLabel(createImgTabCaption());
+                    }).open();
+                });
+                return button;
+            })).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
+        }
+
         grid.addColumn(new TextRenderer<>(CampgameFileTO::getSize)).setHeader("Velikost")
-                .setTextAlign(ColumnTextAlign.END).setFlexGrow(0).setWidth("60px");
+                .setTextAlign(ColumnTextAlign.END).setFlexGrow(0).setWidth("100px");
 
         return grid;
     }

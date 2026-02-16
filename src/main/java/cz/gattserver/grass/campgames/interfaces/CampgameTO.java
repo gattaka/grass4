@@ -1,6 +1,6 @@
 package cz.gattserver.grass.campgames.interfaces;
 
-import java.util.Collection;
+import java.util.Set;
 
 /**
  * Campgame
@@ -20,7 +20,7 @@ public class CampgameTO extends CampgameOverviewTO {
 	/**
 	 * Klíčová slova
 	 */
-	private Collection<String> keywords;
+	private Set<String> keywords;
 
 	public String getDescription() {
 		return description;
@@ -38,11 +38,11 @@ public class CampgameTO extends CampgameOverviewTO {
 		this.origin = origin;
 	}
 
-	public Collection<String> getKeywords() {
+	public Set<String> getKeywords() {
 		return keywords;
 	}
 
-	public void setKeywords(Collection<String> keywords) {
+	public void setKeywords(Set<String> keywords) {
 		this.keywords = keywords;
 	}
 

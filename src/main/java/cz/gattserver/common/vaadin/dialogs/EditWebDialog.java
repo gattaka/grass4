@@ -4,7 +4,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class EditWebDialog extends WebDialog {
 
-    private final boolean readOnly;
+    protected final boolean readOnly;
 
     public EditWebDialog(String caption) {
         this(caption, false);
