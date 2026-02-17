@@ -13,14 +13,17 @@ public class PhotogalleryViewItemTO implements SlideshowItem {
     private String fullPath;
     private String miniaturePath;
 
-    @Override
-    public ExifInfoTO getExifInfoTO() {
-        return exifInfoTO;
+    public PhotogalleryViewItemTO() {
     }
 
     public PhotogalleryViewItemTO setExifInfoTO(ExifInfoTO exifInfoTO) {
         this.exifInfoTO = exifInfoTO;
         return this;
+    }
+
+    @Override
+    public ExifInfoTO getExifInfoTO() {
+        return exifInfoTO;
     }
 
     @Override

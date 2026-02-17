@@ -1,5 +1,7 @@
 package cz.gattserver.grass.pg.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -35,15 +37,14 @@ public class PhotogalleryRESTTO {
 	 */
 	private Set<String> files;
 
+    @QueryProjection
 	public PhotogalleryRESTTO(Long id, String name, LocalDateTime creationDate, LocalDateTime lastModificationDate,
-			String author, Set<String> files) {
-		super();
+			String author) {
 		this.id = id;
 		this.name = name;
 		this.creationDate = creationDate;
 		this.lastModificationDate = lastModificationDate;
 		this.author = author;
-		this.files = files;
 	}
 
 	public Set<String> getFiles() {

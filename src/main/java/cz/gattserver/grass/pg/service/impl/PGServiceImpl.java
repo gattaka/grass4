@@ -7,8 +7,7 @@ import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.model.domain.ContentNode;
-import cz.gattserver.grass.core.model.util.QuerydslUtil;
-import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
 import cz.gattserver.grass.modules.PGModule;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.impl.*;
@@ -50,19 +49,19 @@ public class PGServiceImpl implements PGService {
     private static Logger logger = LoggerFactory.getLogger(PGServiceImpl.class);
 
     @Autowired
-    private ContentNodeService contentNodeFacade;
+    private ContentNodeService contentNodeService;
 
     @Autowired
     private PhotogalleryMapper photogalleriesMapper;
-
-    @Autowired
-    private SecurityService securityFacade;
 
     @Autowired
     private ConfigurationService configurationService;
 
     @Autowired
     private PhotogalleryRepository photogalleryRepository;
+
+    @Autowired
+    private ContentNodeRepository contentNodeRepository;
 
     @Autowired
     private FileSystemService fileSystemService;
@@ -97,12 +96,12 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public boolean deletePhotogallery(long photogalleryId) {
+    public boolean deletePhotogallery(Long photogalleryId) {
         String path = photogalleryRepository.findPhotogalleryPathById(photogalleryId);
         Path galleryDir = getGalleryPath(path);
 
         photogalleryRepository.deleteById(photogalleryId);
-        contentNodeFacade.deleteByContentId(PGModule.ID, photogalleryId);
+        contentNodeService.deleteByContentId(PGModule.ID, photogalleryId);
 
         // musí se řešit return stavem, protože exception by způsobilo rollback
         // transakce, což nechci
@@ -242,7 +241,7 @@ public class PGServiceImpl implements PGService {
     @Override
     @Async
     @Transactional(propagation = Propagation.NEVER)
-    public void modifyPhotogallery(UUID operationId, long photogalleryId, PhotogalleryPayloadTO payloadTO,
+    public void modifyPhotogallery(UUID operationId, Long photogalleryId, PhotogalleryPayloadTO payloadTO,
                                    LocalDateTime date) {
         innerSavePhotogallery(operationId, payloadTO, photogalleryId, null, null, date);
     }
@@ -250,7 +249,7 @@ public class PGServiceImpl implements PGService {
     @Override
     @Async
     @Transactional(propagation = Propagation.NEVER)
-    public void savePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, long nodeId, long authorId,
+    public void savePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, Long nodeId, Long authorId,
                                  LocalDateTime date) {
         innerSavePhotogallery(operationId, payloadTO, null, nodeId, authorId, date);
     }
@@ -281,19 +280,19 @@ public class PGServiceImpl implements PGService {
         if (existingId == null) {
             // vytvoř odpovídající content node
             Long contentNodeId =
-                    contentNodeFacade.save(PGModule.ID, photogallery.getId(), payloadTO.getName(), payloadTO.getTags(),
+                    contentNodeService.save(PGModule.ID, photogallery.getId(), payloadTO.getName(), payloadTO.getTags(),
                             payloadTO.isPublicated(), nodeId, authorId, false, date, null);
 
             // ulož do článku referenci na jeho contentnode
             ContentNode contentNode = new ContentNode();
             contentNode.setId(contentNodeId);
-            photogallery.setContentNode(contentNode);
+            photogallery.setContentNodeId(contentNode.getId());
             if (photogalleryRepository.save(photogallery) == null) {
                 publishPGProcessFailure(operationId);
                 return null;
             }
         } else {
-            contentNodeFacade.modify(photogallery.getContentNode().getId(), payloadTO.getName(), payloadTO.getTags(),
+            contentNodeService.modify(photogallery.getContentNodeId(), payloadTO.getName(), payloadTO.getTags(),
                     payloadTO.isPublicated(), date);
         }
 
@@ -344,8 +343,9 @@ public class PGServiceImpl implements PGService {
     public PhotogalleryTO getPhotogalleryForDetail(Long id) {
         Validate.notNull(id, "Id galerie nesmí být null");
         Photogallery photogallery = photogalleryRepository.findById(id).orElse(null);
-        if (photogallery == null) return null;
-        return photogalleriesMapper.mapPhotogalleryForDetail(photogallery);
+        ContentNode contentNode = contentNodeRepository.findById(photogallery.getContentNodeId()).orElse(null);
+        if (photogallery == null || contentNode == null) return null;
+        return photogalleriesMapper.mapPhotogalleryForDetail(photogallery, contentNode);
     }
 
     /**
@@ -386,7 +386,7 @@ public class PGServiceImpl implements PGService {
      * <code>false</code>
      */
     private boolean tryDeleteGalleryFile(String file, Path galleryDir, GalleryFileType fileType) {
-        Path subFile = null;
+        Path subFile;
         switch (fileType) {
             case MINIATURE:
                 if (file.endsWith(".svg")) file += ".png";
@@ -418,35 +418,29 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public int countAllPhotogalleriesForREST(Long userId, String filter) {
-        filter = QuerydslUtil.transformSimpleLikeFilter(filter);
-        return userId != null ? photogalleryRepository.countByUserAccess(userId, filter) :
-                photogalleryRepository.countByAnonAccess(filter);
+    public int countAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin) {
+        return photogalleryRepository.count(filter, userId, isAdmin);
     }
 
     @Override
-    public List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(Long userId, String filter, Pageable pageable) {
-        filter = QuerydslUtil.transformSimpleLikeFilter(filter);
-        return photogalleriesMapper.mapPhotogalleryForRESTOverviewCollection(
-                userId != null ? photogalleryRepository.findByUserAccess(userId, filter, pageable) :
-                        photogalleryRepository.findByAnonAccess(filter, pageable));
+    public List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin,
+                                                                        Pageable pageable) {
+        return photogalleryRepository.findForRestOverview(filter, userId, isAdmin, pageable);
     }
 
     @Override
-    public PhotogalleryRESTOverviewTO getPhotogalleryByDirectory(String directory) {
-        Photogallery gallery = photogalleryRepository.findByDirectory(directory);
-        return photogalleriesMapper.mapPhotogalleryForRESTOverview(gallery);
+    public PhotogalleryRESTOverviewTO getPhotogalleryByDirectory(String directory, Long userId, boolean isAdmin) {
+        return photogalleryRepository.findForRestByDirectory(directory, userId, isAdmin);
     }
 
     @Override
-    public PhotogalleryRESTTO getPhotogalleryForREST(Long id) throws UnauthorizedAccessException {
+    public PhotogalleryRESTTO getPhotogalleryForREST(Long id, Long userId, boolean isAdmin)
+            throws UnauthorizedAccessException {
         Photogallery gallery = photogalleryRepository.findById(id).orElse(null);
-        if (gallery == null) return null;
+        ContentNode contentNode = contentNodeRepository.findById(gallery.getContentNodeId()).orElse(null);
+        if (gallery == null || contentNode == null) return null;
 
-        UserInfoTO user = securityFacade.getCurrentUser();
-        if (gallery.getContentNode().getPublicated() || user.isAdmin() ||
-                gallery.getContentNode().getAuthor().getId().equals(user.getId())) {
-
+        if (contentNode.getPublicated() || isAdmin || contentNode.getAuthor().getId().equals(userId)) {
             PGConfiguration configuration = loadConfiguration();
             Path file = fileSystemService.getFileSystem()
                     .getPath(configuration.getRootDir(), gallery.getPhotogalleryPath());
@@ -458,9 +452,11 @@ public class PGServiceImpl implements PGService {
                     throw new IllegalStateException(
                             "Nelze získat přehled souborů z '" + file.getFileName().toString() + "'");
                 }
-                return new PhotogalleryRESTTO(gallery.getId(), gallery.getContentNode().getName(),
-                        gallery.getContentNode().getCreationDate(), gallery.getContentNode().getLastModificationDate(),
-                        gallery.getContentNode().getAuthor().getName(), files);
+                PhotogalleryRESTTO to =
+                        new PhotogalleryRESTTO(gallery.getId(), contentNode.getName(), contentNode.getCreationDate(),
+                                contentNode.getLastModificationDate(), contentNode.getAuthor().getName());
+                to.setFiles(files);
+                return to;
             } else {
                 return null;
             }
@@ -469,13 +465,13 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public Path getPhotoForREST(Long id, String fileName, PhotoVersion version) throws UnauthorizedAccessException {
+    public Path getPhotoForREST(Long id, String fileName, PhotoVersion version, Long userId, boolean isAdmin)
+            throws UnauthorizedAccessException {
         Photogallery gallery = photogalleryRepository.findById(id).orElse(null);
-        if (gallery == null) return null;
+        ContentNode contentNode = contentNodeRepository.findById(gallery.getContentNodeId()).orElse(null);
+        if (gallery == null || contentNode == null) return null;
 
-        UserInfoTO user = securityFacade.getCurrentUser();
-        if (gallery.getContentNode().getPublicated() || user.isAdmin() ||
-                gallery.getContentNode().getAuthor().getId().equals(user.getId())) {
+        if (contentNode.getPublicated() || isAdmin || contentNode.getAuthor().getId().equals(userId)) {
             PGConfiguration configuration = loadConfiguration();
             Path rootPath = loadRootDirFromConfiguration(configuration);
             Path galleryPath = rootPath.resolve(gallery.getPhotogalleryPath());

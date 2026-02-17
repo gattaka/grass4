@@ -16,14 +16,13 @@ public class Photogallery {
     /**
 	 * Meta-informace o obsahu
 	 */
-	@OneToOne
-	private ContentNode contentNode;
+	@Column(name = "CONTENTNODE_ID")
+	private Long contentNodeId;
 
     /**
 	 * Relativní cesta (od kořene fotogalerie) k adresáři s fotografiemi
 	 */
 	private String photogalleryPath;
-
 
 	public Long getId() {
 		return id;
@@ -33,15 +32,15 @@ public class Photogallery {
 		this.id = id;
 	}
 
-	public ContentNode getContentNode() {
-		return contentNode;
-	}
+    public Long getContentNodeId() {
+        return contentNodeId;
+    }
 
-	public void setContentNode(ContentNode contentNode) {
-		this.contentNode = contentNode;
-	}
+    public void setContentNodeId(Long contentNodeId) {
+        this.contentNodeId = contentNodeId;
+    }
 
-	public String getPhotogalleryPath() {
+    public String getPhotogalleryPath() {
 		return photogalleryPath;
 	}
 

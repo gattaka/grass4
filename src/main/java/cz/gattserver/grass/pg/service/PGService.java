@@ -26,7 +26,7 @@ public interface PGService {
      * @return <code>false</code> pokud se nezdaŁří smazat některé soubory
      * (smaže tak aspoň datové struktury)
      */
-    boolean deletePhotogallery(long photogalleryId);
+    boolean deletePhotogallery(Long photogalleryId);
 
     /**
      * Upraví galerii. Zpracování je prováděno v samostatném vlákně. Pro
@@ -38,7 +38,7 @@ public interface PGService {
      * @param date           datum vytvoření galerie, může být i <code>null</code>, pak
      *                       bude použito aktuální datum
      */
-    void modifyPhotogallery(UUID operationId, long photogalleryId, PhotogalleryPayloadTO payloadTO, LocalDateTime date);
+    void modifyPhotogallery(UUID operationId, Long photogalleryId, PhotogalleryPayloadTO payloadTO, LocalDateTime date);
 
     /**
      * Uloží galerii. Zpracování je prováděno v samostatném vlákně. Pro
@@ -51,7 +51,7 @@ public interface PGService {
      * @param date      datum vytvoření galerie, může být i <code>null</code>, pak
      *                  bude použito aktuální datum
      */
-    void savePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, long nodeId, long authorId,
+    void savePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, Long nodeId, Long authorId,
                           LocalDateTime date);
 
     /**
@@ -85,7 +85,7 @@ public interface PGService {
      * @param userId id přihlášeného uživatele, může být i <code>null</code>
      * @param filter název galerie (s *)
      */
-    int countAllPhotogalleriesForREST(Long userId, String filter);
+    int countAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin);
 
     /**
      * Získá všechny galerie a namapuje je pro použití REST
@@ -94,7 +94,8 @@ public interface PGService {
      * @param filter   název galerie (s *)
      * @param pageable stránkování
      */
-    List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(Long userId, String filter, Pageable pageable);
+    List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin,
+                                                                 Pageable pageable);
 
     /**
      * Získá detail fotogalerie pro REST
@@ -102,7 +103,7 @@ public interface PGService {
      * @param id idetifikátor galerie
      * @return {@link UnauthorizedAccessException}
      */
-    PhotogalleryRESTTO getPhotogalleryForREST(Long id) throws UnauthorizedAccessException;
+    PhotogalleryRESTTO getPhotogalleryForREST(Long id, Long userId, boolean isAdmin) throws UnauthorizedAccessException;
 
     /**
      * Získá fotografii dle galerie pro REST
@@ -112,7 +113,8 @@ public interface PGService {
      * @param version  o jakou velikost fotky jde
      * @return {@link UnauthorizedAccessException}
      */
-    Path getPhotoForREST(Long id, String fileName, PhotoVersion version) throws UnauthorizedAccessException;
+    Path getPhotoForREST(Long id, String fileName, PhotoVersion version, Long userId, boolean isAdmin)
+            throws UnauthorizedAccessException;
 
     /**
      * Zazipuje galerii
@@ -136,7 +138,7 @@ public interface PGService {
     /**
      * Smaže soubor z fotogalerie.
      *
-     * @param name     soubor
+     * @param name       soubor
      * @param galleryDir adresář galerie
      * @throws IllegalStateException    pokud neexistuje kořenový adresář galerií -- chyba nastavení
      *                                  modulu PG
@@ -246,6 +248,6 @@ public interface PGService {
      * @param directory jméno adresáře
      * @return overview objekt galerie
      */
-    PhotogalleryRESTOverviewTO getPhotogalleryByDirectory(String directory);
+    PhotogalleryRESTOverviewTO getPhotogalleryByDirectory(String directory, Long userId, boolean isAdmin);
 
 }

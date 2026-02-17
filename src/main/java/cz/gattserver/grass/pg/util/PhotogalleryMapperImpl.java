@@ -1,5 +1,7 @@
 package cz.gattserver.grass.pg.util;
 
+import com.vaadin.copilot.shaded.checkerframework.checker.units.qual.A;
+import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.services.CoreMapperService;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryRESTOverviewTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
@@ -22,42 +24,15 @@ public class PhotogalleryMapperImpl implements PhotogalleryMapper {
 	/**
 	 * Převede {@link Photogallery} na {@link PhotogalleryTO}
 	 */
-	public PhotogalleryTO mapPhotogalleryForDetail(Photogallery photogallery) {
+	public PhotogalleryTO mapPhotogalleryForDetail(Photogallery photogallery, ContentNode contentNode) {
 		if (photogallery == null)
 			return null;
 
-		PhotogalleryTO photogalleryDTO = new PhotogalleryTO();
-		photogalleryDTO.setId(photogallery.getId());
-		photogalleryDTO.setPhotogalleryPath(photogallery.getPhotogalleryPath());
-		photogalleryDTO.setContentNode(mapper.mapContentNodeForDetail(photogallery.getContentNode()));
-		return photogalleryDTO;
-	}
-
-	/**
-	 * Převede {@link Photogallery} na {@link PhotogalleryRESTOverviewTO}
-	 */
-	public PhotogalleryRESTOverviewTO mapPhotogalleryForRESTOverview(Photogallery photogallery) {
-		if (photogallery == null)
-			return null;
-
-		PhotogalleryRESTOverviewTO photogalleryDTO = new PhotogalleryRESTOverviewTO();
-		photogalleryDTO.setId(photogallery.getId());
-		photogalleryDTO.setName(photogallery.getContentNode().getName());
-		return photogalleryDTO;
-	}
-
-	/**
-	 * Převede list {@link Photogallery} na list
-	 * {@link PhotogalleryRESTOverviewTO}
-	 */
-	public List<PhotogalleryRESTOverviewTO> mapPhotogalleryForRESTOverviewCollection(
-			List<Photogallery> photogalleryCollection) {
-		List<PhotogalleryRESTOverviewTO> list = new ArrayList<>();
-		for (Photogallery photogallery : photogalleryCollection) {
-			PhotogalleryRESTOverviewTO to = mapPhotogalleryForRESTOverview(photogallery);
-			list.add(to);
-		}
-		return list;
+		PhotogalleryTO photogalleryTO = new PhotogalleryTO();
+		photogalleryTO.setId(photogallery.getId());
+		photogalleryTO.setPhotogalleryPath(photogallery.getPhotogalleryPath());
+		photogalleryTO.setContentNode(mapper.mapContentNodeForDetail(contentNode));
+		return photogalleryTO;
 	}
 
 }

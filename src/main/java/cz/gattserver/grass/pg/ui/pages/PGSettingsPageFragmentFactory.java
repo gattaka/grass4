@@ -21,6 +21,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.router.RouteConfiguration;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
@@ -28,6 +29,8 @@ import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.InfoDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.events.EventBus;
+import cz.gattserver.grass.core.interfaces.UserInfoTO;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
@@ -48,6 +51,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Resource;
+
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -61,32 +65,33 @@ import java.util.stream.Stream;
 
 public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
-	private static final Logger logger = LoggerFactory.getLogger(PGSettingsPageFragmentFactory.class);
+    private static final Logger logger = LoggerFactory.getLogger(PGSettingsPageFragmentFactory.class);
 
-	@Autowired
-	private PGService pgService;
+    private final PGService pgService;
+    private final EventBus eventBus;
+    private final FileSystemService fileSystemService;
+    private final SecurityService securityService;
 
-	@Autowired
-	private EventBus eventBus;
+    private String filterName;
 
-	@Autowired
-	private FileSystemService fileSystemService;
+    private ProgressDialog progressIndicatorWindow;
 
-	@Resource(name = "pgViewerPageFactory")
-	private PageFactory photogalleryViewerPageFactory;
+    public PGSettingsPageFragmentFactory(PGService pgService, EventBus eventBus, FileSystemService fileSystemService,
+                                         SecurityService securityService) {
+        this.pgService = pgService;
+        this.eventBus = eventBus;
+        this.fileSystemService = fileSystemService;
+        this.securityService = securityService;
+    }
 
-	private String filterName;
-
-	private ProgressDialog progressIndicatorWindow;
-
-	@Override
-	public void createFragment(Div div) {
-		final PGConfiguration configuration = pgService.loadConfiguration();
-		final FileSystem fs = fileSystemService.getFileSystem();
+    @Override
+    public void createFragment(Div div) {
+        final PGConfiguration configuration = pgService.loadConfiguration();
+        final FileSystem fs = fileSystemService.getFileSystem();
 
         div.add(new H2("Nastavení fotogalerie"));
 
-		Binder<PGConfiguration> binder = new Binder<>();
+        Binder<PGConfiguration> binder = new Binder<>();
 
         VerticalLayout layout = new VerticalLayout();
         layout.setWidthFull();
@@ -94,237 +99,236 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
         layout.setPadding(false);
         div.add(layout);
 
-		// Název adresářů miniatur
-		final TextField miniaturesDirField = new TextField("Název adresářů miniatur");
-		miniaturesDirField.setValue(String.valueOf(configuration.getMiniaturesDir()));
-		miniaturesDirField.setWidth("300px");
-		layout.add(miniaturesDirField);
+        // Název adresářů miniatur
+        final TextField miniaturesDirField = new TextField("Název adresářů miniatur");
+        miniaturesDirField.setValue(String.valueOf(configuration.getMiniaturesDir()));
+        miniaturesDirField.setWidth("300px");
+        layout.add(miniaturesDirField);
 
-		binder.forField(miniaturesDirField).asRequired("Nesmí být prázdné")
-				.withValidator(new StringLengthValidator("Neodpovídá povolené délce", 1, 1024))
-				.bind(PGConfiguration::getMiniaturesDir, PGConfiguration::setMiniaturesDir);
+        binder.forField(miniaturesDirField).asRequired("Nesmí být prázdné")
+                .withValidator(new StringLengthValidator("Neodpovídá povolené délce", 1, 1024))
+                .bind(PGConfiguration::getMiniaturesDir, PGConfiguration::setMiniaturesDir);
 
-		// Kořenový adresář fotogalerií
-		final TextField rootDirField = new TextField("Kořenový adresář fotogalerií");
-		rootDirField.setValue(String.valueOf(configuration.getRootDir()));
-		rootDirField.setWidth("300px");
-		layout.add(rootDirField);
+        // Kořenový adresář fotogalerií
+        final TextField rootDirField = new TextField("Kořenový adresář fotogalerií");
+        rootDirField.setValue(String.valueOf(configuration.getRootDir()));
+        rootDirField.setWidth("300px");
+        layout.add(rootDirField);
 
-		binder.forField(rootDirField).asRequired("Kořenový adresář je povinný").withValidator((val, c) -> {
-			try {
-				return Files.exists(fs.getPath(val)) ? ValidationResult.ok()
-						: ValidationResult.error("Kořenový adresář musí existovat");
-			} catch (InvalidPathException e) {
-				return ValidationResult.error("Neplatná cesta");
-			}
-		}).bind(PGConfiguration::getRootDir, PGConfiguration::setRootDir);
+        binder.forField(rootDirField).asRequired("Kořenový adresář je povinný").withValidator((val, c) -> {
+            try {
+                return Files.exists(fs.getPath(val)) ? ValidationResult.ok() :
+                        ValidationResult.error("Kořenový adresář musí existovat");
+            } catch (InvalidPathException e) {
+                return ValidationResult.error("Neplatná cesta");
+            }
+        }).bind(PGConfiguration::getRootDir, PGConfiguration::setRootDir);
 
-		// Save tlačítko
-        ComponentFactory  componentFactory = new ComponentFactory();
-		Button saveButton = componentFactory.createSaveButton(event -> {
-			if (binder.validate().isOk()) {
-				configuration.setRootDir(rootDirField.getValue());
-				configuration.setMiniaturesDir(miniaturesDirField.getValue());
-				pgService.storeConfiguration(configuration);
-				UI.getCurrent().getPage().reload();
-			}
-		});
-		binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
-		layout.add(saveButton);
+        // Save tlačítko
+        ComponentFactory componentFactory = new ComponentFactory();
+        Button saveButton = componentFactory.createSaveButton(event -> {
+            if (binder.validate().isOk()) {
+                configuration.setRootDir(rootDirField.getValue());
+                configuration.setMiniaturesDir(miniaturesDirField.getValue());
+                pgService.storeConfiguration(configuration);
+                UI.getCurrent().getPage().reload();
+            }
+        });
+        binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
+        layout.add(saveButton);
 
-		Path path = fileSystemService.getFileSystem().getPath(configuration.getRootDir());
+        Path path = fileSystemService.getFileSystem().getPath(configuration.getRootDir());
 
-		if (Files.exists(path)) {
-			div.add(new H2("Přehled adresářů"));
+        if (Files.exists(path)) {
+            div.add(new H2("Přehled adresářů"));
 
-			Grid<PGSettingsItemTO> grid = new Grid<>();
-			UIUtils.applyGrassDefaultStyle(grid);
-			grid.setWidthFull();
-			grid.setHeight("500px");
+            Grid<PGSettingsItemTO> grid = new Grid<>();
+            UIUtils.applyGrassDefaultStyle(grid);
+            grid.setWidthFull();
+            grid.setHeight("500px");
             div.add(grid);
 
-			Column<PGSettingsItemTO> nameColumn = grid
-					.addColumn(new TextRenderer<>(to -> to.getPath().getFileName().toString())).setHeader("Název")
-					.setFlexGrow(80);
+            Column<PGSettingsItemTO> nameColumn =
+                    grid.addColumn(new TextRenderer<>(to -> to.getPath().getFileName().toString())).setHeader("Název")
+                            .setFlexGrow(80);
 
-			grid.addColumn(new ComponentRenderer<Component, PGSettingsItemTO>(to -> {
-				if (to.getOverviewTO() == null) {
-					return new Text("Nepoužívá se");
-				} else {
-					Anchor a = new Anchor(
-							UIUtils.getPageURL(photogalleryViewerPageFactory, URLIdentifierUtils
-									.createURLIdentifier(to.getOverviewTO().getId(), to.getOverviewTO().getName())),
-							"Odkaz");
-					a.setTarget("_blank");
-					return a;
-				}
-			})).setHeader("Odkaz").setWidth("50px");
+            grid.addColumn(new ComponentRenderer<Component, PGSettingsItemTO>(to -> {
+                if (to.getOverviewTO() == null) {
+                    return new Text("Nepoužívá se");
+                } else {
+                    Anchor a = new Anchor(RouteConfiguration.forSessionScope().getUrl(PGViewerPage.class,
+                            URLIdentifierUtils.createURLIdentifier(to.getOverviewTO().getId(),
+                                    to.getOverviewTO().getName())), "Odkaz");
+                    a.setTarget("_blank");
+                    return a;
+                }
+            })).setHeader("Odkaz").setWidth("50px");
 
-			grid.addColumn(p -> p.getSize() == null ? "N/A" : HumanBytesSizeFormatter.format(p.getSize()))
-					.setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0)
-					.setSortable(true);
+            grid.addColumn(p -> p.getSize() == null ? "N/A" : HumanBytesSizeFormatter.format(p.getSize()))
+                    .setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0)
+                    .setSortable(true);
 
-			grid.addColumn(p -> p.getFilesCount() == null ? "N/A" : p.getFilesCount()).setHeader("Soubory")
-					.setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0).setSortable(true);
+            grid.addColumn(p -> p.getFilesCount() == null ? "N/A" : p.getFilesCount()).setHeader("Soubory")
+                    .setTextAlign(ColumnTextAlign.END).setWidth("80px").setFlexGrow(0).setSortable(true);
 
-			SimpleDateFormat sdf = new SimpleDateFormat("d. M. yyyy");
-			grid.addColumn(p -> sdf.format(p.getDate())).setHeader("Datum").setTextAlign(ColumnTextAlign.END)
-					.setWidth("80px").setFlexGrow(0).setSortable(true);
+            SimpleDateFormat sdf = new SimpleDateFormat("d. M. yyyy");
+            grid.addColumn(p -> sdf.format(p.getDate())).setHeader("Datum").setTextAlign(ColumnTextAlign.END)
+                    .setWidth("80px").setFlexGrow(0).setSortable(true);
 
-			grid.addColumn(new ComponentRenderer<>(item -> {
+            grid.addColumn(new ComponentRenderer<>(item -> {
                 Div button = componentFactory.createInlineButton("Přegenerovat", be -> {
-					new ConfirmDialog("Opravdu přegenerovat galerii?", e -> {
-						UUID operationId = UUID.randomUUID();
+                    new ConfirmDialog("Opravdu přegenerovat galerii?", e -> {
+                        UUID operationId = UUID.randomUUID();
 
-						PhotogalleryTO to = pgService.getPhotogalleryForDetail(item.getOverviewTO().getId());
-						progressIndicatorWindow = new ProgressDialog();
+                        PhotogalleryTO to = pgService.getPhotogalleryForDetail(item.getOverviewTO().getId());
+                        progressIndicatorWindow = new ProgressDialog();
 
-						eventBus.subscribe(PGSettingsPageFragmentFactory.this);
+                        eventBus.subscribe(PGSettingsPageFragmentFactory.this);
 
-						PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(to.getContentNode().getName(),
-								to.getPhotogalleryPath(), to.getContentNode().getContentTagsAsStrings(),
-								to.getContentNode().isPublicated(), true);
-						pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
-					}).open();
-				});
-				button.setVisible(item.getOverviewTO() != null);
-				return button;
-			})).setHeader("Přegenerování").setTextAlign(ColumnTextAlign.CENTER);
+                        PhotogalleryPayloadTO payloadTO =
+                                new PhotogalleryPayloadTO(to.getContentNode().getName(), to.getPhotogalleryPath(),
+                                        to.getContentNode().getContentTagsAsStrings(),
+                                        to.getContentNode().isPublicated(), true);
+                        pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
+                    }).open();
+                });
+                button.setVisible(item.getOverviewTO() != null);
+                return button;
+            })).setHeader("Přegenerování").setTextAlign(ColumnTextAlign.CENTER);
 
-			grid.addColumn(new ComponentRenderer<>(
-					item -> componentFactory.createInlineButton(item.getOverviewTO() == null ? "Smazat adresář" : "Smazat galerii", be -> {
-						String caption = item.getOverviewTO() == null ? "Opravdu smazat adresář?"
-								: "Opravdu smazat galerii (záznam v kategorii a data v adresáři)?";
-						new ConfirmDialog(caption, e -> deleteItem(item, path, grid)).open();
-					}))).setHeader("Smazání").setWidth("110px").setFlexGrow(0).setTextAlign(ColumnTextAlign.CENTER);
+            grid.addColumn(new ComponentRenderer<>(item -> componentFactory.createInlineButton(
+                    item.getOverviewTO() == null ? "Smazat adresář" : "Smazat galerii", be -> {
+                        String caption = item.getOverviewTO() == null ? "Opravdu smazat adresář?" :
+                                "Opravdu smazat galerii (záznam v kategorii a data v adresáři)?";
+                        new ConfirmDialog(caption, e -> deleteItem(item, path, grid)).open();
+                    }))).setHeader("Smazání").setWidth("110px").setFlexGrow(0).setTextAlign(ColumnTextAlign.CENTER);
 
-			HeaderRow filteringHeader = grid.appendHeaderRow();
+            HeaderRow filteringHeader = grid.appendHeaderRow();
 
-			// Obsah
-			UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
-				filterName = e.getValue();
-				populateGrid(grid, path);
-			});
+            // Obsah
+            UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
+                filterName = e.getValue();
+                populateGrid(grid, path);
+            });
 
-			populateGrid(grid, path);
-		}
-	}
+            populateGrid(grid, path);
+        }
+    }
 
-	protected void deleteItem(PGSettingsItemTO item, Path path, Grid<PGSettingsItemTO> grid) {
-		if (item.getOverviewTO() == null) {
-			try (Stream<Path> s = Files.walk(item.getPath())) {
-				s.sorted(Comparator.reverseOrder()).forEach(p -> {
-					try {
-						logger.info("Zkouším mazat '" + p.getFileName().toString() + "'");
-						Files.delete(p);
-					} catch (IOException e2) {
-						logger.error("Nezdařilo se smazat adresář " + p.getFileName().toString(), e2);
-					}
-				});
-			} catch (IOException e1) {
-				logger.error("Nezdařilo se smazat adresář " + item.getPath().getFileName().toString(), e1);
-				WarnDialog warnSubwindow = new WarnDialog(
-						"Při mazání adresáře došlo k chybě (" + e1.getMessage() + ")");
-				warnSubwindow.open();
-			}
-		} else {
-			if (!pgService.deletePhotogallery(item.getOverviewTO().getId())) {
-				WarnDialog warnSubwindow = new WarnDialog("Při mazání galerie se nezdařilo smazat některé soubory.");
-				warnSubwindow.open();
-			}
-		}
-		populateGrid(grid, path);
-	}
+    protected void deleteItem(PGSettingsItemTO item, Path path, Grid<PGSettingsItemTO> grid) {
+        if (item.getOverviewTO() == null) {
+            try (Stream<Path> s = Files.walk(item.getPath())) {
+                s.sorted(Comparator.reverseOrder()).forEach(p -> {
+                    try {
+                        logger.info("Zkouším mazat '" + p.getFileName().toString() + "'");
+                        Files.delete(p);
+                    } catch (IOException e2) {
+                        logger.error("Nezdařilo se smazat adresář " + p.getFileName().toString(), e2);
+                    }
+                });
+            } catch (IOException e1) {
+                logger.error("Nezdařilo se smazat adresář " + item.getPath().getFileName().toString(), e1);
+                WarnDialog warnSubwindow =
+                        new WarnDialog("Při mazání adresáře došlo k chybě (" + e1.getMessage() + ")");
+                warnSubwindow.open();
+            }
+        } else {
+            if (!pgService.deletePhotogallery(item.getOverviewTO().getId())) {
+                WarnDialog warnSubwindow = new WarnDialog("Při mazání galerie se nezdařilo smazat některé soubory.");
+                warnSubwindow.open();
+            }
+        }
+        populateGrid(grid, path);
+    }
 
-	@Handler
-	protected void onProcessStart(final PGProcessStartEvent event) {
-		progressIndicatorWindow.runInUI(() -> {
-			progressIndicatorWindow.setTotal(event.getCountOfStepsToDo());
-			progressIndicatorWindow.open();
-		});
-	}
+    @Handler
+    protected void onProcessStart(final PGProcessStartEvent event) {
+        progressIndicatorWindow.runInUI(() -> {
+            progressIndicatorWindow.setTotal(event.getCountOfStepsToDo());
+            progressIndicatorWindow.open();
+        });
+    }
 
-	@Handler
-	protected void onProcessProgress(PGProcessProgressEvent event) {
-		progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getStepDescription()));
-	}
+    @Handler
+    protected void onProcessProgress(PGProcessProgressEvent event) {
+        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getStepDescription()));
+    }
 
-	@Handler
-	protected void onProcessResult(final PGProcessResultEvent event) {
-		progressIndicatorWindow.runInUI(() -> {
-			if (progressIndicatorWindow != null)
-				progressIndicatorWindow.close();
-			if (event.isSuccess())
-				new InfoDialog("Přegenerování dopladlo úspěšně").open();
-			else
-				new WarnDialog("Při přegenerování došlo k chybám: ", event.getResultDetails()).open();
-		});
-		eventBus.unsubscribe(PGSettingsPageFragmentFactory.this);
-	}
+    @Handler
+    protected void onProcessResult(final PGProcessResultEvent event) {
+        progressIndicatorWindow.runInUI(() -> {
+            if (progressIndicatorWindow != null) progressIndicatorWindow.close();
+            if (event.isSuccess()) new InfoDialog("Přegenerování dopladlo úspěšně").open();
+            else new WarnDialog("Při přegenerování došlo k chybám: ", event.getResultDetails()).open();
+        });
+        eventBus.unsubscribe(PGSettingsPageFragmentFactory.this);
+    }
 
-	private Long getFileSize(Path path) {
-		try {
-			if (!Files.isDirectory(path))
-				return Files.size(path);
-			try (Stream<Path> stream = Files.list(path)) {
-				Long sum = 0L;
-				for (Iterator<Path> it = stream.iterator(); it.hasNext();)
-					sum += getFileSize(it.next());
-				return sum;
-			}
-		} catch (Exception e) {
-			logger.error("Nezdařilo se zjistit velikost souboru " + path.getFileName().toString(), e);
-			return null;
-		}
-	}
+    private Long getFileSize(Path path) {
+        try {
+            if (!Files.isDirectory(path)) return Files.size(path);
+            try (Stream<Path> stream = Files.list(path)) {
+                Long sum = 0L;
+                for (Iterator<Path> it = stream.iterator(); it.hasNext(); )
+                    sum += getFileSize(it.next());
+                return sum;
+            }
+        } catch (Exception e) {
+            logger.error("Nezdařilo se zjistit velikost souboru " + path.getFileName().toString(), e);
+            return null;
+        }
+    }
 
-	private PGSettingsItemTO createItem(Path path) {
-		PhotogalleryRESTOverviewTO to = pgService.getPhotogalleryByDirectory(path.getFileName().toString());
-		Long size = getFileSize(path);
-		Long filesCount = null;
-		Date date = null;
-		try {
-			FileTime fileTime = Files.getLastModifiedTime(path);
-			date = Date.from(fileTime.toInstant());
-		} catch (IOException e) {
-			logger.warn("Nezdařilo se zjistit datum adresáře " + path.getFileName().toString(), e);
-		}
-		try (Stream<Path> stream = Files.list(path)) {
-			filesCount = stream.count();
-		} catch (IOException e) {
-			logger.error("Nezdařilo se zjistit počet položek adresáře " + path.getFileName().toString(), e);
-		}
-		return new PGSettingsItemTO(path, to, size, filesCount, date);
-	}
+    private PGSettingsItemTO createItem(Path path) {
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        PhotogalleryRESTOverviewTO to =
+                pgService.getPhotogalleryByDirectory(path.getFileName().toString(), userInfoTO.getId(),
+                        userInfoTO.isAdmin());
+        Long size = getFileSize(path);
+        Long filesCount = null;
+        Date date = null;
+        try {
+            FileTime fileTime = Files.getLastModifiedTime(path);
+            date = Date.from(fileTime.toInstant());
+        } catch (IOException e) {
+            logger.warn("Nezdařilo se zjistit datum adresáře " + path.getFileName().toString(), e);
+        }
+        try (Stream<Path> stream = Files.list(path)) {
+            filesCount = stream.count();
+        } catch (IOException e) {
+            logger.error("Nezdařilo se zjistit počet položek adresáře " + path.getFileName().toString(), e);
+        }
+        return new PGSettingsItemTO(path, to, size, filesCount, date);
+    }
 
-	private Stream<PGSettingsItemTO> createStream(Path path) {
-		try {
-			// zde se úmyslně nezavírá stream, protože se předává dál do vaadin
-			return Files.list(path)
-					.filter(p -> p.getFileName().toString().contains(filterName == null ? "" : filterName))
-					.map(this::createItem);
-		} catch (IOException e) {
-			logger.error("Nezdařilo se načíst galerie z " + path.getFileName().toString(), e);
-			return new ArrayList<PGSettingsItemTO>().stream();
-		}
-	}
+    private Stream<PGSettingsItemTO> createStream(Path path) {
+        try {
+            // zde se úmyslně nezavírá stream, protože se předává dál do vaadin
+            return Files.list(path)
+                    .filter(p -> p.getFileName().toString().contains(filterName == null ? "" : filterName))
+                    .map(this::createItem);
+        } catch (IOException e) {
+            logger.error("Nezdařilo se načíst galerie z " + path.getFileName().toString(), e);
+            return new ArrayList<PGSettingsItemTO>().stream();
+        }
+    }
 
-	private long count(Path path) {
-		try (Stream<Path> stream = Files.list(path)) {
-			return stream.filter(p -> p.getFileName().toString().contains(filterName == null ? "" : filterName))
-					.count();
-		} catch (IOException e) {
-			logger.error("Nezdařilo se načíst galerie z " + path.getFileName().toString(), e);
-			return 0;
-		}
-	}
+    private long count(Path path) {
+        try (Stream<Path> stream = Files.list(path)) {
+            return stream.filter(p -> p.getFileName().toString().contains(filterName == null ? "" : filterName))
+                    .count();
+        } catch (IOException e) {
+            logger.error("Nezdařilo se načíst galerie z " + path.getFileName().toString(), e);
+            return 0;
+        }
+    }
 
-	private void populateGrid(Grid<PGSettingsItemTO> grid, Path path) {
-		FetchCallback<PGSettingsItemTO, Void> fetchCallback = q -> createStream(path).skip(q.getOffset())
-				.limit(q.getLimit())
-				.sorted(q.getSortingComparator().orElse(Comparator.<PGSettingsItemTO>naturalOrder()));
-		CountCallback<PGSettingsItemTO, Void> countCallback = q -> (int) count(path);
-		grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
-	}
+    private void populateGrid(Grid<PGSettingsItemTO> grid, Path path) {
+        FetchCallback<PGSettingsItemTO, Void> fetchCallback =
+                q -> createStream(path).skip(q.getOffset()).limit(q.getLimit())
+                        .sorted(q.getSortingComparator().orElse(Comparator.<PGSettingsItemTO>naturalOrder()));
+        CountCallback<PGSettingsItemTO, Void> countCallback = q -> (int) count(path);
+        grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
+    }
 
 }

@@ -151,7 +151,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
         ContentNode contentNode = new ContentNode();
         contentNode.setId(contentNodeId1);
-        photogallery.setContentNode(contentNode);
+        photogallery.setContentNodeId(contentNode.getId());
         photogallery = photogalleryRepository.save(photogallery);
 
         pgService.deletePhotogallery(photogallery.getId());
@@ -475,48 +475,50 @@ public class PGServiceImplTest extends DBCleanTest {
     public void testGetAllPhotogalleriesForREST() throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
+        // Admin
         Long userId1 = coreMockService.createMockUser(1);
         Long userId2 = coreMockService.createMockUser(2);
         Long nodeId1 = coreMockService.createMockRootNode(1);
         Long nodeId2 = coreMockService.createMockRootNode(2);
 
         Long id1 = createMockGallery(root, userId1, nodeId1, 1, true);
-        Long id2 = createMockGallery(root, userId1, nodeId2, 2, true);
+        Long id2 = createMockGallery(root, userId1, nodeId2, 2, false);
         Long id3 = createMockGallery(root, userId2, nodeId1, 3, true);
         Long id4 = createMockGallery(root, userId2, nodeId2, 4, false);
 
-        int count = pgService.countAllPhotogalleriesForREST(userId1, null);
-        assertEquals(3, count);
-
-        List<PhotogalleryRESTOverviewTO> list =
-                pgService.getAllPhotogalleriesForREST(userId1, null, PageRequest.of(0, 2));
-        assertEquals(2, list.size());
-        assertEquals("Test galerie3", list.get(0).getName());
-        assertEquals(id3, list.get(0).getId());
-        assertEquals("Test galerie2", list.get(1).getName());
-        assertEquals(id2, list.get(1).getId());
-
-        list = pgService.getAllPhotogalleriesForREST(userId1, null, PageRequest.of(1, 2));
-        assertEquals(1, list.size());
-        assertEquals("Test galerie1", list.get(0).getName());
-        assertEquals(id1, list.get(0).getId());
-
-        count = pgService.countAllPhotogalleriesForREST(userId2, null);
+        int count = pgService.countAllPhotogalleriesForREST(null, userId1, true);
         assertEquals(4, count);
 
-        list = pgService.getAllPhotogalleriesForREST(userId2, null, PageRequest.of(0, 2));
+        count = pgService.countAllPhotogalleriesForREST(null, userId2, false);
+        assertEquals(3, count);
+
+        count = pgService.countAllPhotogalleriesForREST(null, null, false);
+        assertEquals(2, count);
+
+        List<PhotogalleryRESTOverviewTO> list =
+                pgService.getAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(0, 2));
         assertEquals(2, list.size());
         assertEquals("Test galerie4", list.get(0).getName());
         assertEquals(id4, list.get(0).getId());
         assertEquals("Test galerie3", list.get(1).getName());
         assertEquals(id3, list.get(1).getId());
 
-        list = pgService.getAllPhotogalleriesForREST(userId2, null, PageRequest.of(1, 2));
+        list = pgService.getAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(1, 2));
         assertEquals(2, list.size());
         assertEquals("Test galerie2", list.get(0).getName());
         assertEquals(id2, list.get(0).getId());
-        assertEquals("Test galerie1", list.get(1).getName());
-        assertEquals(id1, list.get(1).getId());
+
+        list = pgService.getAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(0, 2));
+        assertEquals(2, list.size());
+        assertEquals("Test galerie4", list.get(0).getName());
+        assertEquals(id4, list.get(0).getId());
+        assertEquals("Test galerie3", list.get(1).getName());
+        assertEquals(id3, list.get(1).getId());
+
+        list = pgService.getAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(1, 2));
+        assertEquals(1, list.size());
+        assertEquals("Test galerie1", list.get(0).getName());
+        assertEquals(id1, list.get(0).getId());
     }
 
     @Test
@@ -556,7 +558,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PhotogalleryRESTTO to = pgService.getPhotogalleryForREST(galleryId);
+        PhotogalleryRESTTO to = pgService.getPhotogalleryForREST(galleryId, userId, false);
 
         assertEquals(MockUtils.MOCK_USER_NAME + 1, to.getAuthor());
         assertEquals(2, to.getFiles().size());
@@ -578,7 +580,7 @@ public class PGServiceImplTest extends DBCleanTest {
         UserInfoTO user = mockSecurityService.getCurrentUser();
         user.setId(userId1);
 
-        pgService.getPhotogalleryForREST(id1);
+        pgService.getPhotogalleryForREST(id1, userId1, false);
     }
 
     public void testGetPhotogalleryForREST_succes2()
@@ -586,13 +588,14 @@ public class PGServiceImplTest extends DBCleanTest {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
         Long userId1 = coreMockService.createMockUser(1);
+        Long userId2 = coreMockService.createMockUser(2);
         Long nodeId1 = coreMockService.createMockRootNode(1);
         Long id1 = createMockGallery(root, userId1, nodeId1, 1, false);
 
         UserInfoTO user = mockSecurityService.getCurrentUser();
         user.getRoles().add(CoreRole.ADMIN);
 
-        pgService.getPhotogalleryForREST(id1);
+        pgService.getPhotogalleryForREST(id1, userId2, true);
     }
 
     @Test
@@ -601,10 +604,12 @@ public class PGServiceImplTest extends DBCleanTest {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
         Long userId1 = coreMockService.createMockUser(1);
+        Long userId2 = coreMockService.createMockUser(2);
         Long nodeId1 = coreMockService.createMockRootNode(1);
         Long id1 = createMockGallery(root, userId1, nodeId1, 1, false);
 
-        assertThrows(UnauthorizedAccessException.class, () -> pgService.getPhotogalleryForREST(id1));
+        assertThrows(UnauthorizedAccessException.class, () -> pgService.getPhotogalleryForREST(id1, null, false));
+        assertThrows(UnauthorizedAccessException.class, () -> pgService.getPhotogalleryForREST(id1, userId2, false));
     }
 
     @Test
@@ -623,6 +628,8 @@ public class PGServiceImplTest extends DBCleanTest {
         assertTrue(Files.exists(smallFile));
 
         Long userId1 = coreMockService.createMockUser(1);
+        Long userId2 = coreMockService.createMockUser(2);
+        Long userId3 = coreMockService.createMockUser(3);
         Long nodeId1 = coreMockService.createMockRootNode(1);
         PhotogalleryPayloadTO payloadTO =
                 new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
@@ -647,13 +654,13 @@ public class PGServiceImplTest extends DBCleanTest {
         PGConfiguration conf = new PGConfiguration();
         configurationService.loadConfiguration(conf);
 
-        Path photoPath = pgService.getPhotoForREST(galleryId, "02.jpg", PhotoVersion.SLIDESHOW);
+        Path photoPath = pgService.getPhotoForREST(galleryId, "02.jpg", PhotoVersion.SLIDESHOW, userId1, false);
         assertEquals(galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg"), photoPath);
-        photoPath = pgService.getPhotoForREST(galleryId, "03.jpg", PhotoVersion.SLIDESHOW);
+        photoPath = pgService.getPhotoForREST(galleryId, "03.jpg", PhotoVersion.SLIDESHOW, userId2, true);
         assertEquals(galleryDir.resolve("03.jpg"), photoPath);
-        photoPath = pgService.getPhotoForREST(galleryId, "02.jpg", PhotoVersion.MINI);
+        photoPath = pgService.getPhotoForREST(galleryId, "02.jpg", PhotoVersion.MINI, userId3, false);
         assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg"), photoPath);
-        photoPath = pgService.getPhotoForREST(galleryId, "03.jpg", PhotoVersion.MINI);
+        photoPath = pgService.getPhotoForREST(galleryId, "03.jpg", PhotoVersion.MINI, null, false);
         assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg"), photoPath);
 
     }
