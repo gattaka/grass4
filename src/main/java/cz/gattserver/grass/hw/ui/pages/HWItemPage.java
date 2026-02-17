@@ -16,12 +16,14 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
+import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.tabs.HWItemDocsTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemInfoTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemPhotosTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemPrint3dTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemRecordsTab;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 @Route(value = "hw-item", layout = MainView.class)
@@ -67,10 +69,7 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
         layout.addClassName("hw-item-layout");
         add(layout);
 
-        Breadcrumb breadcrumb = new Breadcrumb();
-        breadcrumb.resetBreadcrumb(new Breadcrumb.BreadcrumbElement(hwItem.getName(), HWItemPage.class, hwItem.getId()),
-                new Breadcrumb.BreadcrumbElement("HW list", HWItemsPage.class));
-        layout.add(breadcrumb);
+        layout.add(HWUIUtils.createNavigationLayout());
 
         layout.add(new H2(hwItem.getName()));
 

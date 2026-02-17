@@ -1,6 +1,7 @@
 package cz.gattserver.grass.hw.ui;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.router.RouterLink;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -40,16 +41,14 @@ public class HWUIUtils {
     }
 
     public static Component createNavigationLayout() {
-        HorizontalLayout navigatorLayout = new HorizontalLayout();
-        RouterLink itemsLink = new RouterLink("Přehled", HWItemsPage.class);
-        navigatorLayout.add(itemsLink);
+        Div smallMenu = new Div();
+        smallMenu.setId("small-menu");
+        smallMenu.add(new RouterLink("Položky", HWItemsPage.class));
 
         // Typy HW nejsou veřejné, aby nenapovídaly, co vše host nevidí
-        if (SpringContextHelper.getBean(SecurityService.class).getCurrentUser().isAdmin()) {
-            RouterLink typesLink = new RouterLink("Typy zařízení", HWTypesPage.class);
-            navigatorLayout.add(typesLink);
-        }
+        if (SpringContextHelper.getBean(SecurityService.class).getCurrentUser().isAdmin())
+            smallMenu.add(new RouterLink("Typy", HWTypesPage.class));
 
-        return navigatorLayout;
+        return smallMenu;
     }
 }
