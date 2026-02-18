@@ -699,8 +699,8 @@ public class PGServiceImpl implements PGService {
                                 // originál je vektor, který se na slideshow dá rovnou
                                 // použít
                                 itemTO.setName(fileName.substring(0, fileName.length() - 4));
-                                itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + itemTO.getName());
-                                itemTO.setSlideshowPath(configuration.getSlideshowDir() + "/" + itemTO.getName());
+                                itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + fileName);
+                                itemTO.setSlideshowPath(itemTO.getName());
                                 itemTO.setFullPath(itemTO.getName());
                             } else if (!Files.exists(slideshowDir.resolve(fileName))) {
                                 // možná byl tak malý, že nebylo potřeba vytvářet
