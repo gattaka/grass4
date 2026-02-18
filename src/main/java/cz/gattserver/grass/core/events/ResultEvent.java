@@ -2,7 +2,7 @@ package cz.gattserver.grass.core.events;
 
 public interface ResultEvent extends Event {
 
-	public boolean isSuccess();
+	boolean isSuccess();
 	
-	public String getResultDetails();
+	String getResultDetails();
 }

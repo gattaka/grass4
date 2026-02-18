@@ -6,7 +6,6 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
@@ -15,7 +14,6 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.slideshow.ImageSlideshow;
@@ -23,13 +21,11 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.ui.UploadBuilder;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
+import cz.gattserver.common.vaadin.dialogs.DownloadDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
-import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -51,6 +47,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.function.Consumer;
@@ -60,6 +57,9 @@ import java.util.stream.Collectors;
 @Route(value = "photogallery", layout = MainView.class)
 public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
+    @Serial
+    private static final long serialVersionUID = 1245583352776185949L;
+
     private static final Logger logger = LoggerFactory.getLogger(PGViewerPage.class);
 
     private static final int MAX_PAGE_RADIUS = 2;
@@ -67,12 +67,12 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     private static final String MAGICK_WORD = "MAG1CK";
 
-    private PGService pgService;
-    private EventBus eventBus;
-    private SecurityService securityService;
-    private CoreACLService coreACLService;
+    private final PGService pgService;
+    private final EventBus eventBus;
+    private final SecurityService securityService;
+    private final CoreACLService coreACLService;
 
-    private ProgressDialog progressIndicatorWindow;
+    private ProgressDialog progressDialog;
 
     private PhotogalleryTO photogalleryTO;
 
@@ -142,7 +142,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         Button downloadZip =
                 componentFactory.createZipButton(event -> new ConfirmDialog("Přejete si vytvořit ZIP galerie?", e -> {
                     logger.info("zipPhotogallery thread: {}", Thread.currentThread().threadId());
-                    progressIndicatorWindow = new ProgressDialog();
+                    progressDialog = new ProgressDialog();
                     eventBus.subscribe(PGViewerPage.this);
                     pgService.zipGallery(galleryDir);
                 }).open());
@@ -218,7 +218,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
                 }
             }
             eventBus.subscribe(PGViewerPage.this);
-            progressIndicatorWindow = new ProgressDialog();
+            progressDialog = new ProgressDialog();
             PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(photogalleryTO.getName(), galleryDir,
                     photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
                     photogalleryTO.isPublicated(), false);
@@ -244,21 +244,21 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Handler
     protected void onProcessStart(final PGProcessStartEvent event) {
-        progressIndicatorWindow.runInUI(() -> {
-            progressIndicatorWindow.setTotal(event.getCountOfStepsToDo());
-            progressIndicatorWindow.open();
+        progressDialog.runInUI(() -> {
+            progressDialog.setTotal(event.getCountOfStepsToDo());
+            progressDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(PGProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getStepDescription()));
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.getStepDescription()));
     }
 
     @Handler
     protected void onProcessResult(final PGProcessResultEvent event) {
-        progressIndicatorWindow.runInUI(() -> {
-            if (progressIndicatorWindow != null) progressIndicatorWindow.close();
+        progressDialog.runInUI(() -> {
+            if (progressDialog != null) progressDialog.close();
             UI.getCurrent().getPage().reload();
         });
         eventBus.unsubscribe(PGViewerPage.this);
@@ -266,41 +266,30 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Handler
     protected void onProcessStart(final PGZipProcessStartEvent event) {
-        progressIndicatorWindow.runInUI(() -> {
-            progressIndicatorWindow.setTotal(event.getCountOfStepsToDo());
-            progressIndicatorWindow.open();
+        progressDialog.runInUI(() -> {
+            progressDialog.setTotal(event.getCountOfStepsToDo());
+            progressDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(PGZipProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getStepDescription()));
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.getStepDescription()));
     }
 
     @Handler
     protected void onProcessResult(final PGZipProcessResultEvent event) {
-        progressIndicatorWindow.runInUI(() -> {
-            if (progressIndicatorWindow != null) progressIndicatorWindow.close();
-
+        progressDialog.runInUI(() -> {
+            if (progressDialog != null) progressDialog.close();
             if (event.isSuccess()) {
-                WebDialog win = new WebDialog("Komprese");
-                win.addDialogCloseActionListener(e -> pgService.deleteZipFile(event.getZipFile()));
-                Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
+                new DownloadDialog("Komprese", () -> {
                     try {
                         return new DownloadResponse(Files.newInputStream(event.getZipFile()),
                                 photogalleryTO.getPhotogalleryPath() + ".zip", null, -1);
-                    } catch (IOException e1) {
-                        e1.printStackTrace();
-                        return null;
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     }
-                }), "Stáhnout ZIP souboru");
-                link.setTarget("_blank");
-                win.addComponent(link, Alignment.CENTER);
-
-                Button proceedButton = new Button("Zavřít", e -> win.close());
-                win.addComponent(proceedButton, Alignment.CENTER);
-
-                win.open();
+                }, e -> pgService.deleteZipFile(event.getZipFile())).open();
             } else {
                 UIUtils.showWarning(event.getResultDetails());
             }
@@ -371,7 +360,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
                     Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
                         pgService.deleteFile(item.getName(), galleryDir);
                         eventBus.subscribe(PGViewerPage.this);
-                        progressIndicatorWindow = new ProgressDialog();
+                        progressDialog = new ProgressDialog();
                         PhotogalleryPayloadTO payloadTO =
                                 new PhotogalleryPayloadTO(photogalleryTO.getName(), galleryDir,
                                         photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
