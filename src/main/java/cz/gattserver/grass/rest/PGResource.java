@@ -2,6 +2,7 @@ package cz.gattserver.grass.rest;
 
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.pg.events.impl.PGEventsHandler;
@@ -68,7 +69,7 @@ public class PGResource {
         // poradí a sníží ho
         if (page * pageSize > count) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(
-                pgService.getAllPhotogalleriesForREST(filter, currentUser.getId(), currentUser.isAdmin(),
+                pgService.findAllPhotogalleriesForREST(filter, currentUser.getId(), currentUser.isAdmin(),
                         PageRequest.of(page, pageSize)), HttpStatus.OK);
     }
 
@@ -78,7 +79,7 @@ public class PGResource {
         PhotogalleryRESTTO gallery;
         try {
             UserInfoTO currentUser = securityService.getCurrentUser();
-            gallery = pgService.getPhotogalleryForREST(id, currentUser.getId(), currentUser.isAdmin());
+            gallery = pgService.findPhotogalleryForREST(id, currentUser.getId(), currentUser.isAdmin());
         } catch (UnauthorizedAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -90,7 +91,7 @@ public class PGResource {
         Path file;
         try {
             UserInfoTO currentUser = securityService.getCurrentUser();
-            file = pgService.getPhotoForREST(id, fileName, photoVersion, currentUser.getId(), currentUser.isAdmin());
+            file = pgService.findPhotoForREST(id, fileName, photoVersion, currentUser.getId(), currentUser.isAdmin());
         } catch (UnauthorizedAccessException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return;
@@ -170,11 +171,12 @@ public class PGResource {
     public ResponseEntity<String> upload(@RequestParam(value = "galleryId", required = true) Long galleryId,
                                          @RequestParam(value = "files", required = true) MultipartFile[] uploadedFile)
             throws IllegalStateException, IOException {
-        UserInfoTO user = securityService.getCurrentUser();
-        if (user.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        if (userInfoTO.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         logger.info("/upload volán");
         try {
-            PhotogalleryTO to = pgService.getPhotogalleryForDetail(galleryId);
+            PhotogalleryTO to =
+                    pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
             for (MultipartFile file : uploadedFile)
                 pgService.uploadFile(file.getInputStream(), file.getOriginalFilename(), to.getPhotogalleryPath());
 
@@ -189,8 +191,8 @@ public class PGResource {
     @RequestMapping(value = "/process", method = RequestMethod.POST)
     public ResponseEntity<String> process(@RequestParam(value = "galleryId", required = true) Long galleryId)
             throws IllegalStateException, IOException {
-        UserInfoTO user = securityService.getCurrentUser();
-        if (user.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        if (userInfoTO.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         logger.info("/process volán");
         try {
             UUID operationId = UUID.randomUUID();
@@ -199,10 +201,10 @@ public class PGResource {
             eventBus.subscribe(eventsHandler);
             CompletableFuture<PGEventsHandler> future = eventsHandler.expectEvent(operationId);
 
-            PhotogalleryTO to = pgService.getPhotogalleryForDetail(galleryId);
-            PhotogalleryPayloadTO payloadTO =
-                    new PhotogalleryPayloadTO(to.getContentNode().getName(), to.getPhotogalleryPath(),
-                            to.getContentNode().getContentTagsAsStrings(), to.getContentNode().isPublicated(), true);
+            PhotogalleryTO to =
+                    pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
+            PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(to.getName(), to.getPhotogalleryPath(),
+                    to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isPublicated(), true);
             pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
 
             eventsHandler = future.get();
@@ -219,5 +221,4 @@ public class PGResource {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }

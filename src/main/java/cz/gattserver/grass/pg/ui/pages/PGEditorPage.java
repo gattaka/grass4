@@ -27,8 +27,9 @@ import cz.gattserver.common.ui.UploadBuilder;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -113,7 +114,8 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     @Override
     public void setParameter(BeforeEvent event, @WildcardParameter String parameter) {
-        if (!securityService.getCurrentUser().getRoles().contains(CoreRole.AUTHOR))
+        UserInfoTO currentUserInfoTO = securityService.getCurrentUser();
+        if (!currentUserInfoTO.getRoles().contains(CoreRole.AUTHOR))
             throw new GrassPageException(403, "Nemáte oprávnění na tuto operaci");
 
         String[] chunks = parameter.split("/");
@@ -159,21 +161,21 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             editMode = true;
-            photogallery = pgService.getPhotogalleryForDetail(identifier.getId());
+            photogallery = pgService.findPhotogalleryForDetail(identifier.getId(), currentUserInfoTO.getId(),
+                    currentUserInfoTO.isAdmin());
 
             if (photogallery == null) throw new GrassPageException(404);
 
-            photogalleryNameField.setValue(photogallery.getContentNode().getName());
-            for (ContentTagOverviewTO tagDTO : photogallery.getContentNode().getContentTags())
-                photogalleryKeywords.addToken(tagDTO.getName());
+            photogalleryNameField.setValue(photogallery.getName());
+            for (String tag : photogallery.getContentTags().stream().map(ContentTagTO::getName).toList())
+                photogalleryKeywords.addToken(tag);
 
-            publicatedCheckBox.setValue(photogallery.getContentNode().isPublicated());
-            photogalleryDateField.setValue(photogallery.getContentNode().getCreationDate().toLocalDate());
+            publicatedCheckBox.setValue(photogallery.isPublicated());
+            photogalleryDateField.setValue(photogallery.getCreationDate().toLocalDate());
 
             // nemá oprávnění upravovat tento obsah
-            if (!photogallery.getContentNode().getAuthor().getName()
-                    .equals(securityService.getCurrentUser().getName()) && !securityService.getCurrentUser().isAdmin())
-                throw new GrassPageException(403);
+            if (!photogallery.getAuthorName().equals(securityService.getCurrentUser().getName()) &&
+                    !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
             logger.debug("Neznámá operace: '{}'", operationToken);
             throw new GrassPageException(404);
@@ -210,8 +212,8 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         final List<PhotogalleryEditorItemTO> items;
         if (editMode) {
             items = pgService.getItems(galleryDir).stream()
-                    .map(item -> new PhotogalleryEditorItemTO(item.getName(), Path.of(item.getFullPath()))).collect(
-                            Collectors.toList());
+                    .map(item -> new PhotogalleryEditorItemTO(item.getName(), Path.of(item.getFullPath())))
+                    .collect(Collectors.toList());
         } else {
             items = new ArrayList<>();
         }
@@ -373,7 +375,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      */
     private void returnToPhotogallery() {
         UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(PGViewerPage.class,
-                URLIdentifierUtils.createURLIdentifier(photogallery.getId(), photogallery.getContentNode().getName())));
+                URLIdentifierUtils.createURLIdentifier(photogallery.getId(), photogallery.getName())));
     }
 
     /**
@@ -410,7 +412,6 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     private void onSaveResult(PGProcessResultEvent event) {
         Long id = event.getGalleryId();
         if (event.isSuccess() && id != null) {
-            photogallery = pgService.getPhotogalleryForDetail(id);
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();

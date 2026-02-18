@@ -1,12 +1,14 @@
 package cz.gattserver.grass.core.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
+
 /**
  * Objekt sloužící pro přepravu dat mezi fasádou a view třídami
  * 
  * @author gatt
  * 
  */
-public class ContentTagOverviewTO {
+public class ContentTagTO {
 
 	/**
 	 * DB identifikátor
@@ -18,10 +20,16 @@ public class ContentTagOverviewTO {
 	 */
 	private String name;
 
-	public ContentTagOverviewTO() {
+    @QueryProjection
+    public ContentTagTO(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public ContentTagTO() {
 	}
 
-	public ContentTagOverviewTO(String name) {
+	public ContentTagTO(String name) {
 		this.name = name;
 	}
 

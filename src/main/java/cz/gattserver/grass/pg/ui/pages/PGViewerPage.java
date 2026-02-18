@@ -28,7 +28,9 @@ import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
@@ -111,11 +113,14 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) throw new GrassPageException(404);
 
-        photogalleryTO = pgService.getPhotogalleryForDetail(identifier.getId());
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+
+        photogalleryTO =
+                pgService.findPhotogalleryForDetail(identifier.getId(), userInfoTO.getId(), userInfoTO.isAdmin());
         if (photogalleryTO == null) throw new GrassPageException(404);
 
-        if (!MAGICK_WORD.equals(pageToken) && !MAGICK_WORD.equals(extraToken) &&
-                !photogalleryTO.getContentNode().isPublicated() && !isAdminOrAuthor()) throw new GrassPageException(403);
+        if (!MAGICK_WORD.equals(pageToken) && !MAGICK_WORD.equals(extraToken) && !photogalleryTO.isPublicated() &&
+                !isAdminOrAuthor()) throw new GrassPageException(403);
 
         galleryDir = photogalleryTO.getPhotogalleryPath();
 
@@ -128,11 +133,10 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         }
 
         removeAll();
-        ContentNodeTO contentNodeTO = photogalleryTO.getContentNode();
-        ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
+        ContentViewer contentViewer = new ContentViewer(createContent(), photogalleryTO, e -> onDeleteOperation(),
                 e -> UI.getCurrent()
                         .navigate(PGEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(contentNodeTO.getName(), PGViewerPage.class, parameter));
+                new RouterLink(photogalleryTO.getName(), PGViewerPage.class, parameter));
         add(contentViewer);
 
         Button downloadZip =
@@ -150,13 +154,13 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Override
     public String getPageTitle() {
-        return photogalleryTO.getContentNode().getName();
+        return photogalleryTO.getName();
     }
 
 
     private boolean isAdminOrAuthor() {
         return securityService.getCurrentUser().isAdmin() ||
-                photogalleryTO.getContentNode().getAuthor().equals(securityService.getCurrentUser());
+                photogalleryTO.getAuthorId().equals(securityService.getCurrentUser().getId());
     }
 
     protected Div createContent() {
@@ -204,28 +208,26 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
         UploadBuilder uploadBuilder = new UploadBuilder();
         Upload upload = uploadBuilder.createUpload(set -> {
-            if (set.isEmpty())
-                return;
+            if (set.isEmpty()) return;
             for (UploadBuilder.UploadFile file : set) {
                 try {
-                    pgService.uploadFile(new FileInputStream(file.getFile()),file.getMetadata().fileName(),galleryDir);
+                    pgService.uploadFile(new FileInputStream(file.getFile()), file.getMetadata().fileName(),
+                            galleryDir);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
             eventBus.subscribe(PGViewerPage.this);
             progressIndicatorWindow = new ProgressDialog();
-            PhotogalleryPayloadTO payloadTO =
-                    new PhotogalleryPayloadTO(photogalleryTO.getContentNode().getName(), galleryDir,
-                            photogalleryTO.getContentNode().getContentTagsAsStrings(),
-                            photogalleryTO.getContentNode().isPublicated(), false);
+            PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(photogalleryTO.getName(), galleryDir,
+                    photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
+                    photogalleryTO.isPublicated(), false);
             pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.getId(), payloadTO,
-                    photogalleryTO.getContentNode().getCreationDate());
+                    photogalleryTO.getCreationDate());
         }, () -> pgService.getItems(galleryDir).stream().map(PhotogalleryViewItemTO::getName)
                 .collect(Collectors.toSet()));
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        if (coreACLService.canModifyContent(photogalleryTO.getContentNode(), securityService.getCurrentUser()))
-            layout.add(upload);
+        if (coreACLService.canModifyContent(photogalleryTO, securityService.getCurrentUser())) layout.add(upload);
 
         Div statusRow = new Div();
         statusRow.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -365,17 +367,17 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
                 buttonLayout.add(detailButton);
 
                 // Smazat
-                if (coreACLService.canModifyContent(photogalleryTO.getContentNode(), securityService.getCurrentUser())) {
+                if (coreACLService.canModifyContent(photogalleryTO, securityService.getCurrentUser())) {
                     Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
                         pgService.deleteFile(item.getName(), galleryDir);
                         eventBus.subscribe(PGViewerPage.this);
                         progressIndicatorWindow = new ProgressDialog();
                         PhotogalleryPayloadTO payloadTO =
-                                new PhotogalleryPayloadTO(photogalleryTO.getContentNode().getName(), galleryDir,
-                                        photogalleryTO.getContentNode().getContentTagsAsStrings(),
-                                        photogalleryTO.getContentNode().isPublicated(), false);
+                                new PhotogalleryPayloadTO(photogalleryTO.getName(), galleryDir,
+                                        photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
+                                        photogalleryTO.isPublicated(), false);
                         pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.getId(), payloadTO,
-                                photogalleryTO.getContentNode().getCreationDate());
+                                photogalleryTO.getCreationDate());
                     }).open());
                     deleteButton.getStyle().set("color", "red");
                     buttonLayout.add(deleteButton);
@@ -483,9 +485,9 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     protected void onDeleteOperation() {
         ConfirmDialog confirmSubwindow = new ConfirmDialog("Opravdu si přejete smazat tuto galerii ?", ev -> {
-            NodeOverviewTO nodeDTO = photogalleryTO.getContentNode().getParent();
 
-            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(nodeDTO.getId(), nodeDTO.getName());
+            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(photogalleryTO.getParentId(),
+                    photogalleryTO.getParentName());
 
             // zdařilo se ? Pokud ano, otevři info okno a při
             // potvrzení jdi na kategorii

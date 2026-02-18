@@ -2,7 +2,7 @@ package cz.gattserver.grass.core.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.core.mock.CoreMockService;
@@ -41,10 +41,10 @@ public class ContentTagServiceTest extends DBCleanTest {
 		Long contentNode3 = coreMockService.createMockContentNode(33L, null, nodeId1, userId1, 3);
 		contentTagService.saveTags(tags, contentNode3);
 
-		Set<ContentTagOverviewTO> tagsTOs = contentTagService.getTagsForOverviewOrderedByName();
+		Set<ContentTagTO> tagsTOs = contentTagService.getTagsForOverviewOrderedByName();
 		assertEquals(3, tagsTOs.size());
 
-		Iterator<ContentTagOverviewTO> iter = tagsTOs.iterator();
+		Iterator<ContentTagTO> iter = tagsTOs.iterator();
 		assertEquals("atrapa", iter.next().getName());
 		assertEquals("novinky", iter.next().getName());
 		assertEquals("pokusy", iter.next().getName());
@@ -68,10 +68,10 @@ public class ContentTagServiceTest extends DBCleanTest {
 		Long contentNode3 = coreMockService.createMockContentNode(33L, null, nodeId1, userId1, 3);
 		contentTagService.saveTags(tags, contentNode3);
 
-		Set<ContentTagOverviewTO> tagsTOs = contentTagService.getTagsForOverviewOrderedByName();
+		Set<ContentTagTO> tagsTOs = contentTagService.getTagsForOverviewOrderedByName();
 		assertEquals(3, tagsTOs.size());
 
-		Iterator<ContentTagOverviewTO> iter = tagsTOs.iterator();
+		Iterator<ContentTagTO> iter = tagsTOs.iterator();
 		assertEquals(1, contentTagService.getTagContentsCount(iter.next().getId()));
 		assertEquals(3, contentTagService.getTagContentsCount(iter.next().getId()));
 		assertEquals(2, contentTagService.getTagContentsCount(iter.next().getId()));
@@ -96,7 +96,7 @@ public class ContentTagServiceTest extends DBCleanTest {
 		Long contentNode2 = coreMockService.createMockContentNode(32L, null, nodeId1, userId1, 2);
 		contentTagService.saveTags(tags, contentNode2);
 
-		ContentTagOverviewTO tagTO = contentTagService.getTagByName("novinky");
+		ContentTagTO tagTO = contentTagService.getTagByName("novinky");
 		assertEquals("novinky", tagTO.getName());
 		assertEquals(2, contentTagService.getTagContentsCount(tagTO.getId()));
 
@@ -130,7 +130,7 @@ public class ContentTagServiceTest extends DBCleanTest {
 		tags.add("pokusy");
 		coreMockService.createMockContentNode(30L, tags, nodeId1, userId1, 1);
 
-		ContentTagOverviewTO tagTO = contentTagService.getTagByName("novinky");
+		ContentTagTO tagTO = contentTagService.getTagByName("novinky");
 		assertEquals("novinky", tagTO.getName());
 		tagTO = contentTagService.getTagById(tagTO.getId());
 		assertEquals("novinky", tagTO.getName());
@@ -155,7 +155,7 @@ public class ContentTagServiceTest extends DBCleanTest {
 		Long contentNode2 = coreMockService.createMockContentNode(32L, null, nodeId1, userId1, 2);
 		contentTagService.saveTags(tags, contentNode2);
 
-		ContentTagOverviewTO tagTO = contentTagService.getTagByName("novinky");
+		ContentTagTO tagTO = contentTagService.getTagByName("novinky");
 		assertEquals("novinky", tagTO.getName());
 		assertEquals(2, contentTagService.getTagContentsCount(tagTO.getId()));
 
@@ -187,7 +187,7 @@ public class ContentTagServiceTest extends DBCleanTest {
 		Long contentNode2 = coreMockService.createMockContentNode(32L, null, nodeId1, userId1, 2);
 		contentTagService.saveTags(tags, contentNode2);
 
-		ContentTagOverviewTO tagTO = contentTagService.getTagByName("novinky");
+		ContentTagTO tagTO = contentTagService.getTagByName("novinky");
 		assertEquals("novinky", tagTO.getName());
 		assertEquals(2, contentTagService.getTagContentsCount(tagTO.getId()));
 
@@ -214,7 +214,7 @@ public class ContentTagServiceTest extends DBCleanTest {
 		Long contentNode2 = coreMockService.createMockContentNode(32L, null, nodeId1, userId1, 2);
 		contentTagService.saveTags(tags, contentNode2);
 
-		ContentTagOverviewTO tagTO = contentTagService.getTagByName("novinky");
+		ContentTagTO tagTO = contentTagService.getTagByName("novinky");
 		assertEquals("novinky", tagTO.getName());
 		assertEquals(2, contentTagService.getTagContentsCount(tagTO.getId()));
 

@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.interfaces.QuoteTO;
@@ -62,28 +62,28 @@ public interface CoreMapperService {
 	public ContentNodeTO mapContentNodeForDetail(ContentNode e);
 
 	/**
-	 * Převede {@link ContentTag} na {@link ContentTagOverviewTO}
+	 * Převede {@link ContentTag} na {@link ContentTagTO}
 	 * 
 	 * @param e
 	 * @return
 	 */
-	public ContentTagOverviewTO mapContentTagForOverview(ContentTag e);
+	public ContentTagTO mapContentTagForOverview(ContentTag e);
 
 	/**
-	 * Převede list {@link ContentTag} na list {@link ContentTagOverviewTO}
+	 * Převede list {@link ContentTag} na list {@link ContentTagTO}
 	 * 
 	 * @param contentTags
 	 * @return
 	 */
-	public List<ContentTagOverviewTO> mapContentTagCollection(Collection<ContentTag> contentTags);
+	public List<ContentTagTO> mapContentTagCollection(Collection<ContentTag> contentTags);
 
 	/**
-	 * Převede list {@link ContentTag} na list {@link ContentTagOverviewTO}
+	 * Převede list {@link ContentTag} na list {@link ContentTagTO}
 	 * 
 	 * @param contentTags
 	 * @return
 	 */
-	public Set<ContentTagOverviewTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags);
+	public Set<ContentTagTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags);
 
 	/**
 	 * Převede {@link Node} na {@link NodeTO}

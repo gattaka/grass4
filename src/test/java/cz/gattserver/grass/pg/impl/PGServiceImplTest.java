@@ -408,7 +408,7 @@ public class PGServiceImplTest extends DBCleanTest {
     }
 
     @Test
-    public void testGetPhotogalleryForDetail() throws IOException, InterruptedException, ExecutionException {
+    public void testFindPhotogalleryForDetail() throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
         Path galleryDir = root.resolve("testGallery");
@@ -436,10 +436,10 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PhotogalleryTO to = pgService.getPhotogalleryForDetail(galleryId);
+        PhotogalleryTO to = pgService.findPhotogalleryForDetail(galleryId, userId1, true);
         assertEquals("testGallery", to.getPhotogalleryPath());
-        assertEquals("Test galerie", to.getContentNode().getName());
-        assertTrue(to.getContentNode().isPublicated());
+        assertEquals("Test galerie", to.getName());
+        assertTrue(to.isPublicated());
     }
 
     private long createMockGallery(Path root, Long userId, Long nodeId, int variant, boolean publicated)
@@ -472,7 +472,7 @@ public class PGServiceImplTest extends DBCleanTest {
     }
 
     @Test
-    public void testGetAllPhotogalleriesForREST() throws IOException, InterruptedException, ExecutionException {
+    public void testFindAllPhotogalleriesForREST() throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
         // Admin
@@ -496,33 +496,33 @@ public class PGServiceImplTest extends DBCleanTest {
         assertEquals(2, count);
 
         List<PhotogalleryRESTOverviewTO> list =
-                pgService.getAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(0, 2));
+                pgService.findAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(0, 2));
         assertEquals(2, list.size());
         assertEquals("Test galerie4", list.get(0).getName());
         assertEquals(id4, list.get(0).getId());
         assertEquals("Test galerie3", list.get(1).getName());
         assertEquals(id3, list.get(1).getId());
 
-        list = pgService.getAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(1, 2));
+        list = pgService.findAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(1, 2));
         assertEquals(2, list.size());
         assertEquals("Test galerie2", list.get(0).getName());
         assertEquals(id2, list.get(0).getId());
 
-        list = pgService.getAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(0, 2));
+        list = pgService.findAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(0, 2));
         assertEquals(2, list.size());
         assertEquals("Test galerie4", list.get(0).getName());
         assertEquals(id4, list.get(0).getId());
         assertEquals("Test galerie3", list.get(1).getName());
         assertEquals(id3, list.get(1).getId());
 
-        list = pgService.getAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(1, 2));
+        list = pgService.findAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(1, 2));
         assertEquals(1, list.size());
         assertEquals("Test galerie1", list.get(0).getName());
         assertEquals(id1, list.get(0).getId());
     }
 
     @Test
-    public void testGetPhotogalleryForREST()
+    public void testFindPhotogalleryForREST()
             throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
@@ -558,7 +558,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PhotogalleryRESTTO to = pgService.getPhotogalleryForREST(galleryId, userId, false);
+        PhotogalleryRESTTO to = pgService.findPhotogalleryForREST(galleryId, userId, false);
 
         assertEquals(MockUtils.MOCK_USER_NAME + 1, to.getAuthor());
         assertEquals(2, to.getFiles().size());
@@ -569,7 +569,7 @@ public class PGServiceImplTest extends DBCleanTest {
         assertEquals("Test galerie", to.getName());
     }
 
-    public void testGetPhotogalleryForREST_succes1()
+    public void testFindPhotogalleryForREST_succes1()
             throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
@@ -580,10 +580,10 @@ public class PGServiceImplTest extends DBCleanTest {
         UserInfoTO user = mockSecurityService.getCurrentUser();
         user.setId(userId1);
 
-        pgService.getPhotogalleryForREST(id1, userId1, false);
+        pgService.findPhotogalleryForREST(id1, userId1, false);
     }
 
-    public void testGetPhotogalleryForREST_succes2()
+    public void testFindPhotogalleryForREST_succes2()
             throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
@@ -595,11 +595,11 @@ public class PGServiceImplTest extends DBCleanTest {
         UserInfoTO user = mockSecurityService.getCurrentUser();
         user.getRoles().add(CoreRole.ADMIN);
 
-        pgService.getPhotogalleryForREST(id1, userId2, true);
+        pgService.findPhotogalleryForREST(id1, userId2, true);
     }
 
     @Test
-    public void testGetPhotogalleryForREST_exception()
+    public void testFindPhotogalleryForREST_exception()
             throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
@@ -608,12 +608,12 @@ public class PGServiceImplTest extends DBCleanTest {
         Long nodeId1 = coreMockService.createMockRootNode(1);
         Long id1 = createMockGallery(root, userId1, nodeId1, 1, false);
 
-        assertThrows(UnauthorizedAccessException.class, () -> pgService.getPhotogalleryForREST(id1, null, false));
-        assertThrows(UnauthorizedAccessException.class, () -> pgService.getPhotogalleryForREST(id1, userId2, false));
+        assertThrows(UnauthorizedAccessException.class, () -> pgService.findPhotogalleryForREST(id1, null, false));
+        assertThrows(UnauthorizedAccessException.class, () -> pgService.findPhotogalleryForREST(id1, userId2, false));
     }
 
     @Test
-    public void testGetPhotoForREST()
+    public void testFindPhotoForREST()
             throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
@@ -654,13 +654,13 @@ public class PGServiceImplTest extends DBCleanTest {
         PGConfiguration conf = new PGConfiguration();
         configurationService.loadConfiguration(conf);
 
-        Path photoPath = pgService.getPhotoForREST(galleryId, "02.jpg", PhotoVersion.SLIDESHOW, userId1, false);
+        Path photoPath = pgService.findPhotoForREST(galleryId, "02.jpg", PhotoVersion.SLIDESHOW, userId1, false);
         assertEquals(galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg"), photoPath);
-        photoPath = pgService.getPhotoForREST(galleryId, "03.jpg", PhotoVersion.SLIDESHOW, userId2, true);
+        photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.SLIDESHOW, userId2, true);
         assertEquals(galleryDir.resolve("03.jpg"), photoPath);
-        photoPath = pgService.getPhotoForREST(galleryId, "02.jpg", PhotoVersion.MINI, userId3, false);
+        photoPath = pgService.findPhotoForREST(galleryId, "02.jpg", PhotoVersion.MINI, userId3, false);
         assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg"), photoPath);
-        photoPath = pgService.getPhotoForREST(galleryId, "03.jpg", PhotoVersion.MINI, null, false);
+        photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.MINI, null, false);
         assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg"), photoPath);
 
     }

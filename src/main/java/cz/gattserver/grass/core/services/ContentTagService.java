@@ -2,7 +2,7 @@ package cz.gattserver.grass.core.services;
 
 import java.util.*;
 
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
 import cz.gattserver.grass.core.model.domain.ContentNode;
 
@@ -13,7 +13,7 @@ public interface ContentTagService {
 	 * 
 	 * @return list tagů bez jejich vazeb na své obsahy
 	 */
-	Set<ContentTagOverviewTO> getTagsForOverviewOrderedByName();
+	Set<ContentTagTO> getTagsForOverviewOrderedByName();
 
 	/**
 	 * Získá tag pro přehled
@@ -22,7 +22,7 @@ public interface ContentTagService {
 	 *            id tagu
 	 * @return tag bez jeho vazby na své obsahy
 	 */
-	ContentTagOverviewTO getTagById(long id);
+	ContentTagTO getTagById(long id);
 
 	/**
 	 * Získá tag dle názvu
@@ -31,7 +31,7 @@ public interface ContentTagService {
 	 *            název tagu
 	 * @return tag bez jeho vazby na své obsahy
 	 */
-	ContentTagOverviewTO getTagByName(String name);
+	ContentTagTO getTagByName(String name);
 
 	/**
 	 * Bere řetězec tagů, parsuje je a ukládá do nich (nebo vytvoří nové)

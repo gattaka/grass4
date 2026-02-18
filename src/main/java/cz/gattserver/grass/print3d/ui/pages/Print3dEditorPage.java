@@ -24,7 +24,7 @@ import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentTagService;
@@ -148,7 +148,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
             if (project == null) throw new GrassPageException(404);
 
             nameField.setValue(project.getContentNode().getName());
-            for (ContentTagOverviewTO tagDTO : project.getContentNode().getContentTags())
+            for (ContentTagTO tagDTO : project.getContentNode().getContentTags())
                 keywords.addToken(tagDTO.getName());
 
             publicatedCheckBox.setValue(project.getContentNode().isPublicated());

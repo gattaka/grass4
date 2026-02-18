@@ -2,7 +2,7 @@ package cz.gattserver.grass.core.ui.pages;
 
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -25,7 +25,7 @@ public class TagPage extends Div implements HasUrlParameter<String>, HasDynamicT
     private SecurityService securityService;
 
 	private String tagParameter;
-	private ContentTagOverviewTO tag;
+	private ContentTagTO tag;
 
     public TagPage(ContentTagService contentTagFacade, ContentNodeService contentNodeFacade,
                    SecurityService securityService) {

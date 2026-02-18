@@ -5,9 +5,11 @@ import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
-import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.model.domain.ContentNode;
+import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
+import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepositoryCustom;
 import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
+import cz.gattserver.grass.core.model.repositories.ContentTagRepository;
 import cz.gattserver.grass.modules.PGModule;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.impl.*;
@@ -17,11 +19,9 @@ import cz.gattserver.grass.pg.model.repositories.PhotogalleryRepository;
 import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.pg.util.DecodeAndCaptureFrames;
 import cz.gattserver.grass.pg.util.PGUtils;
-import cz.gattserver.grass.pg.util.PhotogalleryMapper;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
-import cz.gattserver.grass.core.services.SecurityService;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,16 +52,13 @@ public class PGServiceImpl implements PGService {
     private ContentNodeService contentNodeService;
 
     @Autowired
-    private PhotogalleryMapper photogalleriesMapper;
-
-    @Autowired
     private ConfigurationService configurationService;
 
     @Autowired
     private PhotogalleryRepository photogalleryRepository;
 
     @Autowired
-    private ContentNodeRepository contentNodeRepository;
+    private ContentNodeContentTagRepository contentNodeContentTagRepository;
 
     @Autowired
     private FileSystemService fileSystemService;
@@ -340,12 +337,12 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public PhotogalleryTO getPhotogalleryForDetail(Long id) {
+    public PhotogalleryTO findPhotogalleryForDetail(Long id, Long userId, boolean isAdmin) {
         Validate.notNull(id, "Id galerie nesmí být null");
-        Photogallery photogallery = photogalleryRepository.findById(id).orElse(null);
-        ContentNode contentNode = contentNodeRepository.findById(photogallery.getContentNodeId()).orElse(null);
-        if (photogallery == null || contentNode == null) return null;
-        return photogalleriesMapper.mapPhotogalleryForDetail(photogallery, contentNode);
+        PhotogalleryTO to = photogalleryRepository.findForDetailById(id, userId, isAdmin);
+        if (to == null) return null;
+        to.setContentTags(contentNodeContentTagRepository.findByContendNodeId(to.getContentNodeId()));
+        return to;
     }
 
     /**
@@ -423,90 +420,76 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin,
-                                                                        Pageable pageable) {
+    public List<PhotogalleryRESTOverviewTO> findAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin,
+                                                                         Pageable pageable) {
         return photogalleryRepository.findForRestOverview(filter, userId, isAdmin, pageable);
     }
 
     @Override
-    public PhotogalleryRESTOverviewTO getPhotogalleryByDirectory(String directory, Long userId, boolean isAdmin) {
+    public PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String directory, Long userId, boolean isAdmin) {
         return photogalleryRepository.findForRestByDirectory(directory, userId, isAdmin);
     }
 
     @Override
-    public PhotogalleryRESTTO getPhotogalleryForREST(Long id, Long userId, boolean isAdmin)
+    public PhotogalleryRESTTO findPhotogalleryForREST(Long id, Long userId, boolean isAdmin)
             throws UnauthorizedAccessException {
-        Photogallery gallery = photogalleryRepository.findById(id).orElse(null);
-        ContentNode contentNode = contentNodeRepository.findById(gallery.getContentNodeId()).orElse(null);
-        if (gallery == null || contentNode == null) return null;
+        PhotogalleryRESTTO to = photogalleryRepository.findForRestById(id, userId, isAdmin);
+        if (to == null) throw new UnauthorizedAccessException();
 
-        if (contentNode.getPublicated() || isAdmin || contentNode.getAuthor().getId().equals(userId)) {
-            PGConfiguration configuration = loadConfiguration();
-            Path file = fileSystemService.getFileSystem()
-                    .getPath(configuration.getRootDir(), gallery.getPhotogalleryPath());
-            if (Files.exists(file)) {
-                Set<String> files = new HashSet<>();
-                try (Stream<Path> stream = Files.list(file).sorted(getComparator())) {
-                    stream.filter(f -> !Files.isDirectory(f)).forEach(f -> files.add(f.getFileName().toString()));
-                } catch (IOException e) {
-                    throw new IllegalStateException(
-                            "Nelze získat přehled souborů z '" + file.getFileName().toString() + "'");
-                }
-                PhotogalleryRESTTO to =
-                        new PhotogalleryRESTTO(gallery.getId(), contentNode.getName(), contentNode.getCreationDate(),
-                                contentNode.getLastModificationDate(), contentNode.getAuthor().getName());
-                to.setFiles(files);
-                return to;
-            } else {
-                return null;
+        PGConfiguration configuration = loadConfiguration();
+        Path file = fileSystemService.getFileSystem().getPath(configuration.getRootDir(), to.getPhotogalleryPath());
+        if (Files.exists(file)) {
+            Set<String> files = new HashSet<>();
+            try (Stream<Path> stream = Files.list(file).sorted(getComparator())) {
+                stream.filter(f -> !Files.isDirectory(f)).forEach(f -> files.add(f.getFileName().toString()));
+            } catch (IOException e) {
+                throw new IllegalStateException(
+                        "Nelze získat přehled souborů z '" + file.getFileName().toString() + "'");
             }
+            to.setFiles(files);
         }
-        throw new UnauthorizedAccessException();
+        return to;
     }
 
     @Override
-    public Path getPhotoForREST(Long id, String fileName, PhotoVersion version, Long userId, boolean isAdmin)
+    public Path findPhotoForREST(Long id, String fileName, PhotoVersion version, Long userId, boolean isAdmin)
             throws UnauthorizedAccessException {
-        Photogallery gallery = photogalleryRepository.findById(id).orElse(null);
-        ContentNode contentNode = contentNodeRepository.findById(gallery.getContentNodeId()).orElse(null);
-        if (gallery == null || contentNode == null) return null;
+        PhotogalleryRESTTO to = photogalleryRepository.findForRestById(id, userId, isAdmin);
+        if (to == null) throw new UnauthorizedAccessException();
 
-        if (contentNode.getPublicated() || isAdmin || contentNode.getAuthor().getId().equals(userId)) {
-            PGConfiguration configuration = loadConfiguration();
-            Path rootPath = loadRootDirFromConfiguration(configuration);
-            Path galleryPath = rootPath.resolve(gallery.getPhotogalleryPath());
-            Path miniaturesPath = galleryPath.resolve(configuration.getMiniaturesDir());
-            Path slideshowPath = galleryPath.resolve(configuration.getSlideshowDir());
-            Path file;
+        PGConfiguration configuration = loadConfiguration();
+        Path rootPath = loadRootDirFromConfiguration(configuration);
+        Path galleryPath = rootPath.resolve(to.getPhotogalleryPath());
+        Path miniaturesPath = galleryPath.resolve(configuration.getMiniaturesDir());
+        Path slideshowPath = galleryPath.resolve(configuration.getSlideshowDir());
+        Path file;
+        switch (version) {
+            case MINI:
+                file = miniaturesPath.resolve(fileName);
+                break;
+            case SLIDESHOW:
+                file = slideshowPath.resolve(fileName);
+                break;
+            default:
+            case FULL:
+                file = galleryPath.resolve(fileName);
+                break;
+        }
+        if (Files.exists(file)) {
+            return file;
+        } else {
             switch (version) {
-                case MINI:
-                    file = miniaturesPath.resolve(fileName);
-                    break;
-                case SLIDESHOW:
-                    file = slideshowPath.resolve(fileName);
-                    break;
-                default:
                 case FULL:
+                    // nenašel jsem ani plnou velikost? Problém!
+                    return null;
+                case SLIDESHOW:
+                case MINI:
                     file = galleryPath.resolve(fileName);
+                    if (Files.exists(file)) return file;
                     break;
-            }
-            if (Files.exists(file)) {
-                return file;
-            } else {
-                switch (version) {
-                    case FULL:
-                        // nenašel jsem ani plnou velikost? Problém!
-                        return null;
-                    case SLIDESHOW:
-                    case MINI:
-                        file = galleryPath.resolve(fileName);
-                        if (Files.exists(file)) return file;
-                        break;
-                }
             }
         }
-
-        throw new UnauthorizedAccessException();
+        return null;
     }
 
     private Path loadRootDirFromConfiguration(PGConfiguration configuration) {

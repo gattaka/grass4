@@ -1,212 +1,188 @@
 package cz.gattserver.grass.core.services;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
+import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.modules.SectionService;
 
 public interface CoreACLService {
 
-	/**
-	 * =======================================================================
-	 * Sekce
-	 * =======================================================================
-	 */
+    /**
+     * =======================================================================
+     * Sekce
+     * =======================================================================
+     */
 
-	/**
-	 * Může uživatel zobrazit danou sekci ?
-	 * 
-	 * @param section
-	 *            sekce
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canShowSection(SectionService section, UserInfoTO user);
+    /**
+     * Může uživatel zobrazit danou sekci ?
+     *
+     * @param sectionService sekce
+     * @param userInfoTO     uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canShowSection(SectionService sectionService, UserInfoTO userInfoTO);
 
-	/**
-	 * Může uživatel upravovat "hlášky"
-	 * 
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canModifyQuotes(UserInfoTO user);
+    /**
+     * Může uživatel upravovat "hlášky"
+     *
+     * @param userInfoTO uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canModifyQuotes(UserInfoTO userInfoTO);
 
-	/**
-	 * =======================================================================
-	 * Obsahy
-	 * =======================================================================
-	 */
+    /**
+     * =======================================================================
+     * Obsahy
+     * =======================================================================
+     */
 
-	/**
-	 * Může uživatel zobrazit daný obsah ?
-	 */
-	// řešeno jako DB dotaz
+    /**
+     * Může uživatel zobrazit daný obsah ?
+     */
+    // řešeno jako DB dotaz
 
-	/**
-	 * Může uživatel vytvářet obsah ?
-	 * 
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canCreateContent(UserInfoTO user);
+    /**
+     * Může uživatel vytvářet obsah ?
+     *
+     * @param userInfoTO uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canCreateContent(UserInfoTO userInfoTO);
 
-	/**
-	 * Může uživatel upravit daný obsah ?
-	 * 
-	 * @param content
-	 *            obsah
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canModifyContent(ContentNodeTO content, UserInfoTO user);
+    /**
+     * Může uživatel upravit daný obsah ?
+     *
+     * @param contentNodeTO obsah
+     * @param userInfoTO    uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canModifyContent(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO);
 
-	/**
-	 * Může uživatel smazat daný obsah ?
-	 * 
-	 * @param content
-	 *            obsah
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canDeleteContent(ContentNodeTO content, UserInfoTO user);
+    /**
+     * Může uživatel smazat daný obsah ?
+     *
+     * @param contentNodeTO obsah
+     * @param userInfoTO    uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canDeleteContent(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO);
 
-	/**
-	 * =======================================================================
-	 * Kategorie
-	 * =======================================================================
-	 */
+    /**
+     * =======================================================================
+     * Kategorie
+     * =======================================================================
+     */
 
-	/**
-	 * Může uživatel založit kategorii ?
-	 * 
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canCreateNode(UserInfoTO user);
+    /**
+     * Může uživatel založit kategorii ?
+     *
+     * @param userInfoTO uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canCreateNode(UserInfoTO userInfoTO);
 
-	/**
-	 * Může uživatel upravit kategorii ?
-	 * 
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canModifyNode(UserInfoTO user);
+    /**
+     * Může uživatel upravit kategorii ?
+     *
+     * @param userInfoTO uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canModifyNode(UserInfoTO userInfoTO);
 
-	/**
-	 * Může uživatel přesunout kategorii ?
-	 * 
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canMoveNode(UserInfoTO user);
+    /**
+     * Může uživatel přesunout kategorii ?
+     *
+     * @param userInfoTO uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canMoveNode(UserInfoTO userInfoTO);
 
-	/**
-	 * Může uživatel smazat kategorii ?
-	 * 
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canDeleteNode(UserInfoTO user);
+    /**
+     * Může uživatel smazat kategorii ?
+     *
+     * @param userInfoTO uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canDeleteNode(UserInfoTO userInfoTO);
 
-	/**
-	 * =======================================================================
-	 * Různé
-	 * =======================================================================
-	 */
+    /**
+     * =======================================================================
+     * Různé
+     * =======================================================================
+     */
 
-	/**
-	 * Je uživatel přihlášen?
-	 * 
-	 * @param user
-	 *            uživatel
-	 * @return <code>true</code> pokud je
-	 */
-	public boolean isLoggedIn(UserInfoTO user);
+    /**
+     * Je uživatel přihlášen?
+     *
+     * @param userInfoTO uživatel
+     * @return <code>true</code> pokud je
+     */
+    boolean isLoggedIn(UserInfoTO userInfoTO);
 
-	/**
-	 * Může daný uživatel zobrazit detaily o uživateli X ?
-	 * 
-	 * @param anotherUser
-	 *            zobrazovaný uživatel
-	 * @param user
-	 *            přihlášený uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canShowUserDetails(UserInfoTO anotherUser, UserInfoTO user);
+    /**
+     * Může daný uživatel zobrazit detaily o uživateli X ?
+     *
+     * @param targetUserInfoTO zobrazovaný uživatel
+     * @param userInfoTO       přihlášený uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canShowUserDetails(UserInfoTO targetUserInfoTO, UserInfoTO userInfoTO);
 
-	/**
-	 * Může se uživatel zaregistrovat ?
-	 * 
-	 * @param user
-	 *            přihlášený uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canRegistrate(UserInfoTO user);
+    /**
+     * Může se uživatel zaregistrovat ?
+     *
+     * @param userInfoTO přihlášený uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canRegistrate(UserInfoTO userInfoTO);
 
-	/**
-	 * Může zobrazit stránku s nastavením ?
-	 * 
-	 * @param user
-	 *            přihlášený uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canShowSettings(UserInfoTO user);
+    /**
+     * Může zobrazit stránku s nastavením ?
+     *
+     * @param userInfoTO přihlášený uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canShowSettings(UserInfoTO userInfoTO);
 
-	/**
-	 * Může zobrazit stránku s nastavením aplikace ?
-	 * 
-	 * @param user
-	 *            přihlášený uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canShowApplicationSettings(UserInfoTO user);
+    /**
+     * Může zobrazit stránku s nastavením aplikace ?
+     *
+     * @param userInfoTO přihlášený uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canShowApplicationSettings(UserInfoTO userInfoTO);
 
-	/**
-	 * Může zobrazit stránku s nastavením kategorií ?
-	 * 
-	 * @param user
-	 *            přihlášený uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canShowCategoriesSettings(UserInfoTO user);
+    /**
+     * Může zobrazit stránku s nastavením kategorií ?
+     *
+     * @param userInfoTO přihlášený uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canShowCategoriesSettings(UserInfoTO userInfoTO);
 
-	/**
-	 * Může zobrazit stránku s nastavením uživatelů ?
-	 * 
-	 * @param user
-	 *            přihlášený uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canShowUserSettings(UserInfoTO user);
+    /**
+     * Může zobrazit stránku s nastavením uživatelů ?
+     *
+     * @param userInfoTO přihlášený uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canShowUserSettings(UserInfoTO userInfoTO);
 
-	/**
-	 * Může přidat obsah do svých oblíbených ?
-	 * 
-	 * @param contentNodeDTO
-	 *            obsah
-	 * @param user
-	 *            přihlášený uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canAddContentToFavourites(ContentNodeTO contentNodeDTO, UserInfoTO user);
+    /**
+     * Může přidat obsah do svých oblíbených ?
+     *
+     * @param contentNodeTO obsah
+     * @param userInfoTO    přihlášený uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canAddContentToFavourites(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO);
 
-	/**
-	 * Může odebrat obsah ze svých oblíbených ?
-	 * 
-	 * @param contentNodeDTO
-	 *            obsah
-	 * @param user
-	 *            přihlášený uživatel
-	 * @return <code>true</code> pokud může
-	 */
-	public boolean canRemoveContentFromFavourites(ContentNodeTO contentNode, UserInfoTO user);
+    /**
+     * Může odebrat obsah ze svých oblíbených ?
+     *
+     * @param contentNodeTO obsah
+     * @param userInfoTO    přihlášený uživatel
+     * @return <code>true</code> pokud může
+     */
+    boolean canRemoveContentFromFavourites(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO);
 
 }

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.interfaces.QuoteTO;
@@ -96,11 +96,11 @@ public class CoreMapperServiceImpl implements CoreMapperService {
 	}
 
 	@Override
-	public ContentTagOverviewTO mapContentTagForOverview(ContentTag e) {
+	public ContentTagTO mapContentTagForOverview(ContentTag e) {
 		if (e == null)
 			return null;
 
-		ContentTagOverviewTO contentTagDTO = new ContentTagOverviewTO();
+		ContentTagTO contentTagDTO = new ContentTagTO();
 
 		contentTagDTO.setId(e.getId());
 		contentTagDTO.setName(e.getName());
@@ -109,11 +109,11 @@ public class CoreMapperServiceImpl implements CoreMapperService {
 	}
 
 	@Override
-	public List<ContentTagOverviewTO> mapContentTagCollection(Collection<ContentTag> contentTags) {
+	public List<ContentTagTO> mapContentTagCollection(Collection<ContentTag> contentTags) {
 		if (contentTags == null)
 			return new ArrayList<>();
 
-		List<ContentTagOverviewTO> contentTagDTOs = new ArrayList<>();
+		List<ContentTagTO> contentTagDTOs = new ArrayList<>();
 		for (ContentTag contentTag : contentTags) {
 			contentTagDTOs.add(mapContentTagForOverview(contentTag));
 		}
@@ -121,11 +121,11 @@ public class CoreMapperServiceImpl implements CoreMapperService {
 	}
 
 	@Override
-	public Set<ContentTagOverviewTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags) {
+	public Set<ContentTagTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags) {
 		if (contentTags == null)
 			return new HashSet<>();
 
-		Set<ContentTagOverviewTO> contentTagDTOs = new LinkedHashSet<>();
+		Set<ContentTagTO> contentTagDTOs = new LinkedHashSet<>();
 		for (ContentTag contentTag : contentTags) {
 			contentTagDTOs.add(mapContentTagForOverview(contentTag));
 		}

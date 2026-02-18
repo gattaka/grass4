@@ -5,7 +5,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.Component;
@@ -14,6 +13,7 @@ import com.vaadin.flow.router.RouterLink;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -22,8 +22,7 @@ import cz.gattserver.grass.core.ui.pages.TagPage;
 
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.UserService;
 import cz.gattserver.grass.core.ui.components.Breadcrumb;
@@ -47,7 +46,7 @@ public class ContentViewer extends Div {
     private CoreACLService coreACLService;
     private NodeService nodeService;
 
-    private ContentNodeTO contentNodeTO;
+    private ContentNodeTO2 contentNodeTO;
     private H2 contentNameLabel;
     private Span contentAuthorNameLabel;
     private Span contentCreationDateNameLabel;
@@ -63,7 +62,7 @@ public class ContentViewer extends Div {
 
     private RouterLink contentLink;
 
-    public ContentViewer(Component contentComponent, ContentNodeTO contentNodeTO,
+    public ContentViewer(Component contentComponent, ContentNodeTO2 contentNodeTO,
                          Consumer<ClickEvent<Button>> deleteAction, Consumer<ClickEvent<Button>> editAction,
                          RouterLink contentLink) {
         this.securityService = SpringContextHelper.getBean(SecurityService.class);
@@ -82,7 +81,7 @@ public class ContentViewer extends Div {
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm:ss");
 
         contentNameLabel = new H2(this.contentNodeTO.getName());
-        contentAuthorNameLabel = new Span(this.contentNodeTO.getAuthor().getName());
+        contentAuthorNameLabel = new Span(this.contentNodeTO.getAuthorName());
         contentCreationDateNameLabel = new HtmlSpan(this.contentNodeTO.getCreationDate() == null ? "" :
                 this.contentNodeTO.getCreationDate().format(dateFormat));
         contentLastModificationDateLabel = new HtmlSpan(
@@ -91,7 +90,7 @@ public class ContentViewer extends Div {
 
         tagsListLayout = new Div();
         tagsListLayout.setId("content-info-tags");
-        for (ContentTagOverviewTO contentTag : this.contentNodeTO.getContentTags()) {
+        for (ContentTagTO contentTag : this.contentNodeTO.getContentTags()) {
             RouterLink tagLink = new RouterLink(contentTag.getName(), TagPage.class,
                     URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()));
             tagsListLayout.add(new Div(tagLink));
@@ -134,7 +133,7 @@ public class ContentViewer extends Div {
         removeFromFavouritesButton = componentFactory.createUnmarkFavouriteButton(event -> {
             // zdařilo se ? Pokud ano, otevři info okno
             try {
-                userService.removeContentFromFavourites(contentNodeTO.getId(),
+                userService.removeContentFromFavourites(contentNodeTO.getContentNodeId(),
                         securityService.getCurrentUser().getId());
                 removeFromFavouritesButton.setVisible(false);
                 addToFavouritesButton.setVisible(true);
@@ -150,7 +149,7 @@ public class ContentViewer extends Div {
         addToFavouritesButton = componentFactory.createMarkFavouriteButton(event -> {
             // zdařilo se? Pokud ano, otevři info okno
             try {
-                userService.addContentToFavourites(contentNodeTO.getId(), securityService.getCurrentUser().getId());
+                userService.addContentToFavourites(contentNodeTO.getContentNodeId(), securityService.getCurrentUser().getId());
                 addToFavouritesButton.setVisible(false);
                 removeFromFavouritesButton.setVisible(true);
             } catch (Exception e) {
@@ -247,7 +246,7 @@ public class ContentViewer extends Div {
     }
 
 
-    private void updateBreadcrumb(ContentNodeTO content) {
+    private void updateBreadcrumb(ContentNodeTO2 content) {
 
         // pokud zjistím, že cesta neodpovídá, vyhodím 302 (přesměrování) na
         // aktuální polohu cílové kategorie
@@ -261,7 +260,7 @@ public class ContentViewer extends Div {
         /**
          * kategorie
          */
-        NodeTO parent = nodeService.getNodeByIdForDetail(content.getParent().getId());
+        NodeTO parent = nodeService.getNodeByIdForDetail(content.getParentId());
         while (true) {
 
             // nejprve zkus zjistit, zda předek existuje

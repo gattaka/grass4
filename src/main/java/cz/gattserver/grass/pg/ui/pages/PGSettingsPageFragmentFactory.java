@@ -29,6 +29,7 @@ import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.InfoDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.events.EventBus;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.pg.config.PGConfiguration;
@@ -42,15 +43,11 @@ import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.annotation.Resource;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
@@ -88,6 +85,8 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
     public void createFragment(Div div) {
         final PGConfiguration configuration = pgService.loadConfiguration();
         final FileSystem fs = fileSystemService.getFileSystem();
+
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
 
         div.add(new H2("Nastavení fotogalerie"));
 
@@ -180,15 +179,17 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
                     new ConfirmDialog("Opravdu přegenerovat galerii?", e -> {
                         UUID operationId = UUID.randomUUID();
 
-                        PhotogalleryTO to = pgService.getPhotogalleryForDetail(item.getOverviewTO().getId());
+                        PhotogalleryTO to =
+                                pgService.findPhotogalleryForDetail(item.getOverviewTO().getId(), userInfoTO.getId(),
+                                        userInfoTO.isAdmin());
                         progressIndicatorWindow = new ProgressDialog();
 
                         eventBus.subscribe(PGSettingsPageFragmentFactory.this);
 
                         PhotogalleryPayloadTO payloadTO =
-                                new PhotogalleryPayloadTO(to.getContentNode().getName(), to.getPhotogalleryPath(),
-                                        to.getContentNode().getContentTagsAsStrings(),
-                                        to.getContentNode().isPublicated(), true);
+                                new PhotogalleryPayloadTO(to.getName(), to.getPhotogalleryPath(),
+                                        to.getContentTags().stream().map(ContentTagTO::getName).toList(),
+                                        to.isPublicated(), true);
                         pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
                     }).open();
                 });
@@ -282,7 +283,7 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
     private PGSettingsItemTO createItem(Path path) {
         UserInfoTO userInfoTO = securityService.getCurrentUser();
         PhotogalleryRESTOverviewTO to =
-                pgService.getPhotogalleryByDirectory(path.getFileName().toString(), userInfoTO.getId(),
+                pgService.findPhotogalleryByDirectory(path.getFileName().toString(), userInfoTO.getId(),
                         userInfoTO.isAdmin());
         Long size = getFileSize(path);
         Long filesCount = null;

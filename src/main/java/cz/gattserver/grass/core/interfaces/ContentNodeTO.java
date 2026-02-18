@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ContentNodeTO {
+public class ContentNodeTO implements ContentNodeTO2 {
 
     /**
      * DB identifikátor
@@ -64,7 +64,7 @@ public class ContentNodeTO {
 	/**
 	 * Tagy
 	 */
-	private Set<ContentTagOverviewTO> contentTags;
+	private Set<ContentTagTO> contentTags;
 
 	public String getContentReaderID() {
 		return contentReaderID;
@@ -88,7 +88,12 @@ public class ContentNodeTO {
 		return name;
 	}
 
-	public ContentNodeTO setName(String name) {
+    @Override
+    public String getAuthorName() {
+        return author.getName();
+    }
+
+    public ContentNodeTO setName(String name) {
 		this.name = name;
 		return this;
 	}
@@ -120,11 +125,26 @@ public class ContentNodeTO {
 		return this;
 	}
 
-	public boolean isPublicated() {
+    @Override
+    public Long getParentId() {
+        return parent.getId();
+    }
+
+    @Override
+    public String getParentName() {
+        return parent.getName();
+    }
+
+    public boolean isPublicated() {
 		return publicated;
 	}
 
-	public ContentNodeTO setPublicated(boolean publicated) {
+    @Override
+    public Long getAuthorId() {
+        return author.getId();
+    }
+
+    public ContentNodeTO setPublicated(boolean publicated) {
 		this.publicated = publicated;
 		return this;
 	}
@@ -156,7 +176,12 @@ public class ContentNodeTO {
 		return draft;
 	}
 
-	public Long getDraftSourceId() {
+    @Override
+    public Long getContentNodeId() {
+        return id;
+    }
+
+    public Long getDraftSourceId() {
 		return draftSourceId;
 	}
 
@@ -165,7 +190,7 @@ public class ContentNodeTO {
 		return this;
 	}
 
-	public Set<ContentTagOverviewTO> getContentTags() {
+	public Set<ContentTagTO> getContentTags() {
 		return contentTags;
 	}
 
@@ -175,9 +200,8 @@ public class ContentNodeTO {
 		return set;
 	}
 
-	public ContentNodeTO setContentTags(Set<ContentTagOverviewTO> contentTags) {
+	public ContentNodeTO setContentTags(Set<ContentTagTO> contentTags) {
 		this.contentTags = contentTags;
 		return this;
 	}
-
 }

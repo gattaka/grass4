@@ -60,7 +60,7 @@ public interface PGService {
      * @param id identifikátor
      * @return TO galerie
      */
-    PhotogalleryTO getPhotogalleryForDetail(Long id);
+    PhotogalleryTO findPhotogalleryForDetail(Long id, Long userId, boolean isAdmin);
 
     /**
      * Vytvoří nový adresář pro fotogalerii
@@ -94,8 +94,8 @@ public interface PGService {
      * @param filter   název galerie (s *)
      * @param pageable stránkování
      */
-    List<PhotogalleryRESTOverviewTO> getAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin,
-                                                                 Pageable pageable);
+    List<PhotogalleryRESTOverviewTO> findAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin,
+                                                                  Pageable pageable);
 
     /**
      * Získá detail fotogalerie pro REST
@@ -103,7 +103,8 @@ public interface PGService {
      * @param id idetifikátor galerie
      * @return {@link UnauthorizedAccessException}
      */
-    PhotogalleryRESTTO getPhotogalleryForREST(Long id, Long userId, boolean isAdmin) throws UnauthorizedAccessException;
+    PhotogalleryRESTTO findPhotogalleryForREST(Long id, Long userId, boolean isAdmin)
+            throws UnauthorizedAccessException;
 
     /**
      * Získá fotografii dle galerie pro REST
@@ -113,7 +114,7 @@ public interface PGService {
      * @param version  o jakou velikost fotky jde
      * @return {@link UnauthorizedAccessException}
      */
-    Path getPhotoForREST(Long id, String fileName, PhotoVersion version, Long userId, boolean isAdmin)
+    Path findPhotoForREST(Long id, String fileName, PhotoVersion version, Long userId, boolean isAdmin)
             throws UnauthorizedAccessException;
 
     /**
@@ -248,6 +249,6 @@ public interface PGService {
      * @param directory jméno adresáře
      * @return overview objekt galerie
      */
-    PhotogalleryRESTOverviewTO getPhotogalleryByDirectory(String directory, Long userId, boolean isAdmin);
+    PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String directory, Long userId, boolean isAdmin);
 
 }

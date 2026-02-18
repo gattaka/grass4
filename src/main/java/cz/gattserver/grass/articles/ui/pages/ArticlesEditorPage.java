@@ -27,7 +27,7 @@ import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.articles.ui.dialogs.DraftMenuDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentTagService;
@@ -180,7 +180,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setDraftName(existingArticle.getContentNode().getName());
             articleEditorTO.setDraftText(existingArticle.getText());
             articleEditorTO.setDraftPublicated(existingArticle.getContentNode().isPublicated());
-            for (ContentTagOverviewTO tagDTO : existingArticle.getContentNode().getContentTags())
+            for (ContentTagTO tagDTO : existingArticle.getContentNode().getContentTags())
                 articleEditorTO.getDraftTags().add(tagDTO.getName());
             articleEditorTO.getDraftAttachments().addAll(articleService.findAttachments(existingArticle.getId()));
         } else {
@@ -199,7 +199,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         articleEditorTO.setDraftName(draft.getContentNode().getName());
         articleEditorTO.setDraftText(draft.getText());
         articleEditorTO.setDraftPublicated(draft.getContentNode().isPublicated());
-        for (ContentTagOverviewTO tagDTO : draft.getContentNode().getContentTags())
+        for (ContentTagTO tagDTO : draft.getContentNode().getContentTags())
             articleEditorTO.getDraftTags().add(tagDTO.getName());
 
         // jedná se o draft již existujícího obsahu?

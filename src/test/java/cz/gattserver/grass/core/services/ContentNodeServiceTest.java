@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.mock.CoreMockService;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.core.util.MockUtils;
@@ -106,7 +106,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
         ContentNodeTO contentNode = contentNodeService.getByID(contentNode1);
 
         assertEquals("newNameAfterModify", contentNode.getName());
-        for (ContentTagOverviewTO t : contentNode.getContentTags())
+        for (ContentTagTO t : contentNode.getContentTags())
             tags.remove(t.getName());
         assertTrue(tags.isEmpty());
         assertEquals(Long.valueOf(30L), contentNode.getContentID());
@@ -210,7 +210,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertNotNull(contentNodeByID);
         assertEquals(moduleId, contentNodeByID.getContentReaderID());
         assertEquals(contentId, contentNodeByID.getContentID());
-        for (ContentTagOverviewTO t : contentNodeByID.getContentTags())
+        for (ContentTagTO t : contentNodeByID.getContentTags())
             tags.remove(t.getName());
         assertTrue(tags.isEmpty());
         assertEquals(name, contentNodeByID.getName());
@@ -318,7 +318,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         Long contentNode3 = coreMockService.createMockContentNode(25L, tags, nodeId2, userId2, 3);
 
-        ContentTagOverviewTO tag = contentTagService.getTagByName("něco");
+        ContentTagTO tag = contentTagService.getTagByName("něco");
         assertNotNull(tag);
         assertEquals("něco", tag.getName());
         assertEquals(1, contentTagService.getTagContentsCount(tag.getId()));

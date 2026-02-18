@@ -3,7 +3,7 @@ package cz.gattserver.grass.core.services.impl;
 import java.util.*;
 import java.util.Map.Entry;
 
-import cz.gattserver.grass.core.interfaces.ContentTagOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.services.CoreMapperService;
@@ -31,18 +31,18 @@ public class ContentTagServiceImpl implements ContentTagService {
 	private ContentNodeRepository contentNodeRepository;
 
 	@Override
-	public Set<ContentTagOverviewTO> getTagsForOverviewOrderedByName() {
+	public Set<ContentTagTO> getTagsForOverviewOrderedByName() {
 		List<ContentTag> contentTags = contentTagRepository.findAllOrderByNameCaseInsensitive();
 		return mapper.mapContentTagCollectionForOverview(contentTags);
 	}
 
 	@Override
-	public ContentTagOverviewTO getTagById(long id) {
+	public ContentTagTO getTagById(long id) {
 		return mapper.mapContentTagForOverview(contentTagRepository.findById(id).orElse(null));
 	}
 
 	@Override
-	public ContentTagOverviewTO getTagByName(String name) {
+	public ContentTagTO getTagByName(String name) {
 		Validate.notBlank(name, "Název hledaného tagu nemůže být prázdný");
 		return mapper.mapContentTagForOverview(contentTagRepository.findByName(name));
 	}
@@ -146,8 +146,8 @@ public class ContentTagServiceImpl implements ContentTagService {
 
 		// Vytáhni si tagy seřazené dle jména a dokonči vytváření datové sady
 		// pro tags cloud
-		Set<ContentTagOverviewTO> tags = getTagsForOverviewOrderedByName();
-		for (ContentTagOverviewTO tag : tags) {
+		Set<ContentTagTO> tags = getTagsForOverviewOrderedByName();
+		for (ContentTagTO tag : tags) {
 			ContentTagsCloudItemTO item = new ContentTagsCloudItemTO();
 			item.setId(tag.getId());
 			item.setContentsCount(countsMap.get(item.getId()));
