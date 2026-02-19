@@ -49,6 +49,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serial;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -244,15 +245,17 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Handler
     protected void onProcessStart(final PGProcessStartEvent event) {
+        final int val = event.getCountOfStepsToDo();
         progressDialog.runInUI(() -> {
-            progressDialog.setTotal(event.getCountOfStepsToDo());
+            progressDialog.setTotal(val);
             progressDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(PGProcessProgressEvent event) {
-        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.getStepDescription()));
+        final String desc = event.getStepDescription();
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(desc));
     }
 
     @Handler
@@ -266,32 +269,37 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Handler
     protected void onProcessStart(final PGZipProcessStartEvent event) {
+        final int val = event.getCountOfStepsToDo();
         progressDialog.runInUI(() -> {
-            progressDialog.setTotal(event.getCountOfStepsToDo());
+            progressDialog.setTotal(val);
             progressDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(PGZipProcessProgressEvent event) {
-        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.getStepDescription()));
+        final String val = event.getStepDescription();
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(val));
     }
 
     @Handler
     protected void onProcessResult(final PGZipProcessResultEvent event) {
+        final boolean success = event.isSuccess();
+        final Path result = event.getZipFile();
+        final String resultDetails = event.getResultDetails();
         progressDialog.runInUI(() -> {
             if (progressDialog != null) progressDialog.close();
-            if (event.isSuccess()) {
+            if (success) {
                 new DownloadDialog("Komprese", () -> {
                     try {
-                        return new DownloadResponse(Files.newInputStream(event.getZipFile()),
+                        return new DownloadResponse(Files.newInputStream(result),
                                 photogalleryTO.getPhotogalleryPath() + ".zip", null, -1);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                }, e -> pgService.deleteZipFile(event.getZipFile())).open();
+                }, e -> pgService.deleteZipFile(result)).open();
             } else {
-                UIUtils.showWarning(event.getResultDetails());
+                UIUtils.showWarning(resultDetails);
             }
         });
         eventBus.unsubscribe(PGViewerPage.this);
