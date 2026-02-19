@@ -1,6 +1,7 @@
 package cz.gattserver.grass.books.facades;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
+import cz.gattserver.grass.books.model.interfaces.BookFilterTO;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 
@@ -35,7 +36,7 @@ public interface BooksService {
 	 * 
 	 * @param filterTO
 	 */
-	int countBooks(BookOverviewTO filterTO);
+	int countBooks(BookFilterTO filterTO);
 
 	/**
 	 * Získá všechny knihy
@@ -46,7 +47,7 @@ public interface BooksService {
 	 * @param sortOrder
 	 * @return
 	 */
-	List<BookOverviewTO> getBooks(BookOverviewTO filterTO, int offset, int limit, List<QuerySortOrder> sortOrder);
+	List<BookOverviewTO> getBooks(BookFilterTO filterTO, int offset, int limit, List<QuerySortOrder> sortOrder);
 
 	/**
 	 * Získá knihu dle id

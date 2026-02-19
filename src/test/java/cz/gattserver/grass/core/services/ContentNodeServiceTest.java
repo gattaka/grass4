@@ -43,10 +43,10 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertEquals(2, added.size());
 
         ContentNodeOverviewTO added2 = added.get(0);
-        assertEquals(contentNodeId2, added2.getId());
+        assertEquals(contentNodeId2, added2.id());
 
         ContentNodeOverviewTO added1 = added.get(1);
-        assertEquals(contentNodeId1, added1.getId());
+        assertEquals(contentNodeId1, added1.id());
     }
 
     @Test
@@ -63,10 +63,10 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertEquals(2, added.size());
 
         ContentNodeOverviewTO added1 = added.get(0);
-        assertEquals(contentNodeId1, added1.getId());
+        assertEquals(contentNodeId1, added1.id());
 
         ContentNodeOverviewTO added2 = added.get(1);
-        assertEquals(contentNodeId2, added2.getId());
+        assertEquals(contentNodeId2, added2.id());
     }
 
     @Test
@@ -84,7 +84,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         List<ContentNodeOverviewTO> favourites = contentNodeService.getUserFavourite(userId1, 0, 10);
         assertEquals(1, favourites.size());
-        assertEquals(contentNode1, favourites.get(0).getId());
+        assertEquals(contentNode1, favourites.get(0).id());
     }
 
     @Test
@@ -280,20 +280,20 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertEquals(2, contentNodesByNode.size());
 
         ContentNodeOverviewTO contentNodeByNode = contentNodesByNode.get(0);
-        assertEquals(contentNode3, contentNodeByNode.getId());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByNode.getContentReaderID());
-        assertEquals(Long.valueOf(25), contentNodeByNode.getContentID());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 3, contentNodeByNode.getName());
-        assertEquals(userId2, contentNodeByNode.getAuthorId());
-        assertEquals(nodeId2, contentNodeByNode.getParentNodeId());
+        assertEquals(contentNode3, contentNodeByNode.id());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByNode.contentReaderID());
+        assertEquals(Long.valueOf(25), contentNodeByNode.contentID());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 3, contentNodeByNode.name());
+        assertEquals(userId2, contentNodeByNode.authorId());
+        assertEquals(nodeId2, contentNodeByNode.parentNodeId());
 
         contentNodeByNode = contentNodesByNode.get(1);
-        assertEquals(contentNode2, contentNodeByNode.getId());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 2, contentNodeByNode.getContentReaderID());
-        assertEquals(Long.valueOf(30L), contentNodeByNode.getContentID());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 2, contentNodeByNode.getName());
-        assertEquals(userId1, contentNodeByNode.getAuthorId());
-        assertEquals(nodeId2, contentNodeByNode.getParentNodeId());
+        assertEquals(contentNode2, contentNodeByNode.id());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 2, contentNodeByNode.contentReaderID());
+        assertEquals(Long.valueOf(30L), contentNodeByNode.contentID());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 2, contentNodeByNode.name());
+        assertEquals(userId1, contentNodeByNode.authorId());
+        assertEquals(nodeId2, contentNodeByNode.parentNodeId());
 
         assertEquals(3, contentNodeService.getCount());
     }
@@ -327,12 +327,12 @@ public class ContentNodeServiceTest extends DBCleanTest {
         List<ContentNodeOverviewTO> contentNodesByTag = contentNodeService.getByTag(tag.getId(), 0, 10);
         assertEquals(1, contentNodesByTag.size());
         ContentNodeOverviewTO contentNodeByTag = contentNodesByTag.get(0);
-        assertEquals(contentNode3, contentNodeByTag.getId());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByTag.getContentReaderID());
-        assertEquals(Long.valueOf(25L), contentNodeByTag.getContentID());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 3, contentNodeByTag.getName());
-        assertEquals(userId2, contentNodeByTag.getAuthorId());
-        assertEquals(nodeId2, contentNodeByTag.getParentNodeId());
+        assertEquals(contentNode3, contentNodeByTag.id());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByTag.contentReaderID());
+        assertEquals(Long.valueOf(25L), contentNodeByTag.contentID());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 3, contentNodeByTag.name());
+        assertEquals(userId2, contentNodeByTag.authorId());
+        assertEquals(nodeId2, contentNodeByTag.parentNodeId());
 
         tag = contentTagService.getTagByName("pokusy");
         assertNotNull(tag);
@@ -341,7 +341,5 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertEquals(3, contentNodeService.getCountByTag(tag.getId()));
 
         assertEquals(3, contentNodeService.getCount());
-
     }
-
 }

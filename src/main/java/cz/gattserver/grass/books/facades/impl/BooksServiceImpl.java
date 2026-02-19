@@ -4,6 +4,7 @@ import com.vaadin.flow.data.provider.QuerySortOrder;
 import cz.gattserver.grass.books.facades.BooksService;
 import cz.gattserver.grass.books.model.dao.BookRepository;
 import cz.gattserver.grass.books.model.domain.Book;
+import cz.gattserver.grass.books.model.interfaces.BookFilterTO;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
@@ -36,13 +37,13 @@ public class BooksServiceImpl implements BooksService {
 	}
 
 	@Override
-	public int countBooks(BookOverviewTO filterTO) {
+	public int countBooks(BookFilterTO filterTO) {
 		return (int) bookRepository.countBooks(filterTO);
 	}
 
 	@Override
-	public List<BookOverviewTO> getBooks(BookOverviewTO filterTO, int offset, int limit,
-			List<QuerySortOrder> sortOrder) {
+	public List<BookOverviewTO> getBooks(BookFilterTO filterTO, int offset, int limit,
+                                         List<QuerySortOrder> sortOrder) {
 		return bookRepository.findBooks(filterTO, offset, limit, QuerydslUtil.transformOrdering(sortOrder, s -> s));
 	}
 

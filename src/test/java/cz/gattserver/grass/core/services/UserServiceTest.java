@@ -102,7 +102,7 @@ public class UserServiceTest extends DBCleanTest {
 
         List<ContentNodeOverviewTO> favourites = contentNodeService.getUserFavourite(user2Id, 0, 10);
         assertEquals(1, favourites.size());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 1, favourites.get(0).getName());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 1, favourites.get(0).name());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class UserServiceTest extends DBCleanTest {
 
         List<ContentNodeOverviewTO> favourites = contentNodeService.getUserFavourite(user2Id, 0, 10);
         assertEquals(1, favourites.size());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 1, favourites.get(0).getName());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 1, favourites.get(0).name());
 
         userService.removeContentFromFavourites(contentNodeId, user2Id);
 
@@ -149,7 +149,7 @@ public class UserServiceTest extends DBCleanTest {
 
         List<ContentNodeOverviewTO> favourites = contentNodeService.getUserFavourite(user2Id, 0, 10);
         assertEquals(1, favourites.size());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 1, favourites.get(0).getName());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 1, favourites.get(0).name());
 
         contentNodeService.deleteByContentNodeId(contentNodeId);
 

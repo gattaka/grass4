@@ -66,7 +66,7 @@ public class CopyTagsDialog extends WebDialog {
             choosenTags.clear();
             contentTagsDiv.removeAll();
             if (to == null) return;
-            List<String> tagList = contentNodeService.getTagsByContentId(to.getId());
+            List<String> tagList = contentNodeService.getTagsByContentId(to.id());
             for (String t : tagList) {
                 contentTagsDiv.add(new Button(t));
                 choosenTags.add(t);

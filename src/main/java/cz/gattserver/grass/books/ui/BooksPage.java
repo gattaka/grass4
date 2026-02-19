@@ -17,6 +17,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.books.facades.BooksService;
+import cz.gattserver.grass.books.model.interfaces.BookFilterTO;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.grass.core.security.CoreRole;
@@ -47,7 +48,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
     private Div imageDiv;
 
     private Grid<BookOverviewTO> grid;
-    private BookOverviewTO filterTO;
+    private BookFilterTO filterTO;
     private BookTO choosenBook;
 
     private CallbackDataProvider<BookOverviewTO, BookOverviewTO> dataProvider;
@@ -65,7 +66,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        filterTO = new BookOverviewTO();
+        filterTO = new BookFilterTO();
         grid = createGrid(filterTO);
         UIUtils.applyGrassDefaultStyle(grid);
         layout.add(grid);
@@ -106,7 +107,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
         }
     }
 
-    protected Grid<BookOverviewTO> createGrid(final BookOverviewTO filterTO) {
+    protected Grid<BookOverviewTO> createGrid(final BookFilterTO filterTO) {
         final Grid<BookOverviewTO> grid = new Grid<>();
         UIUtils.applyGrassDefaultStyle(grid);
         grid.setWidthFull();
@@ -160,7 +161,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
         btnLayout.add(componentFactory.createEditGridButton(event -> new BookDialog(choosenBook, to -> {
             to = getBooksFacade().saveBook(to);
             showDetail(to);
-            dataProvider.refreshItem(to);
+            dataProvider.refreshItem(new BookOverviewTO());
         }).open(), grid));
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
@@ -212,9 +213,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
     }
 
     public void selectBook(Long id) {
-        BookOverviewTO to = new BookOverviewTO();
-        to.setId(id);
-        grid.select(to);
+        grid.select(new BookOverviewTO(id));
     }
 
     protected void showDetail(BookTO choosenBook) {

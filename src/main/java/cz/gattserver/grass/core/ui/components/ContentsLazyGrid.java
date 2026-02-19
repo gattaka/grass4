@@ -58,7 +58,7 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
         String lastModificationDateBind = "customLastModificationDate";
 
         addColumn(new IconRenderer<>(c -> {
-            ContentModule contentService = serviceHolder.getContentModulesByName(c.getContentReaderID());
+            ContentModule contentService = serviceHolder.getContentModulesByName(c.contentReaderID());
             Image img =
                     contentService == null ? ImageIcon.WARNING_16_ICON.createImage() : contentService.getContentIcon();
             img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
@@ -67,21 +67,20 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
                 .setKey(iconBind);
 
         addColumn(new ComponentRenderer<>(contentNode -> {
-            ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.getContentReaderID());
+            ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.contentReaderID());
             if (activeLinks) {
                 String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory) :
                         UIUtils.getPageURL(contentService.getContentViewerPageFactory(),
-                                URLIdentifierUtils.createURLIdentifier(contentNode.getContentID(),
-                                        contentNode.getName()));
-                return new Anchor(url, contentNode.getName());
+                                URLIdentifierUtils.createURLIdentifier(contentNode.contentID(), contentNode.name()));
+                return new Anchor(url, contentNode.name());
             } else {
-                return new Text(contentNode.getName());
+                return new Text(contentNode.name());
             }
         })).setFlexGrow(2).setHeader("Název").setId(nameBind);
 
         if (showPubLock) {
             addColumn(new IconRenderer<>(c -> {
-                if (c.isPublicated()) {
+                if (c.publicated()) {
                     return new Span();
                 } else {
                     Image img = ImageIcon.SHIELD_16_ICON.createImage("locked");
@@ -94,21 +93,21 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
         addColumn(new ComponentRenderer<>(contentNode -> {
             if (activeLinks) {
-                return new RouterLink(contentNode.getParentNodeName(), NodePage.class,
-                        URLIdentifierUtils.createURLIdentifier(contentNode.getParentNodeId(),
-                                contentNode.getParentNodeName()));
+                return new RouterLink(contentNode.parentNodeName(), NodePage.class,
+                        URLIdentifierUtils.createURLIdentifier(contentNode.parentNodeId(),
+                                contentNode.parentNodeName()));
             } else {
-                return new Text(contentNode.getParentNodeName());
+                return new Text(contentNode.parentNodeName());
             }
         })).setFlexGrow(2).setHeader("Kategorie").setId(nodeBind);
 
         if (!UIUtils.isMobileDevice()) {
-            addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getCreationDate, "d. M. yyyy")).setHeader(
+            addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::creationDate, "d. M. yyyy")).setHeader(
                             "Vytvořeno").setKey(creationDateBind).setTextAlign(ColumnTextAlign.END).setFlexGrow(0)
                     .setWidth("90px");
-            addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::getLastModificationDate,
-                    "d. M. yyyy")).setHeader("Upraveno").setKey(lastModificationDateBind)
-                    .setTextAlign(ColumnTextAlign.END).setFlexGrow(0).setWidth("90px");
+            addColumn(new LocalDateTimeRenderer<>(ContentNodeOverviewTO::lastModificationDate, "d. M. yyyy")).setHeader(
+                            "Upraveno").setKey(lastModificationDateBind).setTextAlign(ColumnTextAlign.END).setFlexGrow(0)
+                    .setWidth("90px");
         }
 
         if (dynamicHeight) setHeight(GridUtils.processHeight(countCallback.count(new Query<>())) + "px");

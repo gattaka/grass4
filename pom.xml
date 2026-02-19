@@ -93,6 +93,13 @@
             <artifactId>spring-boot-starter-mail</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.42</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- https://stefan.app.fi/vcf-month-picker-flow-demo -->
         <dependency>
             <groupId>org.vaadin.addons.componentfactory</groupId>

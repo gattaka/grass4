@@ -6,10 +6,7 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.books.model.domain.Book;
 import cz.gattserver.grass.books.model.domain.QBook;
-import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
-import cz.gattserver.grass.books.model.interfaces.BookTO;
-import cz.gattserver.grass.books.model.interfaces.QBookOverviewTO;
-import cz.gattserver.grass.books.model.interfaces.QBookTO;
+import cz.gattserver.grass.books.model.interfaces.*;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
 
 import jakarta.persistence.EntityManager;
@@ -21,7 +18,7 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
 	@PersistenceContext
 	private EntityManager entityManager;
 
-	private Predicate createPredicateBooks(BookOverviewTO filterTO) {
+	private Predicate createPredicateBooks(BookFilterTO filterTO) {
 		QBook b = QBook.book;
 		PredicateBuilder builder = new PredicateBuilder();
 		if (filterTO != null) {
@@ -32,14 +29,14 @@ public class BookRepositoryCustomImpl implements BookRepositoryCustom {
 	}
 
 	@Override
-	public long countBooks(BookOverviewTO filterTO) {
+	public long countBooks(BookFilterTO filterTO) {
 		JPAQuery<Book> query = new JPAQuery<>(entityManager);
 		QBook b = QBook.book;
 		return query.from(b).where(createPredicateBooks(filterTO)).fetchCount();
 	}
 
 	@Override
-	public List<BookOverviewTO> findBooks(BookOverviewTO filterTO, int offset, int limit, OrderSpecifier<?>[] order) {
+	public List<BookOverviewTO> findBooks(BookFilterTO filterTO, int offset, int limit, OrderSpecifier<?>[] order) {
 		JPAQuery<BookOverviewTO> query = new JPAQuery<>(entityManager);
 		QBook b = QBook.book;
 		if (order == null)
