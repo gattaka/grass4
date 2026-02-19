@@ -3,8 +3,18 @@ package cz.gattserver.grass.pg.interfaces;
 import cz.gattserver.common.slideshow.ExifInfoTO;
 import cz.gattserver.common.slideshow.MediaType;
 import cz.gattserver.common.slideshow.SlideshowItem;
+import lombok.Getter;
+import lombok.Setter;
 
-public class PhotogalleryViewItemTO implements SlideshowItem {
+import java.io.Serial;
+import java.io.Serializable;
+
+@Getter
+@Setter
+public class PhotogalleryViewItemTO implements SlideshowItem, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -321662240494516193L;
 
     private String name;
     private MediaType type;
@@ -13,60 +23,4 @@ public class PhotogalleryViewItemTO implements SlideshowItem {
     private String fullPath;
     private String miniaturePath;
 
-    public PhotogalleryViewItemTO() {
-    }
-
-    public PhotogalleryViewItemTO setExifInfoTO(ExifInfoTO exifInfoTO) {
-        this.exifInfoTO = exifInfoTO;
-        return this;
-    }
-
-    @Override
-    public ExifInfoTO getExifInfoTO() {
-        return exifInfoTO;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    public PhotogalleryViewItemTO setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    @Override
-    public MediaType getType() {
-        return type;
-    }
-
-    public PhotogalleryViewItemTO setType(MediaType type) {
-        this.type = type;
-        return this;
-    }
-
-    public String getSlideshowPath() {
-        return slideshowPath;
-    }
-
-    public void setSlideshowPath(String slideshowPath) {
-        this.slideshowPath = slideshowPath;
-    }
-
-    public String getFullPath() {
-        return fullPath;
-    }
-
-    public void setFullPath(String fullPath) {
-        this.fullPath = fullPath;
-    }
-
-    public String getMiniaturePath() {
-        return miniaturePath;
-    }
-
-    public void setMiniaturePath(String miniaturePath) {
-        this.miniaturePath = miniaturePath;
-    }
 }

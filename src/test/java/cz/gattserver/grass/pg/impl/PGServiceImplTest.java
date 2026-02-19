@@ -798,7 +798,9 @@ public class PGServiceImplTest extends DBCleanTest {
         assertFalse(Files.exists(smallSlideshow));
 
         Set<PhotogalleryViewItemTO> items = new HashSet<>();
-        items.add(new PhotogalleryViewItemTO().setName("02.jpg"));
+        PhotogalleryViewItemTO to = new PhotogalleryViewItemTO();
+        to.setName("02.jpg");
+        items.add(to);
         List<String> removed =
                 pgService.deleteFiles(items.stream().map(PhotogalleryViewItemTO::getName).collect(Collectors.toSet()),
                         "testGallery");
