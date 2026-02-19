@@ -36,13 +36,16 @@ public class ScheduledVisitsTab extends Div {
 
     private final MedicService medicService;
 
+    private final ComponentFactory componentFactory;
+
     private Grid<ScheduledVisitOverviewTO> toBePlannedGrid = new Grid<>();
     private Grid<ScheduledVisitOverviewTO> plannedGrid = new Grid<>();
 
     public ScheduledVisitsTab() {
         medicService = SpringContextHelper.getBean(MedicService.class);
+        componentFactory = new ComponentFactory();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("CS"));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d. MMMM yyyy", componentFactory.createLocale());
         Div div = new HtmlDiv("<strong>Dnes je: </strong>" + LocalDate.now().format(formatter));
         div.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         add(div);
@@ -145,7 +148,7 @@ public class ScheduledVisitsTab extends Div {
 
         grid.addColumn(ScheduledVisitOverviewTO::getPurpose).setKey("purpose").setHeader("Účel");
         if (fullTime) grid.addColumn(new LocalDateTimeRenderer<>(to -> to.getDateTime(),
-                        () -> DateTimeFormatter.ofPattern("d. MMMM yyyy H:mm", Locale.forLanguageTag("CS")))).setKey("date")
+                        () -> DateTimeFormatter.ofPattern("d. MMMM yyyy H:mm", componentFactory.createLocale()))).setKey("date")
                 .setHeader("Datum").setSortable(false).setWidth("200px").setFlexGrow(0);
         else grid.addColumn(to -> componentFactory.formatMonthYear(to.getDateTime())).setKey("date").setHeader("Datum")
                 .setSortable(false).setWidth("150px").setFlexGrow(0);

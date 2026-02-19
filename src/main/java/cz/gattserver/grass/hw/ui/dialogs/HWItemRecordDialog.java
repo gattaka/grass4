@@ -44,9 +44,8 @@ public class HWItemRecordDialog extends EditWebDialog {
         Binder<HWItemRecordTO> binder = new Binder<>();
         binder.setBean(formTO);
 
-        DatePicker eventDateField = new DatePicker("Datum");
+        DatePicker eventDateField = componentFactory.createDatePicker("Datum");
         eventDateField.setWidth(200, Unit.PIXELS);
-        eventDateField.setLocale(Locale.forLanguageTag("CS"));
         binder.forField(eventDateField).asRequired("Datum musí být vyplněno")
                 .bind(HWItemRecordTO::getDate, HWItemRecordTO::setDate);
         eventDateField.setReadOnly(readOnly);

@@ -365,7 +365,7 @@ public class ComponentFactory {
 
     public DatePicker createDatePicker(String label) {
         DatePicker datePicker = new DatePicker(label);
-        datePicker.setLocale(Locale.forLanguageTag("CS"));
+        datePicker.setLocale(createLocale());
         datePicker.setWidthFull();
         datePicker.setI18n(createDatePickerI18n());
         return datePicker;
@@ -373,14 +373,14 @@ public class ComponentFactory {
 
     public TimePicker createTimePicker(String label) {
         TimePicker timePicker = new TimePicker(label);
-        timePicker.setLocale(Locale.forLanguageTag("CS"));
+        timePicker.setLocale(createLocale());
         timePicker.setWidthFull();
         return timePicker;
     }
 
     public DateTimePicker createDateTimePicker(String label) {
         DateTimePicker dateTimeField = new DateTimePicker(label);
-        dateTimeField.setLocale(Locale.forLanguageTag("CS"));
+        dateTimeField.setLocale(createLocale());
         dateTimeField.setWidthFull();
         dateTimeField.setDatePickerI18n(createDatePickerI18n());
         return dateTimeField;
@@ -522,5 +522,9 @@ public class ComponentFactory {
         field.getElement().addEventListener("click", event -> {
             if (field.isReadOnly()) onClick.accept(field);
         });
+    }
+
+    public Locale createLocale() {
+        return Locale.forLanguageTag("cs-CZ");
     }
 }

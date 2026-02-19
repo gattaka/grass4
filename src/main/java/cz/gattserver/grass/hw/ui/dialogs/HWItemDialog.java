@@ -66,8 +66,7 @@ public class HWItemDialog extends EditWebDialog {
         topLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0px", 6));
         layout.add(topLayout);
 
-        DatePicker purchaseDateField = new DatePicker("Získáno");
-        purchaseDateField.setLocale(Locale.forLanguageTag("CS"));
+        DatePicker purchaseDateField = componentFactory.createDatePicker("Získáno");
         purchaseDateField.setWidth(130, Unit.PIXELS);
         binder.bind(purchaseDateField, HWItemTO::getPurchaseDate, HWItemTO::setPurchaseDate);
         topLayout.add(purchaseDateField);

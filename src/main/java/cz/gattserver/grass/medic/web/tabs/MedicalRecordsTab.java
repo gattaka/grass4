@@ -12,6 +12,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
 import cz.gattserver.common.spring.SpringContextHelper;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.ui.components.GridOperationsTab;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.medic.interfaces.MedicalRecordTO;
@@ -23,11 +24,13 @@ public class MedicalRecordsTab extends Div {
     private final MedicService medicService;
     private final MedicalRecordTO filterTO;
 
+    private final ComponentFactory componentFactory;
     private GridOperationsTab gridOperationsTab;
 
     public MedicalRecordsTab() {
         medicService = SpringContextHelper.getBean(MedicService.class);
         filterTO = new MedicalRecordTO();
+        componentFactory = new ComponentFactory();
 
         Consumer<MedicalRecordTO> onSave = to -> {
             medicService.saveMedicalRecord(to);
@@ -53,7 +56,7 @@ public class MedicalRecordsTab extends Div {
         String fdateID = "fdate";
         grid.removeAllColumns();
         Grid.Column<MedicalRecordTO> dateCol = grid.addColumn(new LocalDateTimeRenderer<>(MedicalRecordTO::getDateTime,
-                        () -> DateTimeFormatter.ofPattern("d. MMMM yyyy", Locale.forLanguageTag("CS")))).setHeader("Datum")
+                        () -> DateTimeFormatter.ofPattern("d. MMMM yyyy", componentFactory.createLocale()))).setHeader("Datum")
                 .setKey(fdateID).setTextAlign(ColumnTextAlign.END).setWidth("130px").setFlexGrow(0);
         Grid.Column<MedicalRecordTO> instCol =
                 grid.addColumn(MedicalRecordTO::getInstitutionName).setHeader("Instituce");
