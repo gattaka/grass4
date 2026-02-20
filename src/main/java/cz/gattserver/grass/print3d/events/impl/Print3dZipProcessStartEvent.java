@@ -12,7 +12,7 @@ public class Print3dZipProcessStartEvent implements StartEvent {
 	}
 
 	@Override
-	public int getCountOfStepsToDo() {
+	public int steps() {
 		return steps;
 	}
 

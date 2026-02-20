@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-@EqualsAndHashCode
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class BookOverviewTO {
 
     @EqualsAndHashCode.Include
@@ -37,7 +37,6 @@ public class BookOverviewTO {
 
     @QueryProjection
     public BookOverviewTO(Long id, String name, String author, Double rating, String year) {
-        super();
         this.id = id;
         this.name = name;
         this.author = author;

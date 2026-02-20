@@ -11,7 +11,7 @@ public class PGZipProcessProgressEvent implements ProgressEvent {
 	}
 
 	@Override
-	public String getDescription() {
+	public String description() {
 		return description;
 	}
 

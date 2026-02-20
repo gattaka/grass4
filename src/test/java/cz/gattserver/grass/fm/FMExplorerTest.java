@@ -268,56 +268,56 @@ public class FMExplorerTest {
 
         Iterator<FMItemTO> it = explorer.listing(null, 0, 10, null).iterator();
         FMItemTO item = it.next();
-        assertEquals("..", item.getName());
-        assertNotNull(item.getLastModified());
-        assertEquals("", item.getSize());
-        assertTrue(item.isDirectory());
-        assertNull(item.getPathFromFMRoot());
+        assertEquals("..", item.name());
+        assertNotNull(item.lastModified());
+        assertEquals("", item.size());
+        assertTrue(item.directory());
+        assertNull(item.pathFromFMRoot());
 
         item = it.next();
-        assertEquals("subDir3", item.getName());
-        assertNotNull(item.getLastModified());
-        assertEquals("9 B", item.getSize());
-        assertTrue(item.isDirectory());
-        assertNull(item.getPathFromFMRoot());
+        assertEquals("subDir3", item.name());
+        assertNotNull(item.lastModified());
+        assertEquals("9 B", item.size());
+        assertTrue(item.directory());
+        assertNull(item.pathFromFMRoot());
 
         item = it.next();
-        assertEquals("file1", item.getName());
-        assertNotNull(item.getLastModified());
-        assertEquals("3 B", item.getSize());
-        assertFalse(item.isDirectory());
-        assertNull(item.getPathFromFMRoot());
+        assertEquals("file1", item.name());
+        assertNotNull(item.lastModified());
+        assertEquals("3 B", item.size());
+        assertFalse(item.directory());
+        assertNull(item.pathFromFMRoot());
 
         item = it.next();
-        assertEquals("file2", item.getName());
-        assertNotNull(item.getLastModified());
-        assertEquals("1 B", item.getSize());
-        assertFalse(item.isDirectory());
-        assertNull(item.getPathFromFMRoot());
+        assertEquals("file2", item.name());
+        assertNotNull(item.lastModified());
+        assertEquals("1 B", item.size());
+        assertFalse(item.directory());
+        assertNull(item.pathFromFMRoot());
 
         assertEquals(3, explorer.listCount("file"));
 
         it = explorer.listing("file", 0, 10, null).iterator();
         item = it.next();
-        assertEquals("..", item.getName());
-        assertNotNull(item.getLastModified());
-        assertEquals("", item.getSize());
-        assertTrue(item.isDirectory());
-        assertNull(item.getPathFromFMRoot());
+        assertEquals("..", item.name());
+        assertNotNull(item.lastModified());
+        assertEquals("", item.size());
+        assertTrue(item.directory());
+        assertNull(item.pathFromFMRoot());
 
         item = it.next();
-        assertEquals("file1", item.getName());
-        assertNotNull(item.getLastModified());
-        assertEquals("3 B", item.getSize());
-        assertFalse(item.isDirectory());
-        assertNull(item.getPathFromFMRoot());
+        assertEquals("file1", item.name());
+        assertNotNull(item.lastModified());
+        assertEquals("3 B", item.size());
+        assertFalse(item.directory());
+        assertNull(item.pathFromFMRoot());
 
         item = it.next();
-        assertEquals("file2", item.getName());
-        assertNotNull(item.getLastModified());
-        assertEquals("1 B", item.getSize());
-        assertFalse(item.isDirectory());
-        assertNull(item.getPathFromFMRoot());
+        assertEquals("file2", item.name());
+        assertNotNull(item.lastModified());
+        assertEquals("1 B", item.size());
+        assertFalse(item.directory());
+        assertNull(item.pathFromFMRoot());
 
         assertFalse(it.hasNext());
     }
@@ -337,16 +337,16 @@ public class FMExplorerTest {
 
         Iterator<FMItemTO> it = explorer.getBreadcrumbChunks().iterator();
         FMItemTO item = it.next();
-        assertEquals("subDir2", item.getName());
-        assertEquals("subDir1/subDir2", item.getPathFromFMRoot());
+        assertEquals("subDir2", item.name());
+        assertEquals("subDir1/subDir2", item.pathFromFMRoot());
 
         item = it.next();
-        assertEquals("subDir1", item.getName());
-        assertEquals("subDir1", item.getPathFromFMRoot());
+        assertEquals("subDir1", item.name());
+        assertEquals("subDir1", item.pathFromFMRoot());
 
         item = it.next();
-        assertEquals("/", item.getName());
-        assertEquals("", item.getPathFromFMRoot());
+        assertEquals("/", item.name());
+        assertEquals("", item.pathFromFMRoot());
     }
 
     @Test

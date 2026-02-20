@@ -12,7 +12,7 @@ public class PGProcessProgressEvent implements ProgressEvent {
 	}
 
 	@Override
-	public String getDescription() {
+	public String description() {
 		return description;
 	}
 

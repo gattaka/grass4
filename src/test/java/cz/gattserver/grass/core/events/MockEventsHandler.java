@@ -21,7 +21,7 @@ public class MockEventsHandler {
 	@Handler
 	public void onStart(MockProcessStartEvent event) {
 		state = 1;
-		steps = event.getCountOfStepsToDo();
+		steps = event.steps();
 		future.complete(this);
 	}
 
@@ -29,7 +29,7 @@ public class MockEventsHandler {
 	public void onProgress(MockProcessProgressEvent event) {
 		state = 2;
 		currentStep = currentStep + 1;
-		currentStepDesc = event.getDescription();
+		currentStepDesc = event.description();
 		future.complete(this);
 	}
 

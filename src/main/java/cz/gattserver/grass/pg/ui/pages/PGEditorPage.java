@@ -389,14 +389,14 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     @Handler
     protected void onProcessStart(final PGProcessStartEvent event) {
         progressDialog.runInUI(() -> {
-            progressDialog.setTotal(event.getCountOfStepsToDo());
+            progressDialog.setTotal(event.steps());
             progressDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(PGProcessProgressEvent event) {
-        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.getDescription()));
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.description()));
     }
 
     @Handler

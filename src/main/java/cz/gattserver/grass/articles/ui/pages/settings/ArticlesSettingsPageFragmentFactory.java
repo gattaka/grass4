@@ -129,14 +129,14 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
     @Handler
     protected void onProcessStart(final ArticlesProcessStartEvent event) {
         progressIndicatorDialog.runInUI(() -> {
-            progressIndicatorDialog.setTotal(event.getCountOfStepsToDo());
+            progressIndicatorDialog.setTotal(event.steps());
             progressIndicatorDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(ArticlesProcessProgressEvent event) {
-        progressIndicatorDialog.runInUI(() -> progressIndicatorDialog.indicateProgress(event.getDescription()));
+        progressIndicatorDialog.runInUI(() -> progressIndicatorDialog.indicateProgress(event.description()));
     }
 
     @Handler

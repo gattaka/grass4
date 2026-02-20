@@ -245,14 +245,14 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
     @Handler
     protected void onProcessStart(final PGProcessStartEvent event) {
         progressIndicatorWindow.runInUI(() -> {
-            progressIndicatorWindow.setTotal(event.getCountOfStepsToDo());
+            progressIndicatorWindow.setTotal(event.steps());
             progressIndicatorWindow.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(PGProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getDescription()));
+        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.description()));
     }
 
     @Handler

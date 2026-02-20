@@ -12,7 +12,7 @@ public class Print3dZipProcessProgressEvent implements ProgressEvent {
 	}
 
 	@Override
-	public String getDescription() {
+	public String description() {
 		return description;
 	}
 

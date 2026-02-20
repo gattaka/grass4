@@ -1,68 +1,21 @@
 package cz.gattserver.grass.fm.interfaces;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class FMItemTO {
+public record FMItemTO(String name, String pathFromFMRoot, boolean directory, Long numericSize, String size,
+                       LocalDateTime lastModified) implements Serializable {
 
-	private String name;
-	private String pathFromFMRoot;
-	private String size;
-	private Long numericSize;
-	private boolean directory;
-	private LocalDateTime lastModified;
+    @Serial
+    private static final long serialVersionUID = 44677581670349098L;
 
-	public String getSize() {
-		return size;
-	}
+    public FMItemTO(String name, String pathFromFMRoot) {
+        this(name, pathFromFMRoot, false, null, null, null);
+    }
 
-	public FMItemTO setSize(String size) {
-		this.size = size;
-		return this;
-	}
-
-	public boolean isDirectory() {
-		return directory;
-	}
-
-	public FMItemTO setDirectory(boolean directory) {
-		this.directory = directory;
-		return this;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public FMItemTO setName(String name) {
-		this.name = name;
-		return this;
-	}
-
-	public String getPathFromFMRoot() {
-		return pathFromFMRoot;
-	}
-
-	public FMItemTO setPathFromFMRoot(String pathFromFMRoot) {
-		this.pathFromFMRoot = pathFromFMRoot;
-		return this;
-	}
-
-	public LocalDateTime getLastModified() {
-		return lastModified;
-	}
-
-	public FMItemTO setLastModified(LocalDateTime lastModified) {
-		this.lastModified = lastModified;
-		return this;
-	}
-
-	public Long getNumericSize() {
-		return numericSize;
-	}
-
-	public FMItemTO setNumericSize(Long numericSize) {
-		this.numericSize = numericSize;
-		return this;
-	}
+    public FMItemTO(String name, boolean directory, Long numericSize, String size, LocalDateTime lastModified) {
+        this(name, null, directory, numericSize, size, lastModified);
+    }
 
 }

@@ -14,7 +14,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
@@ -24,7 +23,6 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.UploadHandler;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.CZAmountFormatter;
 import cz.gattserver.common.vaadin.HtmlDiv;
@@ -47,49 +45,44 @@ import cz.gattserver.grass.fm.events.FMZipProcessResultEvent;
 import cz.gattserver.grass.fm.events.FMZipProcessStartEvent;
 import cz.gattserver.grass.fm.interfaces.FMItemTO;
 import cz.gattserver.grass.fm.service.FMService;
+import lombok.extern.slf4j.Slf4j;
 import net.engio.mbassy.listener.Handler;
 import net.glxn.qrgen.javase.QRCode;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.annotation.Resource;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.util.*;
 
+@Slf4j
 @PageTitle("Správce souborů")
 @Route(value = "fm", layout = MainView.class)
 public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterObserver {
 
-    private static final Logger logger = LoggerFactory.getLogger(FMPage.class);
+    @Serial
+    private static final long serialVersionUID = -4876290732058009438L;
 
     @Resource(name = "fmPageFactory")
     private PageFactory fmPageFactory;
 
-    @Autowired
-    private FileSystemService fileSystemService;
+    private final FileSystemService fileSystemService;
+    private final EventBus eventBus;
+    private final FMService fmService;
+    private final SecurityService securityService;
+    private final FMSection fmSection;
 
-    @Autowired
-    private EventBus eventBus;
-
-    @Autowired
-    private FMService fmService;
-
-    private ProgressDialog progressIndicatorWindow;
-
+    private final ComponentFactory componentFactory;
     private final CZAmountFormatter selectFormatter;
     private final CZAmountFormatter listFormatter;
+
+    private ProgressDialog progressDialog;
     private String listFormatterValue;
-
-    private FileSystem fileSystem;
-
-    private TextField filterNameField;
     private String filterName;
 
     /**
@@ -115,19 +108,21 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     private String urlBase;
     private String parameter;
 
-    private Div layout;
-
-    private SecurityService securityService;
-
-    public FMPage(SecurityService securityService) {
+    public FMPage(FileSystemService fileSystemService, EventBus eventBus, FMService fmService,
+                  SecurityService securityService, FMSection fmSection) {
+        this.fileSystemService = fileSystemService;
+        this.eventBus = eventBus;
+        this.fmService = fmService;
+        this.securityService = securityService;
+        this.fmSection = fmSection;
+        componentFactory = new ComponentFactory();
         selectFormatter = new CZAmountFormatter("Vybrán %d soubor", "Vybrány %d soubory", "Vybráno %d souborů");
         listFormatter = new CZAmountFormatter("Zobrazen %d soubor", "Zobrazeny %d soubory", "Zobrazeno %d souborů");
-        this.securityService = securityService;
     }
 
     @Override
-    public void setParameter(BeforeEvent beforeEvent, @WildcardParameter String parameter) {
-        this.parameter = parameter;
+    public void setParameter(BeforeEvent beforeEvent, @WildcardParameter String path) {
+        this.parameter = path;
         removeAll();
         ComponentFactory componentFactory = new ComponentFactory();
 
@@ -142,9 +137,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
                 .set("color", "hsl(220, 14%, 61%)");
         breadcrumb = new Breadcrumb();
 
-        fileSystem = fileSystemService.getFileSystem();
-
-        String path = parameter;
+        FileSystem fileSystem = fileSystemService.getFileSystem();
 
         explorer = new FMExplorer(fileSystem);
         FileProcessState result = explorer.goToDir(path);
@@ -211,13 +204,11 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
         // aktuální polohu cílové kategorie
         List<Breadcrumb.BreadcrumbElement> breadcrumbElements = new ArrayList<>();
         for (FMItemTO c : explorer.getBreadcrumbChunks())
-            breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(c.getName(), FMPage.class, c.getPathFromFMRoot()));
+            breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(c.name(), FMPage.class, c.pathFromFMRoot()));
         breadcrumb.resetBreadcrumb(breadcrumbElements);
     }
 
     private void createFilesGrid(Div layout) {
-        ComponentFactory componentFactory = new ComponentFactory();
-
         grid = new Grid<>();
         grid.setSelectionMode(SelectionMode.MULTI);
         grid.setColumnReorderingAllowed(true);
@@ -227,16 +218,16 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
         layout.add(grid);
 
         grid.addColumn(new IconRenderer<>(to -> {
-            Image img = to.isDirectory() ? ImageIcon.FOLDER_16_ICON.createImage() :
+            Image img = to.directory() ? ImageIcon.FOLDER_16_ICON.createImage() :
                     ImageIcon.DOCUMENT_16_ICON.createImage();
             img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
             return img;
         }, to -> "")).setFlexGrow(0).setWidth("36px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
 
         Column<FMItemTO> nameColumn =
-                grid.addColumn(FMItemTO::getName).setHeader("Název").setFlexGrow(100).setSortProperty("name");
+                grid.addColumn(FMItemTO::name).setHeader("Název").setFlexGrow(100).setSortProperty("name");
 
-        grid.addColumn(FMItemTO::getSize).setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("100px")
+        grid.addColumn(FMItemTO::size).setHeader("Velikost").setTextAlign(ColumnTextAlign.END).setWidth("100px")
                 .setFlexGrow(0).setSortProperty("size");
 
         grid.addColumn(new ComponentRenderer<>(to -> {
@@ -259,7 +250,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
                                 "if (document.execCommand(\"copy\")) { " + "document.getElementById(\"" + checkId +
                                 "\").innerHTML = \"URL zkopírováno do schránky\";" + "}" + "},10)");
             });
-            button.setVisible(!to.isDirectory());
+            button.setVisible(!to.directory());
             return button;
         })).setHeader("URL").setTextAlign(ColumnTextAlign.CENTER).setWidth("50px").setFlexGrow(0);
 
@@ -268,28 +259,28 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
                 .setHeader("Stažení").setTextAlign(ColumnTextAlign.CENTER).setWidth("90px").setFlexGrow(0);
 
         grid.addColumn(new ComponentRenderer<>(to -> {
-            String link = explorer.getDownloadLink(urlBase, to.getName());
-            Div button = componentFactory.createInlineButton("QR", e -> {
-                WebDialog ww = new WebDialog("QR kód");
-                ww.setCloseOnEsc(true);
-                ww.setCloseOnOutsideClick(true);
+            String link = explorer.getDownloadLink(urlBase, to.name());
+            return componentFactory.createInlineButton("QR", e -> {
+                WebDialog qrDialog = new WebDialog("QR kód");
+                qrDialog.setCloseOnEsc(true);
+                qrDialog.setCloseOnOutsideClick(true);
                 Image image = new Image(DownloadHandler.fromInputStream(de -> {
                     try {
                         File file = QRCode.from(link).file();
                         return new DownloadResponse(new FileInputStream(file), link, null, -1);
                     } catch (IOException ex) {
-                        ex.printStackTrace();
-                        return null;
+                        String msg = "Nezdařilo se vytvořit QR kód";
+                        log.error(msg, ex);
+                        throw new RuntimeException(msg);
                     }
                 }), link);
-                ww.addComponent(image);
-                ww.setComponentAlignment(image, Alignment.CENTER);
-                ww.open();
+                qrDialog.addComponent(image);
+                qrDialog.setComponentAlignment(image, Alignment.CENTER);
+                qrDialog.open();
             });
-            return button;
         })).setHeader("QR").setTextAlign(ColumnTextAlign.CENTER).setWidth("45px").setFlexGrow(0);
 
-        grid.addColumn(new LocalDateTimeRenderer<>(FMItemTO::getLastModified, "d.M.yyyy HH:mm")).setHeader("Upraveno")
+        grid.addColumn(new LocalDateTimeRenderer<>(FMItemTO::lastModified, "d.M.yyyy HH:mm")).setHeader("Upraveno")
                 .setAutoWidth(true).setTextAlign(ColumnTextAlign.END).setSortProperty("lastModified");
 
         grid.addSelectionListener(e -> {
@@ -305,7 +296,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
         HeaderRow filteringHeader = grid.appendHeaderRow();
 
         // Obsah
-        filterNameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
+        UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
             filterName = e.getValue();
             populateGrid();
         });
@@ -314,7 +305,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     }
 
     private void handleGridDblClick(FMItemTO item) {
-        if (item.isDirectory()) handleGotoDirFromCurrentDirAction(item);
+        if (item.directory()) handleGotoDirFromCurrentDirAction(item);
         else handleDownloadAction(item);
     }
 
@@ -348,7 +339,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
         buttonsLayout.add(componentFactory.createDownloadGridButton(this::handleDownloadAction, grid));
         buttonsLayout.add(componentFactory.createGridSetButton("Otevřít", VaadinIcon.FOLDER_OPEN.create(),
                 items -> handleGotoDirFromCurrentDirAction(items.iterator().next()), grid,
-                items -> items.size() == 1 && items.iterator().next().isDirectory()));
+                items -> items.size() == 1 && items.iterator().next().directory()));
         buttonsLayout.add(componentFactory.createEditGridButton(this::handleRenameAction, grid));
         buttonsLayout.add(componentFactory.createDeleteGridSetButton(this::handleDeleteAction, grid));
 
@@ -356,11 +347,10 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     }
 
     private void handleNewDirectory() {
-        new FileNameDialog((s, w) -> {
-            switch (explorer.createNewDir(s.getName())) {
+        new FileNameDialog(to -> {
+            switch (explorer.createNewDir(to.getName())) {
                 case SUCCESS:
                     populateGrid();
-                    w.close();
                     break;
                 case ALREADY_EXISTS:
                     UIUtils.showWarning("Nezdařilo se vytvořit nový adresář - adresář s tímto jménem již existuje.");
@@ -379,7 +369,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     private void handleDeleteAction(Set<FMItemTO> items) {
         FileProcessState overallResult = FileProcessState.SUCCESS;
         for (FMItemTO p : items) {
-            FileProcessState partialResult = explorer.deleteFile(p.getName());
+            FileProcessState partialResult = explorer.deleteFile(p.name());
             if (!partialResult.equals(FileProcessState.SUCCESS)) overallResult = partialResult;
         }
         if (!overallResult.equals(FileProcessState.SUCCESS))
@@ -388,7 +378,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     }
 
     private void handleGotoDirFromCurrentDirAction(FMItemTO item) {
-        String target = item.getName();
+        String target = item.name();
         if ("..".equals(target)) {
             int lastDelimiter = parameter.lastIndexOf("/");
             if (lastDelimiter < 0) {
@@ -403,11 +393,10 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     }
 
     private void handleRenameAction(final FMItemTO item) {
-        new FileNameDialog(item, (s, w) -> {
-            switch (explorer.renameFile(item.getName(), s.getName())) {
+        new FileNameDialog(item.name(), to -> {
+            switch (explorer.renameFile(item.name(), to.getName())) {
                 case SUCCESS:
                     populateGrid();
-                    w.close();
                     break;
                 case ALREADY_EXISTS:
                     UIUtils.showWarning("Přejmenování se nezdařilo - soubor s tímto názvem již existuje.");
@@ -425,7 +414,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     }
 
     private String getDownloadLink(FMItemTO item) {
-        return urlBase + explorer.getDownloadLink(UIUtils.getContextPath(), item.getName());
+        return urlBase + explorer.getDownloadLink(UIUtils.getContextPath(), item.name());
     }
 
     private void handleDownloadAction(FMItemTO item) {
@@ -434,11 +423,11 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
 
     private void handleDownloadAction(Set<FMItemTO> items) {
         FMItemTO item = items.iterator().next();
-        if (items.size() == 1 && !item.isDirectory()) {
+        if (items.size() == 1 && !item.directory()) {
             UI.getCurrent().getPage().open(getDownloadLink(item));
         } else {
-            logger.info("zipFMthread: {}", Thread.currentThread().threadId());
-            progressIndicatorWindow = new ProgressDialog();
+            log.info("zipFMthread: {}", Thread.currentThread().threadId());
+            progressDialog = new ProgressDialog();
             eventBus.subscribe(FMPage.this);
             explorer.zipFiles(items);
         }
@@ -446,21 +435,21 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
 
     @Handler
     protected void onProcessStart(final FMZipProcessStartEvent event) {
-        progressIndicatorWindow.runInUI(() -> {
-            progressIndicatorWindow.setTotal(event.getCountOfStepsToDo());
-            progressIndicatorWindow.open();
+        progressDialog.runInUI(() -> {
+            progressDialog.setTotal(event.steps());
+            progressDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(FMZipProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getDescription()));
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.description()));
     }
 
     @Handler
     protected void onProcessResult(final FMZipProcessResultEvent event) {
-        progressIndicatorWindow.runInUI(() -> {
-            if (progressIndicatorWindow != null) progressIndicatorWindow.close();
+        progressDialog.runInUI(() -> {
+            if (progressDialog != null) progressDialog.close();
 
             if (event.success()) {
                 WebDialog win = new WebDialog("Komprese");
@@ -490,7 +479,6 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (!SpringContextHelper.getBean(FMSection.class)
-                .isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
+        if (fmSection.isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
     }
 }

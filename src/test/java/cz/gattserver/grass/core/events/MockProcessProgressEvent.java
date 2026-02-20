@@ -9,7 +9,7 @@ public class MockProcessProgressEvent implements ProgressEvent {
 	}
 
 	@Override
-	public String getDescription() {
+	public String description() {
 		return description;
 	}
 

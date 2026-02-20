@@ -1,6 +1,8 @@
 package cz.gattserver.grass.articles.model.domain;
 
 import cz.gattserver.grass.core.model.domain.ContentNode;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.NativeGenerator;
 import org.hibernate.annotations.SortComparator;
 
@@ -8,6 +10,8 @@ import jakarta.persistence.*;
 import java.util.Set;
 import java.util.SortedSet;
 
+@Setter
+@Getter
 @Entity(name = "ARTICLE")
 public class Article {
 
@@ -68,77 +72,5 @@ public class Article {
 	 * Id adresáře příloh
 	 */
 	private String attachmentsDirId;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public ContentNode getContentNode() {
-		return contentNode;
-	}
-
-	public Set<String> getPluginCSSResources() {
-		return pluginCSSResources;
-	}
-
-	public void setPluginCSSResources(Set<String> pluginCSSResources) {
-		this.pluginCSSResources = pluginCSSResources;
-	}
-
-	public SortedSet<ArticleJSResource> getPluginJSResources() {
-		return pluginJSResources;
-	}
-
-	public void setPluginJSResources(SortedSet<ArticleJSResource> pluginJSResources) {
-		this.pluginJSResources = pluginJSResources;
-	}
-
-	public SortedSet<ArticleJSCode> getPluginJSCodes() {
-		return pluginJSCodes;
-	}
-
-	public void setPluginJSCodes(SortedSet<ArticleJSCode> pluginJSCodes) {
-		this.pluginJSCodes = pluginJSCodes;
-	}
-
-	public void setContentNode(ContentNode contentNode) {
-		this.contentNode = contentNode;
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
-
-	public String getOutputHTML() {
-		return outputHTML;
-	}
-
-	public void setOutputHTML(String outputHTML) {
-		this.outputHTML = outputHTML;
-	}
-
-	public String getSearchableOutput() {
-		return searchableOutput;
-	}
-
-	public void setSearchableOutput(String searchableOutput) {
-		this.searchableOutput = searchableOutput;
-	}
-
-	public String getAttachmentsDirId() {
-		return attachmentsDirId;
-	}
-
-	public void setAttachmentsDirId(String attachmentsDirId) {
-		this.attachmentsDirId = attachmentsDirId;
-	}
 
 }

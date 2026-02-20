@@ -12,7 +12,7 @@ public class FMZipProcessStartEvent implements StartEvent {
 	}
 
 	@Override
-	public int getCountOfStepsToDo() {
+	public int steps() {
 		return steps;
 	}
 

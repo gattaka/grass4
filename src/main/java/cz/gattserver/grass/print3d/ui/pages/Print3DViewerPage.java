@@ -314,14 +314,14 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
     @Handler
     protected void onProcessStart(final Print3dZipProcessStartEvent event) {
         progressIndicatorWindow.runInUI(() -> {
-            progressIndicatorWindow.setTotal(event.getCountOfStepsToDo());
+            progressIndicatorWindow.setTotal(event.steps());
             progressIndicatorWindow.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(Print3dZipProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getDescription()));
+        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.description()));
     }
 
     @Handler
