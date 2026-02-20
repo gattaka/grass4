@@ -18,17 +18,21 @@
 
     <properties>
         <java.version>21</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
         <vaadin.version>25.0.3</vaadin.version>
         <tika.core.version>3.0.0</tika.core.version>
         <tomcat.jdbc.version>8.5.23</tomcat.jdbc.version>
         <commons.io.version>2.18.0</commons.io.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
-        <jasperreports.version>6.16.0</jasperreports.version>
-        <itext.version>2.1.7</itext.version>
+        <flying.saucer.pdf.version>10.0.6</flying.saucer.pdf.version>
+        <thymeleaf.version>3.1.2.RELEASE</thymeleaf.version>
+        <gson.version>2.11.0</gson.version>
         <mbassador.version>1.3.1</mbassador.version>
         <java.image.scaling.version>0.8.6</java.image.scaling.version>
-        <h2.version>2.1.214</h2.version>
+        <h2.version>2.4.240</h2.version>
         <lombok.version>1.18.42</lombok.version>
+        <common.lang3.version>3.20.0</common.lang3.version>
         <vcf.month.picker.flow.version>3.0.0</vcf.month.picker.flow.version>
         <jcodec.version>0.2.2</jcodec.version>
         <httpclient5.version>5.2.1</httpclient5.version>
@@ -114,6 +118,14 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-mail</artifactId>
+        </dependency>
+
+        <!-- Source: https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${common.lang3.version}</version>
+            <scope>compile</scope>
         </dependency>
 
         <dependency>
@@ -226,22 +238,24 @@
             <version>${org.mapstruct.version}</version>
         </dependency>
 
-        <!-- Jasper reports -->
+        <!-- Flying Saucer PDF (uses OpenPDF internally, LGPL) -->
         <dependency>
-            <groupId>net.sf.jasperreports</groupId>
-            <artifactId>jasperreports</artifactId>
-            <version>${jasperreports.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.lowagie</groupId>
-                    <artifactId>itext</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>org.xhtmlrenderer</groupId>
+            <artifactId>flying-saucer-pdf</artifactId>
+            <version>${flying.saucer.pdf.version}</version>
         </dependency>
+
+        <!-- Thymeleaf for template rendering -->
         <dependency>
-            <groupId>com.lowagie</groupId>
-            <artifactId>itext</artifactId>
-            <version>${itext.version}</version>
+            <groupId>org.thymeleaf</groupId>
+            <artifactId>thymeleaf</artifactId>
+            <version>${thymeleaf.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>${gson.version}</version>
         </dependency>
 
         <!-- EventBus -->

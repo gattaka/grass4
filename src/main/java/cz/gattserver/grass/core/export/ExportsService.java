@@ -1,11 +1,10 @@
 package cz.gattserver.grass.core.export;
 
-import java.nio.file.Path;
-import java.util.Map;
+import org.thymeleaf.context.Context;
 
-import net.sf.jasperreports.engine.JRDataSource;
+import java.nio.file.Path;
 
 public interface ExportsService {
 
-	Path createPDFReport(JRDataSource jrDataSource, Map<String, Object> params, String reportFileName, ExportType type);
+    Path createPDFReport(Context ctx, String reportFileName);
 }

@@ -1,7 +1,8 @@
 package cz.gattserver.grass.monitor.services.impl;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.monitor.config.MonitorConfiguration;
 import cz.gattserver.grass.monitor.processor.item.*;
@@ -30,8 +31,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.file.FileStore;
-import java.nio.file.FileSystems;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -408,12 +407,13 @@ public class MonitorServiceImpl implements MonitorService {
 			try {
 				String[] lines = partItemTO.getStateDetails().split("\n");
 				for (String line : lines) {
-					ObjectMapper mapper = new ObjectMapper();
-					JsonNode jsonNode = mapper.readTree(line);
-					String message = jsonNode.get(MESSAGE_HEADER).asText();
-					int priority = jsonNode.get(PRIORITY_HEADER).asInt();
-					JsonNode timeNode = jsonNode.get(TIME_HEADER);
-					String time = timeNode == null ? "-null-" : timeNode.asText();
+                    JsonObject jsonObject = JsonParser.parseString(line).getAsJsonObject();
+
+                    String message = jsonObject.get(MESSAGE_HEADER).getAsString();
+                    int priority = jsonObject.get(PRIORITY_HEADER).getAsInt();
+
+                    JsonElement timeElement = jsonObject.get(TIME_HEADER);
+                    String time = (timeElement == null || timeElement.isJsonNull()) ? "-null-" : timeElement.getAsString();
 					SMARTMonitorItemTO to = new SMARTMonitorItemTO(time, message);
 
 					// https://www.freedesktop.org/software/systemd/man/journalctl.html

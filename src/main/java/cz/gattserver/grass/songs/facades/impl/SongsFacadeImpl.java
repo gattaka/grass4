@@ -2,6 +2,9 @@ package cz.gattserver.grass.songs.facades.impl;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
+import cz.gattserver.grass.core.export.ExportType;
+import cz.gattserver.grass.core.export.ExportsService;
+import cz.gattserver.grass.core.export.ExportsServiceImpl;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.dao.ChordsRepository;
@@ -16,8 +19,12 @@ import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.context.Context;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 
 @Transactional
@@ -32,6 +39,9 @@ public class SongsFacadeImpl implements SongsService {
 
 	@Autowired
 	private ChordsRepository chordsRepository;
+
+    @Autowired
+    private ExportsService exportsService;
 
 	@Override
 	public SongTO getSongById(Long id) {
@@ -135,4 +145,14 @@ public class SongsFacadeImpl implements SongsService {
 	public ChordTO getChordByName(String name) {
 		return mapper.mapChord(chordsRepository.findByName(name));
 	}
+
+    @Override
+    public Path print(SongTO s, boolean twoColumn) {
+        var ctx = new Context();
+        ctx.setVariable("name", s.getName());
+        ctx.setVariable("text", s.getText());
+        ctx.setVariable("author", s.getAuthor());
+
+        return exportsService.createPDFReport(ctx, "song-one-col");
+    }
 }

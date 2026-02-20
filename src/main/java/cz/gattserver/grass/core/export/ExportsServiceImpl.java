@@ -1,68 +1,61 @@
 package cz.gattserver.grass.core.export;
 
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Map;
 
 import cz.gattserver.grass.core.exception.GrassException;
-import net.sf.jasperreports.engine.*;
-import net.sf.jasperreports.repo.RepositoryService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
+import org.openpdf.text.pdf.BaseFont;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+import org.xhtmlrenderer.pdf.ITextRenderer;
 
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
-
+@Slf4j
 @Service
 public class ExportsServiceImpl implements ExportsService {
 
-	private static Logger logger = LoggerFactory.getLogger(ExportsServiceImpl.class);
+    @Override
+    public Path createPDFReport(Context ctx, String reportFileName) {
+        try {
+            // 1. Set up Thymeleaf
+            var resolver = new ClassLoaderTemplateResolver();
+            resolver.setPrefix("META-INF/resources/templates/");
+            resolver.setSuffix(".html");
+            resolver.setCharacterEncoding("UTF-8");
 
-	@Override
-	public Path createPDFReport(
-			JRDataSource jrDataSource, Map<String, Object> params, String reportFileName,
-			ExportType type) {
-		try {
-			Path tmpPath = Files.createTempFile("grass-jasper-", ".pdf");
-			OutputStream fileOutputStream = Files.newOutputStream(tmpPath);
+            var engine = new TemplateEngine();
+            engine.setTemplateResolver(resolver);
 
-			String basepath = "META-INF/resources/jasper";
-			String path = basepath + reportFileName + ".jasper";
-			InputStream jasperReportStream = getClass().getClassLoader().getResourceAsStream(path);
+            String html = engine.process(reportFileName, ctx);
 
-			logger.info("Hledám " + path + ", výsledek: " + jasperReportStream);
+            Path outFile = Files.createTempFile("report", ".pdf");
+            try (var os = Files.newOutputStream(outFile)) {
+                var renderer = new ITextRenderer();
 
-			params.put("SUBREPORT_DIR", path);
+                String prefix = "/META-INF/resources/fonts/";
 
-			SimpleJasperReportsContext jasperReportsContext = new SimpleJasperReportsContext();
+                var fontResolver = renderer.getFontResolver();
+                fontResolver.addFont(getClass().getResource(prefix + "DejaVuSans.ttf").toString(), BaseFont.IDENTITY_H,
+                        BaseFont.EMBEDDED);
+                fontResolver.addFont(getClass().getResource(prefix + "DejaVuSans-Bold.ttf").toString(),
+                        BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                fontResolver.addFont(getClass().getResource(prefix + "DejaVuSansMono.ttf").toString(),
+                        BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+                fontResolver.addFont(getClass().getResource(prefix + "DejaVuSansMono-Bold.ttf").toString(),
+                        BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
 
-			// https://stackoverflow.com/questions/1771679/difference-between-threads-context-class-loader-and-normal-classloader
-			// Protože Jasper používá Thread.currentThread().getContextClassLoader(), což nefunguje pod spring boot s
-			// embedded Tomcat, je potřeba to přepsat fungujícím getClass().getClassLoader()
-			CustomJasperRepositoryService repositoryService =
-					new CustomJasperRepositoryService(DefaultJasperReportsContext.getInstance());
-			jasperReportsContext.setExtensions(RepositoryService.class, Arrays.asList(repositoryService));
+                renderer.setDocumentFromString(html);
+                renderer.layout();
+                renderer.createPDF(os);
+            }
 
-			JasperFillManager jasperFillManager = JasperFillManager.getInstance(jasperReportsContext);
-			JasperPrint jasperPrint = jasperFillManager.fill(jasperReportStream, params, jrDataSource);
-
-			JRPdfExporter exporter = new JRPdfExporter();
-			exporter.setParameter(JRExporterParameter.JASPER_PRINT, jasperPrint);
-			exporter.setParameter(JRExporterParameter.OUTPUT_STREAM, fileOutputStream);
-			if (ExportType.PRINT == type)
-				exporter.setParameter(JRPdfExporterParameter.PDF_JAVASCRIPT, "this.print();");
-
-			exporter.exportReport();
-			fileOutputStream.close();
-
-			return tmpPath;
-		} catch (Exception e) {
-			throw new GrassException("Export se nezdařil", e);
-		}
-	}
-
+            return outFile;
+        } catch (Exception e) {
+            throw new GrassException("Export se nezdařil", e);
+        }
+    }
 }

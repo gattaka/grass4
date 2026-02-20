@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <style>
+        @font-face {
+            font-family: 'DejaVu';
+            src: url('classpath:/META-INF/resources/fonts/DejaVuSans.ttf');
+            font-weight: normal;
+            -fs-pdf-font-embed: embed;
+            -fs-pdf-font-encoding: Identity-H;
+        }
+        @font-face {
+            font-family: 'DejaVu';
+            src: url('classpath:/META-INF/resources/fonts/DejaVuSans-Bold.ttf');
+            font-weight: bold;
+            -fs-pdf-font-embed: embed;
+            -fs-pdf-font-encoding: Identity-H;
+        }
+        @font-face {
+            font-family: 'DejaVuMono';
+            src: url('classpath:/META-INF/resources/fonts/DejaVuSansMono.ttf');
+            font-weight: normal;
+            -fs-pdf-font-embed: embed;
+            -fs-pdf-font-encoding: Identity-H;
+        }
+        @font-face {
+            font-family: 'DejaVuMono';
+            src: url('classpath:/META-INF/resources/fonts/DejaVuSansMono-Bold.ttf');
+            font-weight: bold;
+            -fs-pdf-font-embed: embed;
+            -fs-pdf-font-encoding: Identity-H;
+        }
+        h1, div#author {
+            font-family: DejaVu;
+        }
+        h1 {
+            border-bottom: 1px solid black;
+            font-weight: 500;
+            margin-bottom: 5px;
+            margin-top: 0;
+        }
+        div#author {
+            font-style: italic;
+        }
+        div#text {
+            margin-top: 15px;
+            font-family: DejaVuMono;
+            font-size: 13px;
+            white-space: pre;
+        }
+    </style>
+</head>
+<body>
+<h1 th:text="${name}">Mosty</h1>
+<div id="author" th:text="${author}">Lenka Filipová & Karel Zich</div>
+<div id="text" th:text="${text}">text</div>
+</body>
+</html>

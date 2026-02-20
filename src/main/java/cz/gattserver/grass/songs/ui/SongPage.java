@@ -18,8 +18,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.grass.core.export.ExportType;
 import cz.gattserver.grass.core.export.ExportsService;
-import cz.gattserver.grass.core.export.JasperExportDataSource;
-import cz.gattserver.grass.core.export.PagedDataSource;
 import cz.gattserver.grass.core.server.ExportRequestHandler;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
@@ -29,11 +27,9 @@ import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import cz.gattserver.grass.songs.util.ChordImageUtils;
-import net.sf.jasperreports.engine.JRDataSource;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -202,23 +198,7 @@ public class SongPage extends Div implements BeforeEnterObserver {
         SongTO s = new SongTO(choosenSong.getName(), choosenSong.getAuthor(), choosenSong.getYear(),
                 choosenSong.getText().replaceAll("<br/>", "\n"), choosenSong.getId(), choosenSong.getPublicated(),
                 choosenSong.getEmbedded());
-        JRDataSource jrDataSource = new JasperExportDataSource<>(new PagedDataSource<SongTO>(1, 1) {
-            @Override
-            protected List<SongTO> getData(int page, int size) {
-                return Arrays.asList(s);
-            }
-
-            @Override
-            protected void indicateProgress() {
-            }
-        });
-        HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("CONTENT", s.getText());
-        params.put("YEAR", s.getYear());
-        params.put("NAME", s.getName());
-        params.put("AUTHOR", s.getAuthor());
-        String template = twoColumn ? "song-two-col" : "song-one-col";
-        return exportsService.createPDFReport(jrDataSource, params, "/songs/" + template, ExportType.PRINT);
+        return songsService.print(s, twoColumn);
     }
 
     public void showDetail(SongTO choosenSong) {

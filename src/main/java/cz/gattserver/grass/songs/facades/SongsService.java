@@ -6,6 +6,7 @@ import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 
  public interface SongsService {
@@ -104,4 +105,5 @@ import java.util.List;
 	 */
 	 ChordTO getChordByName(String name);
 
-}
+     Path print(SongTO s, boolean twoColumn);
+ }
