@@ -299,7 +299,7 @@ public class HWItemInfoTab extends Div {
         upload.setUploadButton(uploadButton);
         Span dropLabel = new Span("Drop");
         upload.setDropLabel(dropLabel);
-        upload.setAcceptedFileTypes("image/jpg", "image/jpeg", "image/png");
+        upload.setAcceptedFileTypes("image/jpg", "image/jpeg", "image/png", "image/webp");
 
         hwImageLayout.removeAll();
         hwImageLayout.getStyle().set("border", "1px solid lightgray");
