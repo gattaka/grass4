@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>4.0.1</version>
+        <version>4.0.3</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -20,13 +20,32 @@
         <java.version>21</java.version>
         <vaadin.version>25.0.3</vaadin.version>
         <tika.core.version>3.0.0</tika.core.version>
+        <tomcat.jdbc.version>8.5.23</tomcat.jdbc.version>
+        <commons.io.version>2.18.0</commons.io.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
+        <jasperreports.version>6.16.0</jasperreports.version>
+        <itext.version>2.1.7</itext.version>
+        <mbassador.version>1.3.1</mbassador.version>
+        <java.image.scaling.version>0.8.6</java.image.scaling.version>
         <h2.version>2.1.214</h2.version>
         <lombok.version>1.18.42</lombok.version>
+        <vcf.month.picker.flow.version>3.0.0</vcf.month.picker.flow.version>
+        <jcodec.version>0.2.2</jcodec.version>
+        <httpclient5.version>5.2.1</httpclient5.version>
+        <metadata.extractor.version>2.13.0</metadata.extractor.version>
+        <gattserver.inconsolata.version>1.0.0</gattserver.inconsolata.version>
+        <imageio.webp.version>3.12.0</imageio.webp.version>
+        <imageio.bmp.version>3.12.0</imageio.bmp.version>
+        <imageio.jpeg.version>3.12.0</imageio.jpeg.version>
+        <imgscalr.lib.version>4.2</imgscalr.lib.version>
+        <batik.version>1.14</batik.version>
+        <qrgen.version>3.0.1</qrgen.version>
+        <jimfs.version>1.3.0</jimfs.version>
+        <mockserver.netty.version>5.14.0</mockserver.netty.version>
     </properties>
 
     <repositories>
-        <!-- Pro Github build -->
+        <!-- Pro GitHub build -->
         <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
@@ -53,10 +72,11 @@
     </dependencyManagement>
 
     <dependencies>
+
+        <!-- Vaadin -->
         <dependency>
             <groupId>com.vaadin</groupId>
-            <!-- Replace artifactId with vaadin-core to use only free components -->
-            <!-- <artifactId>vaadin</artifactId> -->
+            <!-- Replace artifactId vaadin with vaadin-core to use only free components -->
             <artifactId>vaadin-core</artifactId>
         </dependency>
         <dependency>
@@ -68,6 +88,8 @@
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
+
+        <!-- Spring -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
@@ -105,25 +127,25 @@
         <dependency>
             <groupId>org.vaadin.addons.componentfactory</groupId>
             <artifactId>vcf-month-picker-flow</artifactId>
-            <version>3.0.0</version>
+            <version>${vcf.month.picker.flow.version}</version>
         </dependency>
 
         <!-- JCodec -->
         <dependency>
             <groupId>org.jcodec</groupId>
             <artifactId>jcodec</artifactId>
-            <version>0.2.2</version>
+            <version>${jcodec.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jcodec</groupId>
             <artifactId>jcodec-javase</artifactId>
-            <version>0.2.2</version>
+            <version>${jcodec.version}</version>
         </dependency>
 
         <dependency>
             <groupId>cz.gattserver</groupId>
             <artifactId>inconsolata</artifactId>
-            <version>1.0.0</version>
+            <version>${gattserver.inconsolata.version}</version>
             <scope>system</scope>
             <systemPath>${basedir}/lib/inconsolata-1.0.0.jar</systemPath>
         </dependency>
@@ -133,53 +155,53 @@
         <dependency>
             <groupId>com.drewnoakes</groupId>
             <artifactId>metadata-extractor</artifactId>
-            <version>2.13.0</version>
+            <version>${metadata.extractor.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
         <dependency>
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5</artifactId>
-            <version>5.2.1</version>
+            <version>${httpclient5.version}</version>
         </dependency>
 
         <!-- Image resizing -->
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-webp</artifactId>
-            <version>3.12.0</version>
+            <version>${imageio.webp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-bmp</artifactId>
-            <version>3.12.0</version>
+            <version>${imageio.bmp.version}</version>
         </dependency>
         <dependency>
             <groupId>com.twelvemonkeys.imageio</groupId>
             <artifactId>imageio-jpeg</artifactId>
-            <version>3.12.0</version>
+            <version>${imageio.jpeg.version}</version>
         </dependency>
         <dependency>
             <groupId>org.imgscalr</groupId>
             <artifactId>imgscalr-lib</artifactId>
-            <version>4.2</version>
+            <version>${imgscalr.lib.version}</version>
         </dependency>
 
         <!-- Batik -->
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-util</artifactId>
-            <version>1.14</version>
+            <version>${batik.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-transcoder</artifactId>
-            <version>1.14</version>
+            <version>${batik.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.xmlgraphics</groupId>
             <artifactId>batik-codec</artifactId>
-            <version>1.14</version>
+            <version>${batik.version}</version>
         </dependency>
 
         <!-- QR -->
@@ -187,7 +209,7 @@
         <dependency>
             <groupId>com.github.kenglxn.qrgen</groupId>
             <artifactId>javase</artifactId>
-            <version>3.0.1</version>
+            <version>${qrgen.version}</version>
         </dependency>
 
         <!-- H2 -->
@@ -208,7 +230,7 @@
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports</artifactId>
-            <version>6.16.0</version>
+            <version>${jasperreports.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.lowagie</groupId>
@@ -219,21 +241,21 @@
         <dependency>
             <groupId>com.lowagie</groupId>
             <artifactId>itext</artifactId>
-            <version>2.1.7</version>
+            <version>${itext.version}</version>
         </dependency>
 
         <!-- EventBus -->
         <dependency>
             <groupId>net.engio</groupId>
             <artifactId>mbassador</artifactId>
-            <version>1.3.1</version>
+            <version>${mbassador.version}</version>
         </dependency>
 
         <!-- java-image-scaling -->
         <dependency>
             <groupId>com.mortennobel</groupId>
             <artifactId>java-image-scaling</artifactId>
-            <version>0.8.6</version>
+            <version>${java.image.scaling.version}</version>
         </dependency>
 
         <!-- Apache Tica pro detekci typů souborů -->
@@ -255,17 +277,18 @@
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
-            <version>8.5.23</version>
+            <version>${tomcat.jdbc.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.18.0</version>
+            <version>${commons.io.version}</version>
         </dependency>
 
         <!-- Testy -->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
@@ -286,7 +309,7 @@
         <dependency>
             <groupId>com.google.jimfs</groupId>
             <artifactId>jimfs</artifactId>
-            <version>1.3.0</version>
+            <version>${jimfs.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -294,7 +317,7 @@
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-netty</artifactId>
-            <version>5.14.0</version>
+            <version>${mockserver.netty.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
