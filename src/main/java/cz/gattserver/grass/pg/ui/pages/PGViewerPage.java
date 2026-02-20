@@ -346,7 +346,8 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
                 itemLayout.add(new Breakline());
 
                 String str = item.getName();
-                if (str.length() > 20) str = str.substring(0, 13) + "..." + str.substring(str.length() - 13);
+                int cutPos = 10;
+                if (str.length() > 20) str = str.substring(0, cutPos) + "..." + str.substring(str.length() - cutPos);
                 Span label = new Span(str);
                 label.getStyle().set("font-size", "12px");
                 itemLayout.add(label);

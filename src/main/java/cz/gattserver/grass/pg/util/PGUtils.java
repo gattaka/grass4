@@ -13,14 +13,12 @@ import com.drew.metadata.exif.GpsDirectory;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.common.slideshow.ExifInfoTO;
-import cz.gattserver.common.slideshow.MediaType;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
-import net.coobird.thumbnailator.Thumbnails;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.JPEGTranscoder;
+import org.imgscalr.Scalr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -86,10 +84,7 @@ public class PGUtils {
     }
 
     public static void resizeVideoPreviewImage(BufferedImage inputImage, Path destinationFile) throws IOException {
-        try (OutputStream os = Files.newOutputStream(destinationFile)) {
-            Thumbnails.of(inputImage).outputFormat("jpg").size(PGUtils.MINIATURE_SIZE, PGUtils.MINIATURE_SIZE)
-                    .toOutputStream(os);
-        }
+        resize(inputImage, destinationFile, PGUtils.MINIATURE_SIZE, PGUtils.MINIATURE_SIZE, null, "png");
     }
 
     public static ExifInfoTO readMetadata(Path inputFile) {
@@ -133,15 +128,9 @@ public class PGUtils {
 
     public static void resizeImage(Path inputFile, Path destinationFile, int maxWidth, int maxHeight)
             throws IOException {
-        String filenameLow = inputFile.getFileName().toString().toLowerCase();
+        String extension = getExtension(inputFile).toLowerCase();
         try (OutputStream os = Files.newOutputStream(destinationFile)) {
-            if (filenameLow.endsWith(".gif")) {
-                try (InputStream is = Files.newInputStream(inputFile)) {
-                    GifImage gifImage = GifDecoder.read(is);
-                    BufferedImage image = gifImage.getFrame(0);
-                    Thumbnails.of(image).outputFormat("gif").size(maxWidth, maxHeight).toOutputStream(os);
-                }
-            } else if (filenameLow.endsWith(".svg")) {
+            if (extension.equals("svg")) {
                 try (InputStream is = Files.newInputStream(inputFile)) {
                     // https://xmlgraphics.apache.org/batik/using/transcoder.html
                     // https://stackoverflow.com/questions/42340833/convert-svg-image-to-png-in-java-by-servlet
@@ -158,7 +147,7 @@ public class PGUtils {
             } else {
                 ExifInfoTO exifInfoTO = readMetadata(inputFile);
 
-                double angle = 0;
+                Scalr.Rotation rotation = null;
                 if (exifInfoTO.getOrinetation() != null) switch (exifInfoTO.getOrinetation()) {
                     case 1:
                         // 0 degrees: the correct orientation, no adjustment
@@ -172,35 +161,53 @@ public class PGUtils {
                     case 4:
                         // 180 degrees, mirrored: image has been flipped
                         // back-to-front and is upside down.
-                        angle = 180;
+                        rotation = Scalr.Rotation.CW_180;
                         break;
                     case 5:
                         // 90 degrees: image has been flipped back-to-front
                         // and is on its side.
                     case 6:
                         // 90 degrees, mirrored: image is on its side.
-                        angle = 90;
+                        rotation = Scalr.Rotation.CW_90;
                         break;
                     case 7:
                         // 270 degrees: image has been flipped back-to-front and
                         // is on its far side.
                     case 8:
                         // 270 degrees, mirrored: image is on its far side.
-                        angle = 270;
+                        rotation = Scalr.Rotation.CW_270;
                         break;
                 }
 
+                // Read image — TwelveMonkeys plugins register automatically via ServiceLoader,
+                // so ImageIO transparently gains WebP/BMP/JPEG improvements.
                 try (InputStream is = Files.newInputStream(inputFile)) {
-                    Thumbnails.of(is).outputFormat("jpg").outputQuality(0.8)
-                            // .useExifOrientation(true) // není spolehlivé
-                            // aby se nepletlo s ručním otáčením
-                            .useExifOrientation(false).rotate(angle).size(maxWidth, maxHeight).toOutputStream(os);
+                    BufferedImage image = ImageIO.read(is);
+                    resize(image, destinationFile, maxWidth, maxHeight, rotation, extension);
                 }
                 if (exifInfoTO.getDateMillis() != null)
                     Files.setLastModifiedTime(destinationFile, FileTime.fromMillis(exifInfoTO.getDateMillis()));
             }
         }
+    }
 
+    private static void resize(BufferedImage image, Path destinationFile, int maxWidth, int maxHeight,
+                               Scalr.Rotation rotation, String extension) throws IOException {
+        image = Scalr.resize(image, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.FIT_TO_WIDTH, maxWidth, maxHeight);
+        // If still taller than maxHeight after fitting width, re-fit to height
+        if (image.getHeight() > maxHeight)
+            image = Scalr.resize(image, Scalr.Method.ULTRA_QUALITY, Scalr.Mode.FIT_TO_HEIGHT, maxWidth, maxHeight);
+        if (rotation != null) image = Scalr.rotate(image, rotation);
+
+        // Normalize "jpg" → "jpeg" which ImageIO prefers
+        String writerFormat = extension;
+        if (extension.equals("jpg")) writerFormat = "jpeg";
+        if (extension.equals("webp")) writerFormat = "png";
+
+        try (OutputStream os = Files.newOutputStream(destinationFile)) {
+            boolean success = ImageIO.write(image, writerFormat, os);
+            if (!success) throw new IOException("Can't write image " + destinationFile.getFileName());
+        }
     }
 
     public static BufferedImage getImageFromFile(Path inputFile) throws IOException {
@@ -224,7 +231,7 @@ public class PGUtils {
     public static boolean isRasterImage(String file) {
         String fileToExt = file.toLowerCase();
         return fileToExt.endsWith(".jpg") || fileToExt.endsWith(".jpeg") || fileToExt.endsWith(".gif") ||
-                fileToExt.endsWith(".png") || fileToExt.endsWith(".bmp");
+                fileToExt.endsWith(".png") || fileToExt.endsWith(".bmp") || fileToExt.endsWith(".webp");
     }
 
     /**
@@ -246,7 +253,18 @@ public class PGUtils {
      * vektorového obrázku
      */
     public static boolean isVectorImage(Path file) {
-        return file.getFileName().toString().endsWith(".svg");
+        return file.getFileName().toString().toLowerCase().endsWith(".svg");
+    }
+
+    /**
+     * Zjistí dle přípony souboru, zda se jedná o WEBP obrázek
+     *
+     * @param file jméno souboru s příponou
+     * @return <code>true</code>, pokud se dle přípony jedná o soubor
+     * WEBP obrázku
+     */
+    public static boolean isWebpImage(Path file) {
+        return file.getFileName().toString().toLowerCase().endsWith(".webp");
     }
 
     /**

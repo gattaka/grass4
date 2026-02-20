@@ -7,9 +7,6 @@ import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
-import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepositoryCustom;
-import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
-import cz.gattserver.grass.core.model.repositories.ContentTagRepository;
 import cz.gattserver.grass.modules.PGModule;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.impl.*;
@@ -173,18 +170,14 @@ public class PGServiceImpl implements PGService {
                 eventBus.publish(new PGProcessProgressEvent("Zpracování miniatur " + progress + "/" + total));
                 progress++;
 
-                boolean videoExt = PGUtils.isVideo(file);
-                boolean rasterImageExt = PGUtils.isRasterImage(file);
-                boolean vectorImageExt = PGUtils.isVectorImage(file);
-
-                if (videoExt) {
+                if (PGUtils.isVideo(file)) {
                     Path outputFile = prevDirFile.resolve(file.getFileName().toString() + ".png");
                     if (!Files.exists(outputFile)) createVideoMinature(file, outputFile);
-                } else if (rasterImageExt) {
-                    Path outputFile = miniDirFile.resolve(file.getFileName().toString());
-                    if (!Files.exists(outputFile)) createImageMinature(file, outputFile);
-                } else if (vectorImageExt) {
+                } else if (PGUtils.isVectorImage(file) || PGUtils.isWebpImage(file)) {
                     Path outputFile = miniDirFile.resolve(file.getFileName().toString() + ".png");
+                    if (!Files.exists(outputFile)) createImageMinature(file, outputFile);
+                } else if (PGUtils.isRasterImage(file)) {
+                    Path outputFile = miniDirFile.resolve(file.getFileName().toString());
                     if (!Files.exists(outputFile)) createImageMinature(file, outputFile);
                 }
             }
@@ -215,8 +208,10 @@ public class PGServiceImpl implements PGService {
                 Path file = it.next();
                 Path outputFile = slideshowDirFile.resolve(file.getFileName().toString());
 
-                if (Files.exists(outputFile) || Files.isDirectory(file) || !PGUtils.isRasterImage(file) ||
-                        PGUtils.isVectorImage(file)) continue;
+                if (Files.exists(outputFile) || Files.isDirectory(file) || PGUtils.isVectorImage(file) ||
+                        !PGUtils.isRasterImage(file)) continue;
+
+                if (PGUtils.isWebpImage(outputFile)) outputFile = slideshowDirFile.resolve(file.getFileName() + ".png");
 
                 eventBus.publish(new PGProcessProgressEvent("Zpracování slideshow " + progress + "/" + total));
                 progress++;
@@ -701,6 +696,14 @@ public class PGServiceImpl implements PGService {
                                 itemTO.setName(fileName.substring(0, fileName.length() - 4));
                                 itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + fileName);
                                 itemTO.setSlideshowPath(itemTO.getName());
+                                itemTO.setFullPath(itemTO.getName());
+                            } else if (fileName.endsWith(".webp.png")) {
+                                // U WEBP je potřeba uříznout .png příponu, protože
+                                // originál je WEBP, od kterého se miniatury a slideshow
+                                // musely převádět na PNG
+                                itemTO.setName(fileName.substring(0, fileName.length() - 4));
+                                itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + fileName);
+                                itemTO.setSlideshowPath(configuration.getSlideshowDir() + "/" + fileName);
                                 itemTO.setFullPath(itemTO.getName());
                             } else if (!Files.exists(slideshowDir.resolve(fileName))) {
                                 // možná byl tak malý, že nebylo potřeba vytvářet

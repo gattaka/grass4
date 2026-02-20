@@ -18,6 +18,7 @@ import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.ui.util.ImageComparator;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.hw.interfaces.*;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
