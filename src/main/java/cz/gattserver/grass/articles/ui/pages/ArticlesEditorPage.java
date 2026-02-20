@@ -258,18 +258,18 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
             for (EditorButtonResourcesTO resourceBundle : resourcesBundles) {
                 String js = createTextareaGetJS() + createTextareaGetSelectionJS() + "$0.$server.handleSelection(\"" +
-                        resourceBundle.getPrefix() + "\", \"" + resourceBundle.getSuffix() + "\", start, finish)";
+                        resourceBundle.prefix() + "\", \"" + resourceBundle.suffix() + "\", start, finish)";
                 ComponentEventListener<ClickEvent<Button>> clickListener =
                         event -> UI.getCurrent().getPage().executeJs(js, getElement());
 
                 Button btn;
-                if (resourceBundle.getImagePath() != null) {
-                    btn = new Button(resourceBundle.getDescription(),
-                            new Image(resourceBundle.getImagePath(), resourceBundle.getDescription()), clickListener);
-                    btn.setTooltipText(resourceBundle.getTag());
+                if (resourceBundle.imagePath() != null) {
+                    btn = new Button(resourceBundle.description(),
+                            new Image(resourceBundle.imagePath(), resourceBundle.description()), clickListener);
+                    btn.setTooltipText(resourceBundle.tag());
                 } else {
-                    btn = new Button(resourceBundle.getDescription(), clickListener);
-                    btn.getElement().setProperty("title", resourceBundle.getTag());
+                    btn = new Button(resourceBundle.description(), clickListener);
+                    btn.getElement().setProperty("title", resourceBundle.tag());
                 }
                 familyToolsLayout.add(btn);
             }

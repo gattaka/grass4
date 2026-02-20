@@ -12,11 +12,11 @@ public class MonospacePluginTest {
 		assertEquals("MONSPC", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[MONSPC]", to.getPrefix());
-		assertEquals("[/MONSPC]", to.getSuffix());
-		assertEquals("MONSPC", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[MONSPC]", to.prefix());
+		assertEquals("[/MONSPC]", to.suffix());
+		assertEquals("MONSPC", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

@@ -13,11 +13,11 @@ public class RightAlignPluginTest {
 		assertEquals("ALGNRT", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractAlignParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[ALGNRT]", to.getPrefix());
-		assertEquals("[/ALGNRT]", to.getSuffix());
-		assertEquals("ALGNRT", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[ALGNRT]", to.prefix());
+		assertEquals("[/ALGNRT]", to.suffix());
+		assertEquals("ALGNRT", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

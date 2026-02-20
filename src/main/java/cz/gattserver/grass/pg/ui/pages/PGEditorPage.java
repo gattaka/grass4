@@ -396,7 +396,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     @Handler
     protected void onProcessProgress(PGProcessProgressEvent event) {
-        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.getStepDescription()));
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.getDescription()));
     }
 
     @Handler
@@ -411,7 +411,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     private void onSaveResult(PGProcessResultEvent event) {
         Long id = event.getGalleryId();
-        if (event.isSuccess() && id != null) {
+        if (event.success() && id != null) {
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
@@ -424,7 +424,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     }
 
     private void onModifyResult(PGProcessResultEvent event) {
-        if (event.isSuccess()) {
+        if (event.success()) {
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();

@@ -29,7 +29,7 @@ public class MockEventsHandler {
 	public void onProgress(MockProcessProgressEvent event) {
 		state = 2;
 		currentStep = currentStep + 1;
-		currentStepDesc = event.getStepDescription();
+		currentStepDesc = event.getDescription();
 		future.complete(this);
 	}
 

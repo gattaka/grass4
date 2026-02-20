@@ -34,12 +34,12 @@ public class FMZipProcessResultEvent implements ResultEvent {
 	}
 
 	@Override
-	public boolean isSuccess() {
+	public boolean success() {
 		return success;
 	}
 
 	@Override
-	public String getResultDetails() {
+	public String resultDetails() {
 		return resultDetails;
 	}
 

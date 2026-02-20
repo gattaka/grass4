@@ -3,9 +3,6 @@ package cz.gattserver.grass.articles.editor.parser.interfaces;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * Builder pro immutable {@link EditorButtonResourcesTO}
  *
@@ -13,10 +10,8 @@ import org.slf4j.LoggerFactory;
  */
 public class EditorButtonResourcesTOBuilder {
 
-    private Logger logger = LoggerFactory.getLogger(this.getClass());
-
-    private String tag;
-    private String tagFamily;
+    private final String tag;
+    private final String tagFamily;
     private String description;
     private String prefix;
     private String suffix;

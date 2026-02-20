@@ -13,11 +13,11 @@ public class CrossoutPluginTest {
         assertEquals("CROSS", plugin.getTag());
         assertTrue(plugin.getParser() instanceof AbstractStyleParser);
         EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-        assertNull(to.getDescription());
-        assertEquals("[CROSS]", to.getPrefix());
-        assertEquals("[/CROSS]", to.getSuffix());
-        assertEquals("CROSS", to.getTag());
-        assertEquals("Formátování", to.getTagFamily());
+        assertNull(to.description());
+        assertEquals("[CROSS]", to.prefix());
+        assertEquals("[/CROSS]", to.suffix());
+        assertEquals("CROSS", to.tag());
+        assertEquals("Formátování", to.tagFamily());
     }
 
 }

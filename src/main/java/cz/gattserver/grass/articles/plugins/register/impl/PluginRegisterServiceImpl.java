@@ -81,13 +81,13 @@ public class PluginRegisterServiceImpl implements PluginRegisterService {
 
 	private void addButtonToGroup(EditorButtonResourcesTO resources) {
 		// existuje skupina ?
-		if (editorCatalog.containsKey(resources.getTagFamily())) {
-			editorCatalog.get(resources.getTagFamily()).put(resources.getTag(), resources);
+		if (editorCatalog.containsKey(resources.tagFamily())) {
+			editorCatalog.get(resources.tagFamily()).put(resources.tag(), resources);
 		} else {
 			// založ
 			Map<String, EditorButtonResourcesTO> map = new HashMap<>();
-			map.put(resources.getTag(), resources);
-			editorCatalog.put(resources.getTagFamily(), map);
+			map.put(resources.tag(), resources);
+			editorCatalog.put(resources.tagFamily(), map);
 		}
 	}
 

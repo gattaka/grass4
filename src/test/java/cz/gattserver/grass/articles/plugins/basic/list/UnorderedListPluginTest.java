@@ -12,11 +12,11 @@ public class UnorderedListPluginTest {
 		assertEquals("OL", plugin.getTag());
 		assertEquals(ListParser.class, plugin.getParser().getClass());
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[OL]", to.getPrefix());
-		assertEquals("[/OL]", to.getSuffix());
-		assertEquals("OL", to.getTag());
-		assertEquals("HTML", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[OL]", to.prefix());
+		assertEquals("[/OL]", to.suffix());
+		assertEquals("OL", to.tag());
+		assertEquals("HTML", to.tagFamily());
 	}
 
 }

@@ -4,15 +4,14 @@ import cz.gattserver.grass.core.events.ProgressEvent;
 
 public class ArticlesProcessProgressEvent implements ProgressEvent {
 
-	private String description;
+    private final String description;
 
-	public ArticlesProcessProgressEvent(String description) {
-		this.description = description;
-	}
+    public ArticlesProcessProgressEvent(String description) {
+        this.description = description;
+    }
 
-	@Override
-	public String getStepDescription() {
-		return description;
-	}
+    public String getDescription() {
+        return description;
+    }
 
 }

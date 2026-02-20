@@ -154,8 +154,8 @@ public class PGResource {
 
             eventsHandler = future.get();
             PGProcessResultEvent event = eventsHandler.getResultAndDelete(operationId);
-            if (!event.isSuccess()) {
-                logger.info("/create chyba", event.getResultDetails());
+            if (!event.success()) {
+                logger.info("/create chyba", event.resultDetails());
                 return new ResponseEntity<>(event.getGalleryId(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
@@ -209,8 +209,8 @@ public class PGResource {
 
             eventsHandler = future.get();
             PGProcessResultEvent event = eventsHandler.getResultAndDelete(operationId);
-            if (!event.isSuccess()) {
-                logger.info("/create chyba", event.getResultDetails());
+            if (!event.success()) {
+                logger.info("/create chyba", event.resultDetails());
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
 

@@ -254,7 +254,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Handler
     protected void onProcessProgress(PGProcessProgressEvent event) {
-        final String desc = event.getStepDescription();
+        final String desc = event.getDescription();
         progressDialog.runInUI(() -> progressDialog.indicateProgress(desc));
     }
 
@@ -278,15 +278,15 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Handler
     protected void onProcessProgress(PGZipProcessProgressEvent event) {
-        final String val = event.getStepDescription();
+        final String val = event.getDescription();
         progressDialog.runInUI(() -> progressDialog.indicateProgress(val));
     }
 
     @Handler
     protected void onProcessResult(final PGZipProcessResultEvent event) {
-        final boolean success = event.isSuccess();
+        final boolean success = event.success();
         final Path result = event.getZipFile();
-        final String resultDetails = event.getResultDetails();
+        final String resultDetails = event.resultDetails();
         progressDialog.runInUI(() -> {
             if (progressDialog != null) progressDialog.close();
             if (success) {

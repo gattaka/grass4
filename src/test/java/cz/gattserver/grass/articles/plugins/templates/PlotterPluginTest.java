@@ -16,11 +16,11 @@ public class PlotterPluginTest {
 		assertEquals("PLOTTER", plugin.getTag());
 		assertEquals(PlotterParser.class, plugin.getParser().getClass());
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertEquals("Plotter", to.getDescription());
-		assertEquals("[PLOTTER]x*x;2;5;0;0[;width][;height]", to.getPrefix());
-		assertEquals("[/PLOTTER]", to.getSuffix());
-		assertEquals("PLOTTER", to.getTag());
-		assertEquals("Šablony", to.getTagFamily());
+		assertEquals("Plotter", to.description());
+		assertEquals("[PLOTTER]x*x;2;5;0;0[;width][;height]", to.prefix());
+		assertEquals("[/PLOTTER]", to.suffix());
+		assertEquals("PLOTTER", to.tag());
+		assertEquals("Šablony", to.tagFamily());
 	}
 
 }

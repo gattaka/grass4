@@ -12,11 +12,11 @@ public class StrongPluginTest {
 		assertEquals("STR", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[STR]", to.getPrefix());
-		assertEquals("[/STR]", to.getSuffix());
-		assertEquals("STR", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[STR]", to.prefix());
+		assertEquals("[/STR]", to.suffix());
+		assertEquals("STR", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

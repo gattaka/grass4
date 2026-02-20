@@ -25,8 +25,8 @@ public class PGZipProcessMockEventsHandler {
 	public void onResult(PGZipProcessResultEvent event) {
 		synchronized (this) {
 			zipFile = event.getZipFile();
-			resultDetails = event.getResultDetails();
-			success = event.isSuccess();
+			resultDetails = event.resultDetails();
+			success = event.success();
 			resultException = event.getResultException();
 		}
 		future.complete(this);

@@ -12,11 +12,11 @@ public class OrderedListPluginTest {
 		assertEquals("UL", plugin.getTag());
 		assertEquals(ListParser.class, plugin.getParser().getClass());
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[UL]", to.getPrefix());
-		assertEquals("[/UL]", to.getSuffix());
-		assertEquals("UL", to.getTag());
-		assertEquals("HTML", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[UL]", to.prefix());
+		assertEquals("[/UL]", to.suffix());
+		assertEquals("UL", to.tag());
+		assertEquals("HTML", to.tagFamily());
 	}
 
 }

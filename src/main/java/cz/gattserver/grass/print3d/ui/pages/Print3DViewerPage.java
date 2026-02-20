@@ -321,7 +321,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
     @Handler
     protected void onProcessProgress(Print3dZipProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getStepDescription()));
+        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getDescription()));
     }
 
     @Handler
@@ -329,7 +329,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         progressIndicatorWindow.runInUI(() -> {
             if (progressIndicatorWindow != null) progressIndicatorWindow.close();
 
-            if (event.isSuccess()) {
+            if (event.success()) {
                 WebDialog win = new WebDialog("Komprese");
                 win.addDialogCloseActionListener(e -> print3dService.deleteZipFile(event.getZipFile()));
 
@@ -350,7 +350,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
                 win.open();
             } else {
-                UIUtils.showWarning(event.getResultDetails());
+                UIUtils.showWarning(event.resultDetails());
             }
         });
         eventBus.unsubscribe(Print3DViewerPage.this);

@@ -12,12 +12,12 @@ public class SubPluginTest {
 		assertEquals("SUB", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertEquals("Sub", to.getDescription());
-		assertNull(to.getImagePath());
-		assertEquals("[SUB]", to.getPrefix());
-		assertEquals("[/SUB]", to.getSuffix());
-		assertEquals("SUB", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertEquals("Sub", to.description());
+		assertNull(to.imagePath());
+		assertEquals("[SUB]", to.prefix());
+		assertEquals("[/SUB]", to.suffix());
+		assertEquals("SUB", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

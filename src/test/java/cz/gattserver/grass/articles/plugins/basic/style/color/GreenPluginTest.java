@@ -14,12 +14,12 @@ public class GreenPluginTest {
 		assertEquals("GRN", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertEquals("Zeleně", to.getDescription());
-		assertNull(to.getImagePath());
-		assertEquals("[GRN]", to.getPrefix());
-		assertEquals("[/GRN]", to.getSuffix());
-		assertEquals("GRN", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertEquals("Zeleně", to.description());
+		assertNull(to.imagePath());
+		assertEquals("[GRN]", to.prefix());
+		assertEquals("[/GRN]", to.suffix());
+		assertEquals("GRN", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

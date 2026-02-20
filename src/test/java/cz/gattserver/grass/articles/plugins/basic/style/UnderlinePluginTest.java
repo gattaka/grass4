@@ -13,11 +13,11 @@ public class UnderlinePluginTest {
         assertEquals("UND", plugin.getTag());
         assertTrue(plugin.getParser() instanceof AbstractStyleParser);
         EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-        assertNull(to.getDescription());
-        assertEquals("[UND]", to.getPrefix());
-        assertEquals("[/UND]", to.getSuffix());
-        assertEquals("UND", to.getTag());
-        assertEquals("Formátování", to.getTagFamily());
+        assertNull(to.description());
+        assertEquals("[UND]", to.prefix());
+        assertEquals("[/UND]", to.suffix());
+        assertEquals("UND", to.tag());
+        assertEquals("Formátování", to.tagFamily());
     }
 
 }

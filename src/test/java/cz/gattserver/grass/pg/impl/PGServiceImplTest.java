@@ -212,7 +212,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
 
         eventBus.unsubscribe(eventsHandler);
@@ -305,7 +305,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
         long galleryId = event.getGalleryId();
 
@@ -338,7 +338,7 @@ public class PGServiceImplTest extends DBCleanTest {
         mock = future.get();
         event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
 
         PGConfiguration conf = new PGConfiguration();
         configurationService.loadConfiguration(conf);
@@ -430,7 +430,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
         long galleryId = event.getGalleryId();
 
@@ -462,7 +462,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
         long galleryId = event.getGalleryId();
 
@@ -552,7 +552,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
         long galleryId = event.getGalleryId();
 
@@ -645,7 +645,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
         long galleryId = event.getGalleryId();
 
@@ -953,7 +953,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
 
         eventBus.unsubscribe(eventsHandler);
@@ -1017,7 +1017,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
 
         eventBus.unsubscribe(eventsHandler);
@@ -1052,7 +1052,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGEventsHandler mock = future.get();
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
-        assertTrue(event.isSuccess());
+        assertTrue(event.success());
         assertNotNull(event.getGalleryId());
 
         eventBus.unsubscribe(eventsHandler);

@@ -14,12 +14,12 @@ public class BluePluginTest {
 		assertEquals("BLU", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertEquals("Modře", to.getDescription());
-		assertNull(to.getImagePath());
-		assertEquals("[BLU]", to.getPrefix());
-		assertEquals("[/BLU]", to.getSuffix());
-		assertEquals("BLU", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertEquals("Modře", to.description());
+		assertNull(to.imagePath());
+		assertEquals("[BLU]", to.prefix());
+		assertEquals("[/BLU]", to.suffix());
+		assertEquals("BLU", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

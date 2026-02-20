@@ -12,12 +12,12 @@ public class SupPluginTest {
 		assertEquals("SUP", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertEquals("Sup", to.getDescription());
-		assertNull(to.getImagePath());
-		assertEquals("[SUP]", to.getPrefix());
-		assertEquals("[/SUP]", to.getSuffix());
-		assertEquals("SUP", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertEquals("Sup", to.description());
+		assertNull(to.imagePath());
+		assertEquals("[SUP]", to.prefix());
+		assertEquals("[/SUP]", to.suffix());
+		assertEquals("SUP", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

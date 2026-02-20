@@ -14,12 +14,12 @@ public class RedPluginTest {
 		assertEquals("RED", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertEquals("Červeně", to.getDescription());
-		assertNull(to.getImagePath());
-		assertEquals("[RED]", to.getPrefix());
-		assertEquals("[/RED]", to.getSuffix());
-		assertEquals("RED", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertEquals("Červeně", to.description());
+		assertNull(to.imagePath());
+		assertEquals("[RED]", to.prefix());
+		assertEquals("[/RED]", to.suffix());
+		assertEquals("RED", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

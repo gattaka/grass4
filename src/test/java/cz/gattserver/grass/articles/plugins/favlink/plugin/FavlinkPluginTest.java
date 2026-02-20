@@ -16,11 +16,11 @@ public class FavlinkPluginTest  {
 		assertEquals("A", plugin.getTag());
 		assertEquals(FavlinkParser.class, plugin.getParser().getClass());
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertEquals("Odkaz", to.getDescription());
-		assertEquals("[A]", to.getPrefix());
-		assertEquals("[/A]", to.getSuffix());
-		assertEquals("A", to.getTag());
-		assertEquals("HTML", to.getTagFamily());
+		assertEquals("Odkaz", to.description());
+		assertEquals("[A]", to.prefix());
+		assertEquals("[/A]", to.suffix());
+		assertEquals("A", to.tag());
+		assertEquals("HTML", to.tagFamily());
 	}
 
 }

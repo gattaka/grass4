@@ -14,11 +14,11 @@ public class HTablePluginTest {
 		assertEquals("HTABLE", plugin.getTag());
 		assertEquals(TableParser.class, plugin.getParser().getClass());
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[HTABLE]", to.getPrefix());
-		assertEquals("[/HTABLE]", to.getSuffix());
-		assertEquals("HTABLE", to.getTag());
-		assertEquals("HTML", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[HTABLE]", to.prefix());
+		assertEquals("[/HTABLE]", to.suffix());
+		assertEquals("HTABLE", to.tag());
+		assertEquals("HTML", to.tagFamily());
 	}
 
 }

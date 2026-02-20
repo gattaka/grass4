@@ -12,11 +12,11 @@ public class ItalicPluginTest {
 		assertEquals("EM", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractStyleParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[EM]", to.getPrefix());
-		assertEquals("[/EM]", to.getSuffix());
-		assertEquals("EM", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[EM]", to.prefix());
+		assertEquals("[/EM]", to.suffix());
+		assertEquals("EM", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

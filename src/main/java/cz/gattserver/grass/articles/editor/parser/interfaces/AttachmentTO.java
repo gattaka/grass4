@@ -1,10 +1,15 @@
 package cz.gattserver.grass.articles.editor.parser.interfaces;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
 public class AttachmentTO implements Serializable {
 
     @Serial
@@ -17,51 +22,4 @@ public class AttachmentTO implements Serializable {
     private Path path;
     private boolean draft;
 
-    public Path getPath() {
-        return path;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getSize() {
-        return size;
-    }
-
-    public void setSize(String size) {
-        this.size = size;
-    }
-
-    public Long getNumericSize() {
-        return numericSize;
-    }
-
-    public void setNumericSize(Long numericSize) {
-        this.numericSize = numericSize;
-    }
-
-    public LocalDateTime getLastModified() {
-        return lastModified;
-    }
-
-    public void setLastModified(LocalDateTime lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    public void setPath(Path path) {
-        this.path = path;
-    }
-
-    public boolean isDraft() {
-        return draft;
-    }
-
-    public void setDraft(boolean draft) {
-        this.draft = draft;
-    }
 }

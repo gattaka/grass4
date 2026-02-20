@@ -252,15 +252,15 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
     @Handler
     protected void onProcessProgress(PGProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getStepDescription()));
+        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getDescription()));
     }
 
     @Handler
     protected void onProcessResult(final PGProcessResultEvent event) {
         progressIndicatorWindow.runInUI(() -> {
             if (progressIndicatorWindow != null) progressIndicatorWindow.close();
-            if (event.isSuccess()) new InfoDialog("Přegenerování dopladlo úspěšně").open();
-            else new WarnDialog("Při přegenerování došlo k chybám: ", event.getResultDetails()).open();
+            if (event.success()) new InfoDialog("Přegenerování dopladlo úspěšně").open();
+            else new WarnDialog("Při přegenerování došlo k chybám: ", event.resultDetails()).open();
         });
         eventBus.unsubscribe(PGSettingsPageFragmentFactory.this);
     }

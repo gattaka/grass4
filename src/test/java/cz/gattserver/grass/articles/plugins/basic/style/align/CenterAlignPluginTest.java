@@ -13,11 +13,11 @@ public class CenterAlignPluginTest {
 		assertEquals("ALGNCT", plugin.getTag());
 		assertTrue(plugin.getParser() instanceof AbstractAlignParser);
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[ALGNCT]", to.getPrefix());
-		assertEquals("[/ALGNCT]", to.getSuffix());
-		assertEquals("ALGNCT", to.getTag());
-		assertEquals("Formátování", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[ALGNCT]", to.prefix());
+		assertEquals("[/ALGNCT]", to.suffix());
+		assertEquals("ALGNCT", to.tag());
+		assertEquals("Formátování", to.tagFamily());
 	}
 
 }

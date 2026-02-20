@@ -136,7 +136,7 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
 
     @Handler
     protected void onProcessProgress(ArticlesProcessProgressEvent event) {
-        progressIndicatorDialog.runInUI(() -> progressIndicatorDialog.indicateProgress(event.getStepDescription()));
+        progressIndicatorDialog.runInUI(() -> progressIndicatorDialog.indicateProgress(event.getDescription()));
     }
 
     @Handler
@@ -145,7 +145,7 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
             if (progressIndicatorDialog != null) progressIndicatorDialog.close();
             reprocessButton.setEnabled(true);
 
-            if (event.isSuccess()) {
+            if (event.success()) {
                 UIUtils.showInfo("Přegenerování článků proběhlo úspěšně");
             } else {
                 UIUtils.showWarning("Přegenerování článků se nezdařilo");

@@ -11,11 +11,11 @@ public class ImagePluginTest {
 		assertEquals("IMG", plugin.getTag());
 		assertEquals(ImageParser.class, plugin.getParser().getClass());
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[IMG]", to.getPrefix());
-		assertEquals("[/IMG]", to.getSuffix());
-		assertEquals("IMG", to.getTag());
-		assertEquals("HTML", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[IMG]", to.prefix());
+		assertEquals("[/IMG]", to.suffix());
+		assertEquals("IMG", to.tag());
+		assertEquals("HTML", to.tagFamily());
 	}
 
 }

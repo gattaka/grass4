@@ -454,7 +454,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
 
     @Handler
     protected void onProcessProgress(FMZipProcessProgressEvent event) {
-        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getStepDescription()));
+        progressIndicatorWindow.runInUI(() -> progressIndicatorWindow.indicateProgress(event.getDescription()));
     }
 
     @Handler
@@ -462,7 +462,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
         progressIndicatorWindow.runInUI(() -> {
             if (progressIndicatorWindow != null) progressIndicatorWindow.close();
 
-            if (event.isSuccess()) {
+            if (event.success()) {
                 WebDialog win = new WebDialog("Komprese");
                 win.addDialogCloseActionListener(e -> fmService.deleteZipFile(event.getZipFile()));
                 Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
@@ -482,7 +482,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
 
                 win.open();
             } else {
-                UIUtils.showWarning(event.getResultDetails());
+                UIUtils.showWarning(event.resultDetails());
             }
         });
         eventBus.unsubscribe(FMPage.this);

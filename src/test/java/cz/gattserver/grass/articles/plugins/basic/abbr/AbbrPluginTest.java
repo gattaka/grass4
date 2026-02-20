@@ -12,11 +12,11 @@ public class AbbrPluginTest {
 		assertEquals("ABBR", plugin.getTag());
 		assertEquals(AbbrParser.class, plugin.getParser().getClass());
 		EditorButtonResourcesTO to = plugin.getEditorButtonResources();
-		assertNull(to.getDescription());
-		assertEquals("[ABBR]", to.getPrefix());
-		assertEquals("[T][/T][/ABBR]", to.getSuffix());
-		assertEquals("ABBR", to.getTag());
-		assertEquals("HTML", to.getTagFamily());
+		assertNull(to.description());
+		assertEquals("[ABBR]", to.prefix());
+		assertEquals("[T][/T][/ABBR]", to.suffix());
+		assertEquals("ABBR", to.tag());
+		assertEquals("HTML", to.tagFamily());
 	}
 
 }
