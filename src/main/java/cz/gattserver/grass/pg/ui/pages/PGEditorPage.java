@@ -79,7 +79,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     private ProgressDialog progressDialog;
 
     private NodeOverviewTO node;
-    private PhotogalleryTO photogallery;
+    private PhotogalleryTO existingPhotogalleryTO;
 
     private TokenField photogalleryKeywords;
     private TextField photogalleryNameField;
@@ -161,20 +161,20 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             editMode = true;
-            photogallery = pgService.findPhotogalleryForDetail(identifier.getId(), currentUserInfoTO.getId(),
+            existingPhotogalleryTO = pgService.findPhotogalleryForDetail(identifier.getId(), currentUserInfoTO.getId(),
                     currentUserInfoTO.isAdmin());
 
-            if (photogallery == null) throw new GrassPageException(404);
+            if (existingPhotogalleryTO == null) throw new GrassPageException(404);
 
-            photogalleryNameField.setValue(photogallery.getName());
-            for (String tag : photogallery.getContentTags().stream().map(ContentTagTO::getName).toList())
+            photogalleryNameField.setValue(existingPhotogalleryTO.getName());
+            for (String tag : existingPhotogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList())
                 photogalleryKeywords.addToken(tag);
 
-            publicatedCheckBox.setValue(photogallery.isPublicated());
-            photogalleryDateField.setValue(photogallery.getCreationDate().toLocalDate());
+            publicatedCheckBox.setValue(existingPhotogalleryTO.isPublicated());
+            photogalleryDateField.setValue(existingPhotogalleryTO.getCreationDate().toLocalDate());
 
             // nemá oprávnění upravovat tento obsah
-            if (!photogallery.getAuthorName().equals(securityService.getCurrentUser().getName()) &&
+            if (!existingPhotogalleryTO.getAuthorName().equals(securityService.getCurrentUser().getName()) &&
                     !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
             logger.debug("Neznámá operace: '{}'", operationToken);
@@ -182,7 +182,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         }
 
         try {
-            galleryDir = editMode ? photogallery.getPhotogalleryPath() : pgService.createGalleryDir();
+            galleryDir = editMode ? existingPhotogalleryTO.getPhotogalleryPath() : pgService.createGalleryDir();
         } catch (IOException e) {
             throw new GrassPageException(500);
         }
@@ -328,7 +328,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         buttonLayout.add(componentFactory.createStornoButton(e -> {
             leaving = true;
-            if (editMode) returnToPhotogallery();
+            if (editMode) returnToPhotogallery(existingPhotogalleryTO.getId());
             else returnToNode();
         }, true));
     }
@@ -363,7 +363,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         LocalDateTime ldt =
                 photogalleryDateField.getValue() == null ? null : photogalleryDateField.getValue().atStartOfDay();
         if (editMode) {
-            pgService.modifyPhotogallery(UUID.randomUUID(), photogallery.getId(), payloadTO, ldt);
+            pgService.modifyPhotogallery(UUID.randomUUID(), existingPhotogalleryTO.getId(), payloadTO, ldt);
         } else {
             pgService.savePhotogallery(UUID.randomUUID(), payloadTO, node.getId(),
                     securityService.getCurrentUser().getId(), ldt);
@@ -373,9 +373,9 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     /**
      * Zavolá vrácení se na galerii
      */
-    private void returnToPhotogallery() {
+    private void returnToPhotogallery(Long galleryId) {
         UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(PGViewerPage.class,
-                URLIdentifierUtils.createURLIdentifier(photogallery.getId(), photogallery.getName())));
+                URLIdentifierUtils.createURLIdentifier(galleryId, photogalleryNameField.getValue())));
     }
 
     /**
@@ -415,7 +415,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
-            if (leaving) returnToPhotogallery();
+            if (leaving) returnToPhotogallery(event.getGalleryId());
             // odteď budeme editovat
             editMode = true;
         } else {
@@ -428,7 +428,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
-            if (leaving) returnToPhotogallery();
+            if (leaving) returnToPhotogallery(event.getGalleryId());
         } else {
             UIUtils.showWarning("Úprava galerie se nezdařila");
         }
