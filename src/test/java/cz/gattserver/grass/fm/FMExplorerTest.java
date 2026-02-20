@@ -364,7 +364,8 @@ public class FMExplorerTest {
         fmc.setRootDir(rootDir.toString());
         configurationService.saveConfiguration(fmc);
 
-        assertThrows(IllegalStateException.class, () -> new FMExplorer(fs), "Kořenový adresář FM modulu musí existovat");
+        assertThrows(IllegalStateException.class, () -> new FMExplorer(fs),
+                "Kořenový adresář FM modulu musí existovat");
     }
 
 }

@@ -1,19 +1,13 @@
 package cz.gattserver.grass.fm.events;
 
-
 import cz.gattserver.grass.core.events.StartEvent;
 
-public class FMZipProcessStartEvent implements StartEvent {
+import java.io.Serial;
+import java.io.Serializable;
 
-	private int steps;
+public record FMZipProcessStartEvent(int steps) implements StartEvent, Serializable {
 
-	public FMZipProcessStartEvent(int steps) {
-		this.steps = steps;
-	}
-
-	@Override
-	public int steps() {
-		return steps;
-	}
+    @Serial
+    private static final long serialVersionUID = 2123372385202553332L;
 
 }

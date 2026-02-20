@@ -1,7 +1,6 @@
 package cz.gattserver.grass.fm.web;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
@@ -9,7 +8,6 @@ import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.Grid.SelectionMode;
 import com.vaadin.flow.component.grid.GridVariant;
 import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
@@ -27,6 +25,7 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.CZAmountFormatter;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
+import cz.gattserver.common.vaadin.dialogs.DownloadDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
@@ -51,6 +50,7 @@ import net.glxn.qrgen.javase.QRCode;
 import org.apache.commons.lang3.StringUtils;
 
 import jakarta.annotation.Resource;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -168,6 +168,13 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
 
         layout.add(statusLabel);
 
+        Upload upload = getUpload();
+        layout.add(upload);
+
+        createButtonsLayout(layout);
+    }
+
+    private @NonNull Upload getUpload() {
         Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
             switch (explorer.saveFile(new FileInputStream(file), metadata.fileName())) {
                 case SUCCESS:
@@ -189,9 +196,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
             }
         }));
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        layout.add(upload);
-
-        createButtonsLayout(layout);
+        return upload;
     }
 
     private void createBreadcrumb(Div layout) {
@@ -451,26 +456,15 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     protected void onProcessResult(final FMZipProcessResultEvent event) {
         progressDialog.runInUI(() -> {
             if (progressDialog != null) progressDialog.close();
-
             if (event.success()) {
-                WebDialog win = new WebDialog("Komprese");
-                win.addDialogCloseActionListener(e -> fmService.deleteZipFile(event.getZipFile()));
-                Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
+                String fileName = "fm_" + System.currentTimeMillis() + ".zip";
+                new DownloadDialog("Komprese", () -> {
                     try {
-                        String fileName = "fm_" + System.currentTimeMillis() + ".zip";
-                        return new DownloadResponse(Files.newInputStream(event.getZipFile()), fileName, null, -1);
+                        return new DownloadResponse(Files.newInputStream(event.zipFile()), fileName, null, -1);
                     } catch (IOException e1) {
-                        e1.printStackTrace();
-                        return null;
+                        throw new RuntimeException(e1);
                     }
-                }), "Stáhnout ZIP souboru");
-                link.setTarget("_blank");
-                win.addComponent(link, Alignment.CENTER);
-
-                Button proceedButton = new Button("Zavřít", e -> win.close());
-                win.addComponent(proceedButton, Alignment.CENTER);
-
-                win.open();
+                }, d -> fmService.deleteZipFile(event.zipFile())).open();
             } else {
                 UIUtils.showWarning(event.resultDetails());
             }

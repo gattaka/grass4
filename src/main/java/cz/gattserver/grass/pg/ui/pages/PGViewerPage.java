@@ -42,6 +42,7 @@ import cz.gattserver.grass.core.ui.pages.template.ContentViewer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.pg.util.PGUtils;
 import net.engio.mbassy.listener.Handler;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.Serial;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -73,6 +73,8 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
     private final SecurityService securityService;
     private final CoreACLService coreACLService;
 
+    private final ComponentFactory componentFactory;
+
     private ProgressDialog progressDialog;
 
     private PhotogalleryTO photogalleryTO;
@@ -90,7 +92,6 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     private String galleryDir;
 
-    private ComponentFactory componentFactory;
 
     public PGViewerPage(PGService pgService, EventBus eventBus, SecurityService securityService,
                         CoreACLService coreACLService) {
@@ -207,27 +208,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         lowerPagingLayout.setPadding(false);
         layout.add(lowerPagingLayout);
 
-        UploadBuilder uploadBuilder = new UploadBuilder();
-        Upload upload = uploadBuilder.createUpload(set -> {
-            if (set.isEmpty()) return;
-            for (UploadBuilder.UploadFile file : set) {
-                try {
-                    pgService.uploadFile(new FileInputStream(file.getFile()), file.getMetadata().fileName(),
-                            galleryDir);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-            eventBus.subscribe(PGViewerPage.this);
-            progressDialog = new ProgressDialog();
-            PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(photogalleryTO.getName(), galleryDir,
-                    photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
-                    photogalleryTO.isPublicated(), false);
-            pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.getId(), payloadTO,
-                    photogalleryTO.getCreationDate());
-        }, () -> pgService.getItems(galleryDir).stream().map(PhotogalleryViewItemTO::getName)
-                .collect(Collectors.toSet()));
-        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        Upload upload = getUpload();
         if (coreACLService.canModifyContent(photogalleryTO, securityService.getCurrentUser())) layout.add(upload);
 
         Div statusRow = new Div();
@@ -241,6 +222,25 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         refreshGrid();
 
         return layout;
+    }
+
+    private @NonNull Upload getUpload() {
+        UploadBuilder uploadBuilder = new UploadBuilder();
+        Upload upload = uploadBuilder.createUpload(set -> {
+            if (set.isEmpty()) return;
+            for (UploadBuilder.UploadFile file : set) {
+                try {
+                    pgService.uploadFile(new FileInputStream(file.getFile()), file.getMetadata().fileName(),
+                            galleryDir);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            modifyPhotogallery();
+        }, () -> pgService.getItems(galleryDir).stream().map(PhotogalleryViewItemTO::getName)
+                .collect(Collectors.toSet()));
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        return upload;
     }
 
     @Handler
@@ -284,22 +284,19 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Handler
     protected void onProcessResult(final PGZipProcessResultEvent event) {
-        final boolean success = event.success();
-        final Path result = event.getZipFile();
-        final String resultDetails = event.resultDetails();
         progressDialog.runInUI(() -> {
             if (progressDialog != null) progressDialog.close();
-            if (success) {
+            if (event.success()) {
                 new DownloadDialog("Komprese", () -> {
                     try {
-                        return new DownloadResponse(Files.newInputStream(result),
+                        return new DownloadResponse(Files.newInputStream(event.zipFile()),
                                 photogalleryTO.getPhotogalleryPath() + ".zip", null, -1);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                }, e -> pgService.deleteZipFile(result)).open();
+                }, e -> pgService.deleteZipFile(event.zipFile())).open();
             } else {
-                UIUtils.showWarning(resultDetails);
+                UIUtils.showWarning(event.resultDetails());
             }
         });
         eventBus.unsubscribe(PGViewerPage.this);
@@ -368,14 +365,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
                 if (coreACLService.canModifyContent(photogalleryTO, securityService.getCurrentUser())) {
                     Div deleteButton = componentFactory.createInlineButton("Smazat", e -> new ConfirmDialog(e2 -> {
                         pgService.deleteFile(item.getName(), galleryDir);
-                        eventBus.subscribe(PGViewerPage.this);
-                        progressDialog = new ProgressDialog();
-                        PhotogalleryPayloadTO payloadTO =
-                                new PhotogalleryPayloadTO(photogalleryTO.getName(), galleryDir,
-                                        photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
-                                        photogalleryTO.isPublicated(), false);
-                        pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.getId(), payloadTO,
-                                photogalleryTO.getCreationDate());
+                        modifyPhotogallery();
                     }).open());
                     deleteButton.getStyle().set("color", "red");
                     buttonLayout.add(deleteButton);
@@ -393,6 +383,16 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         } catch (Exception e) {
             UIUtils.showWarning("Listování galerie selhalo");
         }
+    }
+
+    private void modifyPhotogallery() {
+        eventBus.subscribe(PGViewerPage.this);
+        progressDialog = new ProgressDialog();
+        PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(photogalleryTO.getName(), galleryDir,
+                photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
+                photogalleryTO.isPublicated(), false);
+        pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.getId(), payloadTO,
+                photogalleryTO.getCreationDate());
     }
 
     private void populatePaging(HorizontalLayout layout) {
@@ -467,18 +467,23 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         };
 
         Function<Integer, PhotogalleryViewItemTO> itemByIndexProvider = i -> currentPageItems.get(i - startIndex);
-
         String photogalleryBasePath = PGUtils.createPhotogalleryBaseURL(photogalleryTO);
+        ImageSlideshow<PhotogalleryViewItemTO> slideshow =
+                createSlideshow(photogalleryBasePath, pageUpdateListener, itemByIndexProvider);
+        add(slideshow);
+        slideshow.showItem(index);
+    }
+
+    private @NonNull ImageSlideshow<PhotogalleryViewItemTO> createSlideshow(String photogalleryBasePath,
+                                                                            Consumer<Integer> pageUpdateListener,
+                                                                            Function<Integer, PhotogalleryViewItemTO> itemByIndexProvider) {
         Function<PhotogalleryViewItemTO, String> itemSlideshowURLProvider =
                 item -> photogalleryBasePath + item.getSlideshowPath();
         Function<PhotogalleryViewItemTO, String> itemDetailURLProvider =
                 item -> photogalleryBasePath + item.getFullPath();
 
-        ImageSlideshow<PhotogalleryViewItemTO> slideshow =
-                new ImageSlideshow<>(imageCount, pageUpdateListener, itemByIndexProvider, itemSlideshowURLProvider,
-                        itemDetailURLProvider);
-        add(slideshow);
-        slideshow.showItem(index);
+        return new ImageSlideshow<>(imageCount, pageUpdateListener, itemByIndexProvider, itemSlideshowURLProvider,
+                itemDetailURLProvider);
     }
 
     protected void onDeleteOperation() {

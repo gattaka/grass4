@@ -1,19 +1,13 @@
 package cz.gattserver.grass.fm.events;
 
-
 import cz.gattserver.grass.core.events.ProgressEvent;
 
-public class FMZipProcessProgressEvent implements ProgressEvent {
+import java.io.Serial;
+import java.io.Serializable;
 
-	private String description;
+public record FMZipProcessProgressEvent(String description) implements ProgressEvent, Serializable {
 
-	public FMZipProcessProgressEvent(String description) {
-		this.description = description;
-	}
-
-	@Override
-	public String description() {
-		return description;
-	}
+    @Serial
+    private static final long serialVersionUID = 7316903584148999475L;
 
 }

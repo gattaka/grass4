@@ -24,10 +24,10 @@ public class PGZipProcessMockEventsHandler {
 	@Handler
 	public void onResult(PGZipProcessResultEvent event) {
 		synchronized (this) {
-			zipFile = event.getZipFile();
+			zipFile = event.zipFile();
 			resultDetails = event.resultDetails();
 			success = event.success();
-			resultException = event.getResultException();
+			resultException = event.resultException();
 		}
 		future.complete(this);
 	}

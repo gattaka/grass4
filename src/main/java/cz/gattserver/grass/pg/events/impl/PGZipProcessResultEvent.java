@@ -2,48 +2,22 @@ package cz.gattserver.grass.pg.events.impl;
 
 import cz.gattserver.grass.core.events.ResultEvent;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.nio.file.Path;
 
-public class PGZipProcessResultEvent implements ResultEvent {
+public record PGZipProcessResultEvent(boolean success, String resultDetails, Throwable resultException, Path zipFile)
+        implements ResultEvent, Serializable {
 
-	private boolean success;
-	private String resultDetails;
-	private Throwable resultException;
+    @Serial
+    private static final long serialVersionUID = -5648513526550150215L;
 
-	private Path zipFile;
+    public PGZipProcessResultEvent(Path zipFile) {
+        this(true, null, null, zipFile);
+    }
 
-	public PGZipProcessResultEvent(Path zipFile) {
-		this.success = true;
-		this.zipFile = zipFile;
-	}
-
-	public PGZipProcessResultEvent(boolean success, String resultDetails) {
-		this.success = success;
-		this.resultDetails = resultDetails;
-	}
-
-	public PGZipProcessResultEvent(String resultDetails, Throwable exception) {
-		this.success = false;
-		this.resultDetails = resultDetails;
-		this.resultException = exception;
-	}
-
-	public Path getZipFile() {
-		return zipFile;
-	}
-
-	@Override
-	public boolean success() {
-		return success;
-	}
-
-	@Override
-	public String resultDetails() {
-		return resultDetails;
-	}
-
-	public Throwable getResultException() {
-		return resultException;
-	}
+    public PGZipProcessResultEvent(String resultDetails, Throwable exception) {
+        this(false, resultDetails, exception, null);
+    }
 
 }

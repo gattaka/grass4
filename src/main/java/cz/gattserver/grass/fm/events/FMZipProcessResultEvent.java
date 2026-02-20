@@ -1,50 +1,22 @@
 package cz.gattserver.grass.fm.events;
 
-
 import cz.gattserver.grass.core.events.ResultEvent;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.nio.file.Path;
 
-public class FMZipProcessResultEvent implements ResultEvent {
+public record FMZipProcessResultEvent(boolean success, String resultDetails, Throwable resultException, Path zipFile)
+        implements ResultEvent, Serializable {
 
-	private boolean success;
-	private String resultDetails;
-	private Throwable resultException;
+    @Serial
+    private static final long serialVersionUID = 1723470771793883622L;
 
-	private Path zipFile;
+    public FMZipProcessResultEvent(Path zipFile) {
+        this(true, null, null, zipFile);
+    }
 
-	public FMZipProcessResultEvent(Path zipFile) {
-		this.success = true;
-		this.zipFile = zipFile;
-	}
-
-	public FMZipProcessResultEvent(boolean success, String resultDetails) {
-		this.success = success;
-		this.resultDetails = resultDetails;
-	}
-
-	public FMZipProcessResultEvent(String resultDetails, Throwable exception) {
-		this.success = false;
-		this.resultDetails = resultDetails;
-		this.resultException = exception;
-	}
-
-	public Path getZipFile() {
-		return zipFile;
-	}
-
-	@Override
-	public boolean success() {
-		return success;
-	}
-
-	@Override
-	public String resultDetails() {
-		return resultDetails;
-	}
-
-	public Throwable getResultException() {
-		return resultException;
-	}
-
+    public FMZipProcessResultEvent(String resultDetails, Throwable exception) {
+        this(false, resultDetails, exception, null);
+    }
 }

@@ -38,7 +38,7 @@ public class FMUtils {
         }
         LocalDateTime lastModified = null;
         try {
-            LocalDateTime.ofInstant(Files.getLastModifiedTime(path).toInstant(), ZoneId.systemDefault());
+            lastModified = LocalDateTime.ofInstant(Files.getLastModifiedTime(path).toInstant(), ZoneId.systemDefault());
         } catch (IOException e) {
             // zůstane null
         }
@@ -51,11 +51,6 @@ public class FMUtils {
             for (QuerySortOrder o : list) {
                 int direction = SortDirection.ASCENDING == o.getDirection() ? 1 : -1;
                 switch (o.getSorted()) {
-                    default:
-                    case "name":
-                        result = to1.name().compareTo(to2.name());
-                        if (result != 0) return result * direction;
-                        break;
                     case "size":
                         if (to1.numericSize() == null) {
                             if (to2.numericSize() == null) {
@@ -70,6 +65,11 @@ public class FMUtils {
                         break;
                     case "lastModified":
                         result = to1.lastModified().compareTo(to2.lastModified());
+                        if (result != 0) return result * direction;
+                        break;
+                    case "name":
+                        default:
+                        result = to1.name().compareTo(to2.name());
                         if (result != 0) return result * direction;
                         break;
                 }
