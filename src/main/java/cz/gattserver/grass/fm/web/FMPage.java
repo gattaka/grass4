@@ -218,8 +218,8 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
         layout.add(grid);
 
         grid.addColumn(new IconRenderer<>(to -> {
-            Image img = to.directory() ? ImageIcon.FOLDER_16_ICON.createImage() :
-                    ImageIcon.DOCUMENT_16_ICON.createImage();
+            Image img =
+                    to.directory() ? ImageIcon.FOLDER_16_ICON.createImage() : ImageIcon.DOCUMENT_16_ICON.createImage();
             img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
             return img;
         }, to -> "")).setFlexGrow(0).setWidth("36px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
@@ -280,7 +280,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
             });
         })).setHeader("QR").setTextAlign(ColumnTextAlign.CENTER).setWidth("45px").setFlexGrow(0);
 
-        grid.addColumn(new LocalDateTimeRenderer<>(FMItemTO::lastModified, "d.M.yyyy HH:mm")).setHeader("Upraveno")
+        grid.addColumn(new LocalDateTimeRenderer<>(FMItemTO::lastModified, "d. M. yyyy HH:mm")).setHeader("Upraveno")
                 .setAutoWidth(true).setTextAlign(ColumnTextAlign.END).setSortProperty("lastModified");
 
         grid.addSelectionListener(e -> {
@@ -340,7 +340,8 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
         buttonsLayout.add(componentFactory.createGridSetButton("Otevřít", VaadinIcon.FOLDER_OPEN.create(),
                 items -> handleGotoDirFromCurrentDirAction(items.iterator().next()), grid,
                 items -> items.size() == 1 && items.iterator().next().directory()));
-        buttonsLayout.add(componentFactory.createEditGridButton(this::handleRenameAction, grid));
+        buttonsLayout.add(componentFactory.createGridSingleButton("Přejmenovat", VaadinIcon.PENCIL.create(),
+                this::handleRenameAction, grid));
         buttonsLayout.add(componentFactory.createDeleteGridSetButton(this::handleDeleteAction, grid));
 
         layout.add(buttonsLayout);
@@ -479,6 +480,7 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
-        if (fmSection.isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
+        if (!fmSection.isVisibleForRoles(securityService.getCurrentUser().getRoles()))
+            throw new GrassPageException(403);
     }
 }
