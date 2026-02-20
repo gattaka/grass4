@@ -33,6 +33,9 @@
             -fs-pdf-font-embed: embed;
             -fs-pdf-font-encoding: Identity-H;
         }
+        body {
+            height: 100vh;
+        }
         h1, div#author {
             font-family: DejaVu;
         }
@@ -45,7 +48,7 @@
         div#author {
             font-style: italic;
         }
-        div#text {
+        div.text {
             margin-top: 15px;
             font-family: DejaVuMono;
             font-size: 13px;
@@ -56,6 +59,21 @@
 <body>
 <h1 th:text="${name}">Mosty</h1>
 <div id="author" th:text="${author}">Lenka Filipová & Karel Zich</div>
-<div id="text" th:text="${text}">text</div>
+<th:block th:if="${columnsCount == 2}">
+    <table style="width: 100%;">
+        <tr>
+            <td style="width: 50%; vertical-align: top; padding-right: 10px;">
+                <div class="text" th:text="${textCol1}"></div>
+            </td>
+            <td style="width: 50%; vertical-align: top; padding-left: 10px;">
+                <div class="text" th:text="${textCol2}"></div>
+            </td>
+        </tr>
+    </table>
+</th:block>
+
+<th:block th:if="${columnsCount == 1}">
+    <div class="text" th:text="${text}"></div>
+</th:block>
 </body>
 </html>
