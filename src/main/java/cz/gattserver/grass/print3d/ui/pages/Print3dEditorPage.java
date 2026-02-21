@@ -147,11 +147,11 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
             if (project == null) throw new GrassPageException(404);
 
-            nameField.setValue(project.getContentNode().getName());
-            for (ContentTagTO tagDTO : project.getContentNode().getContentTags())
+            nameField.setValue(project.getContentNode().name());
+            for (ContentTagTO tagDTO : project.getContentNode().contentTags())
                 keywords.addToken(tagDTO.getName());
 
-            publicatedCheckBox.setValue(project.getContentNode().isPublicated());
+            publicatedCheckBox.setValue(project.getContentNode().publicated());
 
             // nemá oprávnění upravovat tento obsah
             if (!project.getContentNode().getAuthor().getName().equals(securityService.getCurrentUser().getName()) &&
@@ -327,7 +327,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
      */
     private void returnToProject() {
         UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(Print3DViewerPage.class,
-                URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
+                URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().name())));
     }
 
     /**

@@ -33,7 +33,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
 
     @Override
     public String getPageTitle() {
-        return article.getContentNode().getName();
+        return article.getContentNode().name();
     }
 
     public ArticlesViewer(ArticleService articleFacade, SecurityService securityService, ArticleService articleService) {
@@ -57,7 +57,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
             UI.getCurrent().navigate(MainView.class);
         }
 
-        if (!article.getContentNode().isPublicated() && !securityService.getCurrentUser().isAdmin() &&
+        if (!article.getContentNode().publicated() && !securityService.getCurrentUser().isAdmin() &&
                 !article.getContentNode().getAuthor().equals(securityService.getCurrentUser()))
             throw new GrassPageException(403);
 
@@ -75,7 +75,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         ContentNodeTO contentNodeTO = article.getContentNode();
         add(new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(), e -> UI.getCurrent()
                 .navigate(ArticlesEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(contentNodeTO.getName(), ArticlesViewer.class, parameter)));
+                new RouterLink(contentNodeTO.name(), ArticlesViewer.class, parameter)));
 
         String jsInitDivId = "grass-js-init-div";
         Div jsInitDiv = new Div() {

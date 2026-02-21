@@ -80,24 +80,24 @@ public class ContentViewer extends Div {
 
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm:ss");
 
-        contentNameLabel = new H2(this.contentNodeTO.getName());
-        contentAuthorNameLabel = new Span(this.contentNodeTO.getAuthorName());
-        contentCreationDateNameLabel = new HtmlSpan(this.contentNodeTO.getCreationDate() == null ? "" :
-                this.contentNodeTO.getCreationDate().format(dateFormat));
+        contentNameLabel = new H2(this.contentNodeTO.name());
+        contentAuthorNameLabel = new Span(this.contentNodeTO.authorName());
+        contentCreationDateNameLabel = new HtmlSpan(this.contentNodeTO.creationDate() == null ? "" :
+                this.contentNodeTO.creationDate().format(dateFormat));
         contentLastModificationDateLabel = new HtmlSpan(
-                this.contentNodeTO.getLastModificationDate() == null ? "<em>-neupraveno-</em>" :
-                        dateFormat.format(this.contentNodeTO.getLastModificationDate()));
+                this.contentNodeTO.lastModificationDate() == null ? "<em>-neupraveno-</em>" :
+                        dateFormat.format(this.contentNodeTO.lastModificationDate()));
 
         tagsListLayout = new Div();
         tagsListLayout.setId("content-info-tags");
-        for (ContentTagTO contentTag : this.contentNodeTO.getContentTags()) {
+        for (ContentTagTO contentTag : this.contentNodeTO.contentTags()) {
             RouterLink tagLink = new RouterLink(contentTag.getName(), TagPage.class,
                     URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()));
             tagsListLayout.add(new Div(tagLink));
         }
 
         operationsListLayout = componentFactory.createButtonLayout();
-        if (!this.contentNodeTO.isDraft()) createContentOperations(operationsListLayout, editAction, deleteAction);
+        if (!this.contentNodeTO.draft()) createContentOperations(operationsListLayout, editAction, deleteAction);
 
         Div leftColumnLayout = componentFactory.createLeftColumnLayout();
         add(leftColumnLayout);
@@ -216,7 +216,7 @@ public class ContentViewer extends Div {
         modifiedPart.add(new Breakline());
         modifiedPart.add(contentLastModificationDateLabel);
 
-        if (!contentNodeTO.isPublicated()) {
+        if (!contentNodeTO.publicated()) {
             Div publicatedLayout = new Div();
             publicatedLayout.addClassName("not-publicated-info");
             publicatedLayout.add(ImageIcon.INFO_16_ICON.createImage("Info"));
@@ -260,7 +260,7 @@ public class ContentViewer extends Div {
         /**
          * kategorie
          */
-        NodeTO parent = nodeService.getNodeByIdForDetail(content.getParentId());
+        NodeTO parent = nodeService.getNodeByIdForDetail(content.parentId());
         while (true) {
 
             // nejprve zkus zjistit, zda předek existuje

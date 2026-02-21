@@ -2,17 +2,12 @@ package cz.gattserver.grass.pg.events.impl;
 
 import cz.gattserver.grass.core.events.ProgressEvent;
 
-public class PGZipProcessProgressEvent implements ProgressEvent {
+import java.io.Serial;
+import java.io.Serializable;
 
-	private String description;
+public record PGZipProcessProgressEvent(String description) implements ProgressEvent, Serializable {
 
-	public PGZipProcessProgressEvent(String description) {
-		this.description = description;
-	}
-
-	@Override
-	public String description() {
-		return description;
-	}
+    @Serial
+    private static final long serialVersionUID = 8702688741209054585L;
 
 }

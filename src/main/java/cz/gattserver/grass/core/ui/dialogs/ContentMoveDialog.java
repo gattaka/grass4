@@ -1,13 +1,11 @@
 package cz.gattserver.grass.core.ui.dialogs;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
 import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
@@ -49,7 +47,7 @@ public abstract class ContentMoveDialog extends WebDialog {
         layout.add(btnLayout);
         layout.setHorizontalComponentAlignment(Alignment.END, moveBtn);
 
-        tree.expandTo(contentNodeTO.getParentId());
+        tree.expandTo(contentNodeTO.parentId());
     }
 
     protected abstract void onMove();

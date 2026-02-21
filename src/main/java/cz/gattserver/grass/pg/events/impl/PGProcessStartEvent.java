@@ -2,17 +2,12 @@ package cz.gattserver.grass.pg.events.impl;
 
 import cz.gattserver.grass.core.events.StartEvent;
 
-public class PGProcessStartEvent implements StartEvent {
+import java.io.Serial;
+import java.io.Serializable;
 
-	private int steps;
+public record PGProcessStartEvent(int steps) implements StartEvent, Serializable {
 
-	public PGProcessStartEvent(int steps) {
-		this.steps = steps;
-	}
-
-	@Override
-	public int steps() {
-		return steps;
-	}
+    @Serial
+    private static final long serialVersionUID = -5220589703922871979L;
 
 }

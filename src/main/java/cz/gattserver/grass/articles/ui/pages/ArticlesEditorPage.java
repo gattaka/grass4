@@ -177,10 +177,10 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setNodeId(node.getId());
             articleEditorTO.setNodeName(node.getName());
             articleEditorTO.setExistingArticleId(existingArticle.getId());
-            articleEditorTO.setDraftName(existingArticle.getContentNode().getName());
+            articleEditorTO.setDraftName(existingArticle.getContentNode().name());
             articleEditorTO.setDraftText(existingArticle.getText());
-            articleEditorTO.setDraftPublicated(existingArticle.getContentNode().isPublicated());
-            for (ContentTagTO tagDTO : existingArticle.getContentNode().getContentTags())
+            articleEditorTO.setDraftPublicated(existingArticle.getContentNode().publicated());
+            for (ContentTagTO tagDTO : existingArticle.getContentNode().contentTags())
                 articleEditorTO.getDraftTags().add(tagDTO.getName());
             articleEditorTO.getDraftAttachments().addAll(articleService.findAttachments(existingArticle.getId()));
         } else {
@@ -196,10 +196,10 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         NodeOverviewTO node = draft.getContentNode().getParent();
         articleEditorTO.setNodeId(node.getId());
         articleEditorTO.setNodeName(node.getName());
-        articleEditorTO.setDraftName(draft.getContentNode().getName());
+        articleEditorTO.setDraftName(draft.getContentNode().name());
         articleEditorTO.setDraftText(draft.getText());
-        articleEditorTO.setDraftPublicated(draft.getContentNode().isPublicated());
-        for (ContentTagTO tagDTO : draft.getContentNode().getContentTags())
+        articleEditorTO.setDraftPublicated(draft.getContentNode().publicated());
+        for (ContentTagTO tagDTO : draft.getContentNode().contentTags())
             articleEditorTO.getDraftTags().add(tagDTO.getName());
 
         // jedná se o draft již existujícího obsahu?

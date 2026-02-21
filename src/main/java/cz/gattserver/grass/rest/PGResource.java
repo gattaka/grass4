@@ -149,18 +149,18 @@ public class PGResource {
             eventBus.subscribe(eventsHandler);
             CompletableFuture<PGEventsHandler> future = eventsHandler.expectEvent(operationId);
 
-            PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(galleryName, galleryDir, null, false, false);
+            PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(galleryName, galleryDir, null, false, false);
             pgService.savePhotogallery(operationId, payloadTO, 55L, user.getId(), LocalDateTime.now());
 
             eventsHandler = future.get();
             PGProcessResultEvent event = eventsHandler.getResultAndDelete(operationId);
             if (!event.success()) {
                 logger.info("/create chyba", event.resultDetails());
-                return new ResponseEntity<>(event.getGalleryId(), HttpStatus.INTERNAL_SERVER_ERROR);
+                return new ResponseEntity<>(event.galleryId(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
             logger.info("/create dokončen");
-            return new ResponseEntity<>(event.getGalleryId(), HttpStatus.OK);
+            return new ResponseEntity<>(event.galleryId(), HttpStatus.OK);
         } catch (Exception e) {
             logger.error("/upload chyba", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
@@ -178,7 +178,7 @@ public class PGResource {
             PhotogalleryTO to =
                     pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
             for (MultipartFile file : uploadedFile)
-                pgService.uploadFile(file.getInputStream(), file.getOriginalFilename(), to.getPhotogalleryPath());
+                pgService.uploadFile(file.getInputStream(), file.getOriginalFilename(), to.photogalleryPath());
 
             logger.info("/upload dokončen");
             return new ResponseEntity<>(HttpStatus.OK);
@@ -203,9 +203,9 @@ public class PGResource {
 
             PhotogalleryTO to =
                     pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
-            PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(to.getName(), to.getPhotogalleryPath(),
-                    to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isPublicated(), true);
-            pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
+            PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(to.name(), to.photogalleryPath(),
+                    to.contentTags().stream().map(ContentTagTO::getName).toList(), to.publicated(), true);
+            pgService.modifyPhotogallery(operationId, to.id(), payloadTO, LocalDateTime.now());
 
             eventsHandler = future.get();
             PGProcessResultEvent event = eventsHandler.getResultAndDelete(operationId);

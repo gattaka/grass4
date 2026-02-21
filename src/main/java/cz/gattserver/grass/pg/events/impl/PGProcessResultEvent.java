@@ -2,47 +2,21 @@ package cz.gattserver.grass.pg.events.impl;
 
 import cz.gattserver.grass.core.events.ResultEvent;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.UUID;
 
-public class PGProcessResultEvent implements ResultEvent {
+public record PGProcessResultEvent(boolean success, String resultDetails, Long galleryId, UUID operationId)
+        implements ResultEvent, Serializable {
 
-	private boolean success;
-	private String resultDetails;
-	private Long galleryId;
-	private UUID operationId;
+    @Serial
+    private static final long serialVersionUID = -6357680911232905029L;
 
-	public PGProcessResultEvent(UUID operationId) {
-		this.operationId = operationId;
-	}
+    public PGProcessResultEvent(UUID operationId, Long galleryId) {
+        this(true, null, galleryId, operationId);
+    }
 
-	public PGProcessResultEvent(UUID operationId, Long galleryId) {
-		this(operationId);
-		this.success = true;
-		this.galleryId = galleryId;
-	}
-
-	public PGProcessResultEvent(UUID operationId, boolean success, String resultDetails) {
-		this(operationId);
-		this.success = success;
-		this.resultDetails = resultDetails;
-	}
-
-	public UUID getOperationId() {
-		return operationId;
-	}
-
-	public Long getGalleryId() {
-		return galleryId;
-	}
-
-	@Override
-	public boolean success() {
-		return success;
-	}
-
-	@Override
-	public String resultDetails() {
-		return resultDetails;
-	}
-
+    public PGProcessResultEvent(UUID operationId, boolean success, String resultDetails) {
+        this(success, resultDetails, null, operationId);
+    }
 }

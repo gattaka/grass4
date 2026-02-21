@@ -19,10 +19,8 @@ import cz.gattserver.grass.pg.util.PGUtils;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -41,27 +39,27 @@ import java.util.stream.Stream;
 
 @Transactional
 @Service
+@Slf4j
 public class PGServiceImpl implements PGService {
 
-    private static Logger logger = LoggerFactory.getLogger(PGServiceImpl.class);
+    private final ContentNodeService contentNodeService;
+    private final ConfigurationService configurationService;
+    private final PhotogalleryRepository photogalleryRepository;
+    private final ContentNodeContentTagRepository contentNodeContentTagRepository;
+    private final FileSystemService fileSystemService;
+    private final EventBus eventBus;
 
-    @Autowired
-    private ContentNodeService contentNodeService;
-
-    @Autowired
-    private ConfigurationService configurationService;
-
-    @Autowired
-    private PhotogalleryRepository photogalleryRepository;
-
-    @Autowired
-    private ContentNodeContentTagRepository contentNodeContentTagRepository;
-
-    @Autowired
-    private FileSystemService fileSystemService;
-
-    @Autowired
-    private EventBus eventBus;
+    public PGServiceImpl(ContentNodeService contentNodeService, ConfigurationService configurationService,
+                         PhotogalleryRepository photogalleryRepository,
+                         ContentNodeContentTagRepository contentNodeContentTagRepository,
+                         FileSystemService fileSystemService, EventBus eventBus) {
+        this.contentNodeService = contentNodeService;
+        this.configurationService = configurationService;
+        this.photogalleryRepository = photogalleryRepository;
+        this.contentNodeContentTagRepository = contentNodeContentTagRepository;
+        this.fileSystemService = fileSystemService;
+        this.eventBus = eventBus;
+    }
 
     private enum GalleryFileType {
         MAIN_FILE, PREVIEW, SLIDESHOW, MINIATURE,
@@ -103,7 +101,7 @@ public class PGServiceImpl implements PGService {
             deleteFileRecursively(galleryDir);
             return true;
         } catch (Exception e) {
-            logger.error("Nezdařilo se smazat některé soubory galerie: " + photogalleryId, e);
+            log.error("Nezdařilo se smazat některé soubory galerie: {}", photogalleryId, e);
             return false;
         }
     }
@@ -111,16 +109,16 @@ public class PGServiceImpl implements PGService {
     private void createVideoMinature(Path file, Path outputFile) {
         String videoName = file.getFileName().toString();
         String previewName = outputFile.getFileName().toString();
-        logger.info("Bylo nalezeno video {}", videoName);
-        logger.info("Bylo zahájeno zpracování náhledu videa {}", videoName);
+        log.info("Bylo nalezeno video {}", videoName);
+        log.info("Bylo zahájeno zpracování náhledu videa {}", videoName);
         try {
             BufferedImage image = new DecodeAndCaptureFrames().decodeAndCaptureFrames(file);
-            logger.info("Zpracování náhledu videa {} byla úspěšně dokončeno", videoName);
+            log.info("Zpracování náhledu videa {} byla úspěšně dokončeno", videoName);
             PGUtils.resizeVideoPreviewImage(image, outputFile);
-            logger.info("Náhled videa {} byl úspěšně uložen", previewName);
+            log.info("Náhled videa {} byl úspěšně uložen", previewName);
         } catch (Exception e) {
             PGUtils.createErrorPreview(outputFile);
-            logger.info("Chybový náhled videa {} byl úspěšně uložen", previewName);
+            log.info("Chybový náhled videa {} byl úspěšně uložen", previewName);
         }
     }
 
@@ -128,9 +126,9 @@ public class PGServiceImpl implements PGService {
         String imageName = outputFile.getFileName().toString();
         try {
             PGUtils.resizeImage(file, outputFile);
-            logger.info("Náhled obrázku {} byl úspěšně uložen", imageName);
+            log.info("Náhled obrázku {} byl úspěšně uložen", imageName);
         } catch (Exception e) {
-            logger.error("Vytváření náhledu obrázku {} se nezdařilo", imageName, e);
+            log.error("Vytváření náhledu obrázku {} se nezdařilo", imageName, e);
         }
     }
 
@@ -140,7 +138,7 @@ public class PGServiceImpl implements PGService {
         String previewsDir = configuration.getPreviewsDir();
         Path galleryDir = getGalleryPath(photogallery.getPhotogalleryPath());
 
-        int total = 0;
+        int total;
         try (Stream<Path> stream = Files.list(galleryDir)) {
             total = (int) stream.count();
         }
@@ -189,7 +187,7 @@ public class PGServiceImpl implements PGService {
         String slideshowDir = configuration.getSlideshowDir();
         Path galleryDir = getGalleryPath(photogallery.getPhotogalleryPath());
 
-        int total = 0;
+        int total;
         try (Stream<Path> stream = Files.list(galleryDir)) {
             total = (int) stream.count();
         }
@@ -222,8 +220,7 @@ public class PGServiceImpl implements PGService {
                     try {
                         PGUtils.resizeImage(file, outputFile, PGUtils.SLIDESHOW_WIDTH, PGUtils.SLIDESHOW_HEIGHT);
                     } catch (Exception e) {
-                        logger.error("Při zpracování slideshow pro '{}' došlo k chybě", file.getFileName().toString(),
-                                e);
+                        log.error("Při zpracování slideshow pro '{}' došlo k chybě", file.getFileName().toString(), e);
                     }
                 }
             }
@@ -233,7 +230,7 @@ public class PGServiceImpl implements PGService {
     @Override
     @Async
     @Transactional(propagation = Propagation.NEVER)
-    public void modifyPhotogallery(UUID operationId, Long photogalleryId, PhotogalleryPayloadTO payloadTO,
+    public void modifyPhotogallery(UUID operationId, Long photogalleryId, PhotogalleryCreateTO payloadTO,
                                    LocalDateTime date) {
         innerSavePhotogallery(operationId, payloadTO, photogalleryId, null, null, date);
     }
@@ -241,7 +238,7 @@ public class PGServiceImpl implements PGService {
     @Override
     @Async
     @Transactional(propagation = Propagation.NEVER)
-    public void savePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, Long nodeId, Long authorId,
+    public void savePhotogallery(UUID operationId, PhotogalleryCreateTO payloadTO, Long nodeId, Long authorId,
                                  LocalDateTime date) {
         innerSavePhotogallery(operationId, payloadTO, null, nodeId, authorId, date);
     }
@@ -251,10 +248,10 @@ public class PGServiceImpl implements PGService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    protected Photogallery transactionSavePhotogallery(UUID operationId, String galleryDir,
-                                                       PhotogalleryPayloadTO payloadTO, Long existingId, Long nodeId,
+    protected Photogallery transactionSavePhotogallery(String galleryDir,
+                                                       PhotogalleryCreateTO payloadTO, Long existingId, Long nodeId,
                                                        Long authorId, LocalDateTime date) {
-        logger.info("modifyPhotogallery thread: " + Thread.currentThread().threadId());
+        log.info("modifyPhotogallery thread: {}", Thread.currentThread().threadId());
 
         Photogallery photogallery =
                 existingId == null ? new Photogallery() : photogalleryRepository.findById(existingId).orElse(null);
@@ -264,10 +261,6 @@ public class PGServiceImpl implements PGService {
 
         // ulož ho a nasetuj jeho id
         photogallery = photogalleryRepository.save(photogallery);
-        if (photogallery == null) {
-            publishPGProcessFailure(operationId);
-            return null;
-        }
 
         if (existingId == null) {
             // vytvoř odpovídající content node
@@ -279,10 +272,7 @@ public class PGServiceImpl implements PGService {
             ContentNode contentNode = new ContentNode();
             contentNode.setId(contentNodeId);
             photogallery.setContentNodeId(contentNode.getId());
-            if (photogalleryRepository.save(photogallery) == null) {
-                publishPGProcessFailure(operationId);
-                return null;
-            }
+            photogalleryRepository.save(photogallery);
         } else {
             contentNodeService.modify(photogallery.getContentNodeId(), payloadTO.getName(), payloadTO.getTags(),
                     payloadTO.isPublicated(), date);
@@ -294,7 +284,7 @@ public class PGServiceImpl implements PGService {
     }
 
     @Transactional(propagation = Propagation.NEVER)
-    protected void innerSavePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, Long existingId,
+    protected void innerSavePhotogallery(UUID operationId, PhotogalleryCreateTO payloadTO, Long existingId,
                                          Long nodeId, Long authorId, LocalDateTime date) {
         String galleryDir = payloadTO.getGalleryDir();
         Path galleryPath = getGalleryPath(galleryDir);
@@ -304,7 +294,7 @@ public class PGServiceImpl implements PGService {
             eventBus.publish(new PGProcessStartEvent(2 * total + 1));
 
             Photogallery photogallery =
-                    transactionSavePhotogallery(operationId, galleryDir, payloadTO, existingId, nodeId, authorId, date);
+                    transactionSavePhotogallery(galleryDir, payloadTO, existingId, nodeId, authorId, date);
 
             // vytvoř miniatury
             processMiniatureImages(photogallery, payloadTO.isReprocess());
@@ -315,8 +305,7 @@ public class PGServiceImpl implements PGService {
             eventBus.publish(new PGProcessResultEvent(operationId, photogallery.getId()));
         } catch (Exception e) {
             publishPGProcessFailure(operationId);
-            logger.error("Nezdařilo se uložit galerii", e);
-            return;
+            log.error("Nezdařilo se uložit galerii", e);
         }
     }
 
@@ -336,7 +325,7 @@ public class PGServiceImpl implements PGService {
         Validate.notNull(id, "Id galerie nesmí být null");
         PhotogalleryTO to = photogalleryRepository.findForDetailById(id, userId, isAdmin);
         if (to == null) return null;
-        to.setContentTags(contentNodeContentTagRepository.findByContendNodeId(to.getContentNodeId()));
+        to.contentTags().addAll(contentNodeContentTagRepository.findByContendNodeId(to.getContentNodeId()));
         return to;
     }
 
@@ -355,14 +344,14 @@ public class PGServiceImpl implements PGService {
         Path rootPath = fileSystemService.getFileSystem().getPath(rootDir);
         if (!Files.exists(rootPath)) {
             IllegalStateException ise = new IllegalStateException("Kořenový adresář PG modulu musí existovat");
-            logger.error("Nezdařilo se získat kořenový adresář galerií", ise);
+            log.error("Nezdařilo se získat kořenový adresář galerií", ise);
             throw ise;
         }
         rootPath = rootPath.normalize();
         Path galleryPath = rootPath.resolve(galleryDir);
         if (!galleryPath.normalize().startsWith(rootPath)) {
             IllegalArgumentException ise = new IllegalArgumentException("Podtečení kořenového adresáře galerií");
-            logger.error("Nezdařilo se získat kořenový adresář galerií", ise);
+            log.error("Nezdařilo se získat kořenový adresář galerií", ise);
             throw ise;
         }
         return galleryPath;
@@ -374,38 +363,25 @@ public class PGServiceImpl implements PGService {
      * @param file       jméno souboru
      * @param galleryDir adresář galerie
      * @param fileType   typ souboru
-     * @return <code>true</code>, pokud se odstranění zdaří, jinak
-     * <code>false</code>
      */
-    private boolean tryDeleteGalleryFile(String file, Path galleryDir, GalleryFileType fileType) {
-        Path subFile;
-        switch (fileType) {
-            case MINIATURE:
+    private void tryDeleteGalleryFile(String file, Path galleryDir, GalleryFileType fileType) {
+        Path subFile = switch (fileType) {
+            case MINIATURE -> {
                 if (file.endsWith(".svg")) file += ".png";
-                subFile = galleryDir.resolve(loadConfiguration().getMiniaturesDir()).resolve(file);
-                break;
-            case PREVIEW:
-                subFile = galleryDir.resolve(loadConfiguration().getPreviewsDir()).resolve(file + ".png");
-                break;
-            case SLIDESHOW:
-                subFile = galleryDir.resolve(loadConfiguration().getSlideshowDir()).resolve(file);
-                break;
-            case MAIN_FILE:
-            default:
-                subFile = galleryDir.resolve(file);
-                break;
-        }
+                yield galleryDir.resolve(loadConfiguration().getMiniaturesDir()).resolve(file);
+            }
+            case PREVIEW -> galleryDir.resolve(loadConfiguration().getPreviewsDir()).resolve(file + ".png");
+            case SLIDESHOW -> galleryDir.resolve(loadConfiguration().getSlideshowDir()).resolve(file);
+            default -> galleryDir.resolve(file);
+        };
         if (Files.exists(subFile)) {
             try {
                 Files.delete(subFile);
-                return true;
             } catch (Exception e) {
-                logger.error("Nezdařilo se smazat soubor {}", subFile, e);
-                return false;
+                log.error("Nezdařilo se smazat soubor {}", subFile, e);
             }
         } else {
-            logger.info("Nezdařilo se najít soubor {}", subFile);
-            return true;
+            log.info("Nezdařilo se najít soubor {}", subFile);
         }
     }
 
@@ -421,8 +397,8 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String directory, Long userId, boolean isAdmin) {
-        return photogalleryRepository.findForRestByDirectory(directory, userId, isAdmin);
+    public PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String galleryDir, Long userId, boolean isAdmin) {
+        return photogalleryRepository.findForRestByDirectory(galleryDir, userId, isAdmin);
     }
 
     @Override
@@ -432,7 +408,7 @@ public class PGServiceImpl implements PGService {
         if (to == null) throw new UnauthorizedAccessException();
 
         PGConfiguration configuration = loadConfiguration();
-        Path file = fileSystemService.getFileSystem().getPath(configuration.getRootDir(), to.getPhotogalleryPath());
+        Path file = fileSystemService.getFileSystem().getPath(configuration.getRootDir(), to.photogalleryPath());
         if (Files.exists(file)) {
             Set<String> files = new HashSet<>();
             try (Stream<Path> stream = Files.list(file).sorted(getComparator())) {
@@ -441,7 +417,7 @@ public class PGServiceImpl implements PGService {
                 throw new IllegalStateException(
                         "Nelze získat přehled souborů z '" + file.getFileName().toString() + "'");
             }
-            to.setFiles(files);
+            to.files().addAll(files);
         }
         return to;
     }
@@ -454,22 +430,14 @@ public class PGServiceImpl implements PGService {
 
         PGConfiguration configuration = loadConfiguration();
         Path rootPath = loadRootDirFromConfiguration(configuration);
-        Path galleryPath = rootPath.resolve(to.getPhotogalleryPath());
+        Path galleryPath = rootPath.resolve(to.photogalleryPath());
         Path miniaturesPath = galleryPath.resolve(configuration.getMiniaturesDir());
         Path slideshowPath = galleryPath.resolve(configuration.getSlideshowDir());
-        Path file;
-        switch (version) {
-            case MINI:
-                file = miniaturesPath.resolve(fileName);
-                break;
-            case SLIDESHOW:
-                file = slideshowPath.resolve(fileName);
-                break;
-            default:
-            case FULL:
-                file = galleryPath.resolve(fileName);
-                break;
-        }
+        Path file = switch (version) {
+            case MINI -> miniaturesPath.resolve(fileName);
+            case SLIDESHOW -> slideshowPath.resolve(fileName);
+            default -> galleryPath.resolve(fileName);
+        };
         if (Files.exists(file)) {
             return file;
         } else {
@@ -500,7 +468,7 @@ public class PGServiceImpl implements PGService {
     public void zipGallery(String galleryDir) {
         Path galleryPath = getGalleryPath(galleryDir);
 
-        logger.info("zipPhotogallery thread: " + Thread.currentThread().threadId());
+        log.info("zipPhotogallery thread: {}", Thread.currentThread().threadId());
 
         final ReferenceHolder<Integer> total = new ReferenceHolder<>();
         final ReferenceHolder<Integer> progress = new ReferenceHolder<>();
@@ -511,7 +479,7 @@ public class PGServiceImpl implements PGService {
         } catch (Exception e) {
             String msg = "Nezdařilo se získat počet souborů ke komprimaci";
             eventBus.publish(new PGZipProcessResultEvent(msg, e));
-            logger.error(msg, e);
+            log.error(msg, e);
             return;
         }
 
@@ -524,7 +492,7 @@ public class PGServiceImpl implements PGService {
             try {
                 zipFileSystem = fileSystemService.newZipFileSystem(zipFile, true);
                 performZip(galleryPath, zipFileSystem, progress, total);
-                logger.info("Zipování galerie dokončeno");
+                log.info("Zipování galerie dokončeno");
                 // musí se zavřít před zasláním event, takže nelze použít try-with-resources
                 zipFileSystem.close();
                 eventBus.publish(new PGZipProcessResultEvent(zipFile));
@@ -532,12 +500,12 @@ public class PGServiceImpl implements PGService {
                 String msg = "Nezdařilo se vytvořit ZIP galerie";
                 if (zipFileSystem != null) zipFileSystem.close();
                 eventBus.publish(new PGZipProcessResultEvent(msg, e));
-                logger.error(msg, e);
+                log.error(msg, e);
             }
         } catch (Exception e) {
             String msg = "Nezdařilo se vytvořit dočasný adresář pro ZIP galerie";
             eventBus.publish(new PGZipProcessResultEvent(msg, e));
-            logger.error(msg, e);
+            log.error(msg, e);
         }
     }
 
@@ -560,7 +528,7 @@ public class PGServiceImpl implements PGService {
                     msg = "Ignoruji '" + src.getFileName();
                 }
                 msg += " " + progress.getValue() + "/" + total.getValue();
-                logger.info(msg);
+                log.info(msg);
                 eventBus.publish(new PGZipProcessProgressEvent(msg));
                 progress.setValue(progress.getValue() + 1);
             }
@@ -638,7 +606,7 @@ public class PGServiceImpl implements PGService {
 
     private Comparator<Path> getComparator() {
         Comparator<Path> nameComparator = Comparator.comparing(p -> p.getFileName().toString());
-        Comparator<Path> comparator = (p1, p2) -> {
+        return (p1, p2) -> {
             try {
                 LocalDateTime ldt1 =
                         Files.getLastModifiedTime(p1).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
@@ -651,7 +619,6 @@ public class PGServiceImpl implements PGService {
             }
             return nameComparator.compare(p1, p2);
         };
-        return comparator;
     }
 
     private boolean filterOtherFiles(Path file) {
@@ -679,11 +646,12 @@ public class PGServiceImpl implements PGService {
                     .forEach(file -> {
                         PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
                         String fileName = file.getFileName().toString();
+                        String fileBaseName = fileName.substring(0, fileName.length() - 4);
                         if (file.startsWith(previewDir)) {
                             itemTO.setType(MediaType.VIDEO);
                             // u videa je potřeba useknout příponu preview obrázku
                             // '.png', aby zůstala původní video přípona
-                            itemTO.setName(fileName.substring(0, fileName.length() - 4));
+                            itemTO.setName(fileBaseName);
                             itemTO.setMiniaturePath(configuration.getPreviewsDir() + "/" + fileName);
                             itemTO.setSlideshowPath(itemTO.getName());
                             itemTO.setFullPath(itemTO.getName());
@@ -693,7 +661,7 @@ public class PGServiceImpl implements PGService {
                                 // U vektorů je potřeba uříznout .png příponu, protože
                                 // originál je vektor, který se na slideshow dá rovnou
                                 // použít
-                                itemTO.setName(fileName.substring(0, fileName.length() - 4));
+                                itemTO.setName(fileBaseName);
                                 itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + fileName);
                                 itemTO.setSlideshowPath(itemTO.getName());
                                 itemTO.setFullPath(itemTO.getName());
@@ -701,7 +669,7 @@ public class PGServiceImpl implements PGService {
                                 // U WEBP je potřeba uříznout .png příponu, protože
                                 // originál je WEBP, od kterého se miniatury a slideshow
                                 // musely převádět na PNG
-                                itemTO.setName(fileName.substring(0, fileName.length() - 4));
+                                itemTO.setName(fileBaseName);
                                 itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + fileName);
                                 itemTO.setSlideshowPath(configuration.getSlideshowDir() + "/" + fileName);
                                 itemTO.setFullPath(itemTO.getName());
@@ -715,7 +683,7 @@ public class PGServiceImpl implements PGService {
                                 itemTO.setFullPath(itemTO.getName());
                                 itemTO.setExifInfoTO(PGUtils.readMetadata(previewDir.getParent().resolve(fileName)));
                             } else {
-                                itemTO.setName(fileName.substring(0, fileName.length()));
+                                itemTO.setName(fileName);
                                 itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + itemTO.getName());
                                 itemTO.setSlideshowPath(configuration.getSlideshowDir() + "/" + itemTO.getName());
                                 itemTO.setFullPath(itemTO.getName());
@@ -741,20 +709,20 @@ public class PGServiceImpl implements PGService {
         try {
             Files.delete(zipFile);
         } catch (IOException e) {
-            logger.error("Nezdařilo se smazat ZIP soubor {}", zipFile.getFileName().toString());
+            log.error("Nezdařilo se smazat ZIP soubor {}", zipFile.getFileName().toString());
         }
     }
 
     @Override
     public void deleteDraftGallery(String galleryDir) throws IOException {
         Path galleryPath = getGalleryPath(galleryDir);
-        Files.walkFileTree(galleryPath, new SimpleFileVisitor<Path>() {
+        Files.walkFileTree(galleryPath, new SimpleFileVisitor<>() {
             @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
                 try {
                     Files.delete(file);
                 } catch (Exception e) {
-                    logger.error("Nezdařilo se smazat soubor zrušené rozpracované galerie {}",
+                    log.error("Nezdařilo se smazat soubor zrušené rozpracované galerie {}",
                             file.getFileName().toString(), e);
                 }
                 return FileVisitResult.CONTINUE;

@@ -1,19 +1,13 @@
 package cz.gattserver.grass.pg.events.impl;
 
-
 import cz.gattserver.grass.core.events.ProgressEvent;
 
-public class PGProcessProgressEvent implements ProgressEvent {
+import java.io.Serial;
+import java.io.Serializable;
 
-	private String description;
+public record PGProcessProgressEvent(String description) implements ProgressEvent, Serializable {
 
-	public PGProcessProgressEvent(String description) {
-		this.description = description;
-	}
-
-	@Override
-	public String description() {
-		return description;
-	}
+    @Serial
+    private static final long serialVersionUID = -6476285236133060485L;
 
 }

@@ -1,6 +1,5 @@
 package cz.gattserver.grass.core.services.impl;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.ConfigurationService;
@@ -77,7 +76,7 @@ public final class CoreACLServiceImpl implements CoreACLService {
 				return true;
 
 			// pokud jsi autor, můžeš upravit svůj obsah
-			if (contentNodeTO.getAuthorId().equals(userInfoTO.getId()))
+			if (contentNodeTO.authorId().equals(userInfoTO.getId()))
 				return true;
 		}
 		return false;

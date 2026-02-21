@@ -39,8 +39,8 @@ import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessStartEvent;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryEditorItemTO;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryPayloadTO;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryCreateItemTO;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryCreateTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
 import cz.gattserver.grass.pg.service.PGService;
@@ -49,6 +49,7 @@ import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import net.engio.mbassy.listener.Handler;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +96,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
      * Soubory, které byly nahrány od posledního uložení. V případě, že budou úpravy zrušeny, je potřeba tyto soubory
      * smazat.
      */
-    private final Set<PhotogalleryEditorItemTO> newFiles = new HashSet<>();
+    private final Set<PhotogalleryCreateItemTO> newFiles = new HashSet<>();
 
     private String operationToken;
     private String identifierToken;
@@ -166,15 +167,15 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
             if (existingPhotogalleryTO == null) throw new GrassPageException(404);
 
-            photogalleryNameField.setValue(existingPhotogalleryTO.getName());
-            for (String tag : existingPhotogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList())
+            photogalleryNameField.setValue(existingPhotogalleryTO.name());
+            for (String tag : existingPhotogalleryTO.contentTags().stream().map(ContentTagTO::getName).toList())
                 photogalleryKeywords.addToken(tag);
 
-            publicatedCheckBox.setValue(existingPhotogalleryTO.isPublicated());
-            photogalleryDateField.setValue(existingPhotogalleryTO.getCreationDate().toLocalDate());
+            publicatedCheckBox.setValue(existingPhotogalleryTO.publicated());
+            photogalleryDateField.setValue(existingPhotogalleryTO.creationDate().toLocalDate());
 
             // nemá oprávnění upravovat tento obsah
-            if (!existingPhotogalleryTO.getAuthorName().equals(securityService.getCurrentUser().getName()) &&
+            if (!existingPhotogalleryTO.authorName().equals(securityService.getCurrentUser().getName()) &&
                     !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
             logger.debug("Neznámá operace: '{}'", operationToken);
@@ -182,7 +183,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         }
 
         try {
-            galleryDir = editMode ? existingPhotogalleryTO.getPhotogalleryPath() : pgService.createGalleryDir();
+            galleryDir = editMode ? existingPhotogalleryTO.photogalleryPath() : pgService.createGalleryDir();
         } catch (IOException e) {
             throw new GrassPageException(500);
         }
@@ -208,11 +209,11 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         gridLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         editorLayout.add(gridLayout);
 
-        final Grid<PhotogalleryEditorItemTO> grid = new Grid<>(PhotogalleryEditorItemTO.class);
-        final List<PhotogalleryEditorItemTO> items;
+        final Grid<PhotogalleryCreateItemTO> grid = new Grid<>(PhotogalleryCreateItemTO.class);
+        final List<PhotogalleryCreateItemTO> items;
         if (editMode) {
             items = pgService.getItems(galleryDir).stream()
-                    .map(item -> new PhotogalleryEditorItemTO(item.getName(), Path.of(item.getFullPath())))
+                    .map(item -> new PhotogalleryCreateItemTO(item.getName(), Path.of(item.getFullPath())))
                     .collect(Collectors.toList());
         } else {
             items = new ArrayList<>();
@@ -247,7 +248,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         Button deleteBtn = componentFactory.createDeleteGridSetButton(selectedItems -> {
             boolean failures = false;
-            for (PhotogalleryEditorItemTO itemTO : selectedItems) {
+            for (PhotogalleryCreateItemTO itemTO : selectedItems) {
                 try {
                     pgService.deleteFile(itemTO.getName(), galleryDir);
                     items.remove(itemTO);
@@ -262,25 +263,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         deleteBtn.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         buttonLayout.add(deleteBtn);
 
-        UploadBuilder uploadBuilder = new UploadBuilder();
-
-        // TODO vyřešit práci s přidáváním a odebíráním neuložených souborů atd.
-        Upload upload = uploadBuilder.createUpload(set -> {
-            for (UploadBuilder.UploadFile uploadFile : set) {
-                PhotogalleryEditorItemTO itemTO = new PhotogalleryEditorItemTO(uploadFile.getMetadata().fileName(),
-                        uploadFile.getFile().toPath());
-                newFiles.add(itemTO);
-                items.add(itemTO);
-                grid.setItems(items);
-            }
-        }, () -> {
-            Set<String> files = new HashSet<>();
-            files.addAll(pgService.getItems(galleryDir).stream().map(PhotogalleryViewItemTO::getName)
-                    .collect(Collectors.toSet()));
-            files.addAll(newFiles.stream().map(PhotogalleryEditorItemTO::getName).collect(Collectors.toSet()));
-            return files;
-        }, "image/*", "video/*", ".xcf", ".ttf", ".otf");
-        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        Upload upload = getUpload(items, grid);
         editorLayout.add(upload);
 
         editorLayout.add(new H2("Nastavení"));
@@ -307,6 +290,29 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         UIUtils.addOnbeforeunloadWarning();
     }
 
+    private @NonNull Upload getUpload(List<PhotogalleryCreateItemTO> items, Grid<PhotogalleryCreateItemTO> grid) {
+        UploadBuilder uploadBuilder = new UploadBuilder();
+
+        // TODO vyřešit práci s přidáváním a odebíráním neuložených souborů atd.
+        Upload upload = uploadBuilder.createUpload(set -> {
+            for (UploadBuilder.UploadFile uploadFile : set) {
+                PhotogalleryCreateItemTO itemTO = new PhotogalleryCreateItemTO(uploadFile.getMetadata().fileName(),
+                        uploadFile.getFile().toPath());
+                newFiles.add(itemTO);
+                items.add(itemTO);
+                grid.setItems(items);
+            }
+        }, () -> {
+            Set<String> files = new HashSet<>();
+            files.addAll(pgService.getItems(galleryDir).stream().map(PhotogalleryViewItemTO::getName)
+                    .collect(Collectors.toSet()));
+            files.addAll(newFiles.stream().map(PhotogalleryCreateItemTO::getName).collect(Collectors.toSet()));
+            return files;
+        }, "image/*", "video/*", ".xcf", ".ttf", ".otf");
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        return upload;
+    }
+
     private void populateButtonsLayout(Div buttonLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
 
@@ -328,7 +334,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         buttonLayout.add(componentFactory.createStornoButton(e -> {
             leaving = true;
-            if (editMode) returnToPhotogallery(existingPhotogalleryTO.getId());
+            if (editMode) returnToPhotogallery(existingPhotogalleryTO.id());
             else returnToNode();
         }, true));
     }
@@ -343,9 +349,9 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     }
 
     private void saveOrUpdatePhotogallery() {
-        logger.info("saveOrUpdatePhotogallery thread: " + Thread.currentThread().threadId());
+        logger.info("saveOrUpdatePhotogallery thread: {}", Thread.currentThread().threadId());
 
-        for (PhotogalleryEditorItemTO item : newFiles) {
+        for (PhotogalleryCreateItemTO item : newFiles) {
             try {
                 pgService.uploadFile(Files.newInputStream(item.getPath()), item.getName(), galleryDir);
             } catch (IOException e) {
@@ -353,8 +359,8 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             }
         }
 
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO(photogalleryNameField.getValue(), galleryDir, photogalleryKeywords.getValue(),
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO(photogalleryNameField.getValue(), galleryDir, photogalleryKeywords.getValue(),
                         publicatedCheckBox.getValue(), reprocessSlideshowAndMiniCheckBox.getValue());
 
         eventBus.subscribe(PGEditorPage.this);
@@ -363,7 +369,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         LocalDateTime ldt =
                 photogalleryDateField.getValue() == null ? null : photogalleryDateField.getValue().atStartOfDay();
         if (editMode) {
-            pgService.modifyPhotogallery(UUID.randomUUID(), existingPhotogalleryTO.getId(), payloadTO, ldt);
+            pgService.modifyPhotogallery(UUID.randomUUID(), existingPhotogalleryTO.id(), payloadTO, ldt);
         } else {
             pgService.savePhotogallery(UUID.randomUUID(), payloadTO, node.getId(),
                     securityService.getCurrentUser().getId(), ldt);
@@ -410,12 +416,12 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     }
 
     private void onSaveResult(PGProcessResultEvent event) {
-        Long id = event.getGalleryId();
+        Long id = event.galleryId();
         if (event.success() && id != null) {
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
-            if (leaving) returnToPhotogallery(event.getGalleryId());
+            if (leaving) returnToPhotogallery(event.galleryId());
             // odteď budeme editovat
             editMode = true;
         } else {
@@ -428,7 +434,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             // soubory byly uloženy a nepodléhají
             // podmíněnému smazání
             newFiles.clear();
-            if (leaving) returnToPhotogallery(event.getGalleryId());
+            if (leaving) returnToPhotogallery(event.galleryId());
         } else {
             UIUtils.showWarning("Úprava galerie se nezdařila");
         }

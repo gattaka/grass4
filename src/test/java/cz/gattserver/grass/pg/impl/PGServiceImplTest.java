@@ -24,9 +24,8 @@ import cz.gattserver.grass.pg.model.repositories.PhotogalleryRepository;
 import cz.gattserver.grass.pg.service.PGService;
 import cz.gattserver.grass.pg.util.ZIPUtils;
 import cz.gattserver.grass.test.MockSecurityService;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 
@@ -44,9 +43,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Slf4j
 public class PGServiceImplTest extends DBCleanTest {
-
-    private static Logger logger = LoggerFactory.getLogger(PGServiceImplTest.class);
 
     @Autowired
     private MockFileSystemService fileSystemService;
@@ -143,8 +141,8 @@ public class PGServiceImplTest extends DBCleanTest {
         photogallery = photogalleryRepository.save(photogallery);
         assertNotNull(photogallery);
 
-        Long userId1 = coreMockService.createMockUser(1);
-        Long nodeId1 = coreMockService.createMockRootNode(1);
+        long userId1 = coreMockService.createMockUser(1);
+        long nodeId1 = coreMockService.createMockRootNode(1);
         Long contentNodeId1 =
                 contentNodeService.save(PGModule.ID, photogallery.getId(), "Test galerie", null, true, nodeId1, userId1,
                         false, LocalDateTime.now(), null);
@@ -198,8 +196,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         Long userId1 = coreMockService.createMockUser(1);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -213,7 +211,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
+        assertNotNull(event.galleryId());
 
         eventBus.unsubscribe(eventsHandler);
 
@@ -291,8 +289,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         Long userId1 = coreMockService.createMockUser(1);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -306,8 +304,8 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
-        long galleryId = event.getGalleryId();
+        assertNotNull(event.galleryId());
+        long galleryId = event.galleryId();
 
         eventBus.unsubscribe(eventsHandler);
 
@@ -416,8 +414,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         Long userId1 = coreMockService.createMockUser(1);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -431,15 +429,15 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
-        long galleryId = event.getGalleryId();
+        assertNotNull(event.galleryId());
+        long galleryId = event.galleryId();
 
         eventBus.unsubscribe(eventsHandler);
 
         PhotogalleryTO to = pgService.findPhotogalleryForDetail(galleryId, userId1, true);
-        assertEquals("testGallery", to.getPhotogalleryPath());
-        assertEquals("Test galerie", to.getName());
-        assertTrue(to.isPublicated());
+        assertEquals("testGallery", to.photogalleryPath());
+        assertEquals("Test galerie", to.name());
+        assertTrue(to.publicated());
     }
 
     private long createMockGallery(Path root, Long userId, Long nodeId, int variant, boolean publicated)
@@ -447,8 +445,8 @@ public class PGServiceImplTest extends DBCleanTest {
         Path galleryDir = root.resolve("testGallery" + variant);
         Files.createDirectories(galleryDir);
 
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie" + variant, galleryDir.getFileName().toString(), null,
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie" + variant, galleryDir.getFileName().toString(), null,
                         publicated, false);
 
         UUID operationId = UUID.randomUUID();
@@ -463,8 +461,8 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
-        long galleryId = event.getGalleryId();
+        assertNotNull(event.galleryId());
+        long galleryId = event.galleryId();
 
         eventBus.unsubscribe(eventsHandler);
 
@@ -498,27 +496,27 @@ public class PGServiceImplTest extends DBCleanTest {
         List<PhotogalleryRESTOverviewTO> list =
                 pgService.findAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(0, 2));
         assertEquals(2, list.size());
-        assertEquals("Test galerie4", list.get(0).getName());
-        assertEquals(id4, list.get(0).getId());
-        assertEquals("Test galerie3", list.get(1).getName());
-        assertEquals(id3, list.get(1).getId());
+        assertEquals("Test galerie4", list.get(0).name());
+        assertEquals(id4, list.get(0).id());
+        assertEquals("Test galerie3", list.get(1).name());
+        assertEquals(id3, list.get(1).id());
 
         list = pgService.findAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(1, 2));
         assertEquals(2, list.size());
-        assertEquals("Test galerie2", list.get(0).getName());
-        assertEquals(id2, list.get(0).getId());
+        assertEquals("Test galerie2", list.getFirst().name());
+        assertEquals(id2, list.getFirst().id());
 
         list = pgService.findAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(0, 2));
         assertEquals(2, list.size());
-        assertEquals("Test galerie4", list.get(0).getName());
-        assertEquals(id4, list.get(0).getId());
-        assertEquals("Test galerie3", list.get(1).getName());
-        assertEquals(id3, list.get(1).getId());
+        assertEquals("Test galerie4", list.get(0).name());
+        assertEquals(id4, list.get(0).id());
+        assertEquals("Test galerie3", list.get(1).name());
+        assertEquals(id3, list.get(1).id());
 
         list = pgService.findAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(1, 2));
         assertEquals(1, list.size());
-        assertEquals("Test galerie1", list.get(0).getName());
-        assertEquals(id1, list.get(0).getId());
+        assertEquals("Test galerie1", list.getFirst().name());
+        assertEquals(id1, list.getFirst().id());
     }
 
     @Test
@@ -538,8 +536,8 @@ public class PGServiceImplTest extends DBCleanTest {
         Path largeFile = galleryDir.resolve("02.jpg");
         Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
 
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -553,22 +551,23 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
-        long galleryId = event.getGalleryId();
+        assertNotNull(event.galleryId());
+        long galleryId = event.galleryId();
 
         eventBus.unsubscribe(eventsHandler);
 
         PhotogalleryRESTTO to = pgService.findPhotogalleryForREST(galleryId, userId, false);
 
-        assertEquals(MockUtils.MOCK_USER_NAME + 1, to.getAuthor());
-        assertEquals(2, to.getFiles().size());
-        Iterator<String> it = to.getFiles().iterator();
+        assertEquals(MockUtils.MOCK_USER_NAME + 1, to.author());
+        assertEquals(2, to.files().size());
+        Iterator<String> it = to.files().iterator();
         assertEquals("01.gif", it.next());
         assertEquals("02.jpg", it.next());
-        assertEquals(Long.valueOf(galleryId), to.getId());
-        assertEquals("Test galerie", to.getName());
+        assertEquals(Long.valueOf(galleryId), to.id());
+        assertEquals("Test galerie", to.name());
     }
 
+    @Test
     public void testFindPhotogalleryForREST_succes1()
             throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
         Path root = prepareFS(fileSystemService.getFileSystem());
@@ -583,6 +582,7 @@ public class PGServiceImplTest extends DBCleanTest {
         pgService.findPhotogalleryForREST(id1, userId1, false);
     }
 
+    @Test
     public void testFindPhotogalleryForREST_succes2()
             throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
         Path root = prepareFS(fileSystemService.getFileSystem());
@@ -631,8 +631,8 @@ public class PGServiceImplTest extends DBCleanTest {
         Long userId2 = coreMockService.createMockUser(2);
         Long userId3 = coreMockService.createMockUser(3);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -646,8 +646,8 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
-        long galleryId = event.getGalleryId();
+        assertNotNull(event.galleryId());
+        long galleryId = event.galleryId();
 
         eventBus.unsubscribe(eventsHandler);
 
@@ -682,8 +682,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         Long userId1 = coreMockService.createMockUser(1);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -725,14 +725,14 @@ public class PGServiceImplTest extends DBCleanTest {
 
         List<Path> zipContents = null;
         if (!eventsHandler2.isSuccess()) {
-            logger.error(eventsHandler2.getResultDetails(), eventsHandler2.getResultException());
-            assertTrue(false);
+            log.error(eventsHandler2.getResultDetails(), eventsHandler2.getResultException());
+            fail();
         } else {
-            logger.info("zipPath: {}", zipPath);
+            log.info("zipPath: {}", zipPath);
             try (FileSystem fs = fileSystemService.newZipFileSystem(zipPath, false)) {
                 zipContents = ZIPUtils.list(fs);
                 for (Path p : zipContents)
-                    logger.info(p.toString());
+                    log.info(p.toString());
             }
         }
         eventBus.unsubscribe(eventsHandler2);
@@ -765,8 +765,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         Long userId1 = coreMockService.createMockUser(1);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -878,7 +878,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Test
     public void testGetItems()
-            throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+            throws IOException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
@@ -903,7 +903,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Test
     public void testGetViewItemsCount()
-            throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+            throws IOException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
@@ -939,8 +939,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         Long userId1 = coreMockService.createMockUser(1);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -954,7 +954,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
+        assertNotNull(event.galleryId());
 
         eventBus.unsubscribe(eventsHandler);
 
@@ -1003,8 +1003,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         Long userId1 = coreMockService.createMockUser(1);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -1018,7 +1018,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
+        assertNotNull(event.galleryId());
 
         eventBus.unsubscribe(eventsHandler);
 
@@ -1027,7 +1027,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Test
     public void testCheckGallery2()
-            throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+            throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
@@ -1038,8 +1038,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         Long userId1 = coreMockService.createMockUser(1);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        PhotogalleryPayloadTO payloadTO =
-                new PhotogalleryPayloadTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+        PhotogalleryCreateTO payloadTO =
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -1053,7 +1053,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PGProcessResultEvent event = mock.getResultAndDelete(operationId);
 
         assertTrue(event.success());
-        assertNotNull(event.getGalleryId());
+        assertNotNull(event.galleryId());
 
         eventBus.unsubscribe(eventsHandler);
 
@@ -1062,7 +1062,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Test
     public void testCheckGallery_failed()
-            throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+            throws IOException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
@@ -1084,7 +1084,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Test
     public void testDeleteDraftGallery()
-            throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+            throws IOException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);

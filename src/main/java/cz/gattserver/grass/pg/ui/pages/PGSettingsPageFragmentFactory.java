@@ -37,7 +37,7 @@ import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.impl.PGProcessStartEvent;
 import cz.gattserver.grass.pg.interfaces.PGSettingsItemTO;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryPayloadTO;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryCreateTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryRESTOverviewTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.service.PGService;
@@ -156,8 +156,8 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
                     return new Text("Nepoužívá se");
                 } else {
                     Anchor a = new Anchor(RouteConfiguration.forSessionScope().getUrl(PGViewerPage.class,
-                            URLIdentifierUtils.createURLIdentifier(to.getOverviewTO().getId(),
-                                    to.getOverviewTO().getName())), "Odkaz");
+                            URLIdentifierUtils.createURLIdentifier(to.getOverviewTO().id(),
+                                    to.getOverviewTO().name())), "Odkaz");
                     a.setTarget("_blank");
                     return a;
                 }
@@ -180,17 +180,17 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
                         UUID operationId = UUID.randomUUID();
 
                         PhotogalleryTO to =
-                                pgService.findPhotogalleryForDetail(item.getOverviewTO().getId(), userInfoTO.getId(),
+                                pgService.findPhotogalleryForDetail(item.getOverviewTO().id(), userInfoTO.getId(),
                                         userInfoTO.isAdmin());
                         progressIndicatorWindow = new ProgressDialog();
 
                         eventBus.subscribe(PGSettingsPageFragmentFactory.this);
 
-                        PhotogalleryPayloadTO payloadTO =
-                                new PhotogalleryPayloadTO(to.getName(), to.getPhotogalleryPath(),
-                                        to.getContentTags().stream().map(ContentTagTO::getName).toList(),
-                                        to.isPublicated(), true);
-                        pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
+                        PhotogalleryCreateTO payloadTO =
+                                new PhotogalleryCreateTO(to.name(), to.photogalleryPath(),
+                                        to.contentTags().stream().map(ContentTagTO::getName).toList(),
+                                        to.publicated(), true);
+                        pgService.modifyPhotogallery(operationId, to.id(), payloadTO, LocalDateTime.now());
                     }).open();
                 });
                 button.setVisible(item.getOverviewTO() != null);
@@ -234,7 +234,7 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
                 warnSubwindow.open();
             }
         } else {
-            if (!pgService.deletePhotogallery(item.getOverviewTO().getId())) {
+            if (!pgService.deletePhotogallery(item.getOverviewTO().id())) {
                 WarnDialog warnSubwindow = new WarnDialog("Při mazání galerie se nezdařilo smazat některé soubory.");
                 warnSubwindow.open();
             }

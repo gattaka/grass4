@@ -5,25 +5,25 @@ import java.util.Collection;
 
 public interface ContentNodeTO2 {
 
-    Long getParentId();
+    Long parentId();
 
-    String getParentName();
+    String parentName();
 
-    boolean isPublicated();
+    boolean publicated();
 
-    Long getAuthorId();
+    Long authorId();
 
-    String getName();
+    String name();
 
-    String getAuthorName();
+    String authorName();
 
-    LocalDateTime getCreationDate();
+    LocalDateTime creationDate();
 
-    LocalDateTime getLastModificationDate();
+    LocalDateTime lastModificationDate();
 
-    boolean isDraft();
+    boolean draft();
 
     Long getContentNodeId();
 
-    Collection<ContentTagTO> getContentTags();
+    Collection<ContentTagTO> contentTags();
 }

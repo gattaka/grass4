@@ -33,7 +33,7 @@ import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.pg.events.impl.*;
-import cz.gattserver.grass.pg.interfaces.PhotogalleryPayloadTO;
+import cz.gattserver.grass.pg.interfaces.PhotogalleryCreateTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;
 import cz.gattserver.grass.pg.service.PGService;
@@ -121,10 +121,10 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
                 pgService.findPhotogalleryForDetail(identifier.getId(), userInfoTO.getId(), userInfoTO.isAdmin());
         if (photogalleryTO == null) throw new GrassPageException(404);
 
-        if (!MAGICK_WORD.equals(pageToken) && !MAGICK_WORD.equals(extraToken) && !photogalleryTO.isPublicated() &&
+        if (!MAGICK_WORD.equals(pageToken) && !MAGICK_WORD.equals(extraToken) && !photogalleryTO.publicated() &&
                 !isAdminOrAuthor()) throw new GrassPageException(403);
 
-        galleryDir = photogalleryTO.getPhotogalleryPath();
+        galleryDir = photogalleryTO.photogalleryPath();
 
         if (pageToken != null) {
             try {
@@ -138,7 +138,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         ContentViewer contentViewer = new ContentViewer(createContent(), photogalleryTO, e -> onDeleteOperation(),
                 e -> UI.getCurrent()
                         .navigate(PGEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(photogalleryTO.getName(), PGViewerPage.class, parameter));
+                new RouterLink(photogalleryTO.name(), PGViewerPage.class, parameter));
         add(contentViewer);
 
         Button downloadZip =
@@ -156,13 +156,13 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Override
     public String getPageTitle() {
-        return photogalleryTO.getName();
+        return photogalleryTO.name();
     }
 
 
     private boolean isAdminOrAuthor() {
         return securityService.getCurrentUser().isAdmin() ||
-                photogalleryTO.getAuthorId().equals(securityService.getCurrentUser().getId());
+                photogalleryTO.authorId().equals(securityService.getCurrentUser().getId());
     }
 
     protected Div createContent() {
@@ -171,7 +171,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         try {
             if (!pgService.checkGallery(galleryDir)) {
                 layout.add(new Span("Chyba: Galerie je porušená -- kontaktujte administrátora (ID: " +
-                        photogalleryTO.getPhotogalleryPath() + ")"));
+                        photogalleryTO.photogalleryPath() + ")"));
                 return layout;
             }
         } catch (IllegalStateException e) {
@@ -181,7 +181,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         }
 
         try {
-            imageCount = pgService.getViewItemsCount(photogalleryTO.getPhotogalleryPath());
+            imageCount = pgService.getViewItemsCount(photogalleryTO.photogalleryPath());
         } catch (Exception e) {
             throw new GrassPageException(500, e);
         }
@@ -216,7 +216,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         statusRow.getStyle().set("background", "#fdfaf2").set("padding", "3px 10px").set("line-height", "20px")
                 .set("font-size", "12px").set("color", "#777");
         statusRow.setSizeUndefined();
-        statusRow.setText("Galerie: " + photogalleryTO.getPhotogalleryPath() + " celkem položek: " + imageCount);
+        statusRow.setText("Galerie: " + photogalleryTO.photogalleryPath() + " celkem položek: " + imageCount);
         layout.add(statusRow);
 
         refreshGrid();
@@ -269,17 +269,15 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     @Handler
     protected void onProcessStart(final PGZipProcessStartEvent event) {
-        final int val = event.steps();
         progressDialog.runInUI(() -> {
-            progressDialog.setTotal(val);
+            progressDialog.setTotal(event.steps());
             progressDialog.open();
         });
     }
 
     @Handler
     protected void onProcessProgress(PGZipProcessProgressEvent event) {
-        final String val = event.description();
-        progressDialog.runInUI(() -> progressDialog.indicateProgress(val));
+        progressDialog.runInUI(() -> progressDialog.indicateProgress(event.description()));
     }
 
     @Handler
@@ -290,7 +288,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
                 new DownloadDialog("Komprese", () -> {
                     try {
                         return new DownloadResponse(Files.newInputStream(event.zipFile()),
-                                photogalleryTO.getPhotogalleryPath() + ".zip", null, -1);
+                                photogalleryTO.photogalleryPath() + ".zip", null, -1);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -388,11 +386,11 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
     private void modifyPhotogallery() {
         eventBus.subscribe(PGViewerPage.this);
         progressDialog = new ProgressDialog();
-        PhotogalleryPayloadTO payloadTO = new PhotogalleryPayloadTO(photogalleryTO.getName(), galleryDir,
-                photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
-                photogalleryTO.isPublicated(), false);
-        pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.getId(), payloadTO,
-                photogalleryTO.getCreationDate());
+        PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(photogalleryTO.name(), galleryDir,
+                photogalleryTO.contentTags().stream().map(ContentTagTO::getName).toList(),
+                photogalleryTO.publicated(), false);
+        pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.id(), payloadTO,
+                photogalleryTO.creationDate());
     }
 
     private void populatePaging(HorizontalLayout layout) {
@@ -489,12 +487,12 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
     protected void onDeleteOperation() {
         ConfirmDialog confirmSubwindow = new ConfirmDialog("Opravdu si přejete smazat tuto galerii ?", ev -> {
 
-            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(photogalleryTO.getParentId(),
-                    photogalleryTO.getParentName());
+            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(photogalleryTO.parentId(),
+                    photogalleryTO.parentName());
 
             // zdařilo se ? Pokud ano, otevři info okno a při
             // potvrzení jdi na kategorii
-            if (pgService.deletePhotogallery(photogalleryTO.getId())) {
+            if (pgService.deletePhotogallery(photogalleryTO.id())) {
                 UI.getCurrent().navigate(NodePage.class, urlIdentifier);
             } else {
                 // Pokud ne, otevři warn okno a při

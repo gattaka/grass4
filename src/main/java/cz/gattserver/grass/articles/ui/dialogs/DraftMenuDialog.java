@@ -42,14 +42,14 @@ public class DraftMenuDialog extends WebDialog {
         grid.setWidth("900px");
         grid.setSelectionMode(SelectionMode.SINGLE);
 
-        grid.addColumn(new TextRenderer<>(a -> a.getContentNode().getName())).setHeader("Název").setWidth("200px")
+        grid.addColumn(new TextRenderer<>(a -> a.getContentNode().name())).setHeader("Název").setWidth("200px")
                 .setFlexGrow(0);
         grid.addColumn(
                         new TextRenderer<>(a -> a.getText().length() < 100 ? a.getText() : a.getText().substring(0, 100)))
                 .setHeader("Náhled");
         grid.addColumn(new LocalDateTimeRenderer<>(
-                        a -> a.getContentNode().getLastModificationDate() == null ? a.getContentNode().getCreationDate() :
-                                a.getContentNode().getLastModificationDate(), "d. M. yyyy HH:mm"))
+                        a -> a.getContentNode().lastModificationDate() == null ? a.getContentNode().creationDate() :
+                                a.getContentNode().lastModificationDate(), "d. M. yyyy HH:mm"))
                 .setHeader("Naposledy upraveno").setFlexGrow(0).setWidth("180px");
 
         grid.addItemDoubleClickListener(e -> {

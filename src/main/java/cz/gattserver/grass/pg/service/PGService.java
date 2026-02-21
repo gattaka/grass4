@@ -22,9 +22,8 @@ public interface PGService {
      * Smaže galerii
      *
      * @param photogalleryId galerie ke smazání
-     * @return {@code true} pokud se zdařilo smazat jinak {@code false}
-     * @return <code>false</code> pokud se nezdaŁří smazat některé soubory
-     * (smaže tak aspoň datové struktury)
+     * @return {@code true} pokud se zdařilo smazat jinak {@code false}. Pokud se nezdaří smazat některé soubory
+     * smaže aspoň datové struktury
      */
     boolean deletePhotogallery(Long photogalleryId);
 
@@ -38,7 +37,7 @@ public interface PGService {
      * @param date           datum vytvoření galerie, může být i <code>null</code>, pak
      *                       bude použito aktuální datum
      */
-    void modifyPhotogallery(UUID operationId, Long photogalleryId, PhotogalleryPayloadTO payloadTO, LocalDateTime date);
+    void modifyPhotogallery(UUID operationId, Long photogalleryId, PhotogalleryCreateTO payloadTO, LocalDateTime date);
 
     /**
      * Uloží galerii. Zpracování je prováděno v samostatném vlákně. Pro
@@ -51,7 +50,7 @@ public interface PGService {
      * @param date      datum vytvoření galerie, může být i <code>null</code>, pak
      *                  bude použito aktuální datum
      */
-    void savePhotogallery(UUID operationId, PhotogalleryPayloadTO payloadTO, Long nodeId, Long authorId,
+    void savePhotogallery(UUID operationId, PhotogalleryCreateTO payloadTO, Long nodeId, Long authorId,
                           LocalDateTime date);
 
     /**
@@ -65,7 +64,7 @@ public interface PGService {
     /**
      * Vytvoří nový adresář pro fotogalerii
      *
-     * @throws IOException
+     * @throws IOException exception pokud se vytvoření nezdařilo ze systémových důvodů
      */
     String createGalleryDir() throws IOException;
 
@@ -120,7 +119,7 @@ public interface PGService {
     /**
      * Zazipuje galerii
      *
-     * @param galleryDir
+     * @param galleryDir adresář galerie
      */
     void zipGallery(String galleryDir);
 
@@ -179,7 +178,6 @@ public interface PGService {
      *
      * @param galleryDir adresář galerie
      * @return list souborů
-     * @throws IOException              pokud se nezdařilo číst přehled adresáře galerie
      * @throws IllegalStateException    pokud neexistuje kořenový adresář galerií -- chyba nastavení
      *                                  modulu PG
      * @throws IllegalArgumentException pokud předaný adresář podtéká kořen modulu PG
@@ -235,7 +233,7 @@ public interface PGService {
     /**
      * Smaže rozpracovanou galerii, která ještě nebyla uložena do DB
      *
-     * @param galleryDir
+     * @param galleryDir adresář galerie
      * @throws IOException              pokud se nezdařilo číst přehled adresáře galerie
      * @throws IllegalStateException    pokud neexistuje kořenový adresář galerií -- chyba nastavení
      *                                  modulu PG
@@ -246,9 +244,9 @@ public interface PGService {
     /**
      * Získá fotogalerii dle jména adresáře, ke kterému galerie patří
      *
-     * @param directory jméno adresáře
+     * @param galleryDir adresář galerie
      * @return overview objekt galerie
      */
-    PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String directory, Long userId, boolean isAdmin);
+    PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String galleryDir, Long userId, boolean isAdmin);
 
 }

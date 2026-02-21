@@ -84,12 +84,12 @@ public class ContentNodeTO implements ContentNodeTO2 {
 		return this;
 	}
 
-	public String getName() {
+	public String name() {
 		return name;
 	}
 
     @Override
-    public String getAuthorName() {
+    public String authorName() {
         return author.getName();
     }
 
@@ -107,7 +107,7 @@ public class ContentNodeTO implements ContentNodeTO2 {
 		return this;
 	}
 
-	public LocalDateTime getCreationDate() {
+	public LocalDateTime creationDate() {
 		return creationDate;
 	}
 
@@ -116,7 +116,7 @@ public class ContentNodeTO implements ContentNodeTO2 {
 		return this;
 	}
 
-	public LocalDateTime getLastModificationDate() {
+	public LocalDateTime lastModificationDate() {
 		return lastModificationDate;
 	}
 
@@ -126,21 +126,21 @@ public class ContentNodeTO implements ContentNodeTO2 {
 	}
 
     @Override
-    public Long getParentId() {
+    public Long parentId() {
         return parent.getId();
     }
 
     @Override
-    public String getParentName() {
+    public String parentName() {
         return parent.getName();
     }
 
-    public boolean isPublicated() {
+    public boolean publicated() {
 		return publicated;
 	}
 
     @Override
-    public Long getAuthorId() {
+    public Long authorId() {
         return author.getId();
     }
 
@@ -172,7 +172,7 @@ public class ContentNodeTO implements ContentNodeTO2 {
 		return this;
 	}
 
-	public boolean isDraft() {
+	public boolean draft() {
 		return draft;
 	}
 
@@ -190,7 +190,7 @@ public class ContentNodeTO implements ContentNodeTO2 {
 		return this;
 	}
 
-	public Set<ContentTagTO> getContentTags() {
+	public Set<ContentTagTO> contentTags() {
 		return contentTags;
 	}
 
