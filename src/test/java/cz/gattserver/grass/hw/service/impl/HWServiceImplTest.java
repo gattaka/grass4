@@ -18,7 +18,6 @@ import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.ui.util.ImageComparator;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.hw.interfaces.*;
-import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -267,10 +266,10 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwTypeTO.setName("notebook");
 		hwService.saveHWType(hwTypeTO);
 
-		Set<HWTypeBasicTO> types = hwService.findAllHWTypes();
+		Set<HWTypeTokenTO> types = hwService.findAllHWTypes();
 
 		assertEquals(2, types.size());
-		Iterator<HWTypeBasicTO> it = types.iterator();
+		Iterator<HWTypeTokenTO> it = types.iterator();
 		assertEquals("myš", it.next().getName());
 		assertEquals("notebook", it.next().getName());
 	}
@@ -285,7 +284,7 @@ public class HWServiceImplTest extends DBCleanTest {
 		hwTypeTO.setName("notebook");
 		hwService.saveHWType(hwTypeTO);
 
-		Set<HWTypeBasicTO> types = hwService.findAllHWTypes();
+		Set<HWTypeTokenTO> types = hwService.findAllHWTypes();
 		assertEquals(2, types.size());
 
 		hwService.deleteHWType(id);
@@ -310,8 +309,8 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO.setState(HWItemState.BROKEN);
 		itemTO.setSupervizedFor("Táta");
 
-		Set<HWTypeBasicTO> types = new HashSet<>();
-		types.add(new HWTypeBasicTO("notebook"));
+		Set<HWTypeTokenTO> types = new HashSet<>();
+		types.add(new HWTypeTokenTO("notebook"));
 		itemTO.setTypes(types);
 		itemTO.setUsedInName(null);
 		itemTO.setUsedInId(null);
@@ -345,8 +344,8 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO.setState(HWItemState.BROKEN);
 		itemTO.setSupervizedFor("Táta");
 
-        Set<HWTypeBasicTO> types = new HashSet<>();
-        types.add(new HWTypeBasicTO("notebook"));
+        Set<HWTypeTokenTO> types = new HashSet<>();
+        types.add(new HWTypeTokenTO("notebook"));
 		itemTO.setTypes(types);
 		itemTO.setUsedInId(null);
 		itemTO.setUsedInName(null);
@@ -362,8 +361,8 @@ public class HWServiceImplTest extends DBCleanTest {
 		itemTO2.setPurchaseDate(purchDate2);
 		itemTO2.setState(HWItemState.DISASSEMBLED);
 
-		Set<HWTypeBasicTO> types2 = new HashSet<>();
-		types2.add(new HWTypeBasicTO("RAM"));
+		Set<HWTypeTokenTO> types2 = new HashSet<>();
+		types2.add(new HWTypeTokenTO("RAM"));
 
 		List<HWItemOverviewTO> list = hwService.findAllHWItems();
 
@@ -392,7 +391,9 @@ public class HWServiceImplTest extends DBCleanTest {
 		assertEquals("test Name", savedItemTO2.getUsedInName());
 
 		assertEquals(2, hwService.countHWItems(new HWFilterTO()));
-		assertEquals(1, hwService.countHWItems(new HWFilterTO().setUsedInName("test Name")));
+        HWFilterTO filterTO = new HWFilterTO();
+        filterTO.setUsedInName("test Name");
+		assertEquals(1, hwService.countHWItems(filterTO));
 
 		List<HWItemOverviewTO> items = hwService.findAllHWItems();
 		assertEquals(2, items.size());

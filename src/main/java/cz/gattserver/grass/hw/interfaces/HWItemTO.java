@@ -1,6 +1,9 @@
 package cz.gattserver.grass.hw.interfaces;
 
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -12,6 +15,9 @@ import java.util.Set;
 /**
  * HW Objekt
  */
+@Setter
+@Getter
+@NoArgsConstructor
 public class HWItemTO {
 
     private Long id;
@@ -28,11 +34,8 @@ public class HWItemTO {
     private Integer warrantyYears;
     private String description;
 
-    private Set<HWTypeBasicTO> types = new LinkedHashSet<>();
+    private Set<HWTypeTokenTO> types = new LinkedHashSet<>();
     private List<HWItemRecordTO> itemRecords = new ArrayList<>();
-
-    public HWItemTO() {
-    }
 
     @QueryProjection
     public HWItemTO(Long id, String name, LocalDate purchaseDate, BigDecimal price, HWItemState state, Long usedInId,
@@ -53,136 +56,6 @@ public class HWItemTO {
         this.description = description;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public LocalDate getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public void setPurchaseDate(LocalDate purchaseDate) {
-        this.purchaseDate = purchaseDate;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public HWItemState getState() {
-        return state;
-    }
-
-    public void setState(HWItemState state) {
-        this.state = state;
-    }
-
-    public Long getUsedInId() {
-        return usedInId;
-    }
-
-    public void setUsedInId(Long usedInId) {
-        this.usedInId = usedInId;
-    }
-
-    public String getUsedInName() {
-        return usedInName;
-    }
-
-    public void setUsedInName(String usedInName) {
-        this.usedInName = usedInName;
-    }
-
-    public String getSupervizedFor() {
-        return supervizedFor;
-    }
-
-    public void setSupervizedFor(String supervizedFor) {
-        this.supervizedFor = supervizedFor;
-    }
-
-    public Boolean getPublicItem() {
-        return publicItem;
-    }
-
-    public void setPublicItem(Boolean publicItem) {
-        this.publicItem = publicItem;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getWarrantyYears() {
-        return warrantyYears;
-    }
-
-    public void setWarrantyYears(Integer warrantyYears) {
-        this.warrantyYears = warrantyYears;
-    }
-
-    public Set<HWTypeBasicTO> getTypes() {
-        return types;
-    }
-
-    public void setTypes(Set<HWTypeBasicTO> types) {
-        this.types = types;
-    }
-
-    public List<HWItemRecordTO> getItemRecords() {
-        return itemRecords;
-    }
-
-    public void setItemRecords(List<HWItemRecordTO> itemRecords) {
-        this.itemRecords = itemRecords;
-    }
-
-    public Long getUsedInIdOld() {
-        return usedInIdOld;
-    }
-
-    public void setUsedInIdOld(Long usedInIdOld) {
-        this.usedInIdOld = usedInIdOld;
-    }
-
-    public HWItemState getStateOld() {
-        return stateOld;
-    }
-
-    public void setStateOld(HWItemState stateOld) {
-        this.stateOld = stateOld;
-    }
-
-    @Override
-    public int hashCode() {
-        return super.hashCode();
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return super.equals(obj);
-    }
-
     public HWItemTO copy() {
         HWItemTO to =
                 new HWItemTO(id, name, purchaseDate, price, state, usedInId, usedInName, supervizedFor, publicItem,
@@ -191,7 +64,7 @@ public class HWItemTO {
         for (HWItemRecordTO note : itemRecords)
             to.getItemRecords().add(note.copy());
         to.setTypes(new LinkedHashSet<>());
-        for (HWTypeBasicTO type : types)
+        for (HWTypeTokenTO type : types)
             to.getTypes().add(type.copy());
         return to;
     }

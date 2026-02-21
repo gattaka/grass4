@@ -1,21 +1,20 @@
 package cz.gattserver.grass.hw.interfaces;
 
+import lombok.Getter;
+
+@Getter
 public enum HWItemState {
 
 	NEW("Nový"), FIXED("Opraven"), FAULTY("Poruchový"), BROKEN("Nefunkční"), DISASSEMBLED("Rozebrán"), NOT_USED(
 			"Nepoužíván");
 
-	private String name;
+	private final String name;
 
-	private HWItemState(String name) {
+	 HWItemState(String name) {
 		this.name = name;
 	}
 
-	public String getName() {
-		return name;
-	}
-
-	@Override
+    @Override
 	public String toString() {
 		return name;
 	}

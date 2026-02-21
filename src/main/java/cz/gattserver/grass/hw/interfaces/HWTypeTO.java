@@ -1,15 +1,24 @@
 package cz.gattserver.grass.hw.interfaces;
 
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 /**
  * Typ hw
  */
+@Setter
+@Getter
+@NoArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class HWTypeTO {
 
     /**
      * Identifikátor hw
      */
+    @EqualsAndHashCode.Include
     private Long id;
 
     /**
@@ -26,9 +35,6 @@ public class HWTypeTO {
         this.name = name;
     }
 
-    public HWTypeTO() {
-    }
-
     public HWTypeTO(Long id) {
         this.id = id;
     }
@@ -40,43 +46,7 @@ public class HWTypeTO {
         this.count = count;
     }
 
-    public Integer getCount() {
-        return count;
-    }
-
-    public void setCount(Integer count) {
-        this.count = count;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public HWTypeTO copy() {
         return new HWTypeTO(id, name, count);
-    }
-
-    @Override
-    public final boolean equals(Object o) {
-        if (!(o instanceof HWTypeTO hwTypeTO)) return false;
-
-        return id.equals(hwTypeTO.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return id.hashCode();
     }
 }

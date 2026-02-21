@@ -5,10 +5,14 @@ import java.time.LocalDate;
 import com.querydsl.core.annotations.QueryProjection;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Údaj o opravě, změně součástí apod.
  */
+@Setter
+@Getter
 public class HWItemRecordTO {
 
     private Long id;
@@ -37,46 +41,6 @@ public class HWItemRecordTO {
         this.date = date;
         this.description = description;
         this.state = state;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public HWItemState getState() {
-        return state;
-    }
-
-    public void setState(HWItemState state) {
-        this.state = state;
-    }
-
-    public Long getHwItemId() {
-        return hwItemId;
-    }
-
-    public void setHwItemId(Long hwItemId) {
-        this.hwItemId = hwItemId;
     }
 
     public HWItemRecordTO copy() {

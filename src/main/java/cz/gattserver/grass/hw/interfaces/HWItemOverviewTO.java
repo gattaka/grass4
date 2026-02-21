@@ -1,18 +1,22 @@
 package cz.gattserver.grass.hw.interfaces;
 
 import com.querydsl.core.annotations.QueryProjection;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.io.Serial;
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Objects;
 
 /**
  * HW Objekt
  */
+@Setter
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class HWItemOverviewTO {
 
+    @EqualsAndHashCode.Include
     private Long id;
     private String name;
     private HWItemState state;
@@ -42,89 +46,5 @@ public class HWItemOverviewTO {
         this.price = price;
         this.purchaseDate = purchaseDate;
         this.publicItem = publicItem;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public HWItemState getState() {
-        return state;
-    }
-
-    public void setState(HWItemState state) {
-        this.state = state;
-    }
-
-    public Long getUsedInId() {
-        return usedInId;
-    }
-
-    public void setUsedInId(Long usedInId) {
-        this.usedInId = usedInId;
-    }
-
-    public String getUsedInName() {
-        return usedInName;
-    }
-
-    public void setUsedInName(String usedInName) {
-        this.usedInName = usedInName;
-    }
-
-    public String getSupervizedFor() {
-        return supervizedFor;
-    }
-
-    public void setSupervizedFor(String supervizedFor) {
-        this.supervizedFor = supervizedFor;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public LocalDate getPurchaseDate() {
-        return purchaseDate;
-    }
-
-    public void setPurchaseDate(LocalDate purchaseDate) {
-        this.purchaseDate = purchaseDate;
-    }
-
-    public Boolean getPublicItem() {
-        return publicItem;
-    }
-
-    public void setPublicItem(Boolean publicItem) {
-        this.publicItem = publicItem;
-    }
-
-    @Override
-    public final boolean equals(Object o) {
-        if (!(o instanceof HWItemOverviewTO that)) return false;
-
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }

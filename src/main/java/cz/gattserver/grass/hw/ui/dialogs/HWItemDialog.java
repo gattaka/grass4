@@ -27,7 +27,7 @@ import com.vaadin.flow.data.converter.StringToIntegerConverter;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemState;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
-import cz.gattserver.grass.hw.interfaces.HWTypeBasicTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTokenTO;
 import cz.gattserver.grass.hw.service.HWService;
 import cz.gattserver.grass.hw.ui.UsedInChooser;
 
@@ -124,18 +124,18 @@ public class HWItemDialog extends EditWebDialog {
         descriptionArea.setSizeFull();
         descriptionArea.setMinHeight(300, Unit.PIXELS);
 
-        Map<String, HWTypeBasicTO> typeNameMap = new HashMap<>();
-        for (HWTypeBasicTO to : hwService.findAllHWTypes())
+        Map<String, HWTypeTokenTO> typeNameMap = new HashMap<>();
+        for (HWTypeTokenTO to : hwService.findAllHWTypes())
             typeNameMap.put(to.getName(), to);
 
         TokenField tokenField = new TokenField("Klíčová slova", typeNameMap.keySet());
         tokenField.setAllowNewItems(true);
         binder.forField(tokenField)
-                .bind(to -> to.getTypes().stream().map(HWTypeBasicTO::getName).collect(Collectors.toSet()),
+                .bind(to -> to.getTypes().stream().map(HWTypeTokenTO::getName).collect(Collectors.toSet()),
                         (to, val) -> to.setTypes(val.stream().map(name -> {
-                            HWTypeBasicTO typeTO = typeNameMap.get(name);
+                            HWTypeTokenTO typeTO = typeNameMap.get(name);
                             if (typeTO != null) return typeTO;
-                            return new HWTypeBasicTO(name);
+                            return new HWTypeTokenTO(name);
                         }).collect(Collectors.toSet())));
         layout.add(tokenField);
 

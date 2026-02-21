@@ -5,7 +5,7 @@ import java.util.Set;
 
 import com.querydsl.core.types.OrderSpecifier;
 
-import cz.gattserver.grass.hw.interfaces.HWTypeBasicTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTokenTO;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 
 public interface HWTypeRepositoryCustom {
@@ -14,11 +14,11 @@ public interface HWTypeRepositoryCustom {
 
 	long countHWTypes(HWTypeTO filter);
 
-    Set<HWTypeBasicTO> findOrderByName();
+    Set<HWTypeTokenTO> findOrderByName();
 
     HWTypeTO findByIdAndMap(Long id);
 
-    Set<HWTypeBasicTO> findByItemId(Long itemId);
+    Set<HWTypeTokenTO> findByItemId(Long itemId);
 
     Set<Long> findTypeIdsByItemId(Long itemId);
 

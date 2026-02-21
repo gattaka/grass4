@@ -6,7 +6,7 @@ import java.util.Set;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.jpa.JPQLQuery;
-import cz.gattserver.grass.hw.interfaces.HWTypeBasicTO;
+import cz.gattserver.grass.hw.interfaces.HWTypeTokenTO;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.interfaces.QHWTypeTO;
 import cz.gattserver.grass.hw.interfaces.QHWTypeBasicTO;
@@ -47,7 +47,7 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public Set<HWTypeBasicTO> findOrderByName() {
+    public Set<HWTypeTokenTO> findOrderByName() {
         return new LinkedHashSet<>(
                 createGroupQuery().select(new QHWTypeBasicTO(t.id, t.name)).orderBy(t.name.asc()).fetch());
     }
@@ -58,7 +58,7 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     }
 
     @Override
-    public Set<HWTypeBasicTO> findByItemId(Long itemId) {
+    public Set<HWTypeTokenTO> findByItemId(Long itemId) {
         return new LinkedHashSet<>(
                 createGroupQuery().where(it.id.hwItemId.eq(itemId)).select(new QHWTypeBasicTO(t.id, t.name)).fetch());
     }

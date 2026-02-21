@@ -68,7 +68,7 @@ public class HWItemsGrid extends Div {
     private Grid<HWItemOverviewTO> grid;
     private TokenField hwTypesFilter;
 
-    private Map<String, HWTypeBasicTO> tokenMap = new HashMap<>();
+    private Map<String, HWTypeTokenTO> tokenMap = new HashMap<>();
     private Map<Long, Integer> indexMap = new HashMap<>();
     private Binder<HWFilterTO> binder;
 
@@ -178,7 +178,7 @@ public class HWItemsGrid extends Div {
 
         // Filtr na typy HW není veřejný, aby nenapovídal, co vše host nevidí
         if (securityFacade.getCurrentUser().isAdmin()) {
-            for (HWTypeBasicTO type : hwService.findAllHWTypes())
+            for (HWTypeTokenTO type : hwService.findAllHWTypes())
                 tokenMap.put(type.getName(), type);
 
             hwTypesFilter = new TokenField(null, tokenMap.keySet());

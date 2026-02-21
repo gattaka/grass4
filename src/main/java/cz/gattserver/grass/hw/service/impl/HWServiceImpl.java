@@ -137,7 +137,8 @@ public class HWServiceImpl implements HWService {
     }
 
     private HWItemFileTO mapPathToItem(Path path) {
-        HWItemFileTO to = new HWItemFileTO().setName(path.getFileName().toString());
+        HWItemFileTO to = new HWItemFileTO();
+        to.setName(path.getFileName().toString());
         try {
             to.setSize(HumanBytesSizeFormatter.format(Files.size(path), true));
         } catch (IOException e) {
@@ -526,7 +527,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public Set<HWTypeBasicTO> findAllHWTypes() {
+    public Set<HWTypeTokenTO> findAllHWTypes() {
         return hwTypeRepository.findOrderByName();
     }
 
@@ -616,10 +617,10 @@ public class HWServiceImpl implements HWService {
         item.setWarrantyYears(to.getWarrantyYears());
         item.setUsedInId(to.getUsedInId());
 
-        for (HWTypeBasicTO type : to.getTypes())
+        for (HWTypeTokenTO type : to.getTypes())
             type.setId(hwTypeRepository.save(new HWType(type.getName())).getId());
 
-        Set<Long> typesIdsSet = to.getTypes().stream().map(HWTypeBasicTO::getId).collect(Collectors.toSet());
+        Set<Long> typesIdsSet = to.getTypes().stream().map(HWTypeTokenTO::getId).collect(Collectors.toSet());
         if (to.getId() != null) {
             typesIdsSet = ServiceUtils.processDependentSetAndDeleteMissing(typesIdsSet,
                     hwTypeRepository.findTypeIdsByItemId(to.getId()),

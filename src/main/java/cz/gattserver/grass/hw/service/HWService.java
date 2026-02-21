@@ -89,7 +89,7 @@ public interface HWService {
      */
     Long saveHWType(HWTypeTO hwTypeTO);
 
-    Set<HWTypeBasicTO> findAllHWTypes();
+    Set<HWTypeTokenTO> findAllHWTypes();
 
     HWTypeTO findHWType(Long id);
 
