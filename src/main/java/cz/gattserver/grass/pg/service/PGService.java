@@ -2,9 +2,9 @@ package cz.gattserver.grass.pg.service;
 
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 import cz.gattserver.grass.pg.config.PGConfiguration;
-import cz.gattserver.grass.pg.events.impl.PGProcessProgressEvent;
-import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
-import cz.gattserver.grass.pg.events.impl.PGProcessStartEvent;
+import cz.gattserver.grass.pg.events.PGProcessProgressEvent;
+import cz.gattserver.grass.pg.events.PGProcessResultEvent;
+import cz.gattserver.grass.pg.events.PGProcessStartEvent;
 import cz.gattserver.grass.pg.interfaces.*;
 import org.springframework.data.domain.Pageable;
 

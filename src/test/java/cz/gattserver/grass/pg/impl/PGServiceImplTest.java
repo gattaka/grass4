@@ -14,10 +14,10 @@ import cz.gattserver.grass.core.ui.util.ImageComparator;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.core.util.MockUtils;
 import cz.gattserver.grass.modules.PGModule;
-import cz.gattserver.grass.pg.events.impl.PGEventsHandler;
+import cz.gattserver.grass.pg.events.PGEventsHandler;
 import cz.gattserver.grass.pg.test.PGZipProcessMockEventsHandler;
 import cz.gattserver.grass.pg.config.PGConfiguration;
-import cz.gattserver.grass.pg.events.impl.PGProcessResultEvent;
+import cz.gattserver.grass.pg.events.PGProcessResultEvent;
 import cz.gattserver.grass.pg.interfaces.*;
 import cz.gattserver.grass.pg.model.Photogallery;
 import cz.gattserver.grass.pg.model.PhotogalleryRepository;
@@ -137,7 +137,7 @@ public class PGServiceImplTest extends DBCleanTest {
         assertTrue(Files.exists(testFile2));
 
         Photogallery photogallery = new Photogallery();
-        photogallery.setPhotogalleryPath(galleryDir.getFileName().toString());
+        photogallery.setPhotogalleryDir(galleryDir.getFileName().toString());
         photogallery = photogalleryRepository.save(photogallery);
         assertNotNull(photogallery);
 
@@ -600,7 +600,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Test
     public void testFindPhotogalleryForREST_exception()
-            throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+            throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -667,7 +667,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Test
     public void testZipGallery()
-            throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+            throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
@@ -750,7 +750,7 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Test
     public void testDeleteFiles()
-            throws IOException, InterruptedException, ExecutionException, UnauthorizedAccessException {
+            throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);

@@ -1,4 +1,4 @@
-package cz.gattserver.grass.print3d.service.impl;
+package cz.gattserver.grass.print3d.service;
 
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.util.ReferenceHolder;
@@ -9,21 +9,18 @@ import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.modules.Print3dModule;
 import cz.gattserver.grass.print3d.config.Print3dConfiguration;
-import cz.gattserver.grass.print3d.events.impl.Print3dZipProcessProgressEvent;
-import cz.gattserver.grass.print3d.events.impl.Print3dZipProcessResultEvent;
-import cz.gattserver.grass.print3d.events.impl.Print3dZipProcessStartEvent;
+import cz.gattserver.grass.print3d.events.Print3dZipProcessProgressEvent;
+import cz.gattserver.grass.print3d.events.Print3dZipProcessResultEvent;
+import cz.gattserver.grass.print3d.events.Print3dZipProcessStartEvent;
 import cz.gattserver.grass.print3d.interfaces.Print3dItemType;
-import cz.gattserver.grass.print3d.interfaces.Print3dPayloadTO;
+import cz.gattserver.grass.print3d.interfaces.Print3dCreateTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
-import cz.gattserver.grass.print3d.model.domain.Print3d;
-import cz.gattserver.grass.print3d.model.repositories.Print3dRepository;
-import cz.gattserver.grass.print3d.service.Print3dService;
+import cz.gattserver.grass.print3d.model.Print3d;
+import cz.gattserver.grass.print3d.model.Print3dRepository;
 import cz.gattserver.grass.print3d.util.Print3dMapper;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,34 +28,32 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
+@Slf4j
 @Transactional
 @Service
 public class Print3dServiceImpl implements Print3dService {
 
-    private static Logger logger = LoggerFactory.getLogger(Print3dServiceImpl.class);
+    private final ContentNodeService contentNodeFacade;
+    private final Print3dMapper projectMapper;
+    private final ConfigurationService configurationService;
+    private final Print3dRepository print3dRepository;
+    private final FileSystemService fileSystemService;
+    private final EventBus eventBus;
 
-    @Autowired
-    private ContentNodeService contentNodeFacade;
-
-    @Autowired
-    private Print3dMapper projectMapper;
-
-    @Autowired
-    private ConfigurationService configurationService;
-
-    @Autowired
-    private Print3dRepository print3dRepository;
-
-    @Autowired
-    private FileSystemService fileSystemService;
-
-    @Autowired
-    private EventBus eventBus;
+    public Print3dServiceImpl(ContentNodeService contentNodeFacade, Print3dMapper projectMapper,
+                              ConfigurationService configurationService, Print3dRepository print3dRepository,
+                              FileSystemService fileSystemService, EventBus eventBus) {
+        this.contentNodeFacade = contentNodeFacade;
+        this.projectMapper = projectMapper;
+        this.configurationService = configurationService;
+        this.print3dRepository = print3dRepository;
+        this.fileSystemService = fileSystemService;
+        this.eventBus = eventBus;
+    }
 
     @Override
     public Print3dConfiguration loadConfiguration() {
@@ -84,8 +79,8 @@ public class Print3dServiceImpl implements Print3dService {
 
     @Override
     public boolean deleteProject(long id) {
-        String path = print3dRepository.findProjectPathById(id);
-        Path dir = getProjectPath(path);
+        String dir = print3dRepository.findProjectDirById(id);
+        Path path = getProjectPath(dir);
 
         print3dRepository.deleteById(id);
         contentNodeFacade.deleteByContentId(Print3dModule.ID, id);
@@ -93,35 +88,34 @@ public class Print3dServiceImpl implements Print3dService {
         // musí se řešit return stavem, protože exception by způsobilo rollback
         // transakce, což nechci
         try {
-            deleteFileRecursively(dir);
+            deleteFileRecursively(path);
             return true;
         } catch (Exception e) {
-            logger.error("Nezdařilo se smazat některé soubory: " + id, e);
+            log.error("Nezdařilo se smazat některé soubory: {}", id, e);
             return false;
         }
     }
 
     @Override
-    public void modifyProject(long projectId, Print3dPayloadTO payloadTO) {
+    public void modifyProject(long projectId, Print3dCreateTO payloadTO) {
         innerSaveProject(payloadTO, projectId, null, null);
     }
 
     @Override
-    public Long saveProject(Print3dPayloadTO payloadTO, long nodeId, long authorId) {
+    public Long saveProject(Print3dCreateTO payloadTO, long nodeId, long authorId) {
         return innerSaveProject(payloadTO, null, nodeId, authorId);
     }
 
-    private Print3d saveProject(String projectDir, Print3dPayloadTO payloadTO, Long existingId, Long nodeId,
+    private Print3d saveProject(String projectDir, Print3dCreateTO payloadTO, Long existingId, Long nodeId,
                                 Long authorId) {
 
         Print3d project = existingId == null ? new Print3d() : print3dRepository.findById(existingId).orElse(null);
 
         // nasetuj do ní vše potřebné
-        project.setProjectPath(projectDir);
+        project.setProjectDir(projectDir);
 
         // ulož ho a nasetuj jeho id
         project = print3dRepository.save(project);
-        if (project == null) return null;
 
         if (existingId == null) {
             // vytvoř odpovídající content node
@@ -133,7 +127,6 @@ public class Print3dServiceImpl implements Print3dService {
             ContentNode contentNode = new ContentNode();
             contentNode.setId(contentNodeId);
             project.setContentNode(contentNode);
-            if (print3dRepository.save(project) == null) return null;
         } else {
             contentNodeFacade.modify(project.getContentNode().getId(), payloadTO.getName(), payloadTO.getTags(),
                     payloadTO.isPublicated());
@@ -142,7 +135,7 @@ public class Print3dServiceImpl implements Print3dService {
         return project;
     }
 
-    private Long innerSaveProject(Print3dPayloadTO payloadTO, Long existingId, Long nodeId, Long authorId) {
+    private Long innerSaveProject(Print3dCreateTO payloadTO, Long existingId, Long nodeId, Long authorId) {
         String projectDir = payloadTO.getProjectDir();
         Print3d print3d = saveProject(projectDir, payloadTO, existingId, nodeId, authorId);
         return print3d.getId();
@@ -182,14 +175,14 @@ public class Print3dServiceImpl implements Print3dService {
         Path rootPath = fileSystemService.getFileSystem().getPath(rootDir);
         if (!Files.exists(rootPath)) {
             IllegalStateException ise = new IllegalStateException("Kořenový adresář Print3d modulu musí existovat");
-            logger.error("Nezdařilo se získat kořenový adresář", ise);
+            log.error("Nezdařilo se získat kořenový adresář", ise);
             throw ise;
         }
         rootPath = rootPath.normalize();
         Path projectPath = rootPath.resolve(projectDir);
         if (!projectPath.normalize().startsWith(rootPath)) {
             IllegalArgumentException ise = new IllegalArgumentException("Podtečení kořenového adresáře projektů");
-            logger.error("Nezdařilo se získat kořenový adresář projektu", ise);
+            log.error("Nezdařilo se získat kořenový adresář projektu", ise);
             throw ise;
         }
         return projectPath;
@@ -200,7 +193,7 @@ public class Print3dServiceImpl implements Print3dService {
     public void zipProject(String projectDir) {
         Path projectPath = getProjectPath(projectDir);
 
-        logger.info("zip3dProject thread: " + Thread.currentThread().threadId());
+        log.info("zip3dProject thread: {}", Thread.currentThread().threadId());
 
         final ReferenceHolder<Integer> total = new ReferenceHolder<>();
         final ReferenceHolder<Integer> progress = new ReferenceHolder<>();
@@ -211,7 +204,7 @@ public class Print3dServiceImpl implements Print3dService {
         } catch (Exception e) {
             String msg = "Nezdařilo se získat počet souborů ke komprimaci";
             eventBus.publish(new Print3dZipProcessResultEvent(msg, e));
-            logger.error(msg, e);
+            log.error(msg, e);
             return;
         }
 
@@ -226,12 +219,12 @@ public class Print3dServiceImpl implements Print3dService {
             } catch (Exception e) {
                 String msg = "Nezdařilo se vytvořit ZIP projektu";
                 eventBus.publish(new Print3dZipProcessResultEvent(msg, e));
-                logger.error(msg, e);
+                log.error(msg, e);
             }
         } catch (Exception e) {
             String msg = "Nezdařilo se vytvořit dočasný adresář pro ZIP projektu";
             eventBus.publish(new Print3dZipProcessResultEvent(msg, e));
-            logger.error(msg, e);
+            log.error(msg, e);
         }
     }
 
@@ -253,28 +246,17 @@ public class Print3dServiceImpl implements Print3dService {
     }
 
     @Override
-    public List<Print3dViewItemTO> deleteFiles(Set<Print3dViewItemTO> selected, String projectDir) {
-        List<Print3dViewItemTO> removed = new ArrayList<>();
-        for (Print3dViewItemTO itemTO : selected) {
-            deleteFile(itemTO, projectDir);
-            removed.add(itemTO);
-        }
-        return removed;
-    }
-
-    @Override
     public void deleteFile(Print3dViewItemTO item, String projectDir) {
         Path projectPath = getProjectPath(projectDir);
-        Path subFile =
-                item.getPath().startsWith(projectPath) ? subFile = item.getPath() : projectPath.resolve(item.getPath());
+        Path subFile = item.path().startsWith(projectPath) ? item.path() : projectPath.resolve(item.path());
         if (Files.exists(subFile)) {
             try {
                 Files.delete(subFile);
             } catch (Exception e) {
-                logger.error("Nezdařilo se smazat soubor {}", subFile, e);
+                log.error("Nezdařilo se smazat soubor {}", subFile, e);
             }
         } else {
-            logger.info("Nezdařilo se najít soubor {}", subFile);
+            log.info("Nezdařilo se najít soubor {}", subFile);
         }
     }
 
@@ -343,35 +325,8 @@ public class Print3dServiceImpl implements Print3dService {
         try {
             Files.delete(zipFile);
         } catch (IOException e) {
-            logger.error("Nezdařilo se smazat ZIP soubor {}", zipFile.getFileName().toString());
+            log.error("Nezdařilo se smazat ZIP soubor {}", zipFile.getFileName().toString());
         }
-    }
-
-    @Override
-    public void deleteDraft(String projectDir) throws IOException {
-        Path projectPath = getProjectPath(projectDir);
-        Files.walkFileTree(projectPath, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                try {
-                    Files.delete(file);
-                } catch (Exception e) {
-                    logger.error("Nezdařilo se smazat soubor zrušeného rozpracovaného projektu {}",
-                            file.getFileName().toString(), e);
-                }
-                return FileVisitResult.CONTINUE;
-            }
-        });
-        Files.delete(projectPath);
-    }
-
-    @Override
-    public Path getFullImage(String projectDir, String file) {
-        Path projectPath = getProjectPath(projectDir);
-        Path filePath = projectPath.resolve(file);
-        if (!filePath.normalize().startsWith(projectPath))
-            throw new IllegalArgumentException("Podtečení adresáře projektu");
-        return filePath;
     }
 
     @Override

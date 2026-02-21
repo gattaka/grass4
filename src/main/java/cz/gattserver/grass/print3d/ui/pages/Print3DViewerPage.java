@@ -39,35 +39,40 @@ import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.template.ContentViewer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.print3d.config.Print3dConfiguration;
-import cz.gattserver.grass.print3d.events.impl.Print3dZipProcessProgressEvent;
-import cz.gattserver.grass.print3d.events.impl.Print3dZipProcessResultEvent;
-import cz.gattserver.grass.print3d.events.impl.Print3dZipProcessStartEvent;
+import cz.gattserver.grass.print3d.events.Print3dZipProcessProgressEvent;
+import cz.gattserver.grass.print3d.events.Print3dZipProcessResultEvent;
+import cz.gattserver.grass.print3d.events.Print3dZipProcessStartEvent;
 import cz.gattserver.grass.print3d.interfaces.Print3dItemType;
-import cz.gattserver.grass.print3d.interfaces.Print3dPayloadTO;
+import cz.gattserver.grass.print3d.interfaces.Print3dCreateTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
 import cz.gattserver.grass.print3d.service.Print3dService;
 import cz.gattserver.common.stlviewer.STLViewer;
+import lombok.extern.slf4j.Slf4j;
 import net.engio.mbassy.listener.Handler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jspecify.annotations.NonNull;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Route(value = "print3d", layout = MainView.class)
 public class Print3DViewerPage extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
-    private static final Logger logger = LoggerFactory.getLogger(Print3DViewerPage.class);
+    @Serial
+    private static final long serialVersionUID = 7689863791695300295L;
 
-    private Print3dService print3dService;
-    private EventBus eventBus;
-    private SecurityService securityService;
-    private CoreACLService coreACLService;
+    private final Print3dService print3dService;
+    private final EventBus eventBus;
+    private final SecurityService securityService;
+    private final CoreACLService coreACLService;
+
+    private final ComponentFactory componentFactory;
 
     private ProgressDialog progressIndicatorWindow;
 
@@ -82,8 +87,6 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
     private Grid<Print3dViewItemTO> grid;
 
     private STLViewer stlViewer;
-
-    private ComponentFactory componentFactory;
 
     public Print3DViewerPage(Print3dService print3dService, EventBus eventBus, SecurityService securityService,
                              CoreACLService coreACLService) {
@@ -114,7 +117,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         if (!"MAG1CK".equals(magickToken) && !print3dTO.getContentNode().publicated() && !isAdminOrAuthor())
             throw new GrassPageException(403);
 
-        projectDir = print3dTO.getPrint3dProjectPath();
+        projectDir = print3dTO.getProjectDir();
 
         removeAll();
         ContentNodeTO contentNodeTO = print3dTO.getContentNode();
@@ -126,7 +129,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         add(contentViewer);
         contentViewer.getOperationsListLayout().add(componentFactory.createZipButton(
                 event -> new ConfirmDialog("Přejete si vytvořit ZIP projektu?", e -> {
-                    logger.info("zipPrint3dProject thread: {}", Thread.currentThread().threadId());
+                    log.info("zipPrint3dProject thread: {}", Thread.currentThread().threadId());
                     progressIndicatorWindow = new ProgressDialog();
                     eventBus.subscribe(Print3DViewerPage.this);
                     print3dService.zipProject(projectDir);
@@ -146,7 +149,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         try {
             if (!print3dService.checkProject(projectDir)) {
                 layout.add(new Span("Chyba: Projekt je porušen -- kontaktujte administrátora (ID: " +
-                        print3dTO.getPrint3dProjectPath() + ")"));
+                        print3dTO.getProjectDir() + ")"));
                 return layout;
             }
         } catch (IllegalStateException e) {
@@ -157,7 +160,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
         stlViewer = new STLViewer(e -> {
             for (Print3dViewItemTO to : items) {
-                if (to.getType() == Print3dItemType.MODEL) {
+                if (to.type() == Print3dItemType.MODEL) {
                     grid.select(to);
                     break;
                 }
@@ -194,7 +197,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         imgDiv.add(img);
 
         try {
-            items = print3dService.getItems(print3dTO.getPrint3dProjectPath());
+            items = print3dService.getItems(print3dTO.getProjectDir());
         } catch (Exception e) {
             throw new GrassPageException(500, e);
         }
@@ -209,8 +212,8 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
         Column<Print3dViewItemTO> iconColumn = grid.addColumn(new IconRenderer<>(p -> {
             ImageIcon icon = ImageIcon.DOCUMENT_16_ICON;
-            if (p.getType() == Print3dItemType.IMAGE) icon = ImageIcon.IMG_16_ICON;
-            if (p.getType() == Print3dItemType.MODEL) icon = ImageIcon.STOP_16_ICON;
+            if (p.type() == Print3dItemType.IMAGE) icon = ImageIcon.IMG_16_ICON;
+            if (p.type() == Print3dItemType.MODEL) icon = ImageIcon.STOP_16_ICON;
             Image iconImg = icon.createImage();
             iconImg.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
             return iconImg;
@@ -227,10 +230,10 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
                 grid.getColumnByKey("size").setHeader("Velikost").setWidth("80px").setTextAlign(ColumnTextAlign.END)
                         .setFlexGrow(0).setSortable(true).setComparator((o1, o2) -> {
                             try {
-                                return Long.compare(Files.size(o1.getPath()), Files.size(o2.getPath()));
+                                return Long.compare(Files.size(o1.path()), Files.size(o2.path()));
                             } catch (IOException e) {
-                                logger.error(
-                                        "Nezdařilo se porovnat soubory 3D projektu " + o1.getName() + " a " + o2.getName());
+                                log.error("Nezdařilo se porovnat soubory 3D projektu {} a {}", o1.getName(),
+                                        o2.getName());
                                 return 0;
                             }
                         });
@@ -265,20 +268,36 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
         grid.setSelectionMode(SelectionMode.SINGLE);
         grid.addSelectionListener(item -> {
-            if (!item.getFirstSelectedItem().isPresent()) return;
+            if (item.getFirstSelectedItem().isEmpty()) return;
             Print3dViewItemTO to = item.getFirstSelectedItem().get();
-            if (to.getType() == Print3dItemType.MODEL) {
+            if (to.type() == Print3dItemType.MODEL) {
                 stlViewer.setVisible(true);
                 imgDiv.setVisible(false);
                 stlViewer.show(getItemURL(to.getName()));
             }
-            if (to.getType() == Print3dItemType.IMAGE) {
+            if (to.type() == Print3dItemType.IMAGE) {
                 imgDiv.setVisible(true);
                 stlViewer.setVisible(false);
                 img.setSrc(getItemURL(to.getName()));
             }
         });
 
+        Upload upload = getUpload();
+        if (coreACLService.canModifyContent(print3dTO.getContentNode(), securityService.getCurrentUser()))
+            layout.add(upload);
+
+        Div statusRow = new Div();
+        statusRow.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        statusRow.getStyle().set("background", "#fdfaf2").set("padding", "3px 10px").set("line-height", "20px")
+                .set("font-size", "12px").set("color", "#777");
+        statusRow.setSizeUndefined();
+        statusRow.setText("Projekt: " + print3dTO.getProjectDir() + " celkem položek: " + items.size());
+        layout.add(statusRow);
+
+        return layout;
+    }
+
+    private @NonNull Upload getUpload() {
         UploadBuilder uploadBuilder = new UploadBuilder();
         Upload upload = uploadBuilder.createUpload(set -> {
             if (set.isEmpty()) return;
@@ -290,25 +309,14 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
                     throw new RuntimeException(e);
                 }
             }
-            Print3dPayloadTO payloadTO = new Print3dPayloadTO(print3dTO.getContentNode().name(), projectDir,
+            Print3dCreateTO payloadTO = new Print3dCreateTO(print3dTO.getContentNode().name(), projectDir,
                     print3dTO.getContentNode().getContentTagsAsStrings(), print3dTO.getContentNode().publicated());
             print3dService.modifyProject(print3dTO.getId(), payloadTO);
             UI.getCurrent().getPage().reload();
         }, () -> print3dService.getItems(projectDir).stream().map(Print3dViewItemTO::getName)
                 .collect(Collectors.toSet()));
         upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        if (coreACLService.canModifyContent(print3dTO.getContentNode(), securityService.getCurrentUser()))
-            layout.add(upload);
-
-        Div statusRow = new Div();
-        statusRow.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        statusRow.getStyle().set("background", "#fdfaf2").set("padding", "3px 10px").set("line-height", "20px")
-                .set("font-size", "12px").set("color", "#777");
-        statusRow.setSizeUndefined();
-        statusRow.setText("Projekt: " + print3dTO.getPrint3dProjectPath() + " celkem položek: " + items.size());
-        layout.add(statusRow);
-
-        return layout;
+        return upload;
     }
 
     @Handler
@@ -331,18 +339,9 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
             if (event.success()) {
                 WebDialog win = new WebDialog("Komprese");
-                win.addDialogCloseActionListener(e -> print3dService.deleteZipFile(event.getZipFile()));
+                win.addDialogCloseActionListener(e -> print3dService.deleteZipFile(event.zipFile()));
 
-                Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
-                    try {
-                        String zipName = print3dTO.getPrint3dProjectPath() + ".zip";
-                        return new DownloadResponse(Files.newInputStream(event.getZipFile()), zipName, null, -1);
-                    } catch (IOException ex) {
-                        logger.error("Během komprese souborů 3D projektu došlo k chybě", ex);
-                        return null;
-                    }
-                }), "Stáhnout ZIP souboru");
-                link.setTarget("_blank");
+                Anchor link = getZipDownloadAnchor(event);
                 win.addComponent(link, Alignment.CENTER);
 
                 Button proceedButton = new Button("Zavřít", e -> win.close());
@@ -356,9 +355,23 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         eventBus.unsubscribe(Print3DViewerPage.this);
     }
 
+    private @NonNull Anchor getZipDownloadAnchor(Print3dZipProcessResultEvent event) {
+        Anchor link = new Anchor(DownloadHandler.fromInputStream(e -> {
+            try {
+                String zipName = print3dTO.getProjectDir() + ".zip";
+                return new DownloadResponse(Files.newInputStream(event.zipFile()), zipName, null, -1);
+            } catch (IOException ex) {
+                log.error("Během komprese souborů 3D projektu došlo k chybě", ex);
+                return null;
+            }
+        }), "Stáhnout ZIP souboru");
+        link.setTarget("_blank");
+        return link;
+    }
+
     private String getItemURL(String file) {
         return UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" +
-                print3dTO.getPrint3dProjectPath() + "/" + file;
+                print3dTO.getProjectDir() + "/" + file;
     }
 
     protected void onDeleteOperation() {

@@ -36,10 +36,11 @@ import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.print3d.config.Print3dConfiguration;
-import cz.gattserver.grass.print3d.interfaces.Print3dPayloadTO;
+import cz.gattserver.grass.print3d.interfaces.Print3dCreateTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
 import cz.gattserver.grass.print3d.service.Print3dService;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -162,7 +163,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         }
 
         try {
-            projectDir = editMode ? project.getPrint3dProjectPath() : print3dService.createProjectDir();
+            projectDir = editMode ? project.getProjectDir() : print3dService.createProjectDir();
         } catch (IOException e) {
             throw new GrassPageException(500);
         }
@@ -196,16 +197,16 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         grid.setWidthFull();
         grid.setHeight("400px");
 
-        grid.addColumn(new TextRenderer<>(p -> p.getName())).setHeader("Název")
+        grid.addColumn(new TextRenderer<>(Print3dViewItemTO::getName)).setHeader("Název")
                 .setFlexGrow(100);
 
-        grid.addColumn(new TextRenderer<>(Print3dViewItemTO::getSize)).setHeader("Velikost").setWidth("80px")
+        grid.addColumn(new TextRenderer<>(Print3dViewItemTO::size)).setHeader("Velikost").setWidth("80px")
                 .setTextAlign(ColumnTextAlign.END).setFlexGrow(0);
 
         grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Zobrazit", e -> {
             // TODO funguje aktuálně pouze pro již nahrané
             String url = UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" + projectDir + "/" +
-                    itemTO.getPath().getFileName();
+                    itemTO.path().getFileName();
             WebDialog previewDialog = new WebDialog("Náhled");
             STLViewer stlViewer = new STLViewer(instance -> instance.show(url));
             stlViewer.setWidth(500, Unit.PIXELS);
@@ -227,25 +228,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
         gridLayout.add(grid);
 
-        UploadBuilder uploadBuilder = new UploadBuilder();
-
-        // TODO vyřešit práci s přidáváním a odebíráním neuložených souborů atd.
-        Upload upload = uploadBuilder.createUpload(set -> {
-            for (UploadBuilder.UploadFile uploadFile : set) {
-                Print3dViewItemTO itemTO = print3dService.constructViewItemTO(uploadFile.getMetadata().fileName(),
-                        uploadFile.getFile().toPath());
-                newFiles.add(itemTO);
-                items.add(itemTO);
-                grid.setItems(items);
-            }
-        }, () -> {
-            Set<String> files = new HashSet<>();
-            files.addAll(print3dService.getItems(projectDir).stream().map(Print3dViewItemTO::getName)
-                    .collect(Collectors.toSet()));
-            files.addAll(newFiles.stream().map(Print3dViewItemTO::getName).collect(Collectors.toSet()));
-            return files;
-        });
-        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        Upload upload = getUpload(items, grid);
         editorLayout.add(upload);
 
         editorLayout.add(new H2("Nastavení"));
@@ -265,19 +248,42 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         populateButtonsLayout(buttonsLayout);
     }
 
+    private @NonNull Upload getUpload(List<Print3dViewItemTO> items, Grid<Print3dViewItemTO> grid) {
+        UploadBuilder uploadBuilder = new UploadBuilder();
+
+        // TODO vyřešit práci s přidáváním a odebíráním neuložených souborů atd.
+        Upload upload = uploadBuilder.createUpload(set -> {
+            for (UploadBuilder.UploadFile uploadFile : set) {
+                Print3dViewItemTO itemTO = print3dService.constructViewItemTO(uploadFile.getMetadata().fileName(),
+                        uploadFile.getFile().toPath());
+                newFiles.add(itemTO);
+                items.add(itemTO);
+                grid.setItems(items);
+            }
+        }, () -> {
+            Set<String> files = new HashSet<>();
+            files.addAll(print3dService.getItems(projectDir).stream().map(Print3dViewItemTO::getName)
+                    .collect(Collectors.toSet()));
+            files.addAll(newFiles.stream().map(Print3dViewItemTO::getName).collect(Collectors.toSet()));
+            return files;
+        });
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        return upload;
+    }
+
     private void populateButtonsLayout(Div buttonLayout) {
         // Uložit
 
         ComponentFactory componentFactory = new ComponentFactory();
         Button saveButton = componentFactory.createSaveButton(event -> {
-            if (!isFormValid()) return;
+            if (isFormInvalid()) return;
             saveOrUpdateProject();
         });
         buttonLayout.add(saveButton);
 
         // Uložit a zavřít
         Button saveAndCloseButton = componentFactory.createSaveAndCloseButton(event -> {
-            if (!isFormValid()) return;
+            if (isFormInvalid()) return;
             leaving = true;
             saveOrUpdateProject();
         });
@@ -291,25 +297,25 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         }));
     }
 
-    private boolean isFormValid() {
+    private boolean isFormInvalid() {
         String name = nameField.getValue();
         if (name == null || name.isEmpty()) {
             UIUtils.showWarning("Název projektu nemůže být prázdný");
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
     private void saveOrUpdateProject() {
         for (Print3dViewItemTO item : newFiles) {
             try {
-                print3dService.uploadFile(Files.newInputStream(item.getPath()), item.getName(), projectDir);
+                print3dService.uploadFile(Files.newInputStream(item.path()), item.getName(), projectDir);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        Print3dPayloadTO payloadTO = new Print3dPayloadTO(nameField.getValue(), projectDir, keywords.getValue(),
+        Print3dCreateTO payloadTO = new Print3dCreateTO(nameField.getValue(), projectDir, keywords.getValue(),
                 publicatedCheckBox.getValue());
 
         eventBus.subscribe(Print3dEditorPage.this);

@@ -1,4 +1,4 @@
-package cz.gattserver.grass.pg.events.impl;
+package cz.gattserver.grass.pg.events;
 
 import net.engio.mbassy.listener.Handler;
 

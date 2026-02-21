@@ -9,7 +9,7 @@ import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
 import cz.gattserver.grass.modules.PGModule;
 import cz.gattserver.grass.pg.config.PGConfiguration;
-import cz.gattserver.grass.pg.events.impl.*;
+import cz.gattserver.grass.pg.events.*;
 import cz.gattserver.grass.pg.interfaces.*;
 import cz.gattserver.grass.pg.model.Photogallery;
 import cz.gattserver.grass.pg.model.PhotogalleryRepository;
@@ -135,7 +135,7 @@ public class PGServiceImpl implements PGService {
         PGConfiguration configuration = loadConfiguration();
         String miniaturesDir = configuration.getMiniaturesDir();
         String previewsDir = configuration.getPreviewsDir();
-        Path galleryDir = getGalleryPath(photogallery.getPhotogalleryPath());
+        Path galleryDir = getGalleryPath(photogallery.getPhotogalleryDir());
 
         int total;
         try (Stream<Path> stream = Files.list(galleryDir)) {
@@ -184,7 +184,7 @@ public class PGServiceImpl implements PGService {
     private void processSlideshowImages(Photogallery photogallery, boolean reprocess) throws IOException {
         PGConfiguration configuration = loadConfiguration();
         String slideshowDir = configuration.getSlideshowDir();
-        Path galleryDir = getGalleryPath(photogallery.getPhotogalleryPath());
+        Path galleryDir = getGalleryPath(photogallery.getPhotogalleryDir());
 
         int total;
         try (Stream<Path> stream = Files.list(galleryDir)) {
@@ -256,7 +256,7 @@ public class PGServiceImpl implements PGService {
                 existingId == null ? new Photogallery() : photogalleryRepository.findById(existingId).orElse(null);
 
         // nasetuj do ní vše potřebné
-        photogallery.setPhotogalleryPath(galleryDir);
+        photogallery.setPhotogalleryDir(galleryDir);
 
         // ulož ho a nasetuj jeho id
         photogallery = photogalleryRepository.save(photogallery);

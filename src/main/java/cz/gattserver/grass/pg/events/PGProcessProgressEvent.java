@@ -1,4 +1,4 @@
-package cz.gattserver.grass.pg.events.impl;
+package cz.gattserver.grass.pg.events;
 
 import cz.gattserver.grass.core.events.ProgressEvent;
 

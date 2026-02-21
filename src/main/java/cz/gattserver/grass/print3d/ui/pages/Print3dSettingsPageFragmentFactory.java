@@ -8,15 +8,12 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationResult;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.services.FileSystemService;
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.print3d.config.Print3dConfiguration;
 import cz.gattserver.grass.print3d.service.Print3dService;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import jakarta.annotation.Resource;
 
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
@@ -24,11 +21,13 @@ import java.nio.file.InvalidPathException;
 
 public class Print3dSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
-    @Autowired
-    private Print3dService pgService;
+    private final Print3dService pgService;
+    private final FileSystemService fileSystemService;
 
-    @Autowired
-    private FileSystemService fileSystemService;
+    public Print3dSettingsPageFragmentFactory() {
+        this.pgService = SpringContextHelper.getBean(Print3dService.class);
+        this.fileSystemService = SpringContextHelper.getBean(FileSystemService.class);
+    }
 
     @Override
     public void createFragment(Div div) {
@@ -75,5 +74,4 @@ public class Print3dSettingsPageFragmentFactory extends AbstractPageFragmentFact
         btnLayout.add(saveButton);
         layout.add(btnLayout);
     }
-
 }

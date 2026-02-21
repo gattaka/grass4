@@ -25,6 +25,7 @@ public class Photogallery {
     /**
 	 * Relativní cesta (od kořene fotogalerie) k adresáři s fotografiemi
 	 */
-	private String photogalleryPath;
+    @Column(name = "PHOTOGALLERYPATH")
+	private String photogalleryDir;
 
 }

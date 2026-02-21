@@ -32,7 +32,7 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
-import cz.gattserver.grass.pg.events.impl.*;
+import cz.gattserver.grass.pg.events.*;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryCreateTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryViewItemTO;

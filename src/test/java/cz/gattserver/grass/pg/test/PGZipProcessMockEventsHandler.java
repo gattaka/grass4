@@ -1,6 +1,6 @@
 package cz.gattserver.grass.pg.test;
 
-import cz.gattserver.grass.pg.events.impl.PGZipProcessResultEvent;
+import cz.gattserver.grass.pg.events.PGZipProcessResultEvent;
 import net.engio.mbassy.listener.Handler;
 
 import java.nio.file.Path;

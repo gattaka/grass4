@@ -2,27 +2,29 @@ package cz.gattserver.grass.print3d.config;
 
 
 import cz.gattserver.grass.core.config.AbstractConfiguration;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 /**
  * @author Hynek
- * 
+ *
  */
-public class Print3dConfiguration extends AbstractConfiguration {
+@Setter
+@Getter
+public class Print3dConfiguration extends AbstractConfiguration implements Serializable {
 
-	public static final String PRINT3D_PATH = "print3d-files";
+    @Serial
+    private static final long serialVersionUID = 3185228743362557896L;
 
-	private String rootDir = "rootDir";
+    public static final String PRINT3D_PATH = "print3d-files";
 
-	public Print3dConfiguration() {
-		super("cz.gattserver.grass3.print3d");
-	}
+    private String rootDir = "rootDir";
 
-	public String getRootDir() {
-		return rootDir;
-	}
-
-	public void setRootDir(String rootDir) {
-		this.rootDir = rootDir;
-	}
+    public Print3dConfiguration() {
+        super("cz.gattserver.grass3.print3d");
+    }
 
 }
