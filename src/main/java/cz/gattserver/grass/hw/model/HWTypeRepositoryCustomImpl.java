@@ -9,9 +9,9 @@ import com.querydsl.jpa.JPQLQuery;
 import cz.gattserver.grass.hw.interfaces.HWTypeTokenTO;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.interfaces.QHWTypeTO;
-import cz.gattserver.grass.hw.interfaces.QHWTypeBasicTO;
 
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
+import cz.gattserver.grass.hw.interfaces.QHWTypeTokenTO;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import com.querydsl.core.types.OrderSpecifier;
@@ -49,7 +49,7 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     @Override
     public Set<HWTypeTokenTO> findOrderByName() {
         return new LinkedHashSet<>(
-                createGroupQuery().select(new QHWTypeBasicTO(t.id, t.name)).orderBy(t.name.asc()).fetch());
+                createGroupQuery().select(new QHWTypeTokenTO(t.id, t.name)).orderBy(t.name.asc()).fetch());
     }
 
     @Override
@@ -60,7 +60,7 @@ public class HWTypeRepositoryCustomImpl extends QuerydslRepositorySupport implem
     @Override
     public Set<HWTypeTokenTO> findByItemId(Long itemId) {
         return new LinkedHashSet<>(
-                createGroupQuery().where(it.id.hwItemId.eq(itemId)).select(new QHWTypeBasicTO(t.id, t.name)).fetch());
+                createGroupQuery().where(it.id.hwItemId.eq(itemId)).select(new QHWTypeTokenTO(t.id, t.name)).fetch());
     }
 
     @Override
