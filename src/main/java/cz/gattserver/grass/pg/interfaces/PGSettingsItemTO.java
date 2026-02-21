@@ -4,13 +4,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Date;
 
 @Setter
 @Getter
 @AllArgsConstructor
-public class PGSettingsItemTO implements Comparable<PGSettingsItemTO> {
+public class PGSettingsItemTO implements Comparable<PGSettingsItemTO>, Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -6240185413941887320L;
 
     private Path path;
     private PhotogalleryRESTOverviewTO overviewTO;

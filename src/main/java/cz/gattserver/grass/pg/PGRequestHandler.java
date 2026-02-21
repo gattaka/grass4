@@ -5,15 +5,18 @@ import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
+import java.io.Serial;
 import java.nio.file.Path;
 
 @Component
 public class PGRequestHandler extends AbstractGrassRequestHandler {
+
+    @Serial
+    private static final long serialVersionUID = 6875894210256634225L;
 
     private final ConfigurationService configurationService;
     private final FileSystemService fileSystemService;

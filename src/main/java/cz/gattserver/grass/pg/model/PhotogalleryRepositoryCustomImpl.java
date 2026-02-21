@@ -1,4 +1,4 @@
-package cz.gattserver.grass.pg.model.repositories;
+package cz.gattserver.grass.pg.model;
 
 import com.querydsl.jpa.JPQLQuery;
 import cz.gattserver.grass.core.model.domain.QContentNode;
@@ -6,13 +6,10 @@ import cz.gattserver.grass.core.model.domain.QNode;
 import cz.gattserver.grass.core.model.domain.QUser;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.pg.interfaces.*;
-import cz.gattserver.grass.pg.model.domain.Photogallery;
-import cz.gattserver.grass.pg.model.domain.QPhotogallery;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport

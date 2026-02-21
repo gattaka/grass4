@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 public class PGRequestHandlerConfig {
 
     @Bean
-    public ServletRegistrationBean pgRequestHandlerRegisterBean(PGRequestHandler handler) {
+    public ServletRegistrationBean<PGRequestHandler> pgRequestHandlerRegisterBean(PGRequestHandler handler) {
         return new ServletRegistrationBean<>(handler, "/" + PGConfiguration.PG_PATH + "/*");
     }
 }

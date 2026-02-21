@@ -1,4 +1,4 @@
-package cz.gattserver.grass.pg.service.impl;
+package cz.gattserver.grass.pg.service;
 
 import cz.gattserver.common.slideshow.MediaType;
 import cz.gattserver.common.util.ReferenceHolder;
@@ -11,9 +11,8 @@ import cz.gattserver.grass.modules.PGModule;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.impl.*;
 import cz.gattserver.grass.pg.interfaces.*;
-import cz.gattserver.grass.pg.model.domain.Photogallery;
-import cz.gattserver.grass.pg.model.repositories.PhotogalleryRepository;
-import cz.gattserver.grass.pg.service.PGService;
+import cz.gattserver.grass.pg.model.Photogallery;
+import cz.gattserver.grass.pg.model.PhotogalleryRepository;
 import cz.gattserver.grass.pg.util.DecodeAndCaptureFrames;
 import cz.gattserver.grass.pg.util.PGUtils;
 import cz.gattserver.grass.core.services.ConfigurationService;
@@ -589,7 +588,6 @@ public class PGServiceImpl implements PGService {
                 itemTO.setFullPath(itemTO.getName());
                 items.add(itemTO);
             });
-
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

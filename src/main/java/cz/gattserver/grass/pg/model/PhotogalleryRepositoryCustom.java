@@ -1,4 +1,4 @@
-package cz.gattserver.grass.pg.model.repositories;
+package cz.gattserver.grass.pg.model;
 
 import cz.gattserver.grass.pg.interfaces.PhotogalleryRESTOverviewTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryRESTTO;

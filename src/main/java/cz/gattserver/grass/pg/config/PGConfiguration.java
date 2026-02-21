@@ -5,17 +5,23 @@ import cz.gattserver.grass.core.config.AbstractConfiguration;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * @author Hynek
  * 
  */
 @Setter
 @Getter
-public class PGConfiguration extends AbstractConfiguration {
+public class PGConfiguration extends AbstractConfiguration implements Serializable {
 
-	public static final String PG_PATH = "pg-files";
+    @Serial
+    private static final long serialVersionUID = -4927306254703367064L;
 
-	private String rootDir = "rootDir";
+    public static final String PG_PATH = "pg-files";
+
+    private String rootDir = "rootDir";
 
 	private String miniaturesDir = "foto_mini";
 

@@ -14,13 +14,12 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.common.slideshow.ExifInfoTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.batik.transcoder.TranscoderException;
 import org.apache.batik.transcoder.TranscoderInput;
 import org.apache.batik.transcoder.TranscoderOutput;
 import org.apache.batik.transcoder.image.JPEGTranscoder;
 import org.imgscalr.Scalr;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -35,9 +34,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+@Slf4j
 public class PGUtils {
-
-    private static Logger logger = LoggerFactory.getLogger(PGUtils.class);
 
     public static final int MINIATURE_SIZE = 150;
     public static final int SLIDESHOW_WIDTH = 900;
@@ -78,7 +76,7 @@ public class PGUtils {
         try (OutputStream o = Files.newOutputStream(destinationFile)) {
             ImageIO.write(backgroundImage, "png", o);
         } catch (IOException e) {
-            logger.error("Vytváření chybového náhledu videa {} se nezdařilo", destinationFile.getFileName().toString(),
+            log.error("Vytváření chybového náhledu videa {} se nezdařilo", destinationFile.getFileName().toString(),
                     e);
         }
     }
@@ -121,7 +119,7 @@ public class PGUtils {
 
         } catch (IOException | ImageProcessingException e) {
             // nezdařilo se, nevadí
-            logger.error("Získání EXIF pro soubor {} se nezdařilo", inputFile.getFileName().toString(), e);
+            log.error("Získání EXIF pro soubor {} se nezdařilo", inputFile.getFileName().toString(), e);
         }
         return infoTO;
     }
@@ -138,8 +136,8 @@ public class PGUtils {
                     TranscoderInput input = new TranscoderInput(is);
                     TranscoderOutput output = new TranscoderOutput(os);
                     JPEGTranscoder converter = new JPEGTranscoder();
-                    converter.addTranscodingHint(JPEGTranscoder.KEY_MAX_WIDTH, Float.valueOf(maxWidth));
-                    converter.addTranscodingHint(JPEGTranscoder.KEY_MAX_HEIGHT, Float.valueOf(maxHeight));
+                    converter.addTranscodingHint(JPEGTranscoder.KEY_MAX_WIDTH, (float) maxWidth);
+                    converter.addTranscodingHint(JPEGTranscoder.KEY_MAX_HEIGHT, (float) maxHeight);
                     converter.transcode(input, output);
                 } catch (TranscoderException e) {
                     throw new IOException("SVG to JPG failed", e);
