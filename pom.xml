@@ -21,7 +21,7 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <vaadin.version>25.0.3</vaadin.version>
-        <tika.core.version>3.0.0</tika.core.version>
+        <tika.core.version>3.2.3</tika.core.version>
         <tomcat.jdbc.version>8.5.23</tomcat.jdbc.version>
         <commons.io.version>2.18.0</commons.io.version>
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
