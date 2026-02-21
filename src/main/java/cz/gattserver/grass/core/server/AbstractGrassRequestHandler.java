@@ -1,11 +1,8 @@
 package cz.gattserver.grass.core.server;
 
-import java.io.Closeable;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.RandomAccessFile;
+import java.io.*;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -13,30 +10,29 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import cz.gattserver.grass.core.exception.GrassPageException;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
 import org.apache.tika.Tika;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Registrace servletu, které z tohoto dědí by měly být namísto přes {@link jakarta.servlet.annotation.WebServlet}
  * provedeny přes Spring {@link org.springframework.boot.web.servlet.ServletRegistrationBean}
  * Důvodem je pořadí vytváření Spring beans, u kterých takhle vznikal problém s vytvářením jakarta.persistence.EntityManager
  */
+@Slf4j
 public abstract class AbstractGrassRequestHandler extends HttpServlet {
 
-    private transient Logger logger = LoggerFactory.getLogger(AbstractGrassRequestHandler.class);
+    @Serial
+    private static final long serialVersionUID = -273598508191130081L;
 
     private static final int DEFAULT_BUFFER_SIZE = 10240; // ..bytes = 10KB.
-    private static final long DEFAULT_EXPIRE_TIME = 604800000L; // ..ms = 1
-    // week.
+    private static final long DEFAULT_EXPIRE_TIME = 604800000L; // ..ms = 1 week.
     private static final String MULTIPART_BOUNDARY = "MULTIPART_BYTERANGES";
 
     private static final String ETAG = "ETag";
@@ -51,7 +47,7 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
 
     @Override
     public void init() {
-        logger.info("Servlet " + this.getServletName() + " initialized");
+        log.info("Servlet {} initialized", this.getServletName());
     }
 
     protected abstract Path getPath(String fileName, HttpServletRequest request) throws FileNotFoundException;
@@ -62,15 +58,13 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
         try {
             return tika.detect(file);
         } catch (IOException e) {
-            logger.error("Nezdařilo se zjištění MIME souboru", e);
+            log.error("Nezdařilo se zjištění MIME souboru", e);
         }
         return null;
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         // credit:
         // http://balusc.omnifaces.org/2009/02/fileservlet-supporting-resume-and.html
 
@@ -88,9 +82,9 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
 
         // URL-decode the file name (might contain spaces and on) and prepare
         // file object.
-        Path file = null;
+        Path file;
         try {
-            file = getPath(URLDecoder.decode(requestedFile, "UTF-8"), request);
+            file = getPath(URLDecoder.decode(requestedFile, StandardCharsets.UTF_8), request);
         } catch (GrassPageException gpe) {
             response.sendError(gpe.getStatus(), gpe.getLocalizedMessage());
             return;
@@ -105,7 +99,7 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
             return;
         }
 
-        // Prepare some variables. The ETag is an unique identifier of the file.
+        // Prepare some variables. The ETag is a unique identifier of the file.
         String fileName = file.getFileName().toString();
         long length = Files.size(file);
         long lastModified = Files.getLastModifiedTime(file).toMillis();
@@ -158,7 +152,7 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
         // -------------------------------------------------------------
 
         // Prepare some variables. The full Range represents the complete file.
-        Range full = new Range(0, length - 1, length);
+        final Range fullRange = new Range(0, length - 1, length);
         List<Range> ranges = new ArrayList<>();
 
         // Validate and process Range and If-Range headers.
@@ -175,7 +169,7 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
                 return;
             }
 
-            // If-Range header should either match ETag or be greater then
+            // If-Range header should either match ETag or be greater than
             // LastModified. If not,
             // then return full file.
             String ifRange = request.getHeader(IF_RANGE);
@@ -184,10 +178,10 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
                     // Throws IAE if invalid.
                     long ifRangeTime = request.getDateHeader(IF_RANGE);
                     if (ifRangeTime != -1 && ifRangeTime + 1000 < lastModified) {
-                        ranges.add(full);
+                        ranges.add(fullRange);
                     }
                 } catch (IllegalArgumentException ignore) {
-                    ranges.add(full);
+                    ranges.add(fullRange);
                 }
             }
 
@@ -273,14 +267,13 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
         // ------------------------------------------------
 
         OutputStream output = null;
-        try (RandomAccessFile input = new RandomAccessFile(file.toFile(), "r");) {
+        try (RandomAccessFile input = new RandomAccessFile(file.toFile(), "r")) {
             output = response.getOutputStream();
-            if (ranges.isEmpty() || ranges.get(0) == full) {
+            if (ranges.isEmpty() || ranges.getFirst() == fullRange) {
 
                 // Return full file.
-                Range r = full;
                 response.setContentType(contentType);
-                response.setHeader(CONTENT_RANGE, "bytes " + r.start + "-" + r.end + "/" + r.total);
+                response.setHeader(CONTENT_RANGE, "bytes " + fullRange.start + "-" + fullRange.end + "/" + fullRange.total);
 
                 if (content) {
                     if (acceptsGzip) {
@@ -292,17 +285,17 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
                         // GZIP.
                         // So only add it if there is no means of GZIP, else
                         // browser will hang.
-                        response.setHeader(CONTENT_LENGTH, String.valueOf(r.length));
+                        response.setHeader(CONTENT_LENGTH, String.valueOf(fullRange.length));
                     }
 
                     // Copy full range.
-                    copy(input, output, r.start, r.length);
+                    copy(input, output, fullRange.start, fullRange.length);
                 }
 
             } else if (ranges.size() == 1) {
 
                 // Return single part of file.
-                Range r = ranges.get(0);
+                Range r = ranges.getFirst();
                 response.setContentType(contentType);
                 response.setHeader(CONTENT_RANGE, "bytes " + r.start + "-" + r.end + "/" + r.total);
                 response.setHeader(CONTENT_LENGTH, String.valueOf(r.length));
@@ -324,7 +317,7 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
                     // methods.
                     ServletOutputStream sos = (ServletOutputStream) output;
 
-                    // Copy multi part range.
+                    // Copy multipart range.
                     for (Range r : ranges) {
                         // Add multipart boundary and header fields for every
                         // range.
@@ -333,7 +326,7 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
                         sos.println("Content-Type: " + contentType);
                         sos.println("Content-Range: bytes " + r.start + "-" + r.end + "/" + r.total);
 
-                        // Copy single part range of multi part range.
+                        // Copy single part range of multipart range.
                         copy(input, output, r.start, r.length);
                     }
 
@@ -389,7 +382,7 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
      */
     private static long sublong(String value, int beginIndex, int endIndex) {
         String substring = value.substring(beginIndex, endIndex);
-        return (substring.length() > 0) ? Long.parseLong(substring) : -1;
+        return (!substring.isEmpty()) ? Long.parseLong(substring) : -1;
     }
 
     /**
@@ -448,7 +441,7 @@ public abstract class AbstractGrassRequestHandler extends HttpServlet {
     /**
      * This class represents a byte range.
      */
-    protected class Range {
+    protected static class Range {
         long start;
         long end;
         long length;

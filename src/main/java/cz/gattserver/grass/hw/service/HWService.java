@@ -27,7 +27,7 @@ public interface HWService {
 
     InputStream findHWItemImagesMiniFileInputStream(Long id, String name);
 
-    boolean deleteHWItemImagesFile(Long id, String name);
+    void deleteHWItemImagesFile(Long id, String name);
 
     /*
      * 3D files
@@ -43,7 +43,7 @@ public interface HWService {
 
     Path findHWItemPrint3dFilePath(Long id, String name);
 
-    boolean deleteHWItemPrint3dFile(Long id, String name);
+    void deleteHWItemPrint3dFile(Long id, String name);
 
     /*
      * Documents
@@ -59,7 +59,7 @@ public interface HWService {
 
     InputStream findHWItemDocumentsFileInputStream(Long id, String name);
 
-    boolean deleteHWItemDocumentsFile(Long id, String name);
+    void deleteHWItemDocumentsFile(Long id, String name);
 
     /*
      * Icons
@@ -75,7 +75,7 @@ public interface HWService {
 
     InputStream findHWItemIconMiniFileInputStream(Long id);
 
-    boolean deleteHWItemIconFile(Long id);
+    void deleteHWItemIconFile(Long id);
 
     /*
      * Item types

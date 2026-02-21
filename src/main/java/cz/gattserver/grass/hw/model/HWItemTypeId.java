@@ -1,11 +1,21 @@
 package cz.gattserver.grass.hw.model;
 
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 
+@Setter
+@Getter
 @Embeddable
+@EqualsAndHashCode
 public class HWItemTypeId implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -898418862465443635L;
 
     @Column(name = "HW_ITEM_ID")
     private Long hwItemId;
@@ -21,33 +31,4 @@ public class HWItemTypeId implements Serializable {
         this.hwTypeId = hwTypeId;
     }
 
-    public Long getHwItemId() {
-        return hwItemId;
-    }
-
-    public void setHwItemId(Long hwItemId) {
-        this.hwItemId = hwItemId;
-    }
-
-    public Long getHwTypeId() {
-        return hwTypeId;
-    }
-
-    public void setHwTypeId(Long hwTypeId) {
-        this.hwTypeId = hwTypeId;
-    }
-
-    @Override
-    public final boolean equals(Object o) {
-        if (!(o instanceof HWItemTypeId that)) return false;
-
-        return hwItemId.equals(that.hwItemId) && hwTypeId.equals(that.hwTypeId);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = hwItemId.hashCode();
-        result = 31 * result + hwTypeId.hashCode();
-        return result;
-    }
 }

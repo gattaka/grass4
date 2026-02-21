@@ -1,7 +1,11 @@
 package cz.gattserver.grass.hw.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity(name = "HW_ITEM_TYPE")
 public class HWItemType {
 
@@ -18,11 +22,4 @@ public class HWItemType {
         this.id = new HWItemTypeId(hwItemId, hwTypeId);
     }
 
-    public HWItemTypeId getId() {
-        return id;
-    }
-
-    public void setId(HWItemTypeId id) {
-        this.id = id;
-    }
 }

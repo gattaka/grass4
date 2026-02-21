@@ -5,10 +5,14 @@ import java.time.LocalDate;
 import jakarta.persistence.*;
 
 import cz.gattserver.grass.hw.interfaces.HWItemState;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Údaj o opravě, změně součástí apod.
  */
+@Setter
+@Getter
 @Entity(name = "HW_ITEM_RECORD")
 public class HWItemRecord {
 
@@ -40,45 +44,5 @@ public class HWItemRecord {
      * Stav do kterého byl HW převeden v souvislosti s popisovanou událostí
      */
     private HWItemState state;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
-    public HWItemState getState() {
-        return state;
-    }
-
-    public void setState(HWItemState state) {
-        this.state = state;
-    }
-
-    public Long getHwItemId() {
-        return hwItemId;
-    }
-
-    public void setHwItemId(Long hwItemId) {
-        this.hwItemId = hwItemId;
-    }
 
 }

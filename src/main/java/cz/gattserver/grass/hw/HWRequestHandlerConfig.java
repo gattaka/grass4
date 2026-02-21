@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 public class HWRequestHandlerConfig {
 
     @Bean
-    public ServletRegistrationBean hwRequestHandlerRegisterBean(HWRequestHandler handler) {
+    public ServletRegistrationBean<HWRequestHandler> hwRequestHandlerRegisterBean(HWRequestHandler handler) {
         return new ServletRegistrationBean<>(handler, "/" + HWConfiguration.HW_PATH + "/*");
     }
 }

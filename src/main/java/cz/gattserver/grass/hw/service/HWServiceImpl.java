@@ -1,4 +1,4 @@
-package cz.gattserver.grass.hw.service.impl;
+package cz.gattserver.grass.hw.service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -36,8 +36,6 @@ import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.grass.hw.HWConfiguration;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.model.HWType;
-import cz.gattserver.grass.hw.service.HWMapperService;
-import cz.gattserver.grass.hw.service.HWService;
 
 @Transactional
 @Component
@@ -68,9 +66,6 @@ public class HWServiceImpl implements HWService {
 
     @Autowired
     private ConfigurationService configurationService;
-
-    @Autowired
-    private HWMapperService hwMapper;
 
     /*
      * Config
@@ -234,7 +229,7 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public boolean deleteHWItemImagesFile(Long id, String fileName) {
+    public void deleteHWItemImagesFile(Long id, String fileName) {
         try {
             Path images = getHWItemImagesPath(id);
             Path image = images.resolve(fileName);
@@ -245,7 +240,6 @@ public class HWServiceImpl implements HWService {
             Path imageMiniPath = imagesMiniPath.resolve(fileName);
             Files.deleteIfExists(imageMiniPath);
 
-            return true;
         } catch (IOException e) {
             throw new GrassException("Nezdařilo se smazat grafickou přílohu HW položky.", e);
         }
@@ -349,13 +343,13 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public boolean deleteHWItemPrint3dFile(Long id, String name) {
+    public void deleteHWItemPrint3dFile(Long id, String name) {
         Path models;
         try {
             models = getHWItemPrint3dPath(id);
             Path model = models.resolve(name);
             if (!model.normalize().startsWith(models)) throw new IllegalArgumentException(ILLEGAL_PATH_PRINT_3D_ERR);
-            return Files.deleteIfExists(model);
+            Files.deleteIfExists(model);
         } catch (IOException e) {
             throw new GrassException("Nezdařilo se smazat soubor 3d modelu HW položky.", e);
         }
@@ -425,13 +419,13 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public boolean deleteHWItemDocumentsFile(Long id, String name) {
+    public void deleteHWItemDocumentsFile(Long id, String name) {
         Path docs;
         try {
             docs = getHWItemDocumentsPath(id);
             Path doc = docs.resolve(name);
             if (!doc.normalize().startsWith(docs)) throw new IllegalArgumentException(ILLEGAL_PATH_DOCS_ERR);
-            return Files.deleteIfExists(doc);
+            Files.deleteIfExists(doc);
         } catch (IOException e) {
             throw new GrassException("Nezdařilo se smazat soubor dokumentace HW položky.", e);
         }
@@ -502,14 +496,18 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
-    public boolean deleteHWItemIconFile(Long id) {
+    public void deleteHWItemIconFile(Long id) {
         try {
             Path image = findHWItemIconFile(id);
-            if (image != null) return Files.deleteIfExists(image);
+            if (image != null) {
+                Files.deleteIfExists(image);
+                return;
+            }
 
             Path imageMini = findHWItemIconMiniFile(id);
-            if (imageMini != null) return Files.deleteIfExists(imageMini);
-            return false;
+            if (imageMini != null) {
+                Files.deleteIfExists(imageMini);
+            }
         } catch (IOException e) {
             throw new GrassException("Nezdařilo se smazat miniaturu ikonu HW položky.", e);
         }
@@ -521,7 +519,7 @@ public class HWServiceImpl implements HWService {
 
     @Override
     public Long saveHWType(HWTypeTO hwTypeTO) {
-        HWType type = hwMapper.mapHWItem(hwTypeTO);
+        HWType type = new HWType(hwTypeTO.getId(),hwTypeTO.getName());
         type = hwTypeRepository.save(type);
         return type.getId();
     }
@@ -633,7 +631,7 @@ public class HWServiceImpl implements HWService {
                 typesIdsSet.stream().map(typeId -> new HWItemType(item.getId(), typeId)).collect(Collectors.toList());
         hwItemTypeRepository.saveAll(itemTypesBatch);
 
-        if (to.getUsedInId() != to.getUsedInIdOld()) {
+        if (!to.getUsedInId().equals(to.getUsedInIdOld())) {
             if (to.getUsedInIdOld() != null) {
                 HWItem oldParentItem = hwItemRepository.findById(to.getUsedInIdOld()).get();
 

@@ -2,21 +2,22 @@ package cz.gattserver.grass.hw;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.Serial;
 import java.nio.file.Path;
 
 import cz.gattserver.grass.core.server.AbstractGrassRequestHandler;
-import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServletRequest;
 
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.hw.service.HWService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Component
 public class HWRequestHandler extends AbstractGrassRequestHandler {
+
+    @Serial
+    private static final long serialVersionUID = 5193217920856378073L;
 
     private final HWService hwService;
 
