@@ -62,12 +62,12 @@ public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport
 
     @Override
     public String findPhotogalleryPathById(Long photogalleryId) {
-        return from(p).where(p.id.eq(photogalleryId)).select(p.photogalleryPath).fetchFirst();
+        return from(p).where(p.id.eq(photogalleryId)).select(p.photogalleryDir).fetchFirst();
     }
 
     @Override
     public PhotogalleryRESTOverviewTO findForRestByDirectory(String directory, Long userId, boolean isAdmin) {
-        return createOverviewQuery(null, userId, isAdmin).where(p.photogalleryPath.eq(directory))
+        return createOverviewQuery(null, userId, isAdmin).where(p.photogalleryDir.eq(directory))
                 .select(new QPhotogalleryRESTOverviewTO(p.id, c.name)).fetchFirst();
     }
 
@@ -75,13 +75,13 @@ public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport
     public PhotogalleryRESTTO findForRestById(Long id, Long userId, boolean isAdmin) {
         return createDetailQuery(userId, isAdmin).where(p.id.eq(id))
                 .select(new QPhotogalleryRESTTO(p.id, c.name, c.creationDate, c.lastModificationDate, u.name,
-                        p.photogalleryPath)).fetchFirst();
+                        p.photogalleryDir)).fetchFirst();
     }
 
     @Override
     public PhotogalleryTO findForDetailById(Long id, Long userId, boolean isAdmin) {
         return createDetailQuery(userId, isAdmin).where(p.id.eq(id))
                 .select(new QPhotogalleryTO(p.id, p.contentNodeId, c.name, n.id, n.name, c.creationDate,
-                        c.lastModificationDate, u.id, u.name, p.photogalleryPath, c.publicated, c.draft)).fetchFirst();
+                        c.lastModificationDate, u.id, u.name, p.photogalleryDir, c.publicated, c.draft)).fetchFirst();
     }
 }

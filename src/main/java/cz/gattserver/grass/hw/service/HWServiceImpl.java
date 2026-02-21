@@ -519,7 +519,7 @@ public class HWServiceImpl implements HWService {
 
     @Override
     public Long saveHWType(HWTypeTO hwTypeTO) {
-        HWType type = new HWType(hwTypeTO.getId(),hwTypeTO.getName());
+        HWType type = new HWType(hwTypeTO.getId(), hwTypeTO.getName());
         type = hwTypeRepository.save(type);
         return type.getId();
     }
@@ -631,7 +631,10 @@ public class HWServiceImpl implements HWService {
                 typesIdsSet.stream().map(typeId -> new HWItemType(item.getId(), typeId)).collect(Collectors.toList());
         hwItemTypeRepository.saveAll(itemTypesBatch);
 
-        if (!to.getUsedInId().equals(to.getUsedInIdOld())) {
+        boolean isAddedUsedIn = to.getUsedInId() != null && to.getUsedInIdOld() == null;
+        boolean isRemovedUsedIn = to.getUsedInId() == null && to.getUsedInIdOld() != null;
+        boolean isChangedUsedIn = to.getUsedInId() != null && !to.getUsedInId().equals(to.getUsedInIdOld());
+        if (isAddedUsedIn || isRemovedUsedIn || isChangedUsedIn) {
             if (to.getUsedInIdOld() != null) {
                 HWItem oldParentItem = hwItemRepository.findById(to.getUsedInIdOld()).get();
 
