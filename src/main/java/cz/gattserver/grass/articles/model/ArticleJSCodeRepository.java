@@ -15,4 +15,7 @@ public interface ArticleJSCodeRepository extends JpaRepository<ArticleJSCode, Ar
     @Query("delete ARTICLE_JS_CODE where id.articleId = ?1 and id.code in ?2")
     void deleteJSCodes(Long articleId, Set<String> code);
 
+    @Modifying
+    @Query("delete ARTICLE_JS_CODE where id.articleId = ?1")
+    void deleteByArticleId(Long articleId);
 }

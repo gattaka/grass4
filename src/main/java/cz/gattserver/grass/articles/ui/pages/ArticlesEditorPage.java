@@ -160,8 +160,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 logger.debug("Neexistující kategorie: {}", identifier.getId());
                 throw new GrassPageException(404);
             }
-            articleEditorTO.setContentNodeId(node.getId());
-            articleEditorTO.setContentNodeName(node.getName());
+            articleEditorTO.setNodeId(node.getId());
+            articleEditorTO.setNodeName(node.getName());
             articleEditorTO.setDraftName("");
             articleEditorTO.setDraftText("");
             articleEditorTO.setDraftPublicated(true);
@@ -173,6 +173,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                     articleService.getArticleForDetail(identifier.getId(), securityService.getCurrentUser().getId(),
                             securityService.getCurrentUser().isAdmin());
             if (existingArticleTO == null) throw new GrassPageException(403);
+            articleEditorTO.setNodeId(existingArticleTO.parentId());
+            articleEditorTO.setNodeName(existingArticleTO.parentName());
             articleEditorTO.setContentNodeId(existingArticleTO.contentNodeId());
             articleEditorTO.setContentNodeName(existingArticleTO.name());
             articleEditorTO.setExistingArticleId(existingArticleTO.id());
@@ -194,6 +196,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         ArticleTO draftTO = articleService.getArticleForDetail(draftId, securityService.getCurrentUser().getId(),
                 securityService.getCurrentUser().isAdmin());
         articleEditorTO.setDraftId(draftTO.id());
+        articleEditorTO.setNodeId(draftTO.parentId());
+        articleEditorTO.setNodeName(draftTO.parentName());
         articleEditorTO.setContentNodeId(draftTO.contentNodeId());
         articleEditorTO.setContentNodeName(draftTO.name());
         articleEditorTO.setDraftName(draftTO.name());
@@ -327,7 +331,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsDialog(list -> list.forEach(articleKeywords::addToken)).open());
-        articleKeywords.getChooseElementsDiv().add(copyFromContentButton);
+        articleKeywords.getTokensLayout().addComponentAsFirst(copyFromContentButton);
 
         layout.add(new H3("Obsah článku"));
         layout.add(articleTextArea);
@@ -491,7 +495,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
     private void saveArticle() {
         gatherFields();
-        articleService.saveArticle(articleEditorTO);
+        articleEditorTO.setExistingArticleId(articleService.saveArticle(articleEditorTO));
     }
 
     @ClientCallable
@@ -610,8 +614,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     @ClientCallable
     private void returnToNodeCallback() {
         UI.getCurrent().navigate(NodePage.class,
-                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getContentNodeId(),
-                        articleEditorTO.getContentNodeName()));
+                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getNodeId(),
+                        articleEditorTO.getNodeName()));
     }
 
     @ClientCallable

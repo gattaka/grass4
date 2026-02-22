@@ -110,21 +110,16 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
     }
 
     protected void onDeleteOperation() {
-        ConfirmDialog confirmDialog = new ConfirmDialog("Opravdu si přejete smazat tento článek ?", event -> {
-            // zdařilo se ? Pokud ano, otevři info okno a při
+        try {
+            articleService.deleteArticle(articleTO.id());
+            UI.getCurrent().navigate(NodePage.class,
+                    URLIdentifierUtils.createURLIdentifier(articleTO.parentId(), articleTO.parentName()));
+        } catch (Exception e) {
+            // Pokud ne, otevři warn okno a při
             // potvrzení jdi na kategorii
-            try {
-                articleService.deleteArticle(articleTO.id());
-                UI.getCurrent().navigate(NodePage.class,
-                        URLIdentifierUtils.createURLIdentifier(articleTO.parentId(), articleTO.parentName()));
-            } catch (Exception e) {
-                // Pokud ne, otevři warn okno a při
-                // potvrzení jdi na kategorii
-                WarnDialog warnDialog = new WarnDialog("Smazání článku se nezdařilo.");
-                warnDialog.open();
-            }
-        });
-        confirmDialog.open();
+            WarnDialog warnDialog = new WarnDialog("Smazání článku se nezdařilo.");
+            warnDialog.open();
+        }
     }
 
     @Override

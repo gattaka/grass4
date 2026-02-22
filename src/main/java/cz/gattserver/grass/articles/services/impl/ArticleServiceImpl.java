@@ -56,7 +56,7 @@ public class ArticleServiceImpl implements ArticleService {
     private EventBus eventBus;
 
     @Autowired
-    private ContentNodeService contentNodeFacade;
+    private ContentNodeService contentNodeService;
 
     @Autowired
     private ArticleRepository articleRepository;
@@ -103,7 +103,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Long saveArticle(ArticleEditorTO articleEditorTO) {
-        // zatím bez procesování
         Article article = innerSaveArticle(articleEditorTO, true, false, true);
 
         // Nejprve smaž draft, ale ponech přílohy (ty se musí přenést do ostrého článku).
@@ -172,10 +171,12 @@ public class ArticleServiceImpl implements ArticleService {
         Article article = articleRepository.findById(id).get();
 
         // smaž článek
+        articleCSSResourceRepository.deleteByArticleId(id);
+        articleJSResourceRepository.deleteByArticleId(id);
+        articleJSCodeRepository.deleteByArticleId(id);
         articleRepository.deleteById(id);
 
-        // smaž jeho content node
-        contentNodeFacade.deleteByContentId(ArticlesContentModule.ID, id);
+        contentNodeService.deleteByContentId(ArticlesContentModule.ID, id);
 
         if (deleteAttachments) {
             // smaž jeho přílohy
@@ -228,40 +229,41 @@ public class ArticleServiceImpl implements ArticleService {
             article = new Article();
         } else {
             article = articleRepository.findById(existingArticleId).orElse(null);
+            if (article == null) throw new IllegalStateException("Nenalezen článek dle id " + existingArticleId);
         }
 
-        if (article == null) throw new IllegalStateException("Nenalezen článek dle id " + existingArticleId);
-
+        // ulož ho a nasetuj jeho id
+        article.setId(articleRepository.save(article).getId());
         article.setText(payload.getDraftText());
 
         // nasetuj do něj vše potřebné
         Context context = null;
         if (process) {
-            context = processArticle(payload.getDraftText(), payload.getContextRoot());
-            article.setOutputHTML(context.getOutput());
-            article.setSearchableOutput(HTMLTagsFilter.trim(context.getOutput()));
-
             if (replaceAttachmentsId) {
                 // Nahraď draft id ve všech attachment odkazech novým id ostrého článku
                 String linkFrom = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + payload.getDraftId();
                 String linkTo = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getId();
                 article.setText(article.getText().replaceAll(linkFrom, linkTo));
             }
+
+            context = processArticle(article.getText(), payload.getContextRoot());
+            article.setOutputHTML(context.getOutput());
+            article.setSearchableOutput(HTMLTagsFilter.trim(context.getOutput()));
         }
 
-        // ulož ho a nasetuj jeho id
-        article.setId(articleRepository.save(article).getId());
+        // ulož ho podruhé se zapracavaným id v textu
+        articleRepository.save(article);
 
         if (process) processJSAndCSS(article.getId(), existingArticleId, context);
 
         if (existingArticleId == null) {
             Long contentNodeId =
-                    contentNodeFacade.save(ArticlesContentModule.ID, article.getId(), payload.getDraftName(),
-                            payload.getDraftTags(), payload.isDraftPublicated(), payload.getContentNodeId(),
+                    contentNodeService.save(ArticlesContentModule.ID, article.getId(), payload.getDraftName(),
+                            payload.getDraftTags(), payload.isDraftPublicated(), payload.getNodeId(),
                             securityService.getCurrentUser().getId(), draft, null, payload.getExistingArticleId());
             articleRepository.updateContentNodeId(article.getId(), contentNodeId);
         } else {
-            contentNodeFacade.modify(article.getContentNodeId(), payload.getDraftName(), payload.getDraftTags(),
+            contentNodeService.modify(article.getContentNodeId(), payload.getDraftName(), payload.getDraftTags(),
                     payload.isDraftPublicated());
         }
 

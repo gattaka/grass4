@@ -6,5 +6,4 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ContentNodeContentTagRepository
         extends JpaRepository<ContentNodeContentTag, ContentNodeContentTagId>, ContentNodeContentTagRepositoryCustom {
-
 }

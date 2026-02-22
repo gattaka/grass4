@@ -15,4 +15,7 @@ public interface ArticleJSResourceRepository extends JpaRepository<ArticleJSReso
     @Query("delete ARTICLE_JS_RESOURCE where id.articleId = ?1 and id.resource in ?2")
     void deleteJSResources(Long articleId, Set<String> resources);
 
+    @Modifying
+    @Query("delete ARTICLE_JS_RESOURCE where id.articleId = ?1")
+    void deleteByArticleId(Long articleId);
 }

@@ -4,7 +4,6 @@ import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleEditorTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.modules.ArticlesContentModule;
-import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
@@ -59,7 +58,7 @@ public class ArticlesResource {
                 "GrassAndroid Import " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("d.M.yyyy")));
         payload.setDraftText(text);
         payload.setDraftPublicated(false);
-        payload.setContentNodeId(nodeService.getRootNodes().get(0).getId());
+        payload.setNodeId(nodeService.getRootNodes().get(0).getId());
 
         long articleId = articleService.saveArticle(payload);
 

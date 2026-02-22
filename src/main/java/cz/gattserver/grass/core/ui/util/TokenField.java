@@ -50,7 +50,6 @@ public class TokenField extends CustomField<Set<String>> {
         chooseElementsDiv.setVisible(false);
         tokensLayout.add(chooseElementsDiv);
 
-
         comboBox.addCustomValueSetListener(e -> {
             if (allowNewItems) commitValue(e.getDetail());
         });
@@ -123,6 +122,7 @@ public class TokenField extends CustomField<Set<String>> {
             }
             chooseElementsDiv.setVisible(true);
             comboBox.focus();
+            updateValue();
             if (addTokenListener != null) addTokenListener.accept(token);
         }
     }
@@ -156,8 +156,8 @@ public class TokenField extends CustomField<Set<String>> {
         return comboBox;
     }
 
-    public Div getChooseElementsDiv() {
-        return chooseElementsDiv;
+    public Div getTokensLayout() {
+        return tokensLayout;
     }
 
     public void addTokenAddListener(Consumer<String> addTokenListener) {

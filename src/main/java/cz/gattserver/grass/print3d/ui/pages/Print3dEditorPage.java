@@ -130,7 +130,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsDialog(list -> list.forEach(keywords::addToken)).open());
-        keywords.getChooseElementsDiv().add(copyFromContentButton);
+        keywords.getTokensLayout().addComponentAsFirst(copyFromContentButton);
 
         nameField = new TextField();
         nameField.setValueChangeMode(ValueChangeMode.EAGER);

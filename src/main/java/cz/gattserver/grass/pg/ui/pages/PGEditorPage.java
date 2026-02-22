@@ -143,7 +143,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
                 e -> new CopyTagsDialog(list -> list.forEach(photogalleryKeywords::addToken)).open());
-        photogalleryKeywords.getChooseElementsDiv().add(copyFromContentButton);
+        photogalleryKeywords.getTokensLayout().addComponentAsFirst(copyFromContentButton);
 
         photogalleryNameField = new TextField();
         photogalleryNameField.setValueChangeMode(ValueChangeMode.EAGER);
