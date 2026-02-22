@@ -10,8 +10,8 @@ import java.util.Set;
 @Setter
 public class ArticleEditorTO {
 
-    private Long nodeId;
-    private String nodeName;
+    private Long contentNodeId;
+    private String contentNodeName;
 
     private String contextRoot;
     private Long existingArticleId;

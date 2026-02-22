@@ -93,13 +93,6 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
             if (binder.writeBeanIfValid(configuration)) storeConfiguration(configuration);
         });
 
-        Button renameAttachmentDirsButton =
-                new Button("Přejmenovat adresáře příloh", VaadinIcon.COG_O.create(), event -> {
-                    UIUtils.showSilentInfo(
-                            "Bylo přejmenováno " + articleService.renameAttachmentDirs(UIUtils.getContextPath()) +
-                                    " adresářů příloh");
-                });
-
         reprocessButton = new Button("Přegenerovat všechny články", VaadinIcon.COG_O.create(), event -> {
             ConfirmDialog dialog = new ConfirmDialog(
                     "Přegenerování všech článků může zabrat delší čas a dojde během něj zřejmě k mnoha drobným změnám - opravdu přegenerovat ?",
@@ -113,7 +106,7 @@ public class ArticlesSettingsPageFragmentFactory extends AbstractPageFragmentFac
             dialog.setHeight("230px");
             dialog.open();
         });
-        buttonLayout.add(saveButton, renameAttachmentDirsButton, reprocessButton);
+        buttonLayout.add(saveButton, reprocessButton);
     }
 
     private ArticlesConfiguration loadConfiguration() {

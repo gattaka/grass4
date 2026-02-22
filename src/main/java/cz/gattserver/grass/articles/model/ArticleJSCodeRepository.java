@@ -9,7 +9,7 @@ import java.util.Set;
 public interface ArticleJSCodeRepository extends JpaRepository<ArticleJSCode, ArticleJSCodeId> {
 
     @Query("select c.id.code from ARTICLE_JS_CODE c where c.id.articleId = ?1")
-    Set<String> findJSCodeByArticleId(Long articleId);
+    Set<String> findByArticleId(Long articleId);
 
     @Modifying
     @Query("delete ARTICLE_JS_CODE where id.articleId = ?1 and id.code in ?2")

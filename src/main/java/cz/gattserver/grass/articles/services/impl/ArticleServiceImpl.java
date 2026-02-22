@@ -19,13 +19,10 @@ import cz.gattserver.grass.articles.events.impl.ArticlesProcessStartEvent;
 import cz.gattserver.grass.articles.model.*;
 import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
 import cz.gattserver.grass.articles.services.ArticleService;
-import cz.gattserver.grass.articles.services.ArticlesMapperService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.modules.ArticlesContentModule;
 import cz.gattserver.grass.core.events.EventBus;
-import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 import cz.gattserver.grass.core.model.domain.ContentNode;
-import cz.gattserver.grass.core.model.domain.User;
 import cz.gattserver.grass.core.model.repositories.UserRepository;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.ContentNodeService;
@@ -34,7 +31,6 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -64,13 +60,7 @@ public class ArticleServiceImpl implements ArticleService {
     private ContentNodeService contentNodeFacade;
 
     @Autowired
-    private ArticlesMapperService articlesMapper;
-
-    @Autowired
     private ArticleRepository articleRepository;
-
-    @Autowired
-    private UserRepository userRepository;
 
     @Autowired
     private PluginRegisterService pluginRegister;
@@ -112,13 +102,7 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public Long saveArticle(ArticleEditorTO articleEditorTO) {
         // zatím bez procesování
-        Article article = innerSaveArticle(articleEditorTO, false, false);
-
-        // Nahraď draft id ve všech attachment odkazech novým id ostrého článku
-        String linkFrom = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + articleEditorTO.getDraftId();
-        String linkTo = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getId();
-        article.setText(article.getText().replaceAll(linkFrom, linkTo));
-        reprocessArticle(article, articleEditorTO.getContextRoot());
+        Article article = innerSaveArticle(articleEditorTO, true, false, true);
 
         // Nejprve smaž draft, ale ponech přílohy (ty se musí přenést do ostrého článku).
         // Pokud dojde k problémům se soubory, dá se provést DB rollback, pokud by pořadí operací bylo obráceně,
@@ -174,7 +158,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Long saveDraft(ArticleEditorTO articleEditorTO, boolean asPreview) {
-        return innerSaveArticle(articleEditorTO, asPreview, true).getId();
+        return innerSaveArticle(articleEditorTO, asPreview, true, false).getId();
     }
 
     @Override
@@ -233,7 +217,7 @@ public class ArticleServiceImpl implements ArticleService {
         return set;
     }
 
-    private Article innerSaveArticle(ArticleEditorTO payload, boolean process, boolean draft) {
+    private Article innerSaveArticle(ArticleEditorTO payload, boolean process, boolean draft, boolean replaceAttachmentsId) {
         Long existingArticleId = draft ? payload.getDraftId() : payload.getExistingArticleId();
 
         Article article;
@@ -245,58 +229,34 @@ public class ArticleServiceImpl implements ArticleService {
 
         if (article == null) throw new IllegalStateException("Nenalezen článek dle id " + existingArticleId);
 
+        article.setText(payload.getDraftText());
+
         // nasetuj do něj vše potřebné
         Context context = null;
         if (process) {
             context = processArticle(payload.getDraftText(), payload.getContextRoot());
             article.setOutputHTML(context.getOutput());
             article.setSearchableOutput(HTMLTagsFilter.trim(context.getOutput()));
+
+            if (replaceAttachmentsId) {
+                // Nahraď draft id ve všech attachment odkazech novým id ostrého článku
+                String linkFrom = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + payload.getDraftId();
+                String linkTo = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getId();
+                article.setText(article.getText().replaceAll(linkFrom, linkTo));
+            }
         }
-        article.setText(payload.getDraftText());
 
         // ulož ho a nasetuj jeho id
         article.setId(articleRepository.save(article).getId());
 
-        if (process) {
-            Set<String> cssResourcesSet = context.getCSSResources();
-            if (existingArticleId != null) {
-                cssResourcesSet = ServiceUtils.processDependentSetAndDeleteMissing(cssResourcesSet,
-                        articleCSSResourceRepository.findCSSResourcesByArticleId(existingArticleId),
-                        set -> articleCSSResourceRepository.deleteCSSResources(existingArticleId, set));
-            }
-            articleCSSResourceRepository.saveAll(
-                    cssResourcesSet.stream().map(resource -> new ArticleCSSResource(article.getId(), resource))
-                            .toList());
-
-            Set<String> jsResourcesSet = context.getJSResources();
-            if (existingArticleId != null) {
-                jsResourcesSet = ServiceUtils.processDependentSetAndDeleteMissing(jsResourcesSet,
-                        articleJSResourceRepository.findJSResourcesByArticleId(existingArticleId),
-                        set -> articleJSResourceRepository.deleteJSResources(existingArticleId, set));
-            }
-            articleJSResourceRepository.saveAll(createJSResourcesSet(article.getId(), jsResourcesSet));
-
-            Set<String> jsCodesSet = context.getJSCodes();
-            if (existingArticleId != null) {
-                jsCodesSet = ServiceUtils.processDependentSetAndDeleteMissing(jsCodesSet,
-                        articleJSCodeRepository.findJSCodeByArticleId(existingArticleId),
-                        set -> articleJSCodeRepository.deleteJSCodes(existingArticleId, set));
-            }
-            articleJSCodeRepository.saveAll(createJSCodesSet(article.getId(), jsCodesSet));
-        }
+        if (process) processJSAndCSS(article.getId(), existingArticleId, context);
 
         if (existingArticleId == null) {
-            // vytvoř odpovídající content node
             Long contentNodeId =
                     contentNodeFacade.save(ArticlesContentModule.ID, article.getId(), payload.getDraftName(),
-                            payload.getDraftTags(), payload.isDraftPublicated(), payload.getNodeId(),
+                            payload.getDraftTags(), payload.isDraftPublicated(), payload.getContentNodeId(),
                             securityService.getCurrentUser().getId(), draft, null, payload.getExistingArticleId());
-
-            // ulož do článku referenci na jeho contentnode
-            ContentNode contentNode = new ContentNode();
-            contentNode.setId(contentNodeId);
-            article.setContentNodeId(contentNodeId);
-            articleRepository.save(article);
+            articleRepository.updateContentNodeId(article.getId(), contentNodeId);
         } else {
             contentNodeFacade.modify(article.getContentNodeId(), payload.getDraftName(), payload.getDraftTags(),
                     payload.isDraftPublicated());
@@ -305,24 +265,41 @@ public class ArticleServiceImpl implements ArticleService {
         return article;
     }
 
-    @Override
-    public ArticleTO getArticleForDetail(Long id) {
-        Article article = articleRepository.findById(id).orElse(null);
-        if (article == null) return null;
-        return articlesMapper.mapArticleForDetail(article);
+    private void processJSAndCSS(Long articleId, Long existingArticleId, Context context) {
+        Set<String> cssResourcesSet = context.getCSSResources();
+        if (existingArticleId != null) {
+            cssResourcesSet = ServiceUtils.processDependentSetAndDeleteMissing(cssResourcesSet,
+                    articleCSSResourceRepository.findByArticleId(existingArticleId),
+                    set -> articleCSSResourceRepository.deleteCSSResources(existingArticleId, set));
+        }
+        articleCSSResourceRepository.saveAll(
+                cssResourcesSet.stream().map(resource -> new ArticleCSSResource(articleId, resource)).toList());
+
+        Set<String> jsResourcesSet = context.getJSResources();
+        if (existingArticleId != null) {
+            jsResourcesSet = ServiceUtils.processDependentSetAndDeleteMissing(jsResourcesSet,
+                    articleJSResourceRepository.findByArticleId(existingArticleId),
+                    set -> articleJSResourceRepository.deleteJSResources(existingArticleId, set));
+        }
+        articleJSResourceRepository.saveAll(createJSResourcesSet(articleId, jsResourcesSet));
+
+        Set<String> jsCodesSet = context.getJSCodes();
+        if (existingArticleId != null) {
+            jsCodesSet = ServiceUtils.processDependentSetAndDeleteMissing(jsCodesSet,
+                    articleJSCodeRepository.findByArticleId(existingArticleId),
+                    set -> articleJSCodeRepository.deleteJSCodes(existingArticleId, set));
+        }
+        articleJSCodeRepository.saveAll(createJSCodesSet(articleId, jsCodesSet));
     }
 
     @Override
-    public ArticleRESTTO getArticleForREST(Long id, Long userId) throws UnauthorizedAccessException {
-
-        Article article = articleRepository.findById(id).orElse(null);
-        if (article == null) return null;
-        User user = userId == null ? null : userRepository.findById(userId).orElse(null);
-        if (article.getPublicated() ||
-                user != null && (user.isAdmin() || article.getContentNode().getAuthor().getId().equals(user.getId()))) {
-            return articlesMapper.mapArticleForREST(article);
-        }
-        throw new UnauthorizedAccessException();
+    public ArticleTO getArticleForDetail(Long id, Long userId, boolean isAdmin) {
+        ArticleTO to = articleRepository.findByForDetailId(id, userId, isAdmin);
+        if (to == null) return null;
+        to.pluginCSSResources().addAll(articleCSSResourceRepository.findByArticleId(id));
+        to.pluginJSResources().addAll(articleJSResourceRepository.findByArticleId(id));
+        to.pluginJSCodes().addAll(articleJSCodeRepository.findByArticleId(id));
+        return to;
     }
 
     @Async
@@ -330,37 +307,24 @@ public class ArticleServiceImpl implements ArticleService {
     public void reprocessAllArticles(UUID operationId, String contextRoot) {
         int total = (int) articleRepository.count();
         eventBus.publish(new ArticlesProcessStartEvent(total));
+        List<Long> ids = articleRepository.findAllIds();
         int current = 0;
-        int pageSize = 100;
-        int pages = (int) Math.ceil(total * 1.0 / pageSize);
-        for (int page = 0; page < pages; page++) {
-            List<Article> articles = articleRepository.findAll(PageRequest.of(page, pageSize)).getContent();
-            for (Article article : articles) {
-                reprocessArticle(article, contextRoot);
-                eventBus.publish(new ArticlesProcessProgressEvent(
-                        "(" + current + "/" + total + ") " + article.getContentNode().getName()));
-                current++;
-            }
+        for (Long id : ids) {
+            ArticleTO articleTO = getArticleForDetail(id, null, true);
+            Context context = processArticle(articleTO.text(), contextRoot);
+            articleRepository.updateOutputs(articleTO.id(), context.getOutput(),
+                    HTMLTagsFilter.trim(context.getOutput()));
+            processJSAndCSS(id, id, context);
+            eventBus.publish(new ArticlesProcessProgressEvent("(" + current + "/" + total + ") " + articleTO.name()));
+            current++;
         }
 
         eventBus.publish(new ArticlesProcessResultEvent(operationId));
     }
 
-    private void reprocessArticle(Article article, String contextRoot) {
-        Context context = processArticle(article.getText(), contextRoot);
-        article.setOutputHTML(context.getOutput());
-        article.setPluginCSSResources(context.getCSSResources());
-        article.setPluginJSResources(createJSResourcesSet(context.getJSResources()));
-        article.setPluginJSCodes(createJSCodesSet(context.getJSCodes()));
-        article.setSearchableOutput(HTMLTagsFilter.trim(context.getOutput()));
-        articleRepository.save(article);
-    }
-
     @Override
     public List<ArticleDraftOverviewTO> getDraftsForUser(Long userId) {
-        boolean isAdmin = userId == null ? false : userRepository.findById(userId).get().isAdmin();
-        List<Article> articles = articleRepository.findDraftsForUser(userId, isAdmin);
-        return articlesMapper.mapArticlesForDraftOverview(articles);
+        return articleRepository.findDraftsForUser(userId);
     }
 
     @Override
@@ -466,30 +430,4 @@ public class ArticleServiceImpl implements ArticleService {
         return to;
     }
 
-    @Override
-    public int renameAttachmentDirs(String contextRoot) {
-        Path rootPath = findAttachmentsRootPath();
-        List<Article> articleList = articleRepository.findWithAttachments();
-        int renamed = 0;
-        for (Article article : articleList) {
-            Path attachmentsDirPath = rootPath.resolve(article.getAttachmentsDirId());
-            Path targetPath = rootPath.resolve(ATTACHMENT_DIR_PREFIX + article.getId());
-
-            // Nahraď draft id ve všech attachment odkazech novým id ostrého článku
-            String linkFrom = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getAttachmentsDirId();
-            String linkTo = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getId();
-            article.setText(article.getText().replaceAll(linkFrom, linkTo));
-            article.setAttachmentsDirId(null);
-            reprocessArticle(article, contextRoot);
-
-            try {
-                Files.move(attachmentsDirPath, targetPath);
-            } catch (IOException e) {
-                throw new IllegalStateException("Nezdařilo se přejmenovat adresář příloh článku " + article.getId(), e);
-            }
-
-            renamed++;
-        }
-        return renamed;
-    }
 }

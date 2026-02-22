@@ -28,17 +28,7 @@ public interface ArticleService {
      * @param id identifikátor
      * @return DTO článku
      */
-    ArticleTO getArticleForDetail(Long id);
-
-    /**
-     * Získá článek pro REST dle jeho identifikátoru
-     *
-     * @param id     identifikátor
-     * @param userId id přihlášeného uživatele
-     * @return DTO článku
-     * @throws UnauthorizedAccessException pokud uživatel nemá právo na přístup k obsahu
-     */
-    ArticleRESTTO getArticleForREST(Long id, Long userId) throws UnauthorizedAccessException;
+    ArticleTO getArticleForDetail(Long id, Long userId, boolean isAdmin);
 
     /**
      * Spustí přegenerování všech článků
@@ -71,5 +61,4 @@ public interface ArticleService {
 
     Path getAttachmentFilePath(Long articleId, String name);
 
-    int renameAttachmentDirs(String contextRoot);
 }

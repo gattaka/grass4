@@ -9,8 +9,6 @@ import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
 import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.js.JScriptItem;
@@ -29,14 +27,15 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
     private ArticleService articleService;
     private SecurityService securityService;
 
-    private ArticleTO article;
+    private ArticleTO articleTO;
 
     @Override
     public String getPageTitle() {
-        return article.getContentNode().name();
+        return articleTO.name();
     }
 
-    public ArticlesViewer(ArticleService articleFacade, SecurityService securityService, ArticleService articleService) {
+    public ArticlesViewer(ArticleService articleFacade, SecurityService securityService,
+                          ArticleService articleService) {
         this.articleService = articleFacade;
         this.securityService = securityService;
         this.articleService = articleService;
@@ -47,22 +46,19 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(parameter);
         if (identifier == null) throw new GrassPageException(404);
 
-        article = articleService.getArticleForDetail(identifier.getId());
-        if (article == null) throw new GrassPageException(404);
+        articleTO = articleService.getArticleForDetail(identifier.getId(), securityService.getCurrentUser().getId(),
+                securityService.getCurrentUser().isAdmin());
+        if (articleTO == null) throw new GrassPageException(404);
 
         // RESCUE -- tohle by se normálně stát nemělo, ale umožňuje to aspoň
         // vyřešit stav, ve kterém existuje takovýto nezobrazitelný obsah
-        if (article.getContentNode() == null) {
-            articleService.deleteArticle(article.getId());
+        if (articleTO.contentNodeId() == null) {
+            articleService.deleteArticle(articleTO.id());
             UI.getCurrent().navigate(MainView.class);
         }
 
-        if (!article.getContentNode().publicated() && !securityService.getCurrentUser().isAdmin() &&
-                !article.getContentNode().getAuthor().equals(securityService.getCurrentUser()))
-            throw new GrassPageException(403);
-
         // CSS resources
-        for (String css : article.getPluginCSSResources()) {
+        for (String css : articleTO.pluginCSSResources()) {
             // není to úplně nejhezčí řešení, ale dá se tak relativně elegantně
             // obejít problém se závislosí pluginů na úložišti theme apod. a
             // přitom umožnit aby se CSS odkazovali na externí zdroje
@@ -72,10 +68,9 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         }
 
         removeAll();
-        ContentNodeTO contentNodeTO = article.getContentNode();
-        add(new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(), e -> UI.getCurrent()
+        add(new ContentViewer(createHTMLDiv(), articleTO, e -> onDeleteOperation(), e -> UI.getCurrent()
                 .navigate(ArticlesEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(contentNodeTO.name(), ArticlesViewer.class, parameter)));
+                new RouterLink(articleTO.name(), ArticlesViewer.class, parameter)));
 
         String jsInitDivId = "grass-js-init-div";
         Div jsInitDiv = new Div() {
@@ -86,14 +81,14 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
             @ClientCallable
             private void initJS() {
                 // JS resources
-                int jsResourcesSize = article.getPluginJSResources().size();
-                int jsCodesSize = article.getPluginJSCodes().size();
+                int jsResourcesSize = articleTO.pluginJSResources().size();
+                int jsCodesSize = articleTO.pluginJSCodes().size();
 
                 JScriptItem[] jsResourcesArr = new JScriptItem[jsResourcesSize + jsCodesSize];
                 int i = 0;
-                for (String resource : article.getPluginJSResources())
+                for (String resource : articleTO.pluginJSResources())
                     jsResourcesArr[i++] = new JScriptItem(resource);
-                for (String code : article.getPluginJSCodes())
+                for (String code : articleTO.pluginJSCodes())
                     jsResourcesArr[i++] = new JScriptItem(code, true);
 
                 UIUtils.loadJS(jsResourcesArr);
@@ -107,8 +102,8 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         UIUtils.turnOffRouterAnchors();
     }
 
-    private HtmlDiv createContent() {
-        HtmlDiv content = new HtmlDiv(article.getOutputHTML());
+    private HtmlDiv createHTMLDiv() {
+        HtmlDiv content = new HtmlDiv(articleTO.outputHTML());
         content.setWidthFull();
         content.addClassName("article-content");
         return content;
@@ -116,14 +111,12 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
 
     protected void onDeleteOperation() {
         ConfirmDialog confirmDialog = new ConfirmDialog("Opravdu si přejete smazat tento článek ?", event -> {
-            NodeOverviewTO nodeDTO = article.getContentNode().getParent();
-
             // zdařilo se ? Pokud ano, otevři info okno a při
             // potvrzení jdi na kategorii
             try {
-                articleService.deleteArticle(article.getId());
+                articleService.deleteArticle(articleTO.id());
                 UI.getCurrent().navigate(NodePage.class,
-                        URLIdentifierUtils.createURLIdentifier(nodeDTO.getId(), nodeDTO.getName()));
+                        URLIdentifierUtils.createURLIdentifier(articleTO.parentId(), articleTO.parentName()));
             } catch (Exception e) {
                 // Pokud ne, otevři warn okno a při
                 // potvrzení jdi na kategorii

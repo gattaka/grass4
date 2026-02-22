@@ -160,8 +160,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 logger.debug("Neexistující kategorie: {}", identifier.getId());
                 throw new GrassPageException(404);
             }
-            articleEditorTO.setNodeId(node.getId());
-            articleEditorTO.setNodeName(node.getName());
+            articleEditorTO.setContentNodeId(node.getId());
+            articleEditorTO.setContentNodeName(node.getName());
             articleEditorTO.setDraftName("");
             articleEditorTO.setDraftText("");
             articleEditorTO.setDraftPublicated(true);
@@ -169,20 +169,19 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             // rovnou ulož, ať máme draft id
             articleEditorTO.setDraftId(articleService.saveDraft(articleEditorTO, false));
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
-            ArticleTO existingArticle = articleService.getArticleForDetail(identifier.getId());
-            // má oprávnění upravovat tento článek?
-            if (!existingArticle.getContentNode().getAuthor().equals(securityService.getCurrentUser()) &&
-                    !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
-            NodeOverviewTO node = existingArticle.getContentNode().getParent();
-            articleEditorTO.setNodeId(node.getId());
-            articleEditorTO.setNodeName(node.getName());
-            articleEditorTO.setExistingArticleId(existingArticle.getId());
-            articleEditorTO.setDraftName(existingArticle.getContentNode().name());
-            articleEditorTO.setDraftText(existingArticle.getText());
-            articleEditorTO.setDraftPublicated(existingArticle.getContentNode().publicated());
-            for (ContentTagTO tagDTO : existingArticle.getContentNode().contentTags())
+            ArticleTO existingArticleTO =
+                    articleService.getArticleForDetail(identifier.getId(), securityService.getCurrentUser().getId(),
+                            securityService.getCurrentUser().isAdmin());
+            if (existingArticleTO == null) throw new GrassPageException(403);
+            articleEditorTO.setContentNodeId(existingArticleTO.contentNodeId());
+            articleEditorTO.setContentNodeName(existingArticleTO.name());
+            articleEditorTO.setExistingArticleId(existingArticleTO.id());
+            articleEditorTO.setDraftName(existingArticleTO.name());
+            articleEditorTO.setDraftText(existingArticleTO.text());
+            articleEditorTO.setDraftPublicated(existingArticleTO.publicated());
+            for (ContentTagTO tagDTO : existingArticleTO.contentTags())
                 articleEditorTO.getDraftTags().add(tagDTO.getName());
-            articleEditorTO.getDraftAttachments().addAll(articleService.findAttachments(existingArticle.getId()));
+            articleEditorTO.getDraftAttachments().addAll(articleService.findAttachments(existingArticleTO.id()));
         } else {
             logger.debug("Neznámá operace: {}", operationToken);
             throw new GrassPageException(404);
@@ -191,26 +190,27 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         createFields();
     }
 
-    private void populateByExistingDraft(ArticleDraftOverviewTO draft) {
-        articleEditorTO.setDraftId(draft.id());
-        NodeOverviewTO node = draft.contentNode().getParent();
-        articleEditorTO.setNodeId(node.getId());
-        articleEditorTO.setNodeName(node.getName());
-        articleEditorTO.setDraftName(draft.contentNode().name());
-        articleEditorTO.setDraftText(draft.text());
-        articleEditorTO.setDraftPublicated(draft.contentNode().publicated());
-        for (ContentTagTO tagDTO : draft.contentNode().contentTags())
+    private void populateByExistingDraft(ArticleDraftOverviewTO draftTO) {
+        articleEditorTO.setDraftId(draftTO.id());
+        articleEditorTO.setContentNodeId(draftTO.contentNodeId());
+        articleEditorTO.setContentNodeName(draftTO.name());
+        articleEditorTO.setDraftName(draftTO.name());
+        articleEditorTO.setDraftText(draftTO.text());
+        articleEditorTO.setDraftPublicated(draftTO.publicated());
+        for (ContentTagTO tagDTO : draftTO.contentTags())
             articleEditorTO.getDraftTags().add(tagDTO.getName());
 
         // jedná se o draft již existujícího obsahu?
-        if (draft.contentNode().getDraftSourceId() != null) {
-            ArticleTO article = articleService.getArticleForDetail(draft.contentNode().getDraftSourceId());
-            articleEditorTO.setExistingArticleId(article.getId());
+        if (draftTO.draftSourceId() != null) {
+            ArticleTO existingArticleTO = articleService.getArticleForDetail(draftTO.draftSourceId(),
+                    securityService.getCurrentUser().getId(), securityService.getCurrentUser().isAdmin());
+            if (existingArticleTO == null) throw new GrassPageException(403);
+            articleEditorTO.setExistingArticleId(existingArticleTO.id());
         }
 
         articleEditorTO.getDraftAttachments()
                 .addAll(articleService.findAttachments(articleEditorTO.getExistingArticleId()));
-        for (AttachmentTO attachmentTO : articleService.findAttachments(draft.id())) {
+        for (AttachmentTO attachmentTO : articleService.findAttachments(draftTO.id())) {
             attachmentTO.setDraft(true);
             articleEditorTO.getDraftAttachments().add(attachmentTO);
         }
@@ -608,7 +608,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     @ClientCallable
     private void returnToNodeCallback() {
         UI.getCurrent().navigate(NodePage.class,
-                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getNodeId(), articleEditorTO.getNodeName()));
+                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getContentNodeId(),
+                        articleEditorTO.getContentNodeName()));
     }
 
     @ClientCallable

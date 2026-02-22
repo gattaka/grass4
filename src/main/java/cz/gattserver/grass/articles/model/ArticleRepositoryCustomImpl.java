@@ -1,16 +1,14 @@
 package cz.gattserver.grass.articles.model;
 
 import com.querydsl.jpa.JPQLQuery;
-import cz.gattserver.grass.articles.model.domain.QArticle;
+import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
+import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
 import cz.gattserver.grass.core.model.domain.QContentNode;
 import cz.gattserver.grass.core.model.domain.QNode;
 import cz.gattserver.grass.core.model.domain.QUser;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.pg.interfaces.*;
-import cz.gattserver.grass.pg.model.Photogallery;
-import cz.gattserver.grass.pg.model.QPhotogallery;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
@@ -24,11 +22,11 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport
     private final QNode n = QNode.node;
 
     public ArticleRepositoryCustomImpl() {
-        super(Photogallery.class);
+        super(Article.class);
     }
 
-    private JPQLQuery<Photogallery> createBaseQuery(Long userId, boolean isAdmin) {
-        JPQLQuery<Photogallery> query = from(a).join(c).on(a.contentNodeId.eq(c.id));
+    private JPQLQuery<Article> createBaseQuery(Long userId, boolean isAdmin) {
+        JPQLQuery<Article> query = from(a).join(c).on(a.contentNodeId.eq(c.id));
         if (!isAdmin) {
             if (userId == null) {
                 query.where(c.publicated.isTrue());
@@ -39,15 +37,25 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport
         return query;
     }
 
-    private JPQLQuery<Photogallery> createOverviewQuery(String filter, Long userId, boolean isAdmin) {
-        JPQLQuery<Photogallery> query = createBaseQuery(userId, isAdmin);
+    private JPQLQuery<Article> createOverviewQuery(String filter, Long userId, boolean isAdmin) {
+        JPQLQuery<Article> query = createBaseQuery(userId, isAdmin);
         if (StringUtils.isNotBlank(filter))
             query.where(c.name.toLowerCase().like(QuerydslUtil.transformSimpleLikeFilter(filter).toLowerCase()));
         return query;
     }
 
-    private JPQLQuery<Photogallery> createDetailQuery(Long userId, boolean isAdmin) {
+    private JPQLQuery<Article> createDetailQuery(Long userId, boolean isAdmin) {
         return createBaseQuery(userId, isAdmin).join(u).on(c.author.id.eq(u.id)).join(n).on(c.parent.id.eq(n.id));
+    }
+
+    @Override
+    public ArticleTO findByForDetailId(Long id, Long userId, boolean isAdmin) {
+        return null;
+    }
+
+    @Override
+    public List<ArticleDraftOverviewTO> findDraftsForUser(Long userId) {
+        return List.of();
     }
 
 //    @Override

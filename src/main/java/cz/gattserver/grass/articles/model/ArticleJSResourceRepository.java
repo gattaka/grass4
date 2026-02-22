@@ -9,7 +9,7 @@ import java.util.Set;
 public interface ArticleJSResourceRepository extends JpaRepository<ArticleJSResource, ArticleJSResource> {
 
     @Query("select r.id.resource from ARTICLE_JS_RESOURCE r where r.id.articleId = ?1")
-    Set<String> findJSResourcesByArticleId(Long articleId);
+    Set<String> findByArticleId(Long articleId);
 
     @Modifying
     @Query("delete ARTICLE_JS_RESOURCE where id.articleId = ?1 and id.resource in ?2")
