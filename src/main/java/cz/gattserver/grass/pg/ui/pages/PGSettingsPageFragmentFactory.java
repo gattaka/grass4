@@ -302,12 +302,13 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
         return new PGSettingsItemTO(path, to, size, filesCount, date);
     }
 
-    private Stream<PGSettingsItemTO> createStream(Path path) {
+    private Stream<PGSettingsItemTO> createStream(Path path, int offset, int limit) {
         try {
-            // zde se úmyslně nezavírá stream, protože se předává dál do vaadin
             try (Stream<Path> list = Files.list(path)) {
-                return list.filter(p -> p.getFileName().toString().contains(filterName == null ? "" : filterName))
-                        .map(this::createItem);
+                List<PGSettingsItemTO> itemsList =
+                        list.filter(p -> p.getFileName().toString().contains(filterName == null ? "" : filterName))
+                                .map(this::createItem).skip(offset).limit(limit).toList();
+                return itemsList.stream();
             }
         } catch (IOException e) {
             logger.error("Nezdařilo se načíst galerie z {}", path.getFileName().toString(), e);
@@ -327,8 +328,8 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
     private void populateGrid(Grid<PGSettingsItemTO> grid, Path path) {
         FetchCallback<PGSettingsItemTO, Void> fetchCallback =
-                q -> createStream(path).skip(q.getOffset()).limit(q.getLimit())
-                        .sorted(q.getSortingComparator().orElse(Comparator.naturalOrder()));
+                q -> createStream(path, q.getOffset(), q.getLimit()).sorted(
+                        q.getSortingComparator().orElse(Comparator.naturalOrder()));
         CountCallback<PGSettingsItemTO, Void> countCallback = q -> (int) count(path);
         grid.setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
     }
