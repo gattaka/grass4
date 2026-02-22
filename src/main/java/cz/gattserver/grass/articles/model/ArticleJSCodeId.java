@@ -17,7 +17,7 @@ public class ArticleJSCodeId {
     @Column(name = "ARTICLE_ID")
     private Long articleId;
 
-	@Column(name = "CODE")
+	@Column(name = "CODE", columnDefinition = "TEXT")
 	private String code;
 
 }

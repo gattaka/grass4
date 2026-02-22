@@ -1,5 +1,6 @@
 package cz.gattserver.grass.articles.model;
 
+import com.vaadin.copilot.shaded.checkerframework.checker.units.qual.C;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,7 +8,6 @@ import lombok.*;
 @Setter
 @ToString
 @NoArgsConstructor
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Entity(name = "ARTICLE_JS_CODE")
 public class ArticleJSCode implements ExecutedInOrder, Comparable<ArticleJSCode> {
 
@@ -18,15 +18,9 @@ public class ArticleJSCode implements ExecutedInOrder, Comparable<ArticleJSCode>
     private ArticleJSCodeId id;
 
     /**
-     * Obsah skriptu
-     */
-    @EqualsAndHashCode.Include
-    @Column(columnDefinition = "TEXT")
-    private String content;
-
-    /**
      * Pořadí při nahrávání
      */
+    @Column(name = "EXECUTION_ORDER")
     private Integer executionOrder = 0;
 
     public ArticleJSCode(Long articleId, String resource, Integer executionOrder) {
@@ -38,4 +32,5 @@ public class ArticleJSCode implements ExecutedInOrder, Comparable<ArticleJSCode>
     public int compareTo(ArticleJSCode resource) {
         return this.getExecutionOrder().compareTo(resource.getExecutionOrder());
     }
+
 }

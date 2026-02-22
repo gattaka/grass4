@@ -23,8 +23,6 @@ import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagReposito
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.modules.ArticlesContentModule;
 import cz.gattserver.grass.core.events.EventBus;
-import cz.gattserver.grass.core.model.domain.ContentNode;
-import cz.gattserver.grass.core.model.repositories.UserRepository;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
@@ -363,8 +361,7 @@ public class ArticleServiceImpl implements ArticleService {
         configurationService.loadConfiguration(configuration);
         String rootDir = configuration.getAttachmentsDir();
         FileSystem fileSystem = fileSystemService.getFileSystem();
-        Path rootPath = fileSystem.getPath(rootDir);
-        return rootPath;
+        return fileSystem.getPath(rootDir);
     }
 
     private Path getAttachmentsPath(Long articleId, boolean createIfDoesNotExists) {
