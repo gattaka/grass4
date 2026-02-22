@@ -19,6 +19,7 @@ import cz.gattserver.grass.articles.events.impl.ArticlesProcessStartEvent;
 import cz.gattserver.grass.articles.model.*;
 import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
 import cz.gattserver.grass.articles.services.ArticleService;
+import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.modules.ArticlesContentModule;
 import cz.gattserver.grass.core.events.EventBus;
@@ -82,6 +83,9 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private ArticleJSCodeRepository articleJSCodeRepository;
+
+    @Autowired
+    private ContentNodeContentTagRepository contentNodeContentTagRepository;
 
     private Context processArticle(String source, String contextRoot) {
         Validate.notNull(contextRoot, "ContextRoot nemůže být null");
@@ -217,7 +221,8 @@ public class ArticleServiceImpl implements ArticleService {
         return set;
     }
 
-    private Article innerSaveArticle(ArticleEditorTO payload, boolean process, boolean draft, boolean replaceAttachmentsId) {
+    private Article innerSaveArticle(ArticleEditorTO payload, boolean process, boolean draft,
+                                     boolean replaceAttachmentsId) {
         Long existingArticleId = draft ? payload.getDraftId() : payload.getExistingArticleId();
 
         Article article;
@@ -299,6 +304,7 @@ public class ArticleServiceImpl implements ArticleService {
         to.pluginCSSResources().addAll(articleCSSResourceRepository.findByArticleId(id));
         to.pluginJSResources().addAll(articleJSResourceRepository.findByArticleId(id));
         to.pluginJSCodes().addAll(articleJSCodeRepository.findByArticleId(id));
+        to.contentTags().addAll(contentNodeContentTagRepository.findByContendNodeId(to.contentNodeId()));
         return to;
     }
 

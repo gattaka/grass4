@@ -3,18 +3,17 @@ package cz.gattserver.grass.articles.model;
 import com.querydsl.jpa.JPQLQuery;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
+import cz.gattserver.grass.articles.editor.parser.interfaces.QArticleDraftOverviewTO;
+import cz.gattserver.grass.articles.editor.parser.interfaces.QArticleTO;
 import cz.gattserver.grass.core.model.domain.QContentNode;
 import cz.gattserver.grass.core.model.domain.QNode;
 import cz.gattserver.grass.core.model.domain.QUser;
-import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.pg.interfaces.*;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
 
-public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport
-        implements ArticleRepositoryCustom {
+public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport implements ArticleRepositoryCustom {
 
     private final QArticle a = QArticle.article;
     private final QContentNode c = QContentNode.contentNode;
@@ -37,62 +36,29 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport
         return query;
     }
 
-    private JPQLQuery<Article> createOverviewQuery(String filter, Long userId, boolean isAdmin) {
-        JPQLQuery<Article> query = createBaseQuery(userId, isAdmin);
-        if (StringUtils.isNotBlank(filter))
-            query.where(c.name.toLowerCase().like(QuerydslUtil.transformSimpleLikeFilter(filter).toLowerCase()));
-        return query;
-    }
-
-    private JPQLQuery<Article> createDetailQuery(Long userId, boolean isAdmin) {
-        return createBaseQuery(userId, isAdmin).join(u).on(c.author.id.eq(u.id)).join(n).on(c.parent.id.eq(n.id));
-    }
 
     @Override
     public ArticleTO findByForDetailId(Long id, Long userId, boolean isAdmin) {
-        return null;
+        return createBaseQuery(userId, isAdmin)
+                // author
+                .join(u).on(c.author.id.eq(u.id))
+                // node
+                .join(n).on(c.parent.id.eq(n.id)).where(c.author.id.eq(userId), c.draft.isTrue())
+                .select(new QArticleTO(a.id, c.id, c.name, n.id, n.name, c.creationDate, c.lastModificationDate, u.id,
+                        u.name, c.publicated, c.draft, c.draftSourceId, a.outputHTML, a.text, a.searchableOutput,
+                        a.attachmentsDirId)).fetchFirst();
     }
 
     @Override
     public List<ArticleDraftOverviewTO> findDraftsForUser(Long userId) {
-        return List.of();
+        return from(a)
+                // content node
+                .join(c).on(a.contentNodeId.eq(c.id))
+                // author
+                .join(u).on(c.author.id.eq(u.id))
+                // node
+                .join(n).on(c.parent.id.eq(n.id)).where(c.author.id.eq(userId), c.draft.isTrue())
+                .select(new QArticleDraftOverviewTO(a.id, c.name, c.creationDate, c.lastModificationDate, a.text))
+                .fetch();
     }
-
-//    @Override
-//    public List<PhotogalleryRESTOverviewTO> findForRestOverview(String filter, Long userId, boolean isAdmin,
-//                                                                Pageable pageable) {
-//        JPQLQuery<Photogallery> query = createOverviewQuery(filter, userId, isAdmin);
-//        QuerydslUtil.applyPagination(pageable, query);
-//        return query.select(new QPhotogalleryRESTOverviewTO(a.id, c.name)).orderBy(a.id.desc()).fetch();
-//    }
-//
-//    @Override
-//    public int count(String filter, Long userId, boolean isAdmin) {
-//        return (int) createOverviewQuery(filter, userId, isAdmin).fetchCount();
-//    }
-//
-//    @Override
-//    public String findPhotogalleryPathById(Long photogalleryId) {
-//        return from(a).where(a.id.eq(photogalleryId)).select(a.photogalleryDir).fetchFirst();
-//    }
-//
-//    @Override
-//    public PhotogalleryRESTOverviewTO findForRestByDirectory(String directory, Long userId, boolean isAdmin) {
-//        return createOverviewQuery(null, userId, isAdmin).where(a.photogalleryDir.eq(directory))
-//                .select(new QPhotogalleryRESTOverviewTO(a.id, c.name)).fetchFirst();
-//    }
-//
-//    @Override
-//    public PhotogalleryRESTTO findForRestById(Long id, Long userId, boolean isAdmin) {
-//        return createDetailQuery(userId, isAdmin).where(a.id.eq(id))
-//                .select(new QPhotogalleryRESTTO(a.id, c.name, c.creationDate, c.lastModificationDate, u.name,
-//                        a.photogalleryDir)).fetchFirst();
-//    }
-//
-//    @Override
-//    public PhotogalleryTO findForDetailById(Long id, Long userId, boolean isAdmin) {
-//        return createDetailQuery(userId, isAdmin).where(a.id.eq(id))
-//                .select(new QPhotogalleryTO(a.id, a.contentNodeId, c.name, n.id, n.name, c.creationDate,
-//                        c.lastModificationDate, u.id, u.name, a.photogalleryDir, c.publicated, c.draft)).fetchFirst();
-//    }
 }

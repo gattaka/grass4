@@ -133,7 +133,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             // pokud jsou nalezeny drafty k dokončení, nabídni je k výběru
             new DraftMenuDialog(drafts, to -> {
                 if (to != null) {
-                    populateByExistingDraft(to);
+                    populateByExistingDraft(to.id());
                 } else {
                     defaultCreateContent();
                 }
@@ -190,7 +190,9 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         createFields();
     }
 
-    private void populateByExistingDraft(ArticleDraftOverviewTO draftTO) {
+    private void populateByExistingDraft(Long draftId) {
+        ArticleTO draftTO = articleService.getArticleForDetail(draftId, securityService.getCurrentUser().getId(),
+                securityService.getCurrentUser().isAdmin());
         articleEditorTO.setDraftId(draftTO.id());
         articleEditorTO.setContentNodeId(draftTO.contentNodeId());
         articleEditorTO.setContentNodeName(draftTO.name());
