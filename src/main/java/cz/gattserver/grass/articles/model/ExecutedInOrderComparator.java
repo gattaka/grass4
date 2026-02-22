@@ -1,4 +1,4 @@
-package cz.gattserver.grass.articles.model.domain;
+package cz.gattserver.grass.articles.model;
 
 import java.util.Comparator;
 

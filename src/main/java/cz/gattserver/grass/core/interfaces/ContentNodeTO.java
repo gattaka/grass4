@@ -177,7 +177,7 @@ public class ContentNodeTO implements ContentNodeTO2 {
 	}
 
     @Override
-    public Long getContentNodeId() {
+    public Long contentNodeId() {
         return id;
     }
 

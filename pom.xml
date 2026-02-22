@@ -11,7 +11,7 @@
 
     <groupId>cz.gattserver</groupId>
     <artifactId>grass4</artifactId>
-    <version>4.1.1</version>
+    <version>4.1.2</version>
     <name>grass4</name>
     <description>GRASS4 Knowledge Base</description>
     <packaging>jar</packaging>

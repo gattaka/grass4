@@ -137,7 +137,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                 } else {
                     defaultCreateContent();
                 }
-            }, to -> articleService.deleteArticle(to.getId())).open();
+            }, to -> articleService.deleteArticle(to.id())).open();
         }
     }
 
@@ -192,25 +192,25 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     }
 
     private void populateByExistingDraft(ArticleDraftOverviewTO draft) {
-        articleEditorTO.setDraftId(draft.getId());
-        NodeOverviewTO node = draft.getContentNode().getParent();
+        articleEditorTO.setDraftId(draft.id());
+        NodeOverviewTO node = draft.contentNode().getParent();
         articleEditorTO.setNodeId(node.getId());
         articleEditorTO.setNodeName(node.getName());
-        articleEditorTO.setDraftName(draft.getContentNode().name());
-        articleEditorTO.setDraftText(draft.getText());
-        articleEditorTO.setDraftPublicated(draft.getContentNode().publicated());
-        for (ContentTagTO tagDTO : draft.getContentNode().contentTags())
+        articleEditorTO.setDraftName(draft.contentNode().name());
+        articleEditorTO.setDraftText(draft.text());
+        articleEditorTO.setDraftPublicated(draft.contentNode().publicated());
+        for (ContentTagTO tagDTO : draft.contentNode().contentTags())
             articleEditorTO.getDraftTags().add(tagDTO.getName());
 
         // jedná se o draft již existujícího obsahu?
-        if (draft.getContentNode().getDraftSourceId() != null) {
-            ArticleTO article = articleService.getArticleForDetail(draft.getContentNode().getDraftSourceId());
+        if (draft.contentNode().getDraftSourceId() != null) {
+            ArticleTO article = articleService.getArticleForDetail(draft.contentNode().getDraftSourceId());
             articleEditorTO.setExistingArticleId(article.getId());
         }
 
         articleEditorTO.getDraftAttachments()
                 .addAll(articleService.findAttachments(articleEditorTO.getExistingArticleId()));
-        for (AttachmentTO attachmentTO : articleService.findAttachments(draft.getId())) {
+        for (AttachmentTO attachmentTO : articleService.findAttachments(draft.id())) {
             attachmentTO.setDraft(true);
             articleEditorTO.getDraftAttachments().add(attachmentTO);
         }

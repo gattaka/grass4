@@ -23,7 +23,7 @@ public interface ContentNodeTO2 {
 
     boolean draft();
 
-    Long getContentNodeId();
+    Long contentNodeId();
 
     Collection<ContentTagTO> contentTags();
 }

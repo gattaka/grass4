@@ -1,25 +1,13 @@
 package cz.gattserver.grass.articles.editor.parser.interfaces;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 
-@Getter
-@AllArgsConstructor
-public class ArticleDraftOverviewTO {
+import java.time.LocalDateTime;
+import java.util.Set;
+public record ArticleDraftOverviewTO(Long id, Long contentNodeId, String name, Long parentId, String parentName,
+                                     LocalDateTime creationDate, LocalDateTime lastModificationDate, Long authorId,
+                                     String authorName, boolean publicated, boolean draft,
+                                     Set<ContentTagTO> contentTags, String text) implements ContentNodeTO2 {
 
-    /**
-     * DB identifikátor
-     */
-    private Long id;
-
-    /**
-     * Náhled článku
-     */
-    private String text;
-
-    /**
-     * Meta-informace o obsahu
-     */
-    private ContentNodeTO contentNode;
 }

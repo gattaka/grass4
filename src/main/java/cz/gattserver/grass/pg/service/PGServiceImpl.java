@@ -153,7 +153,6 @@ public class PGServiceImpl implements PGService {
         }
 
         if (!Files.exists(miniDirFile)) fileSystemService.createDirectoriesWithPerms(miniDirFile);
-
         if (!Files.exists(prevDirFile)) fileSystemService.createDirectoriesWithPerms(prevDirFile);
 
         try (Stream<Path> stream = Files.list(galleryDir).sorted(getComparator())) {
@@ -324,7 +323,7 @@ public class PGServiceImpl implements PGService {
         Validate.notNull(id, "Id galerie nesmí být null");
         PhotogalleryTO to = photogalleryRepository.findForDetailById(id, userId, isAdmin);
         if (to == null) return null;
-        to.contentTags().addAll(contentNodeContentTagRepository.findByContendNodeId(to.getContentNodeId()));
+        to.contentTags().addAll(contentNodeContentTagRepository.findByContendNodeId(to.contentNodeId()));
         return to;
     }
 

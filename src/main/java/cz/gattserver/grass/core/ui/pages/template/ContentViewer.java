@@ -133,7 +133,7 @@ public class ContentViewer extends Div {
         removeFromFavouritesButton = componentFactory.createUnmarkFavouriteButton(event -> {
             // zdařilo se ? Pokud ano, otevři info okno
             try {
-                userService.removeContentFromFavourites(contentNodeTO.getContentNodeId(),
+                userService.removeContentFromFavourites(contentNodeTO.contentNodeId(),
                         securityService.getCurrentUser().getId());
                 removeFromFavouritesButton.setVisible(false);
                 addToFavouritesButton.setVisible(true);
@@ -149,7 +149,7 @@ public class ContentViewer extends Div {
         addToFavouritesButton = componentFactory.createMarkFavouriteButton(event -> {
             // zdařilo se? Pokud ano, otevři info okno
             try {
-                userService.addContentToFavourites(contentNodeTO.getContentNodeId(), securityService.getCurrentUser().getId());
+                userService.addContentToFavourites(contentNodeTO.contentNodeId(), securityService.getCurrentUser().getId());
                 addToFavouritesButton.setVisible(false);
                 removeFromFavouritesButton.setVisible(true);
             } catch (Exception e) {

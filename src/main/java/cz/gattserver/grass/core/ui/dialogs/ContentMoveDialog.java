@@ -31,7 +31,7 @@ public abstract class ContentMoveDialog extends WebDialog {
         moveBtn = componentFactory.createSubmitButton(event -> {
             NodeOverviewTO nodeDTO = tree.getGrid().getSelectedItems().iterator().next();
             SpringContextHelper.getBean(ContentNodeService.class)
-                    .moveContent(nodeDTO.getId(), contentNodeTO.getContentNodeId());
+                    .moveContent(nodeDTO.getId(), contentNodeTO.contentNodeId());
             close();
             onMove();
         });

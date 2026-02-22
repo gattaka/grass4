@@ -21,7 +21,7 @@ public record PhotogalleryTO(Long id, Long contentId, String name, Long parentId
     }
 
     @Override
-    public Long getContentNodeId() {
+    public Long contentNodeId() {
         return contentId;
     }
 }

@@ -1,4 +1,4 @@
-package cz.gattserver.grass.articles.model.domain;
+package cz.gattserver.grass.articles.model;
 
 public interface ExecutedInOrder {
 

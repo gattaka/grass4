@@ -3,9 +3,9 @@ package cz.gattserver.grass.articles.services.impl;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleRESTTO;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
-import cz.gattserver.grass.articles.model.domain.Article;
-import cz.gattserver.grass.articles.model.domain.ArticleJSCode;
-import cz.gattserver.grass.articles.model.domain.ArticleJSResource;
+import cz.gattserver.grass.articles.model.Article;
+import cz.gattserver.grass.articles.model.ArticleJSCode;
+import cz.gattserver.grass.articles.model.ArticleJSResource;
 import cz.gattserver.grass.articles.services.ArticlesMapperService;
 import cz.gattserver.grass.core.services.CoreMapperService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,33 +63,4 @@ public class ArticlesMapperServiceImpl implements ArticlesMapperService {
         articleDTO.setContentNode(mapper.mapContentNodeForDetail(article.getContentNode()));
         return articleDTO;
     }
-
-    /**
-     * Převede kolekci {@link Article} na kolekci {@link ArticleDraftOverviewTO}
-     * určenou pro menu výběru rozpracovaného článku
-     *
-     * @param articles vstupní kolekce entit {@link Article}
-     * @return
-     */
-    @Override
-    public List<ArticleDraftOverviewTO> mapArticlesForDraftOverview(List<Article> articles) {
-        List<ArticleDraftOverviewTO> articleDTOs = new ArrayList<>();
-        for (Article article : articles)
-            articleDTOs.add(mapArticleForDraftOverview(article));
-        return articleDTOs;
-    }
-
-    /**
-     * Převede {@link Article} na {@link ArticleDraftOverviewTO} určený pro menu
-     * výběru rozpracovaného článku
-     *
-     * @param article vstupní {@link Article}
-     * @return
-     */
-    @Override
-    public ArticleDraftOverviewTO mapArticleForDraftOverview(Article article) {
-        return new ArticleDraftOverviewTO(article.getId(), article.getText(),
-                mapper.mapContentNodeForDetail(article.getContentNode()));
-    }
-
 }
