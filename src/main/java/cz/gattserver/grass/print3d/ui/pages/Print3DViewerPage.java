@@ -111,7 +111,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) throw new GrassPageException(404);
 
-        print3dTO = print3dService.getProjectForDetail(identifier.getId());
+        print3dTO = print3dService.getProjectForDetail(identifier.id());
         if (print3dTO == null) throw new GrassPageException(404);
 
         if (!"MAG1CK".equals(magickToken) && !print3dTO.getContentNode().publicated() && !isAdminOrAuthor())
@@ -148,8 +148,9 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         // pokud je obsah porušený, pak nic nevypisuj
         try {
             if (!print3dService.checkProject(projectDir)) {
-                layout.add(new Span("Chyba: Projekt je porušen -- kontaktujte administrátora (ID: " +
-                        print3dTO.getProjectDir() + ")"));
+                layout.add(new Span(
+                        "Chyba: Projekt je porušen -- kontaktujte administrátora (ID: " + print3dTO.getProjectDir() +
+                                ")"));
                 return layout;
             }
         } catch (IllegalStateException e) {
@@ -202,7 +203,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
             throw new GrassPageException(500, e);
         }
 
-        grid = new Grid<>(Print3dViewItemTO.class);
+        grid = new Grid<>();
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         grid.setItems(items);
         grid.setWidthFull();
@@ -220,34 +221,24 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER).setKey("icon");
 
         Column<Print3dViewItemTO> nameColumn =
-                grid.getColumnByKey("onlyName").setHeader("Název").setFlexGrow(100).setSortable(true);
+                grid.addColumn(Print3dViewItemTO::onlyName).setHeader("Název").setFlexGrow(100).setSortable(true);
 
         Column<Print3dViewItemTO> extensionColumn =
-                grid.getColumnByKey("extension").setHeader("Typ").setWidth("80px").setTextAlign(ColumnTextAlign.CENTER)
-                        .setFlexGrow(0).setSortable(true);
+                grid.addColumn(Print3dViewItemTO::extension).setHeader("Typ").setWidth("80px")
+                        .setTextAlign(ColumnTextAlign.CENTER).setFlexGrow(0).setSortable(true);
 
         Column<Print3dViewItemTO> sizeColumn =
-                grid.getColumnByKey("size").setHeader("Velikost").setWidth("80px").setTextAlign(ColumnTextAlign.END)
-                        .setFlexGrow(0).setSortable(true).setComparator((o1, o2) -> {
+                grid.addColumn(Print3dViewItemTO::size).setHeader("Velikost").setWidth("80px")
+                        .setTextAlign(ColumnTextAlign.END).setFlexGrow(0).setSortable(true).setComparator((o1, o2) -> {
                             try {
                                 return Long.compare(Files.size(o1.path()), Files.size(o2.path()));
                             } catch (IOException e) {
-                                log.error("Nezdařilo se porovnat soubory 3D projektu {} a {}", o1.getName(),
-                                        o2.getName());
+                                log.error("Nezdařilo se porovnat soubory 3D projektu {} a {}", o1.getName(), o2.getName());
                                 return 0;
                             }
                         });
 
-        Column<Print3dViewItemTO> fullnameColumn = grid.getColumnByKey("name");
-        Column<Print3dViewItemTO> typeColumn = grid.getColumnByKey("type");
-        Column<Print3dViewItemTO> pathColumn = grid.getColumnByKey("path");
-
-        fullnameColumn.setVisible(false);
-        typeColumn.setVisible(false);
-        pathColumn.setVisible(false);
-
-        grid.setColumnOrder(Arrays.asList(iconColumn, nameColumn, extensionColumn, sizeColumn, typeColumn, pathColumn,
-                fullnameColumn));
+        grid.setColumnOrder(Arrays.asList(iconColumn, nameColumn, extensionColumn, sizeColumn));
 
         grid.addColumn(new ComponentRenderer<>(item -> {
             String url = getItemURL(item.getName());
@@ -370,8 +361,8 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
     }
 
     private String getItemURL(String file) {
-        return UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" +
-                print3dTO.getProjectDir() + "/" + file;
+        return UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" + print3dTO.getProjectDir() +
+                "/" + file;
     }
 
     protected void onDeleteOperation() {

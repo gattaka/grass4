@@ -103,7 +103,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
 
         if (parameter != null) {
             URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(parameter);
-            selectBook(identifier.getId());
+            selectBook(identifier.id());
         }
     }
 

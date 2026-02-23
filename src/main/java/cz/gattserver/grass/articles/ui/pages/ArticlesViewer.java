@@ -46,7 +46,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(parameter);
         if (identifier == null) throw new GrassPageException(404);
 
-        articleTO = articleService.getArticleForDetail(identifier.getId(), securityService.getCurrentUser().getId(),
+        articleTO = articleService.getArticleForDetail(identifier.id(), securityService.getCurrentUser().getId(),
                 securityService.getCurrentUser().isAdmin());
         if (articleTO == null) throw new GrassPageException(404);
 

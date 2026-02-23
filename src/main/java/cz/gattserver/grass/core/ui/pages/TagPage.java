@@ -47,7 +47,7 @@ public class TagPage extends Div implements HasUrlParameter<String>, HasDynamicT
 		if (identifier == null)
 			throw new GrassPageException(404);
 
-		tag = contentTagFacade.getTagById(identifier.getId());
+		tag = contentTagFacade.getTagById(identifier.id());
 
 		if (tag == null)
 			throw new GrassPageException(404);

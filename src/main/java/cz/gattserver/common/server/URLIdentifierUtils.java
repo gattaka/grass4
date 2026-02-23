@@ -1,71 +1,40 @@
 package cz.gattserver.common.server;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 
 public class URLIdentifierUtils {
 
 	private URLIdentifierUtils() {
 	}
 
-	public static class URLIdentifier {
-		private String name;
-		private Long id;
-
-		private URLIdentifier(Long id, String name) {
-			this.id = id;
-			this.name = name;
-		}
-
-		public Long getId() {
-			return id;
-		}
-
-		public String getName() {
-			return name;
-		}
-	}
+    public record URLIdentifier(Long id, String name) {
+    }
 
 	private static char transformChars(char c) {
-		switch (c) {
-		case 'á':
-			return 'a';
-		case 'č':
-			return 'c';
-		case 'ď':
-			return 'd';
-		case 'é':
-			return 'e';
-		case 'ě':
-			return 'e';
-		case 'í':
-			return 'i';
-		case 'ň':
-			return 'n';
-		case 'ó':
-			return 'o';
-		case 'ř':
-			return 'r';
-		case 'š':
-			return 's';
-		case 'ť':
-			return 't';
-		case 'ú':
-			return 'u';
-		case 'ů':
-			return 'u';
-		case 'ý':
-			return 'y';
-		case 'ž':
-			return 'z';
-		case ' ':
-			return '-';
-		default:
-			if ((c + "").matches("[0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]"))
-				return c;
-			return '-';
-		}
+        return switch (c) {
+            case 'á' -> 'a';
+            case 'č' -> 'c';
+            case 'ď' -> 'd';
+            case 'é' -> 'e';
+            case 'ě' -> 'e';
+            case 'í' -> 'i';
+            case 'ň' -> 'n';
+            case 'ó' -> 'o';
+            case 'ř' -> 'r';
+            case 'š' -> 's';
+            case 'ť' -> 't';
+            case 'ú' -> 'u';
+            case 'ů' -> 'u';
+            case 'ý' -> 'y';
+            case 'ž' -> 'z';
+            case ' ' -> '-';
+            default -> {
+                if ((c + "").matches("[0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ]")) yield c;
+                yield '-';
+            }
+        };
 	}
 
 	/**
@@ -91,28 +60,23 @@ public class URLIdentifierUtils {
 	 * @return URL identifikátor kategorie
 	 */
 	public static String createURLIdentifier(Long id, String name) {
-		try {
-			StringBuilder sb = new StringBuilder();
-			name = name.toLowerCase();
-			for (int i = 0; i < name.length(); i++) {
-				char c = transformChars(name.charAt(i));
-				if (c != 0)
-					sb.append(c);
-			}
-			name = sb.toString().replaceAll("[-]+", "-");
+        StringBuilder sb = new StringBuilder();
+        name = name.toLowerCase();
+        for (int i = 0; i < name.length(); i++) {
+            char c = transformChars(name.charAt(i));
+            if (c != 0)
+                sb.append(c);
+        }
+        name = sb.toString().replaceAll("[-]+", "-");
 
-			String identifier = URLEncoder.encode(id + "-" + name, "UTF-8");
-			// Tomcat má default nastavené ignorovat adresy ve kterých je %2F
-			// https://www.assembla.com/spaces/liftweb/wiki/Tomcat/print
-			// http://forum.spring.io/forum/spring-projects/web/97212-url-encoded-in-pathvariable-value-causes-problems
-			// Nově to Spring security už vůbec nepovoluje
-			// https://stackoverflow.com/questions/48580584/stricthttpfirewall-in-spring-security-4-2-vs-spring-mvc-matrixvariable
-			return identifier.replaceAll("%2F", "").replaceAll("%3B", "");
-		} catch (UnsupportedEncodingException e) {
-			// UTF-8 missing - vážně ?
-			throw new IllegalStateException("Nezdařilo se vytvoření URL identifikátoru", e);
-		}
-	}
+        String identifier = URLEncoder.encode(id + "-" + name, StandardCharsets.UTF_8);
+        // Tomcat má default nastavené ignorovat adresy ve kterých je %2F
+        // https://www.assembla.com/spaces/liftweb/wiki/Tomcat/print
+        // http://forum.spring.io/forum/spring-projects/web/97212-url-encoded-in-pathvariable-value-causes-problems
+        // Nově to Spring security už vůbec nepovoluje
+        // https://stackoverflow.com/questions/48580584/stricthttpfirewall-in-spring-security-4-2-vs-spring-mvc-matrixvariable
+        return identifier.replaceAll("%2F", "").replaceAll("%3B", "");
+    }
 
 	/**
 	 * Naparsuje URL identifikátor a vrátí jeho položky v novém
@@ -132,19 +96,14 @@ public class URLIdentifierUtils {
 		if (parts.length <= 1)
 			return null;
 
-		Long id = null;
+		long id;
 		try {
-			id = Long.valueOf(parts[0]);
+			id = Long.parseLong(parts[0]);
 		} catch (NumberFormatException e) {
 			return null;
 		}
 
-		try {
-			String name = URLDecoder.decode(parts[1], "UTF-8");
-			return new URLIdentifier(id, name);
-		} catch (UnsupportedEncodingException e) {
-			// UTF-8 missing - vážně ?
-			throw new IllegalStateException("Nezdařilo se naparsovat URL identifikátor", e);
-		}
-	}
+        String name = URLDecoder.decode(parts[1], StandardCharsets.UTF_8);
+        return new URLIdentifier(id, name);
+    }
 }

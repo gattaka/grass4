@@ -103,8 +103,8 @@ public class PGUtils {
 
             // Orientation
             for (Directory d : metadata.getDirectories()) {
-                if (infoTO.getOrinetation() == null)
-                    infoTO.setOrinetation(d.getInteger(ExifIFD0Directory.TAG_ORIENTATION));
+                if (infoTO.getOrientation() == null)
+                    infoTO.setOrientation(d.getInteger(ExifIFD0Directory.TAG_ORIENTATION));
                 if (infoTO.getDeviceMaker() == null) infoTO.setDeviceMaker(d.getString(ExifIFD0Directory.TAG_MAKE));
                 if (infoTO.getDeviceModel() == null) infoTO.setDeviceModel(d.getString(ExifIFD0Directory.TAG_MODEL));
                 d.getString(GpsDirectory.TAG_LATITUDE);
@@ -146,7 +146,7 @@ public class PGUtils {
                 ExifInfoTO exifInfoTO = readMetadata(inputFile);
 
                 Scalr.Rotation rotation = null;
-                if (exifInfoTO.getOrinetation() != null) switch (exifInfoTO.getOrinetation()) {
+                if (exifInfoTO.getOrientation() != null) switch (exifInfoTO.getOrientation()) {
                     case 1:
                         // 0 degrees: the correct orientation, no adjustment
                         // is required.

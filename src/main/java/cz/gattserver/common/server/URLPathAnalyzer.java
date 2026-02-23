@@ -1,12 +1,16 @@
 package cz.gattserver.common.server;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 public class URLPathAnalyzer implements Serializable {
 
-	private List<String> tokens = new ArrayList<>();
+    @Serial
+    private static final long serialVersionUID = 6664860937181783718L;
+
+    private final List<String> tokens = new ArrayList<>();
 	private StringBuilder buffer = new StringBuilder();
 
 	private int currentIndex;
@@ -15,7 +19,7 @@ public class URLPathAnalyzer implements Serializable {
 	 * aplikuje oddělení částí - lomítko, nebo konec textu
 	 */
 	private void applyDelimiter() {
-		if (buffer.length() != 0) {
+		if (!buffer.isEmpty()) {
 			tokens.add(buffer.toString());
 			buffer = new StringBuilder();
 		}
@@ -23,15 +27,11 @@ public class URLPathAnalyzer implements Serializable {
 
 	/**
 	 * Zanalyzuje URL relativní cestu
-	 * 
-	 * @param path
-	 * 
 	 */
 	public URLPathAnalyzer(String path) {
 		for (char c : path.toCharArray()) {
 			if (c == '/') {
 				applyDelimiter();
-				continue;
 			} else {
 				buffer.append(c);
 			}

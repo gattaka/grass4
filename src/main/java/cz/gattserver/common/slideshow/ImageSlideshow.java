@@ -8,8 +8,7 @@ import com.vaadin.flow.component.html.Image;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.Serial;
 import java.time.format.DateTimeFormatter;
@@ -18,9 +17,16 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+@Slf4j
 public class ImageSlideshow<T extends SlideshowItem> extends Div {
 
-    private static final Logger logger = LoggerFactory.getLogger(ImageSlideshow.class);
+    @Serial
+    private static final long serialVersionUID = 6807439571580634675L;
+
+    private final Consumer<Integer> pageUpdateListener;
+    private final Function<Integer, T> itemByIndexProvider;
+    private final Function<T, String> itemSlideshowURLProvider;
+    private final Function<T, String> itemDetailURLProvider;
 
     protected int currentIndex;
     protected int totalCount;
@@ -28,10 +34,6 @@ public class ImageSlideshow<T extends SlideshowItem> extends Div {
     protected Div itemLayout;
     protected Div itemExifLayout;
 
-    private Consumer<Integer> pageUpdateListener;
-    private Function<Integer, T> itemByIndexProvider;
-    private Function<T, String> itemSlideshowURLProvider;
-    private Function<T, String> itemDetailURLProvider;
     private T currentItemTO;
 
     protected boolean closePrevented = false;
@@ -96,96 +98,86 @@ public class ImageSlideshow<T extends SlideshowItem> extends Div {
         nextItemButton.setId("image-slideshow-next-item-button");
         wrapperDiv.add(nextItemButton);
 
-        UI.getCurrent().getPage().executeJs(
-                "let cont = document.querySelector('#image-slideshow-item-div');"/*		*/ + "let NF = 30;"
-                        /*		*/ + "let N = 1;"
-                        /*		*/ + ""
-                        /*		*/ + "let i = 0, x0 = null, locked = false, w, ini, fin, rID = null, anf;"
-                        /*		*/ + ""
-                        /*		*/ + "function smooth(k) {"
-                        /*		*/ + "	return .5 * (Math.sin((k - .5) * Math.PI) + 1);"
-                        /*		*/ + "};"
-                        /*		*/ + ""
-                        /*		*/ + "function stopAni() {"
-                        /*		*/ + "	cancelAnimationFrame(rID);"
-                        /*		*/ + "	rID = null;"
-                        /*		*/ + "};"
-                        /*		*/ + ""
-                        /*		*/ + "function stop() {"
-                        /*		*/ + "  stopAni();"
-                        /*		*/ + "  i = 0;"
-                        /*		*/ + "  anf = 0;"
-                        /*		*/ + "	fin = i;"
-                        /*		*/ + "	x0 = null;"
-                        /*		*/ + "	locked = false;"
-                        /*		*/ + "	cont.style.setProperty('--i', 0);"
-                        /*		*/ + "	console.log('stop');"
-                        /*		*/ + "};"
-                        /*		*/ + ""
-                        /*		*/ + "function setI(n) {"
-                        /*		*/ + "	cont.style.setProperty('--i', Number.isNaN(n) ? 0 : n);"
-                        /*		*/ + "  if (n < -.25) {"
-                        /*		*/ + "		document.getElementById('" + jsDivId + "').$server.prev();"
-                        /*		*/ + "  	stop();"
-                        /*		*/ + "  }"
-                        /*		*/ + "  if (n > .25) {"
-                        /*		*/ + "		document.getElementById('" + jsDivId + "').$server.next();"
-                        /*		*/ + "  	stop();"
-                        /*		*/ + "  }"
-                        /*		*/ + "	console.log(i);"
-                        /*		*/ + "};"
-                        /*		*/ + ""
-                        /*		*/ + "function ani(cf = 0) {"
-                        /*		*/ + "  setI(ini + (fin - ini) * smooth(cf / anf));"
-                        /*		*/ + "	if (cf === anf) {"
-                        /*		*/ + "		stopAni();"
-                        /*		*/ + "		return;"
-                        /*		*/ + "	}"
-                        /*		*/ + "	rID = requestAnimationFrame(ani.bind(this, ++cf));"
-                        /*		*/ + "};"
-                        /*		*/ + ""
-                        /*		*/ + "function unify(e) { return e.changedTouches ? e.changedTouches[0] : e };"
-                        /*		*/ + ""
-                        /*		*/ + "function lock(e) {"
-                        /*		*/ + "	x0 = unify(e).clientX;"
-                        /*		*/ + "	locked = true;"
-                        /*		*/ + "};"
-                        /*		*/ + ""
-                        /*		*/ + "function drag(e) {"
-                        /*		*/ + "	e.preventDefault();"
-                        /*		*/ + "	if (locked) {"
-                        /*		*/ + "		let dx = unify(e).clientX - x0, f = +(dx / w).toFixed(2);"
-                        /*		*/ + "		setI(i - f);"
-                        /*		*/ + "	}"
-                        /*		*/ + "};"
-                        /*		*/ + ""
-                        /*		*/ + "function move(e) {"
-                        /*		*/ + "	if (locked) {"
-                        /*		*/ + "		let dx = unify(e).clientX - x0;"
-                        /*		*/ + "		let s = Math.sign(dx);"
-                        /*		*/ + "		let f = +(s * dx / w).toFixed(2);"
-                        /*		*/ + "		ini = i - s * f;"
-                        /*		*/ + "		if((i > 0 || s < 0) && (i < N - 1 || s > 0) && f > .2) {"
-                        /*		*/ + "			i -= s;"
-                        /*		*/ + "			f = 1 - f;"
-                        /*		*/ + "		}"
-                        /*		*/ + "		fin = i;"
-                        /*		*/ + "		anf = Math.round(f * NF);"
-                        /*		*/ + "		ani();"
-                        /*		*/ + "		x0 = null;"
-                        /*		*/ + "		locked = false;"
-                        /*		*/ + "	}"
-                        /*		*/ + "};"
-                        /*		*/ + ""
-                        /*		*/ + "function size() { w = window.innerWidth };"
-                        /*		*/ + "addEventListener('resize', size, false);"
-                        /*		*/ + "" + "size();" + "cont.style.setProperty('--n', N);"
-                        /*		*/ + "cont.addEventListener('mousedown', lock, false);"
-                        /*		*/ + "cont.addEventListener('touchstart', lock, false);"
-                        /*		*/ + "cont.addEventListener('mousemove', drag, false);"
-                        /*		*/ + "cont.addEventListener('touchmove', drag, false);"
-                        /*		*/ + "cont.addEventListener('mouseup', move, false);"
-                        /*		*/ + "cont.addEventListener('touchend', move, false);");
+        UI.getCurrent().getPage().executeJs("let cont = document.querySelector('#image-slideshow-item-div');"
+                /*		*/ + "let NF = 30;"
+                /*		*/ + "let N = 1;"
+                /*		*/ + "let i = 0, x0 = null, locked = false, w, ini, fin, rID = null, anf;"
+                /*		*/ + "function smooth(k) {"
+                /*		*/ + "	return .5 * (Math.sin((k - .5) * Math.PI) + 1);"
+                /*		*/ + "};"
+                /*		*/ + "function stopAni() {"
+                /*		*/ + "	cancelAnimationFrame(rID);"
+                /*		*/ + "	rID = null;"
+                /*		*/ + "};"
+                /*		*/ + "function stop() {"
+                /*		*/ + "  stopAni();"
+                /*		*/ + "  i = 0;"
+                /*		*/ + "  anf = 0;"
+                /*		*/ + "	fin = i;"
+                /*		*/ + "	x0 = null;"
+                /*		*/ + "	locked = false;"
+                /*		*/ + "	cont.style.setProperty('--i', 0);"
+                /*		*/ + "	console.log('stop');"
+                /*		*/ + "};"
+                /*		*/ + "function setI(n) {"
+                /*		*/ + "	cont.style.setProperty('--i', Number.isNaN(n) ? 0 : n);"
+                /*		*/ + "  if (n < -.25) {"
+                /*		*/ + "		document.getElementById('" + jsDivId + "').$server.prev();"
+                /*		*/ + "  	stop();"
+                /*		*/ + "  }"
+                /*		*/ + "  if (n > .25) {"
+                /*		*/ + "		document.getElementById('" + jsDivId + "').$server.next();"
+                /*		*/ + "  	stop();"
+                /*		*/ + "  }"
+                /*		*/ + "	console.log(i);"
+                /*		*/ + "};"
+                /*		*/ + "function ani(cf = 0) {"
+                /*		*/ + "  setI(ini + (fin - ini) * smooth(cf / anf));"
+                /*		*/ + "	if (cf === anf) {"
+                /*		*/ + "		stopAni();"
+                /*		*/ + "		return;"
+                /*		*/ + "	}"
+                /*		*/ + "	rID = requestAnimationFrame(ani.bind(this, ++cf));"
+                /*		*/ + "};"
+                /*		*/ + "function unify(e) { return e.changedTouches ? e.changedTouches[0] : e };"
+                /*		*/ + "function lock(e) {"
+                /*		*/ + "	x0 = unify(e).clientX;"
+                /*		*/ + "	locked = true;"
+                /*		*/ + "};"
+                /*		*/ + "function drag(e) {"
+                /*		*/ + "	e.preventDefault();"
+                /*		*/ + "	if (locked) {"
+                /*		*/ + "		let dx = unify(e).clientX - x0, f = +(dx / w).toFixed(2);"
+                /*		*/ + "		setI(i - f);"
+                /*		*/ + "	}"
+                /*		*/ + "};"
+                /*		*/ + "function move(e) {"
+                /*		*/ + "	if (locked) {"
+                /*		*/ + "		let dx = unify(e).clientX - x0;"
+                /*		*/ + "		let s = Math.sign(dx);"
+                /*		*/ + "		let f = +(s * dx / w).toFixed(2);"
+                /*		*/ + "		ini = i - s * f;"
+                /*		*/ + "		if((i > 0 || s < 0) && (i < N - 1 || s > 0) && f > .2) {"
+                /*		*/ + "			i -= s;"
+                /*		*/ + "			f = 1 - f;"
+                /*		*/ + "		}"
+                /*		*/ + "		fin = i;"
+                /*		*/ + "		anf = Math.round(f * NF);"
+                /*		*/ + "		ani();"
+                /*		*/ + "		x0 = null;"
+                /*		*/ + "		locked = false;"
+                /*		*/ + "	}"
+                /*		*/ + "};"
+                /*		*/ + "function size() { w = window.innerWidth };"
+                /*		*/ + "addEventListener('resize', size, false);"
+                /*		*/ + "size();"
+                /*      */ + "cont.style.setProperty('--n', N);"
+                /*		*/ + "cont.addEventListener('mousedown', lock, false);"
+                /*		*/ + "cont.addEventListener('touchstart', lock, false);"
+                /*		*/ + "cont.addEventListener('mousemove', drag, false);"
+                /*		*/ + "cont.addEventListener('touchmove', drag, false);"
+                /*		*/ + "cont.addEventListener('mouseup', move, false);"
+                /*		*/ + "cont.addEventListener('touchend', move, false);");
 
         ComponentFactory componentFactory = new ComponentFactory();
         Div closeBtn = componentFactory.createInlineButton("Zavřít", e -> close());
@@ -199,13 +191,7 @@ public class ImageSlideshow<T extends SlideshowItem> extends Div {
     private Component createItemSlide(T itemTO) {
         // vytvoř odpovídající komponentu pro zobrazení
         // obrázku nebo videa
-        switch (itemTO.getType()) {
-            case VIDEO:
-                return createVideoSlide(itemTO);
-            case IMAGE:
-            default:
-                return createImageSlide(itemTO);
-        }
+        return itemTO.getType() == MediaType.VIDEO ? createVideoSlide(itemTO) : createImageSlide(itemTO);
     }
 
     public void showItem(int index) {
@@ -244,7 +230,7 @@ public class ImageSlideshow<T extends SlideshowItem> extends Div {
             itemLayout.add(slideshowComponent);
             itemLabel.setText((index + 1) + "/" + totalCount + " " + currentItemTO.getName());
         } catch (Exception e) {
-            logger.error("Chyba při zobrazování slideshow položky fotogalerie", e);
+            log.error("Chyba při zobrazování slideshow položky fotogalerie", e);
             UIUtils.showWarning("Zobrazení položky se nezdařilo");
             close();
         }
@@ -301,7 +287,7 @@ public class ImageSlideshow<T extends SlideshowItem> extends Div {
     }
 
     protected void close() {
-        if (!closePrevented) ((HasComponents) getParent().get()).remove(ImageSlideshow.this);
+        if (!closePrevented) getParent().ifPresent(p -> ((HasComponents) p).remove(ImageSlideshow.this));
         closePrevented = false;
     }
 

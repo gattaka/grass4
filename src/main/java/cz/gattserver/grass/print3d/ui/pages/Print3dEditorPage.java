@@ -139,12 +139,12 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
             editMode = false;
-            node = nodeService.getNodeByIdForOverview(identifier.getId());
+            node = nodeService.getNodeByIdForOverview(identifier.id());
             nameField.setValue("");
             publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             editMode = true;
-            project = print3dService.getProjectForDetail(identifier.getId());
+            project = print3dService.getProjectForDetail(identifier.id());
 
             if (project == null) throw new GrassPageException(404);
 

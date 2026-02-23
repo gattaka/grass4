@@ -118,7 +118,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         UserInfoTO userInfoTO = securityService.getCurrentUser();
 
         photogalleryTO =
-                pgService.findPhotogalleryForDetail(identifier.getId(), userInfoTO.getId(), userInfoTO.isAdmin());
+                pgService.findPhotogalleryForDetail(identifier.id(), userInfoTO.getId(), userInfoTO.isAdmin());
         if (photogalleryTO == null) throw new GrassPageException(404);
 
         if (!MAGICK_WORD.equals(pageToken) && !MAGICK_WORD.equals(extraToken) && !photogalleryTO.publicated() &&

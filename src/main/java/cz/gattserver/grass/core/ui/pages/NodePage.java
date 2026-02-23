@@ -65,7 +65,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        nodeTO = nodeService.getNodeByIdForDetail(identifier.getId());
+        nodeTO = nodeService.getNodeByIdForDetail(identifier.id());
 
         // Navigační breadcrumb
         createBreadcrumb(layout, nodeTO);

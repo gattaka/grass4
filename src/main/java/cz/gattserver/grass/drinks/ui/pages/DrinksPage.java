@@ -78,7 +78,7 @@ public class DrinksPage extends Div implements HasUrlParameter<String> {
             Long itemId = null;
             if (itemParam != null) {
                 URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(itemParam);
-                itemId = identifier.getId();
+                itemId = identifier.id();
             }
             switch (tabParam.toLowerCase()) {
                 default:

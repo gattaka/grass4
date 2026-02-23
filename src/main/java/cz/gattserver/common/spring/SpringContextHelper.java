@@ -1,13 +1,11 @@
 package cz.gattserver.common.spring;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.context.ApplicationContext;
 
+@Slf4j
 public class SpringContextHelper {
-
-	private static Logger logger = LoggerFactory.getLogger(SpringContextHelper.class);
 
 	private static ApplicationContext applicationContext;
 
@@ -16,7 +14,8 @@ public class SpringContextHelper {
 
 	public static void setApplicationContext(ApplicationContext applicationContext) {
 		if (SpringContextHelper.applicationContext != null) {
-			logger.warn("SpringContextHelper.applicationContext je již obsazen " + SpringContextHelper.applicationContext);
+            log.warn("SpringContextHelper.applicationContext je již obsazen {}",
+                    SpringContextHelper.applicationContext);
 			return;
 		}
 		SpringContextHelper.applicationContext = applicationContext;
@@ -38,5 +37,4 @@ public class SpringContextHelper {
 		getContext().getAutowireCapableBeanFactory().autowireBeanProperties(target,
 				AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
 	}
-
 }

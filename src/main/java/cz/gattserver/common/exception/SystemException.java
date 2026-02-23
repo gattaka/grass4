@@ -1,8 +1,13 @@
 package cz.gattserver.common.exception;
 
+import java.io.Serial;
+
 public class SystemException extends ApplicationException {
 
-	public SystemException(String errorMessage, Throwable originalException) {
+    @Serial
+    private static final long serialVersionUID = -296340491520121296L;
+
+    public SystemException(String errorMessage, Throwable originalException) {
 		super(errorMessage, originalException);
 	}
 

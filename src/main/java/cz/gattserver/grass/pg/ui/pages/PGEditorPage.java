@@ -157,12 +157,12 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
             editMode = false;
-            node = nodeService.getNodeByIdForOverview(identifier.getId());
+            node = nodeService.getNodeByIdForOverview(identifier.id());
             photogalleryNameField.setValue("");
             publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             editMode = true;
-            existingPhotogalleryTO = pgService.findPhotogalleryForDetail(identifier.getId(), currentUserInfoTO.getId(),
+            existingPhotogalleryTO = pgService.findPhotogalleryForDetail(identifier.id(), currentUserInfoTO.getId(),
                     currentUserInfoTO.isAdmin());
 
             if (existingPhotogalleryTO == null) throw new GrassPageException(404);

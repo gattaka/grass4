@@ -155,9 +155,9 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
-            NodeOverviewTO node = nodeService.getNodeByIdForOverview(identifier.getId());
+            NodeOverviewTO node = nodeService.getNodeByIdForOverview(identifier.id());
             if (node == null) {
-                logger.debug("Neexistující kategorie: {}", identifier.getId());
+                logger.debug("Neexistující kategorie: {}", identifier.id());
                 throw new GrassPageException(404);
             }
             articleEditorTO.setNodeId(node.getId());
@@ -170,7 +170,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setDraftId(articleService.saveDraft(articleEditorTO, false));
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             ArticleTO existingArticleTO =
-                    articleService.getArticleForDetail(identifier.getId(), securityService.getCurrentUser().getId(),
+                    articleService.getArticleForDetail(identifier.id(), securityService.getCurrentUser().getId(),
                             securityService.getCurrentUser().isAdmin());
             if (existingArticleTO == null) throw new GrassPageException(403);
             articleEditorTO.setNodeId(existingArticleTO.parentId());

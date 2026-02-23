@@ -11,7 +11,7 @@ public class ExifInfoTO {
 
 	private LocalDateTime date;
 	private Long dateMillis;
-	private Integer orinetation;
+	private Integer orientation;
 	private String deviceMaker;
 	private String deviceModel;
 	private Double latitude;
