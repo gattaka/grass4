@@ -7,8 +7,10 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class HWRequestHandlerConfig {
 
+    public static final String HW_PATH = "hw-files";
+
     @Bean
     public ServletRegistrationBean<HWRequestHandler> hwRequestHandlerRegisterBean(HWRequestHandler handler) {
-        return new ServletRegistrationBean<>(handler, "/" + HWConfiguration.HW_PATH + "/*");
+        return new ServletRegistrationBean<>(handler, "/" + HW_PATH + "/*");
     }
 }

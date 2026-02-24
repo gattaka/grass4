@@ -10,6 +10,7 @@ import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.HWRequestHandlerConfig;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,6 @@ import com.vaadin.flow.component.upload.Upload;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 
-import cz.gattserver.grass.hw.HWConfiguration;
 import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
@@ -58,7 +58,7 @@ public class HWItemDocsTab extends Div {
 
     private void downloadDocument(HWItemFileTO item) {
         UI.getCurrent().getPage().executeJs(
-                "window.open('" + UIUtils.getContextPath() + "/" + HWConfiguration.HW_PATH + "/" + hwItem.getId() +
+                "window.open('" + UIUtils.getContextPath() + "/" + HWRequestHandlerConfig.HW_PATH + "/" + hwItem.getId() +
                         "/doc/" + item.getName() + "', '_blank');");
     }
 

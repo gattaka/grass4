@@ -22,6 +22,7 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TableLayout;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import cz.gattserver.grass.hw.HWRequestHandlerConfig;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -42,7 +43,6 @@ import com.vaadin.flow.data.renderer.IconRenderer;
 
 import cz.gattserver.common.util.CZAmountFormatter;
 import cz.gattserver.common.util.MoneyFormatter;
-import cz.gattserver.grass.hw.HWConfiguration;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
@@ -274,7 +274,7 @@ public class HWItemInfoTab extends Div {
         ComponentFactory componentFactory = new ComponentFactory();
 
         Button hwItemImageDetailBtn = componentFactory.createDetailButton(
-                e -> UI.getCurrent().getPage().open(HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/icon/show"));
+                e -> UI.getCurrent().getPage().open(HWRequestHandlerConfig.HW_PATH + "/" + hwItem.getId() + "/icon/show"));
         btnLayout.add(hwItemImageDetailBtn);
 
         if (getUser().isAdmin()) {

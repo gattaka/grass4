@@ -16,6 +16,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
+import cz.gattserver.grass.hw.HWRequestHandlerConfig;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +25,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.upload.Upload;
 
-import cz.gattserver.grass.hw.HWConfiguration;
 import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
@@ -146,6 +146,6 @@ public class HWItemPhotosTab extends Div {
     }
 
     private String createPhotoItemURL(HWItemFileTO item) {
-        return HWConfiguration.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName();
+        return HWRequestHandlerConfig.HW_PATH + "/" + hwItem.getId() + "/img/" + item.getName();
     }
 }

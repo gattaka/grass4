@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 
 import cz.gattserver.common.util.ServiceUtils;
 import cz.gattserver.grass.core.exception.GrassException;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.hw.interfaces.*;
 import cz.gattserver.grass.hw.model.*;
@@ -26,14 +25,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.types.OrderSpecifier;
 
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
-import cz.gattserver.grass.hw.HWConfiguration;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 import cz.gattserver.grass.hw.model.HWType;
 
@@ -49,32 +47,35 @@ public class HWServiceImpl implements HWService {
     private static final String ILLEGAL_PATH_DOCS_ERR = "Podtečení adresáře dokumentací";
     private static final String ILLEGAL_PATH_PRINT_3D_ERR = "Podtečení adresáře 3d modelů";
 
-    @Autowired
-    private FileSystemService fileSystemService;
+    private final FileSystemService fileSystemService;
+    private final HWItemRepository hwItemRepository;
+    private final HWTypeRepository hwTypeRepository;
+    private final HWItemTypeRepository hwItemTypeRepository;
+    private final HWItemRecordRepository hwItemRecordRepository;
 
-    @Autowired
-    private HWItemRepository hwItemRepository;
+    @Value("${hw.root.path}")
+    private String hwRootPath;
 
-    @Autowired
-    private HWTypeRepository hwTypeRepository;
+    @Value("${hw.images.dir}")
+    private String hwImagesDir;
 
-    @Autowired
-    private HWItemTypeRepository hwItemTypeRepository;
+    @Value("${hw.images.mini.dir}")
+    private String hwImagesMiniDir;
 
-    @Autowired
-    private HWItemRecordRepository hwItemRecordRepository;
+    @Value("${hw.documents.dir}")
+    private String hwDocumentsDir;
 
-    @Autowired
-    private ConfigurationService configurationService;
+    @Value("${hw.print3d.dir}")
+    private String hwPrint3dDir;
 
-    /*
-     * Config
-     */
-
-    private HWConfiguration loadConfiguration() {
-        HWConfiguration configuration = new HWConfiguration();
-        configurationService.loadConfiguration(configuration);
-        return configuration;
+    public HWServiceImpl(FileSystemService fileSystemService, HWItemRepository hwItemRepository,
+                         HWTypeRepository hwTypeRepository, HWItemTypeRepository hwItemTypeRepository,
+                         HWItemRecordRepository hwItemRecordRepository) {
+        this.fileSystemService = fileSystemService;
+        this.hwItemRepository = hwItemRepository;
+        this.hwTypeRepository = hwTypeRepository;
+        this.hwItemTypeRepository = hwItemTypeRepository;
+        this.hwItemRecordRepository = hwItemRecordRepository;
     }
 
     /**
@@ -88,9 +89,7 @@ public class HWServiceImpl implements HWService {
      */
     private Path getHWPath(Long id) {
         Validate.notNull(id, "ID HW položky nesmí být null");
-        HWConfiguration configuration = loadConfiguration();
-        String rootDir = configuration.getRootDir();
-        Path rootPath = fileSystemService.getFileSystem().getPath(rootDir);
+        Path rootPath = fileSystemService.getFileSystem().getPath(hwRootPath);
         if (!Files.exists(rootPath)) throw new IllegalStateException("Kořenový adresář HW modulu musí existovat");
         rootPath = rootPath.normalize();
         Path hwPath = rootPath.resolve(String.valueOf(id));
@@ -100,33 +99,29 @@ public class HWServiceImpl implements HWService {
     }
 
     private Path getHWItemDocumentsPath(Long id) throws IOException {
-        HWConfiguration configuration = loadConfiguration();
         Path hwPath = getHWPath(id);
-        Path file = hwPath.resolve(configuration.getDocumentsDir());
+        Path file = hwPath.resolve(hwDocumentsDir);
         if (!Files.exists(file)) fileSystemService.createDirectoriesWithPerms(file);
         return file;
     }
 
     private Path getHWItemPrint3dPath(Long id) throws IOException {
-        HWConfiguration configuration = loadConfiguration();
         Path hwPath = getHWPath(id);
-        Path file = hwPath.resolve(configuration.getPrint3dDir());
+        Path file = hwPath.resolve(hwPrint3dDir);
         if (!Files.exists(file)) fileSystemService.createDirectoriesWithPerms(file);
         return file;
     }
 
     private Path getHWItemImagesPath(Long id) throws IOException {
-        HWConfiguration configuration = loadConfiguration();
         Path hwPath = getHWPath(id);
-        Path file = hwPath.resolve(configuration.getImagesDir());
+        Path file = hwPath.resolve(hwImagesDir);
         if (!Files.exists(file)) fileSystemService.createDirectoriesWithPerms(file);
         return file;
     }
 
     private Path getHWItemImagesMiniPath(Long id) throws IOException {
-        HWConfiguration configuration = loadConfiguration();
         Path hwPath = getHWPath(id);
-        Path file = hwPath.resolve(configuration.getImagesMiniDir());
+        Path file = hwPath.resolve(hwImagesMiniDir);
         if (!Files.exists(file)) fileSystemService.createDirectoriesWithPerms(file);
         return file;
     }
@@ -263,22 +258,20 @@ public class HWServiceImpl implements HWService {
             // images
             try {
                 Path imagesPath = getHWItemImagesPath(id);
-                if (imagesPath != null) {
-                    Path imagesMiniPath = getHWItemImagesMiniPath(id);
-                    try (Stream<Path> s = Files.walk(imagesPath)) {
-                        s.forEach(p -> {
-                            if (Files.isDirectory(p)) return;
-                            String imageName = p.getFileName().toString();
-                            Path imageMiniPath = imagesMiniPath.resolve(imageName);
-                            try {
-                                createMiniature(p, imageMiniPath);
-                            } catch (Exception e) {
-                                throw new GrassException(
-                                        "Nezdařilo se vytvořit miniaturu grafické přílohu " + imageName +
-                                                " HW položky " + id + ".", e);
-                            }
-                        });
-                    }
+                Path imagesMiniPath = getHWItemImagesMiniPath(id);
+                try (Stream<Path> s = Files.walk(imagesPath)) {
+                    s.forEach(p -> {
+                        if (Files.isDirectory(p)) return;
+                        String imageName = p.getFileName().toString();
+                        Path imageMiniPath = imagesMiniPath.resolve(imageName);
+                        try {
+                            createMiniature(p, imageMiniPath);
+                        } catch (Exception e) {
+                            throw new GrassException(
+                                    "Nezdařilo se vytvořit miniaturu grafické přílohu " + imageName + " HW položky " +
+                                            id + ".", e);
+                        }
+                    });
                 }
             } catch (Exception e) {
                 throw new GrassException("Nezdařilo se vytvořit miniatury grafických přílohu HW položky " + id + ".",
@@ -738,11 +731,11 @@ public class HWServiceImpl implements HWService {
                 try {
                     Files.delete(p);
                 } catch (IOException e) {
-                    logger.error("Chyba při mazání souboru HW položky " + id + "]", e);
+                    logger.error("Chyba při mazání souboru HW položky {}]", id, e);
                 }
             });
         } catch (Exception e) {
-            logger.warn("Nezdařilo se smazat adresář příloh k HW položce [" + id + "]");
+            logger.warn("Nezdařilo se smazat adresář příloh k HW položce [{}]", id);
         }
     }
 
