@@ -19,15 +19,14 @@ import com.vaadin.flow.data.binder.Setter;
 import com.vaadin.flow.dom.DomEvent;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.BeforeLeaveEvent;
-import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.shared.Registration;
 import cz.gattserver.common.Identifiable;
 import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.vaadin.addons.componentfactory.monthpicker.MonthPicker;
 
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Consumer;
@@ -114,7 +113,7 @@ public class ComponentFactory {
     }
 
     public <T> Button createCopyGridButton(Consumer<T> clickListener, Grid<T> grid) {
-        return createGridSingleButton(l -> createCopyButton(l), clickListener, grid);
+        return createGridSingleButton(this::createCopyButton, clickListener, grid);
     }
 
     public Button createDetailButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -124,7 +123,7 @@ public class ComponentFactory {
     }
 
     public <T> Button createDetailGridButton(Consumer<T> clickListener, Grid<T> grid) {
-        return createGridSingleButton(l -> createDetailButton(l), clickListener, grid);
+        return createGridSingleButton(this::createDetailButton, clickListener, grid);
     }
 
     public Button createDownloadButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -134,7 +133,7 @@ public class ComponentFactory {
     }
 
     public <T> Button createDownloadGridButton(Consumer<T> clickListener, Grid<T> grid) {
-        return createGridSingleButton(l -> createDownloadButton(l), clickListener, grid);
+        return createGridSingleButton(this::createDownloadButton, clickListener, grid);
     }
 
     public Button createZipButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -162,7 +161,7 @@ public class ComponentFactory {
     }
 
     public <T> Button createEditGridButton(Consumer<T> clickListener, Grid<T> grid) {
-        return createGridSingleButton(l -> createEditButton(l), clickListener, grid);
+        return createGridSingleButton(this::createEditButton, clickListener, grid);
     }
 
     public Button createCreateDirButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -188,7 +187,7 @@ public class ComponentFactory {
     }
 
     public <T> Button createMoveGridButton(Consumer<Set<T>> clickListener, Grid<T> grid) {
-        return createGridSetButton(l -> createMoveButton(l), clickListener, grid);
+        return createGridSetButton(this::createMoveButton, clickListener, grid);
     }
 
     public Button createPreviewButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
@@ -248,11 +247,11 @@ public class ComponentFactory {
     }
 
     public <T> Button createDeleteGridButton(Consumer<T> clickListener, Grid<T> grid) {
-        return createGridSingleButton(l -> createDeleteButton(l), clickListener, grid);
+        return createGridSingleButton(this::createDeleteButton, clickListener, grid);
     }
 
     public <T> Button createDeleteGridSetButton(Consumer<Set<T>> clickListener, Grid<T> grid) {
-        return createGridSetButton(l -> createDeleteButton(l), clickListener, grid);
+        return createGridSetButton(this::createDeleteButton, clickListener, grid);
     }
 
     /* Input pole */
@@ -263,6 +262,9 @@ public class ComponentFactory {
         // Logika musí procházet přes Java Vaadin, aby si změn všimnul binder,
         // pokud by se vše upravilo pouze v JS, může se během binder commitu přijít o změny
         TextArea textArea = new TextArea(caption) {
+
+            @Serial
+            private static final long serialVersionUID = 4705199151311135474L;
 
             @ClientCallable
             private void handleTab(int start, int end, String value, boolean shiftKey) {
@@ -512,9 +514,7 @@ public class ComponentFactory {
         bindingBuilder.bind(to -> {
             I id = getter.apply(to);
             return id == null ? null : map.get(id);
-        }, (to, val) -> {
-            setter.accept(to, val == null ? null : val.getId());
-        });
+        }, (to, val) -> setter.accept(to, val == null ? null : val.getId()));
     }
 
     public <T extends Component & HasValueAndElement<?, ?>> void attachLink(T field, Consumer<T> onClick) {

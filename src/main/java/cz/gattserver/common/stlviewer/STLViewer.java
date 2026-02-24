@@ -4,7 +4,6 @@ import java.io.Serial;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.page.PendingJavaScriptResult;
 

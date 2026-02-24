@@ -1,5 +1,6 @@
 package cz.gattserver.common.ui;
 
+import java.io.Serial;
 import java.util.Objects;
 
 import com.vaadin.flow.component.AbstractField.ComponentValueChangeEvent;
@@ -8,16 +9,25 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.selection.SingleSelect;
 import com.vaadin.flow.dom.DomListenerRegistration;
 import com.vaadin.flow.shared.Registration;
+import lombok.Getter;
 
 public class RatingStars extends Div implements SingleSelect<RatingStars, Double> {
 
-	private Double value;
-	private HoverIcon[] icons = new HoverIcon[5];
-	private DomListenerRegistration[] mouseOverListeners = new DomListenerRegistration[5];
-	private DomListenerRegistration[] mouseOutListeners = new DomListenerRegistration[5];
-	private Registration[] clickListeners = new Registration[5];
-	private boolean readOnly = false;
-	private boolean required = false;
+    @Serial
+    private static final long serialVersionUID = 1003271614688759968L;
+
+	private final HoverIcon[] icons = new HoverIcon[5];
+    private final DomListenerRegistration[] mouseOverListeners = new DomListenerRegistration[5];
+    private final DomListenerRegistration[] mouseOutListeners = new DomListenerRegistration[5];
+    private final Registration[] clickListeners = new Registration[5];
+
+    @Getter
+    private Double value;
+    @Getter
+    private boolean readOnly = false;
+
+	private boolean requiredIndicatorVisible = false;
+
 	private ValueChangeListener<? super ComponentValueChangeEvent<RatingStars, Double>> valueChangeListener;
 
 	private void showCurrentValue() {
@@ -29,17 +39,13 @@ public class RatingStars extends Div implements SingleSelect<RatingStars, Double
 		if (!Objects.equals(newValue, this.value)) {
 			if (valueChangeListener != null)
 				valueChangeListener.valueChanged(
-						new ComponentValueChangeEvent<RatingStars, Double>(this, this, this.value, userOriginated));
+						new ComponentValueChangeEvent<>(this, this, this.value, userOriginated));
 			this.value = newValue;
 			showCurrentValue();
 		}
 	}
 
-	public Double getValue() {
-		return value;
-	}
-
-	public void setValue(Double value) {
+    public void setValue(Double value) {
 		changeValue(value, false);
 	}
 
@@ -58,11 +64,7 @@ public class RatingStars extends Div implements SingleSelect<RatingStars, Double
 		value = 0d;
 	}
 
-	public boolean isReadOnly() {
-		return readOnly;
-	}
-
-	public void setReadOnly(boolean readOnly) {
+    public void setReadOnly(boolean readOnly) {
 		this.readOnly = readOnly;
 		if (readOnly) {
 			for (DomListenerRegistration reg : mouseOverListeners)
@@ -91,12 +93,12 @@ public class RatingStars extends Div implements SingleSelect<RatingStars, Double
 
 	@Override
 	public void setRequiredIndicatorVisible(boolean requiredIndicatorVisible) {
-		this.required = requiredIndicatorVisible;
+		this.requiredIndicatorVisible = requiredIndicatorVisible;
 	}
 
 	@Override
 	public boolean isRequiredIndicatorVisible() {
-		return required;
+		return requiredIndicatorVisible;
 	}
 
 	@Override
@@ -105,5 +107,4 @@ public class RatingStars extends Div implements SingleSelect<RatingStars, Double
 		valueChangeListener = listener;
 		return () -> valueChangeListener = null;
 	}
-
 }
