@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 
 import cz.gattserver.grass.core.mock.MockFileSystemService;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.ui.util.ImageComparator;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.hw.interfaces.*;

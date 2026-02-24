@@ -1,9 +1,7 @@
 package cz.gattserver.grass.pg.util;
 
 import cz.gattserver.grass.core.mock.MockFileSystemService;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.ui.util.ImageComparator;
-import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.pg.config.PGConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

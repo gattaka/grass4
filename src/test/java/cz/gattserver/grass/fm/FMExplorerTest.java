@@ -1,7 +1,6 @@
 package cz.gattserver.grass.fm;
 
 import cz.gattserver.grass.core.mock.MockFileSystemService;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.fm.interfaces.FMItemTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;

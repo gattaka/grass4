@@ -2,7 +2,6 @@ package cz.gattserver.grass.core.services.impl;
 
 import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

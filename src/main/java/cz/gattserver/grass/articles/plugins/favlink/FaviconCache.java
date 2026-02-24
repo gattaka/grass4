@@ -2,9 +2,7 @@ package cz.gattserver.grass.articles.plugins.favlink;
 
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.articles.editor.parser.exceptions.ParserException;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.net.URL;

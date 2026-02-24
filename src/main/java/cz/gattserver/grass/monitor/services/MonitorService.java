@@ -1,6 +1,5 @@
 package cz.gattserver.grass.monitor.services;
 
-import cz.gattserver.grass.monitor.config.MonitorConfiguration;
 import cz.gattserver.grass.monitor.processor.item.DiskStatusPartItemTO;
 import cz.gattserver.grass.monitor.processor.item.JVMMemoryMonitorItemTO;
 import cz.gattserver.grass.monitor.processor.item.JVMPIDMonitorItemTO;
@@ -15,10 +14,6 @@ import cz.gattserver.grass.monitor.processor.item.SystemSwapMonitorItemTO;
 import cz.gattserver.grass.monitor.processor.item.SystemUptimeMonitorItemTO;
 
 public interface MonitorService {
-
-	MonitorConfiguration getConfiguration();
-
-	void storeConfiguration(MonitorConfiguration configuration);
 
 	SystemUptimeMonitorItemTO getSystemUptime();
 

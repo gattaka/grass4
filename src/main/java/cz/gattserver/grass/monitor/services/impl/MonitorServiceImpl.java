@@ -3,8 +3,6 @@ package cz.gattserver.grass.monitor.services.impl;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import cz.gattserver.grass.core.services.ConfigurationService;
-import cz.gattserver.grass.monitor.config.MonitorConfiguration;
 import cz.gattserver.grass.monitor.processor.item.*;
 import cz.gattserver.grass.monitor.services.MonitorService;
 import org.apache.commons.lang3.StringUtils;
@@ -42,8 +40,6 @@ import java.util.stream.Collectors;
 public class MonitorServiceImpl implements MonitorService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MonitorServiceImpl.class);
-
-	private static final int HTTP_TEST_TIMEOUT = 5000;
 
 	@Value("${servers.items:}")
 	private String serversItems;
@@ -83,21 +79,6 @@ public class MonitorServiceImpl implements MonitorService {
 
 	@Value("${monitor.password}")
 	private String monitorPassword;
-
-	@Autowired
-	private ConfigurationService configurationService;
-
-	@Override
-	public MonitorConfiguration getConfiguration() {
-		MonitorConfiguration configuration = new MonitorConfiguration();
-		configurationService.loadConfiguration(configuration);
-		return configuration;
-	}
-
-	@Override
-	public void storeConfiguration(MonitorConfiguration configuration) {
-		configurationService.saveConfiguration(configuration);
-	}
 
 	@Override
 	public SystemUptimeMonitorItemTO getSystemUptime() {

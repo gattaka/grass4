@@ -14,7 +14,6 @@ import cz.gattserver.grass.pg.model.Photogallery;
 import cz.gattserver.grass.pg.model.PhotogalleryRepository;
 import cz.gattserver.grass.pg.util.DecodeAndCaptureFrames;
 import cz.gattserver.grass.pg.util.PGUtils;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +41,6 @@ import java.util.stream.Stream;
 public class PGServiceImpl implements PGService {
 
     private final ContentNodeService contentNodeService;
-    private final ConfigurationService configurationService;
     private final PhotogalleryRepository photogalleryRepository;
     private final ContentNodeContentTagRepository contentNodeContentTagRepository;
     private final FileSystemService fileSystemService;
@@ -60,12 +58,10 @@ public class PGServiceImpl implements PGService {
     @Value("${pg.slideshow.dir}")
     private String slideshowDir;
 
-    public PGServiceImpl(ContentNodeService contentNodeService, ConfigurationService configurationService,
-                         PhotogalleryRepository photogalleryRepository,
+    public PGServiceImpl(ContentNodeService contentNodeService, PhotogalleryRepository photogalleryRepository,
                          ContentNodeContentTagRepository contentNodeContentTagRepository,
                          FileSystemService fileSystemService, EventBus eventBus) {
         this.contentNodeService = contentNodeService;
-        this.configurationService = configurationService;
         this.photogalleryRepository = photogalleryRepository;
         this.contentNodeContentTagRepository = contentNodeContentTagRepository;
         this.fileSystemService = fileSystemService;

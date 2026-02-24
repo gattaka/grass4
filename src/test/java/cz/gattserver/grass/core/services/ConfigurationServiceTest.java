@@ -2,7 +2,6 @@ package cz.gattserver.grass.core.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import cz.gattserver.grass.core.mock.MockConfiguration;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

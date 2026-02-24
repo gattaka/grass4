@@ -8,7 +8,6 @@ import cz.gattserver.grass.core.mock.CoreMockService;
 import cz.gattserver.grass.core.mock.MockFileSystemService;
 import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.security.CoreRole;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.ui.util.ImageComparator;
 import cz.gattserver.grass.core.util.DBCleanTest;
