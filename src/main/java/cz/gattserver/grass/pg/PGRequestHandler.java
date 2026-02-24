@@ -28,6 +28,8 @@ public class PGRequestHandler extends AbstractGrassRequestHandler {
 
     @Override
     protected Path getPath(String fileName, HttpServletRequest httpRequest) throws FileNotFoundException {
+        if (fileName.startsWith("/"))
+            fileName = fileName.substring(1);
         Path rootPath = fileSystemService.getFileSystem().getPath(rootPathName);
         Path path = rootPath.resolve(fileName);
         if (!path.toAbsolutePath().startsWith(rootPath.toAbsolutePath()))
