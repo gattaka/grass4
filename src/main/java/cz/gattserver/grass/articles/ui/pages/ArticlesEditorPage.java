@@ -21,7 +21,7 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
-import cz.gattserver.grass.articles.config.ArticlesConfiguration;
+import cz.gattserver.grass.articles.AttachmentsRequestHandlerConfig;
 import cz.gattserver.grass.articles.editor.parser.interfaces.*;
 import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
 import cz.gattserver.grass.articles.services.ArticleService;
@@ -571,7 +571,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     private String getDownloadLink(AttachmentTO item) {
         String id =
                 String.valueOf(item.isDraft() ? articleEditorTO.getDraftId() : articleEditorTO.getExistingArticleId());
-        return String.join("/", UIUtils.getURLBase(), ArticlesConfiguration.ATTACHMENTS_PATH, id, item.getName());
+        return String.join("/", UIUtils.getURLBase(), AttachmentsRequestHandlerConfig.ATTACHMENTS_PATH, id, item.getName());
     }
 
     private void handleDownloadAction(AttachmentTO item) {

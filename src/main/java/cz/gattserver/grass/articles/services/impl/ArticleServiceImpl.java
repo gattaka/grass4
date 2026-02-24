@@ -3,7 +3,7 @@ package cz.gattserver.grass.articles.services.impl;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.util.ServiceUtils;
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
-import cz.gattserver.grass.articles.config.ArticlesConfiguration;
+import cz.gattserver.grass.articles.AttachmentsRequestHandlerConfig;
 import cz.gattserver.grass.articles.editor.lexer.Lexer;
 import cz.gattserver.grass.articles.editor.parser.Context;
 import cz.gattserver.grass.articles.editor.parser.Parser;
@@ -23,13 +23,13 @@ import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagReposito
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.modules.ArticlesContentModule;
 import cz.gattserver.grass.core.events.EventBus;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,6 +52,12 @@ public class ArticleServiceImpl implements ArticleService {
 
     private static final Logger logger = LoggerFactory.getLogger(ArticleServiceImpl.class);
 
+    @Value("${articles.root.path}")
+    private String articlesRootPath;
+
+    @Value("${articles.backup.timeout}")
+    private Integer articlesBackupTimeout;
+
     @Autowired
     private EventBus eventBus;
 
@@ -63,9 +69,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Autowired
     private PluginRegisterService pluginRegister;
-
-    @Autowired
-    private ConfigurationService configurationService;
 
     @Autowired
     private FileSystemService fileSystemService;
@@ -241,8 +244,8 @@ public class ArticleServiceImpl implements ArticleService {
         if (process) {
             if (replaceAttachmentsId) {
                 // Nahraď draft id ve všech attachment odkazech novým id ostrého článku
-                String linkFrom = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + payload.getDraftId();
-                String linkTo = ArticlesConfiguration.ATTACHMENTS_PATH + "/" + article.getId();
+                String linkFrom = AttachmentsRequestHandlerConfig.ATTACHMENTS_PATH + "/" + payload.getDraftId();
+                String linkTo = AttachmentsRequestHandlerConfig.ATTACHMENTS_PATH + "/" + article.getId();
                 article.setText(article.getText().replaceAll(linkFrom, linkTo));
             }
 
@@ -335,9 +338,7 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public Integer getBackupTimeout() {
-        ArticlesConfiguration configuration = new ArticlesConfiguration();
-        configurationService.loadConfiguration(configuration);
-        return configuration.getBackupTimeout();
+        return articlesBackupTimeout;
     }
 
     private Path createAttachmentsDir(Path newPath) {
@@ -359,11 +360,8 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     private Path findAttachmentsRootPath() {
-        ArticlesConfiguration configuration = new ArticlesConfiguration();
-        configurationService.loadConfiguration(configuration);
-        String rootDir = configuration.getAttachmentsDir();
         FileSystem fileSystem = fileSystemService.getFileSystem();
-        return fileSystem.getPath(rootDir);
+        return fileSystem.getPath(articlesRootPath);
     }
 
     private Path getAttachmentsPath(Long articleId, boolean createIfDoesNotExists) {

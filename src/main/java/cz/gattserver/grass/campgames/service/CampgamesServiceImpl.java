@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 import cz.gattserver.grass.campgames.interfaces.CampgameFileTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.core.exception.GrassException;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,8 +38,8 @@ public class CampgamesServiceImpl implements CampgamesService {
 
     private static final String ILLEGAL_PATH_IMGS_ERR = "Podtečení adresáře grafických příloh";
 
-    @Value("${campgames.root.dir}")
-    private String campgamesRootDirectory;
+    @Value("${campgames.root.path}")
+    private String campgamesRootPath;
 
     @Value("${campgames.images.dir}")
     private String campgamesImagesDirectory;
@@ -53,9 +52,6 @@ public class CampgamesServiceImpl implements CampgamesService {
 
 	@Autowired
 	private CampgameKeywordRepository campgameKeywordRepository;
-
-	@Autowired
-	private ConfigurationService configurationService;
 
 	@Autowired
 	private CampgamesMapperService campgamesMapper;
@@ -74,7 +70,7 @@ public class CampgamesServiceImpl implements CampgamesService {
 	 */
 	private Path getCampgamePath(Long id) {
 		Validate.notNull(id, "ID hry nesmí být null");
-		Path rootPath = fileSystemService.getFileSystem().getPath(campgamesRootDirectory);
+		Path rootPath = fileSystemService.getFileSystem().getPath(campgamesRootPath);
 		if (!Files.exists(rootPath))
 			throw new IllegalStateException("Kořenový adresář modulu her musí existovat");
 		rootPath = rootPath.normalize();
