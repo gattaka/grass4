@@ -19,7 +19,6 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.util.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,37 +40,37 @@ public class MonitorServiceImpl implements MonitorService {
 
 	private static final Logger logger = LoggerFactory.getLogger(MonitorServiceImpl.class);
 
-	@Value("${servers.items:}")
+	@Value("${monitor.servers.items:}")
 	private String serversItems;
 
 	@Value("${monitor.address}")
 	private String monitorAddress;
 
-	@Value("${uptime.ws}")
+	@Value("${monitor.uptime.ws}")
 	private String uptimeWs;
 
-	@Value("${disk.mounts.ws}")
+	@Value("${monitor.disk.mounts.ws}")
 	private String diskMountsWs;
 
-	@Value("${last.backup.ws}")
+	@Value("${monitor.last.backup.ws}")
 	private String lastBackupWs;
 
-	@Value("${services.status.ws}")
+	@Value("${monitor.services.status.ws}")
 	private String servicesStatusWs;
 
-	@Value("${swap.status.ws}")
+	@Value("${monitor.swap.status.ws}")
 	private String swapStatusWs;
 
-	@Value("${jmap.list.ws}")
+	@Value("${monitor.jmap.list.ws}")
 	private String jmapListWs;
 
-	@Value("${memory.status.ws}")
+	@Value("${monitor.memory.status.ws}")
 	private String memoryStatusWs;
 
-	@Value("${smart.status.ws}")
+	@Value("${monitor.smart.status.ws}")
 	private String smartStatusWs;
 
-	@Value("${backup.disk.mount.ws}")
+	@Value("${monitor.backup.disk.mount.ws}")
 	private String backupDiskMountWs;
 
 	@Value("${monitor.username}")
