@@ -38,7 +38,7 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.template.ContentViewer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.print3d.config.Print3dConfiguration;
+import cz.gattserver.grass.print3d.Print3dRequestHandlerConfig;
 import cz.gattserver.grass.print3d.events.Print3dZipProcessProgressEvent;
 import cz.gattserver.grass.print3d.events.Print3dZipProcessResultEvent;
 import cz.gattserver.grass.print3d.events.Print3dZipProcessStartEvent;
@@ -361,7 +361,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
     }
 
     private String getItemURL(String file) {
-        return UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" + print3dTO.getProjectDir() +
+        return UIUtils.getContextPath() + "/" + Print3dRequestHandlerConfig.PRINT3D_PATH + "/" + print3dTO.getProjectDir() +
                 "/" + file;
     }
 

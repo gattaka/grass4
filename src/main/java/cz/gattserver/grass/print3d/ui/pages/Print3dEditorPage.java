@@ -35,7 +35,7 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.print3d.config.Print3dConfiguration;
+import cz.gattserver.grass.print3d.Print3dRequestHandlerConfig;
 import cz.gattserver.grass.print3d.interfaces.Print3dCreateTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
@@ -205,7 +205,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
         grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Zobrazit", e -> {
             // TODO funguje aktuálně pouze pro již nahrané
-            String url = UIUtils.getContextPath() + "/" + Print3dConfiguration.PRINT3D_PATH + "/" + projectDir + "/" +
+            String url = UIUtils.getContextPath() + "/" + Print3dRequestHandlerConfig.PRINT3D_PATH + "/" + projectDir + "/" +
                     itemTO.path().getFileName();
             WebDialog previewDialog = new WebDialog("Náhled");
             STLViewer stlViewer = new STLViewer(instance -> instance.show(url));

@@ -1,6 +1,5 @@
 package cz.gattserver.grass.print3d.service;
 
-import cz.gattserver.grass.print3d.config.Print3dConfiguration;
 import cz.gattserver.grass.print3d.interfaces.Print3dCreateTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
@@ -53,16 +52,6 @@ public interface Print3dService {
      * @throws IOException při systémové chybě
      */
     String createProjectDir() throws IOException;
-
-    /**
-     * Získá objekt konfigurace
-     */
-    Print3dConfiguration loadConfiguration();
-
-    /**
-     * Uloží konfiguraci
-     */
-    void storeConfiguration(Print3dConfiguration configuration);
 
     /**
      * Zazipuje projekt

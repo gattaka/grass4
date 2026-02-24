@@ -4,11 +4,9 @@ import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.model.domain.ContentNode;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.modules.Print3dModule;
-import cz.gattserver.grass.print3d.config.Print3dConfiguration;
 import cz.gattserver.grass.print3d.events.Print3dZipProcessProgressEvent;
 import cz.gattserver.grass.print3d.events.Print3dZipProcessResultEvent;
 import cz.gattserver.grass.print3d.events.Print3dZipProcessStartEvent;
@@ -21,6 +19,7 @@ import cz.gattserver.grass.print3d.model.Print3dRepository;
 import cz.gattserver.grass.print3d.util.Print3dMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,32 +38,21 @@ public class Print3dServiceImpl implements Print3dService {
 
     private final ContentNodeService contentNodeFacade;
     private final Print3dMapper projectMapper;
-    private final ConfigurationService configurationService;
     private final Print3dRepository print3dRepository;
     private final FileSystemService fileSystemService;
     private final EventBus eventBus;
 
+    @Value("${print3d.root.path}")
+    private String rootPathName;
+
     public Print3dServiceImpl(ContentNodeService contentNodeFacade, Print3dMapper projectMapper,
-                              ConfigurationService configurationService, Print3dRepository print3dRepository,
-                              FileSystemService fileSystemService, EventBus eventBus) {
+                              Print3dRepository print3dRepository, FileSystemService fileSystemService,
+                              EventBus eventBus) {
         this.contentNodeFacade = contentNodeFacade;
         this.projectMapper = projectMapper;
-        this.configurationService = configurationService;
         this.print3dRepository = print3dRepository;
         this.fileSystemService = fileSystemService;
         this.eventBus = eventBus;
-    }
-
-    @Override
-    public Print3dConfiguration loadConfiguration() {
-        Print3dConfiguration configuration = new Print3dConfiguration();
-        configurationService.loadConfiguration(configuration);
-        return configuration;
-    }
-
-    @Override
-    public void storeConfiguration(Print3dConfiguration configuration) {
-        configurationService.saveConfiguration(configuration);
     }
 
     private void deleteFileRecursively(Path file) throws IOException {
@@ -143,11 +131,9 @@ public class Print3dServiceImpl implements Print3dService {
 
     @Override
     public String createProjectDir() throws IOException {
-        Print3dConfiguration configuration = loadConfiguration();
-        String dirRoot = configuration.getRootDir();
-        Path dirRootFile = fileSystemService.getFileSystem().getPath(dirRoot);
+        Path rootPath = fileSystemService.getFileSystem().getPath(rootPathName);
         long systime = System.currentTimeMillis();
-        Path tmpDirFile = dirRootFile.resolve("print3dProj_" + systime);
+        Path tmpDirFile = rootPath.resolve("print3dProj_" + systime);
         fileSystemService.createDirectoriesWithPerms(tmpDirFile);
         return tmpDirFile.getFileName().toString();
     }
@@ -170,9 +156,7 @@ public class Print3dServiceImpl implements Print3dService {
      * @throws IllegalArgumentException pokud předaný adresář podtéká kořen modulu Print3d
      */
     private Path getProjectPath(String projectDir) {
-        Print3dConfiguration configuration = loadConfiguration();
-        String rootDir = configuration.getRootDir();
-        Path rootPath = fileSystemService.getFileSystem().getPath(rootDir);
+        Path rootPath = fileSystemService.getFileSystem().getPath(rootPathName);
         if (!Files.exists(rootPath)) {
             IllegalStateException ise = new IllegalStateException("Kořenový adresář Print3d modulu musí existovat");
             log.error("Nezdařilo se získat kořenový adresář", ise);
