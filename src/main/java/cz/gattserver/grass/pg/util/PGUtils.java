@@ -11,7 +11,7 @@ import com.drew.metadata.exif.ExifIFD0Directory;
 import com.drew.metadata.exif.ExifSubIFDDirectory;
 import com.drew.metadata.exif.GpsDirectory;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.pg.config.PGConfiguration;
+import cz.gattserver.grass.pg.PGRequestHandlerConfig;
 import cz.gattserver.common.slideshow.ExifInfoTO;
 import cz.gattserver.grass.pg.interfaces.PhotogalleryTO;
 import lombok.extern.slf4j.Slf4j;
@@ -288,7 +288,7 @@ public class PGUtils {
     }
 
     public static String createPhotogalleryBaseURL(PhotogalleryTO photogallery) {
-        return UIUtils.getContextPath() + "/" + PGConfiguration.PG_PATH + "/" + photogallery.photogalleryPath() +
+        return UIUtils.getContextPath() + "/" + PGRequestHandlerConfig.PG_PATH + "/" + photogallery.photogalleryPath() +
                 "/";
     }
 

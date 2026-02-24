@@ -8,7 +8,6 @@ import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
 import cz.gattserver.grass.modules.PGModule;
-import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.*;
 import cz.gattserver.grass.pg.interfaces.*;
 import cz.gattserver.grass.pg.model.Photogallery;
@@ -20,6 +19,7 @@ import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -48,6 +48,18 @@ public class PGServiceImpl implements PGService {
     private final FileSystemService fileSystemService;
     private final EventBus eventBus;
 
+    @Value("${pg.root.path}")
+    private String rootPathName;
+
+    @Value("${pg.miniatures.dir}")
+    private String miniaturesDir;
+
+    @Value("${pg.previews.dir}")
+    private String previewsDir;
+
+    @Value("${pg.slideshow.dir}")
+    private String slideshowDir;
+
     public PGServiceImpl(ContentNodeService contentNodeService, ConfigurationService configurationService,
                          PhotogalleryRepository photogalleryRepository,
                          ContentNodeContentTagRepository contentNodeContentTagRepository,
@@ -62,18 +74,6 @@ public class PGServiceImpl implements PGService {
 
     private enum GalleryFileType {
         MAIN_FILE, PREVIEW, SLIDESHOW, MINIATURE,
-    }
-
-    @Override
-    public PGConfiguration loadConfiguration() {
-        PGConfiguration configuration = new PGConfiguration();
-        configurationService.loadConfiguration(configuration);
-        return configuration;
-    }
-
-    @Override
-    public void storeConfiguration(PGConfiguration configuration) {
-        configurationService.saveConfiguration(configuration);
     }
 
     private void deleteFileRecursively(Path file) throws IOException {
@@ -132,9 +132,6 @@ public class PGServiceImpl implements PGService {
     }
 
     private void processMiniatureImages(Photogallery photogallery, boolean reprocess) throws IOException {
-        PGConfiguration configuration = loadConfiguration();
-        String miniaturesDir = configuration.getMiniaturesDir();
-        String previewsDir = configuration.getPreviewsDir();
         Path galleryDir = getGalleryPath(photogallery.getPhotogalleryDir());
 
         int total;
@@ -181,8 +178,6 @@ public class PGServiceImpl implements PGService {
     }
 
     private void processSlideshowImages(Photogallery photogallery, boolean reprocess) throws IOException {
-        PGConfiguration configuration = loadConfiguration();
-        String slideshowDir = configuration.getSlideshowDir();
         Path galleryDir = getGalleryPath(photogallery.getPhotogalleryDir());
 
         int total;
@@ -246,9 +241,9 @@ public class PGServiceImpl implements PGService {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    protected Photogallery transactionSavePhotogallery(String galleryDir,
-                                                       PhotogalleryCreateTO payloadTO, Long existingId, Long nodeId,
-                                                       Long authorId, LocalDateTime date) {
+    protected Photogallery transactionSavePhotogallery(String galleryDir, PhotogalleryCreateTO payloadTO,
+                                                       Long existingId, Long nodeId, Long authorId,
+                                                       LocalDateTime date) {
         log.info("modifyPhotogallery thread: {}", Thread.currentThread().threadId());
 
         Photogallery photogallery =
@@ -282,8 +277,8 @@ public class PGServiceImpl implements PGService {
     }
 
     @Transactional(propagation = Propagation.NEVER)
-    protected void innerSavePhotogallery(UUID operationId, PhotogalleryCreateTO payloadTO, Long existingId,
-                                         Long nodeId, Long authorId, LocalDateTime date) {
+    protected void innerSavePhotogallery(UUID operationId, PhotogalleryCreateTO payloadTO, Long existingId, Long nodeId,
+                                         Long authorId, LocalDateTime date) {
         String galleryDir = payloadTO.getGalleryDir();
         Path galleryPath = getGalleryPath(galleryDir);
         try (Stream<Path> stream = Files.list(galleryPath).sorted(getComparator())) {
@@ -309,9 +304,7 @@ public class PGServiceImpl implements PGService {
 
     @Override
     public String createGalleryDir() throws IOException {
-        PGConfiguration configuration = loadConfiguration();
-        String dirRoot = configuration.getRootDir();
-        Path dirRootFile = fileSystemService.getFileSystem().getPath(dirRoot);
+        Path dirRootFile = fileSystemService.getFileSystem().getPath(rootPathName);
         long systime = System.currentTimeMillis();
         Path tmpDirFile = dirRootFile.resolve("pgGal_" + systime);
         fileSystemService.createDirectoriesWithPerms(tmpDirFile);
@@ -337,9 +330,7 @@ public class PGServiceImpl implements PGService {
      * @throws IllegalArgumentException pokud předaný adresář podtéká kořen modulu PG
      */
     private Path getGalleryPath(String galleryDir) {
-        PGConfiguration configuration = loadConfiguration();
-        String rootDir = configuration.getRootDir();
-        Path rootPath = fileSystemService.getFileSystem().getPath(rootDir);
+        Path rootPath = fileSystemService.getFileSystem().getPath(rootPathName);
         if (!Files.exists(rootPath)) {
             IllegalStateException ise = new IllegalStateException("Kořenový adresář PG modulu musí existovat");
             log.error("Nezdařilo se získat kořenový adresář galerií", ise);
@@ -366,10 +357,10 @@ public class PGServiceImpl implements PGService {
         Path subFile = switch (fileType) {
             case MINIATURE -> {
                 if (file.endsWith(".svg")) file += ".png";
-                yield galleryDir.resolve(loadConfiguration().getMiniaturesDir()).resolve(file);
+                yield galleryDir.resolve(miniaturesDir).resolve(file);
             }
-            case PREVIEW -> galleryDir.resolve(loadConfiguration().getPreviewsDir()).resolve(file + ".png");
-            case SLIDESHOW -> galleryDir.resolve(loadConfiguration().getSlideshowDir()).resolve(file);
+            case PREVIEW -> galleryDir.resolve(previewsDir).resolve(file + ".png");
+            case SLIDESHOW -> galleryDir.resolve(slideshowDir).resolve(file);
             default -> galleryDir.resolve(file);
         };
         if (Files.exists(subFile)) {
@@ -405,8 +396,7 @@ public class PGServiceImpl implements PGService {
         PhotogalleryRESTTO to = photogalleryRepository.findForRestById(id, userId, isAdmin);
         if (to == null) throw new UnauthorizedAccessException();
 
-        PGConfiguration configuration = loadConfiguration();
-        Path file = fileSystemService.getFileSystem().getPath(configuration.getRootDir(), to.photogalleryPath());
+        Path file = fileSystemService.getFileSystem().getPath(rootPathName, to.photogalleryPath());
         if (Files.exists(file)) {
             Set<String> files = new HashSet<>();
             try (Stream<Path> stream = Files.list(file).sorted(getComparator())) {
@@ -426,11 +416,10 @@ public class PGServiceImpl implements PGService {
         PhotogalleryRESTTO to = photogalleryRepository.findForRestById(id, userId, isAdmin);
         if (to == null) throw new UnauthorizedAccessException();
 
-        PGConfiguration configuration = loadConfiguration();
-        Path rootPath = loadRootDirFromConfiguration(configuration);
+        Path rootPath = loadRoot();
         Path galleryPath = rootPath.resolve(to.photogalleryPath());
-        Path miniaturesPath = galleryPath.resolve(configuration.getMiniaturesDir());
-        Path slideshowPath = galleryPath.resolve(configuration.getSlideshowDir());
+        Path miniaturesPath = galleryPath.resolve(miniaturesDir);
+        Path slideshowPath = galleryPath.resolve(slideshowDir);
         Path file = switch (version) {
             case MINI -> miniaturesPath.resolve(fileName);
             case SLIDESHOW -> slideshowPath.resolve(fileName);
@@ -453,9 +442,8 @@ public class PGServiceImpl implements PGService {
         return null;
     }
 
-    private Path loadRootDirFromConfiguration(PGConfiguration configuration) {
-        String rootDir = configuration.getRootDir();
-        Path rootPath = fileSystemService.getFileSystem().getPath(rootDir);
+    private Path loadRoot() {
+        Path rootPath = fileSystemService.getFileSystem().getPath(rootPathName);
         if (!Files.exists(rootPath)) throw new GrassPageException(500, "Kořenový adresář PG modulu musí existovat");
         rootPath = rootPath.normalize();
         return rootPath;
@@ -630,26 +618,25 @@ public class PGServiceImpl implements PGService {
     @Override
     public List<PhotogalleryViewItemTO> getViewItems(String galleryDir, int skip, int limit) throws IOException {
         Path galleryPath = getGalleryPath(galleryDir);
-        PGConfiguration configuration = loadConfiguration();
-        Path miniaturesDir = galleryPath.resolve(configuration.getMiniaturesDir());
-        Path previewDir = galleryPath.resolve(configuration.getPreviewsDir());
-        Path slideshowDir = galleryPath.resolve(configuration.getSlideshowDir());
+        Path miniaturesPath = galleryPath.resolve(miniaturesDir);
+        Path previewPath = galleryPath.resolve(previewsDir);
+        Path slideshowPath = galleryPath.resolve(slideshowDir);
         List<PhotogalleryViewItemTO> list = new ArrayList<>();
 
-        try (Stream<Path> miniaturesStream = Files.list(miniaturesDir).sorted(getComparator());
-             Stream<Path> previewsStream = Files.list(previewDir).sorted(getComparator());
+        try (Stream<Path> miniaturesStream = Files.list(miniaturesPath).sorted(getComparator());
+             Stream<Path> previewsStream = Files.list(previewPath).sorted(getComparator());
              Stream<Path> otherStream = Files.list(galleryPath).filter(this::filterOtherFiles)) {
             Stream.concat(miniaturesStream, Stream.concat(previewsStream, otherStream)).skip(skip).limit(limit)
                     .forEach(file -> {
                         PhotogalleryViewItemTO itemTO = new PhotogalleryViewItemTO();
                         String fileName = file.getFileName().toString();
                         String fileBaseName = fileName.substring(0, fileName.length() - 4);
-                        if (file.startsWith(previewDir)) {
+                        if (file.startsWith(previewPath)) {
                             itemTO.setType(MediaType.VIDEO);
                             // u videa je potřeba useknout příponu preview obrázku
                             // '.png', aby zůstala původní video přípona
                             itemTO.setName(fileBaseName);
-                            itemTO.setMiniaturePath(configuration.getPreviewsDir() + "/" + fileName);
+                            itemTO.setMiniaturePath(previewsDir + "/" + fileName);
                             itemTO.setSlideshowPath(itemTO.getName());
                             itemTO.setFullPath(itemTO.getName());
                         } else {
@@ -659,7 +646,7 @@ public class PGServiceImpl implements PGService {
                                 // originál je vektor, který se na slideshow dá rovnou
                                 // použít
                                 itemTO.setName(fileBaseName);
-                                itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + fileName);
+                                itemTO.setMiniaturePath(miniaturesDir + "/" + fileName);
                                 itemTO.setSlideshowPath(itemTO.getName());
                                 itemTO.setFullPath(itemTO.getName());
                             } else if (fileName.endsWith(".webp.png")) {
@@ -667,24 +654,24 @@ public class PGServiceImpl implements PGService {
                                 // originál je WEBP, od kterého se miniatury a slideshow
                                 // musely převádět na PNG
                                 itemTO.setName(fileBaseName);
-                                itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + fileName);
-                                itemTO.setSlideshowPath(configuration.getSlideshowDir() + "/" + fileName);
+                                itemTO.setMiniaturePath(miniaturesDir + "/" + fileName);
+                                itemTO.setSlideshowPath(slideshowDir + "/" + fileName);
                                 itemTO.setFullPath(itemTO.getName());
-                            } else if (!Files.exists(slideshowDir.resolve(fileName))) {
+                            } else if (!Files.exists(slideshowPath.resolve(fileName))) {
                                 // možná byl tak malý, že nebylo potřeba vytvářet
                                 // slideshow velikost a stačí použít přímo původní
                                 // soubor obrázku
                                 itemTO.setName(fileName);
-                                itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + itemTO.getName());
+                                itemTO.setMiniaturePath(miniaturesDir + "/" + itemTO.getName());
                                 itemTO.setSlideshowPath(itemTO.getName());
                                 itemTO.setFullPath(itemTO.getName());
-                                itemTO.setExifInfoTO(PGUtils.readMetadata(previewDir.getParent().resolve(fileName)));
+                                itemTO.setExifInfoTO(PGUtils.readMetadata(previewPath.getParent().resolve(fileName)));
                             } else {
                                 itemTO.setName(fileName);
-                                itemTO.setMiniaturePath(configuration.getMiniaturesDir() + "/" + itemTO.getName());
-                                itemTO.setSlideshowPath(configuration.getSlideshowDir() + "/" + itemTO.getName());
+                                itemTO.setMiniaturePath(miniaturesDir + "/" + itemTO.getName());
+                                itemTO.setSlideshowPath(slideshowDir + "/" + itemTO.getName());
                                 itemTO.setFullPath(itemTO.getName());
-                                itemTO.setExifInfoTO(PGUtils.readMetadata(previewDir.getParent().resolve(fileName)));
+                                itemTO.setExifInfoTO(PGUtils.readMetadata(previewPath.getParent().resolve(fileName)));
                             }
                         }
                         list.add(itemTO);
@@ -696,9 +683,8 @@ public class PGServiceImpl implements PGService {
     @Override
     public boolean checkGallery(String galleryDir) {
         Path galleryPath = getGalleryPath(galleryDir);
-        PGConfiguration conf = loadConfiguration();
-        return Files.exists(galleryPath) && (Files.exists(galleryPath.resolve(conf.getMiniaturesDir())) ||
-                Files.exists(galleryPath.resolve(conf.getPreviewsDir())));
+        return Files.exists(galleryPath) &&
+                (Files.exists(galleryPath.resolve(miniaturesDir)) || Files.exists(galleryPath.resolve(previewsDir)));
     }
 
     @Override

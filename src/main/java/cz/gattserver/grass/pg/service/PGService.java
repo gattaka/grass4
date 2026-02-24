@@ -1,7 +1,6 @@
 package cz.gattserver.grass.pg.service;
 
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
-import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.PGProcessStartEvent;
@@ -67,16 +66,6 @@ public interface PGService {
      * @throws IOException exception pokud se vytvoření nezdařilo ze systémových důvodů
      */
     String createGalleryDir() throws IOException;
-
-    /**
-     * Získá objekt konfigurace
-     */
-    PGConfiguration loadConfiguration();
-
-    /**
-     * Uloží konfiguraci
-     */
-    void storeConfiguration(PGConfiguration configuration);
 
     /**
      * Získá počet galerií pro použití REST

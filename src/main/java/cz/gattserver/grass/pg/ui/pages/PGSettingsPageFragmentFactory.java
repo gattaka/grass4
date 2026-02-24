@@ -23,6 +23,7 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.router.RouteConfiguration;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
@@ -32,7 +33,6 @@ import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.PGProcessStartEvent;
@@ -86,14 +86,11 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
     @Override
     public void createFragment(Div div) {
-        final PGConfiguration configuration = pgService.loadConfiguration();
-        final FileSystem fs = fileSystemService.getFileSystem();
+        final String rootDir = SpringContextHelper.getContext().getEnvironment().getProperty("pg.root.path");
 
         UserInfoTO userInfoTO = securityService.getCurrentUser();
 
         div.add(new H2("Nastavení fotogalerie"));
-
-        Binder<PGConfiguration> binder = new Binder<>();
 
         VerticalLayout layout = new VerticalLayout();
         layout.setWidthFull();
@@ -101,44 +98,7 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
         layout.setPadding(false);
         div.add(layout);
 
-        // Název adresářů miniatur
-        final TextField miniaturesDirField = new TextField("Název adresářů miniatur");
-        miniaturesDirField.setValue(String.valueOf(configuration.getMiniaturesDir()));
-        miniaturesDirField.setWidth("300px");
-        layout.add(miniaturesDirField);
-
-        binder.forField(miniaturesDirField).asRequired("Nesmí být prázdné")
-                .withValidator(new StringLengthValidator("Neodpovídá povolené délce", 1, 1024))
-                .bind(PGConfiguration::getMiniaturesDir, PGConfiguration::setMiniaturesDir);
-
-        // Kořenový adresář fotogalerií
-        final TextField rootDirField = new TextField("Kořenový adresář fotogalerií");
-        rootDirField.setValue(String.valueOf(configuration.getRootDir()));
-        rootDirField.setWidth("300px");
-        layout.add(rootDirField);
-
-        binder.forField(rootDirField).asRequired("Kořenový adresář je povinný").withValidator((val, c) -> {
-            try {
-                return Files.exists(fs.getPath(val)) ? ValidationResult.ok() :
-                        ValidationResult.error("Kořenový adresář musí existovat");
-            } catch (InvalidPathException e) {
-                return ValidationResult.error("Neplatná cesta");
-            }
-        }).bind(PGConfiguration::getRootDir, PGConfiguration::setRootDir);
-
-        // Save tlačítko
-        Button saveButton = componentFactory.createSaveButton(event -> {
-            if (binder.validate().isOk()) {
-                configuration.setRootDir(rootDirField.getValue());
-                configuration.setMiniaturesDir(miniaturesDirField.getValue());
-                pgService.storeConfiguration(configuration);
-                UI.getCurrent().getPage().reload();
-            }
-        });
-        binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
-        layout.add(saveButton);
-
-        Path path = fileSystemService.getFileSystem().getPath(configuration.getRootDir());
+        Path path = fileSystemService.getFileSystem().getPath(rootDir);
 
         if (Files.exists(path)) {
             div.add(new H2("Přehled adresářů"));
