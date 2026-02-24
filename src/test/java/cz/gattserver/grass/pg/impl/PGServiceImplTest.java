@@ -15,7 +15,6 @@ import cz.gattserver.grass.core.util.MockUtils;
 import cz.gattserver.grass.modules.PGModule;
 import cz.gattserver.grass.pg.events.PGEventsHandler;
 import cz.gattserver.grass.pg.test.PGZipProcessMockEventsHandler;
-import cz.gattserver.grass.pg.config.PGConfiguration;
 import cz.gattserver.grass.pg.events.PGProcessResultEvent;
 import cz.gattserver.grass.pg.interfaces.*;
 import cz.gattserver.grass.pg.model.Photogallery;
@@ -26,6 +25,7 @@ import cz.gattserver.grass.test.MockSecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
@@ -52,9 +52,6 @@ public class PGServiceImplTest extends DBCleanTest {
     private MockSecurityService mockSecurityService;
 
     @Autowired
-    private ConfigurationService configurationService;
-
-    @Autowired
     private PGService pgService;
 
     @Autowired
@@ -69,6 +66,18 @@ public class PGServiceImplTest extends DBCleanTest {
     @Autowired
     private EventBus eventBus;
 
+    @Value("${pg.root.path}")
+    private String rootPathName;
+
+    @Value("${pg.miniatures.dir}")
+    private String miniaturesDir;
+
+    @Value("${pg.previews.dir}")
+    private String previewsDir;
+
+    @Value("${pg.slideshow.dir}")
+    private String slideshowDir;
+
     @BeforeEach
     public void init() {
         fileSystemService.init();
@@ -77,44 +86,7 @@ public class PGServiceImplTest extends DBCleanTest {
     private Path prepareFS(FileSystem fs) throws IOException {
         Path rootDir = fs.getPath("/some/path/pg/root/");
         Files.createDirectories(rootDir);
-
-        PGConfiguration conf = new PGConfiguration();
-        conf.setRootDir(rootDir.toString());
-        configurationService.saveConfiguration(conf);
-
         return rootDir;
-    }
-
-    @Test
-    public void testLoadConfiguration() {
-        PGConfiguration conf = new PGConfiguration();
-        conf.setRootDir("test-root-dir");
-        conf.setMiniaturesDir("test-mini-dir");
-        conf.setPreviewsDir("test-prev-dir");
-        conf.setSlideshowDir("test-slideshow-dir");
-        configurationService.saveConfiguration(conf);
-
-        conf = pgService.loadConfiguration();
-        assertEquals("test-root-dir", conf.getRootDir());
-        assertEquals("test-mini-dir", conf.getMiniaturesDir());
-        assertEquals("test-prev-dir", conf.getPreviewsDir());
-        assertEquals("test-slideshow-dir", conf.getSlideshowDir());
-    }
-
-    @Test
-    public void testStoreConfiguration() {
-        PGConfiguration conf = new PGConfiguration();
-        conf.setRootDir("test-root-dir");
-        conf.setMiniaturesDir("test-mini-dir");
-        conf.setPreviewsDir("test-prev-dir");
-        conf.setSlideshowDir("test-slideshow-dir");
-        pgService.storeConfiguration(conf);
-
-        configurationService.loadConfiguration(conf);
-        assertEquals("test-root-dir", conf.getRootDir());
-        assertEquals("test-mini-dir", conf.getMiniaturesDir());
-        assertEquals("test-prev-dir", conf.getPreviewsDir());
-        assertEquals("test-slideshow-dir", conf.getSlideshowDir());
     }
 
     @Test
@@ -214,14 +186,11 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PGConfiguration conf = new PGConfiguration();
-        configurationService.loadConfiguration(conf);
-
         double acceptableDifference = 0.1; // 10%
 
         // Animated small
-        Path animatedSmallMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("01.gif");
-        Path animatedSmallSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("01.gif");
+        Path animatedSmallMiniature = galleryDir.resolve(miniaturesDir).resolve("01.gif");
+        Path animatedSmallSlideshow = galleryDir.resolve(slideshowDir).resolve("01.gif");
         assertTrue(Files.exists(animatedSmallFile));
         assertTrue(Files.exists(animatedSmallMiniature));
         assertFalse(Files.exists(animatedSmallSlideshow));
@@ -229,8 +198,8 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("animatedSmallMiniature.gif")) < acceptableDifference);
 
         // Animated small (flawed)
-        Path animatedSmallFlawedMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("01b.gif");
-        Path animatedSmallFlawedSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("01b.gif");
+        Path animatedSmallFlawedMiniature = galleryDir.resolve(miniaturesDir).resolve("01b.gif");
+        Path animatedSmallFlawedSlideshow = galleryDir.resolve(slideshowDir).resolve("01b.gif");
         assertTrue(Files.exists(animatedSmallFlawedFile));
         assertTrue(Files.exists(animatedSmallFlawedMiniature));
         assertFalse(Files.exists(animatedSmallFlawedSlideshow));
@@ -238,8 +207,8 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("animatedSmallFlawedMiniature.gif")) < acceptableDifference);
 
         // Large
-        Path largeMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg");
-        Path largeSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg");
+        Path largeMiniature = galleryDir.resolve(miniaturesDir).resolve("02.jpg");
+        Path largeSlideshow = galleryDir.resolve(slideshowDir).resolve("02.jpg");
         assertTrue(Files.exists(largeFile));
         assertTrue(Files.exists(largeMiniature));
         assertTrue(Files.exists(largeSlideshow));
@@ -249,8 +218,8 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("largeSlideshow.jpg")) < acceptableDifference);
 
         // Small
-        Path smallMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg");
-        Path smallSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("03.jpg");
+        Path smallMiniature = galleryDir.resolve(miniaturesDir).resolve("03.jpg");
+        Path smallSlideshow = galleryDir.resolve(slideshowDir).resolve("03.jpg");
         assertTrue(Files.exists(smallFile));
         assertTrue(Files.exists(smallMiniature));
         assertFalse(Files.exists(smallSlideshow));
@@ -258,8 +227,8 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("smallMiniature.jpg")) < acceptableDifference);
 
         // Oriented large
-        Path orientedLargeMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("04.jpg");
-        Path orientedLargeSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("04.jpg");
+        Path orientedLargeMiniature = galleryDir.resolve(miniaturesDir).resolve("04.jpg");
+        Path orientedLargeSlideshow = galleryDir.resolve(slideshowDir).resolve("04.jpg");
         assertTrue(Files.exists(orientedLargeFile));
         assertTrue(Files.exists(orientedLargeMiniature));
         assertTrue(Files.exists(orientedLargeSlideshow));
@@ -269,7 +238,7 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("orientedLargeSlideshow.jpg")) < acceptableDifference);
 
         // X264 MP4
-        Path x264MP4Preview = galleryDir.resolve(conf.getPreviewsDir()).resolve("05.mp4.png");
+        Path x264MP4Preview = galleryDir.resolve(previewsDir).resolve("05.mp4.png");
         assertTrue(Files.exists(x264MP4File));
         assertTrue(Files.exists(x264MP4Preview));
         assertTrue(ImageComparator.isEqualAsImagePixels(Files.newInputStream(x264MP4Preview),
@@ -337,14 +306,11 @@ public class PGServiceImplTest extends DBCleanTest {
 
         assertTrue(event.success());
 
-        PGConfiguration conf = new PGConfiguration();
-        configurationService.loadConfiguration(conf);
-
         double acceptableDifference = 0.1; // 10%
 
         // Animated small
-        Path animatedSmallMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("01.gif");
-        Path animatedSmallSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("01.gif");
+        Path animatedSmallMiniature = galleryDir.resolve(miniaturesDir).resolve("01.gif");
+        Path animatedSmallSlideshow = galleryDir.resolve(slideshowDir).resolve("01.gif");
         assertTrue(Files.exists(animatedSmallFile));
         assertTrue(Files.exists(animatedSmallMiniature));
         assertFalse(Files.exists(animatedSmallSlideshow));
@@ -352,8 +318,8 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("animatedSmallMiniature.gif")) < acceptableDifference);
 
         // Animated small (flawed)
-        Path animatedSmallFlawedMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("01b.gif");
-        Path animatedSmallFlawedSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("01b.gif");
+        Path animatedSmallFlawedMiniature = galleryDir.resolve(miniaturesDir).resolve("01b.gif");
+        Path animatedSmallFlawedSlideshow = galleryDir.resolve(slideshowDir).resolve("01b.gif");
         assertTrue(Files.exists(animatedSmallFlawedFile));
         assertTrue(Files.exists(animatedSmallFlawedMiniature));
         assertFalse(Files.exists(animatedSmallFlawedSlideshow));
@@ -361,8 +327,8 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("animatedSmallFlawedMiniature.gif")) < acceptableDifference);
 
         // Large
-        Path largeMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg");
-        Path largeSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg");
+        Path largeMiniature = galleryDir.resolve(miniaturesDir).resolve("02.jpg");
+        Path largeSlideshow = galleryDir.resolve(slideshowDir).resolve("02.jpg");
         assertTrue(Files.exists(largeFile));
         assertTrue(Files.exists(largeMiniature));
         assertTrue(Files.exists(largeSlideshow));
@@ -372,8 +338,8 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("largeSlideshow.jpg")) < acceptableDifference);
 
         // Small
-        Path smallMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg");
-        Path smallSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("03.jpg");
+        Path smallMiniature = galleryDir.resolve(miniaturesDir).resolve("03.jpg");
+        Path smallSlideshow = galleryDir.resolve(slideshowDir).resolve("03.jpg");
         assertTrue(Files.exists(smallFile));
         assertTrue(Files.exists(smallMiniature));
         assertFalse(Files.exists(smallSlideshow));
@@ -381,8 +347,8 @@ public class PGServiceImplTest extends DBCleanTest {
                 this.getClass().getResourceAsStream("smallMiniature.jpg")) < acceptableDifference);
 
         // Oriented large
-        Path orientedLargeMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("04.jpg");
-        Path orientedLargeSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("04.jpg");
+        Path orientedLargeMiniature = galleryDir.resolve(miniaturesDir).resolve("04.jpg");
+        Path orientedLargeSlideshow = galleryDir.resolve(slideshowDir).resolve("04.jpg");
         assertTrue(Files.exists(orientedLargeFile));
         assertTrue(Files.exists(orientedLargeMiniature));
         assertTrue(Files.exists(orientedLargeSlideshow));
@@ -650,17 +616,14 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PGConfiguration conf = new PGConfiguration();
-        configurationService.loadConfiguration(conf);
-
         Path photoPath = pgService.findPhotoForREST(galleryId, "02.jpg", PhotoVersion.SLIDESHOW, userId1, false);
-        assertEquals(galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg"), photoPath);
+        assertEquals(galleryDir.resolve(slideshowDir).resolve("02.jpg"), photoPath);
         photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.SLIDESHOW, userId2, true);
         assertEquals(galleryDir.resolve("03.jpg"), photoPath);
         photoPath = pgService.findPhotoForREST(galleryId, "02.jpg", PhotoVersion.MINI, userId3, false);
-        assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg"), photoPath);
+        assertEquals(galleryDir.resolve(miniaturesDir).resolve("02.jpg"), photoPath);
         photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.MINI, null, false);
-        assertEquals(galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg"), photoPath);
+        assertEquals(galleryDir.resolve(miniaturesDir).resolve("03.jpg"), photoPath);
 
     }
 
@@ -696,19 +659,16 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PGConfiguration conf = new PGConfiguration();
-        configurationService.loadConfiguration(conf);
-
         // Large
-        Path largeMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg");
-        Path largeSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg");
+        Path largeMiniature = galleryDir.resolve(miniaturesDir).resolve("02.jpg");
+        Path largeSlideshow = galleryDir.resolve(slideshowDir).resolve("02.jpg");
         assertTrue(Files.exists(largeFile));
         assertTrue(Files.exists(largeMiniature));
         assertTrue(Files.exists(largeSlideshow));
 
         // Small
-        Path smallMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg");
-        Path smallSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("03.jpg");
+        Path smallMiniature = galleryDir.resolve(miniaturesDir).resolve("03.jpg");
+        Path smallSlideshow = galleryDir.resolve(slideshowDir).resolve("03.jpg");
         assertTrue(Files.exists(smallFile));
         assertTrue(Files.exists(smallMiniature));
         assertFalse(Files.exists(smallSlideshow));
@@ -779,19 +739,16 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PGConfiguration conf = new PGConfiguration();
-        configurationService.loadConfiguration(conf);
-
         // Large
-        Path largeMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg");
-        Path largeSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg");
+        Path largeMiniature = galleryDir.resolve(miniaturesDir).resolve("02.jpg");
+        Path largeSlideshow = galleryDir.resolve(slideshowDir).resolve("02.jpg");
         assertTrue(Files.exists(largeFile));
         assertTrue(Files.exists(largeMiniature));
         assertTrue(Files.exists(largeSlideshow));
 
         // Small
-        Path smallMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg");
-        Path smallSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("03.jpg");
+        Path smallMiniature = galleryDir.resolve(miniaturesDir).resolve("03.jpg");
+        Path smallSlideshow = galleryDir.resolve(slideshowDir).resolve("03.jpg");
         assertTrue(Files.exists(smallFile));
         assertTrue(Files.exists(smallMiniature));
         assertFalse(Files.exists(smallSlideshow));
@@ -807,15 +764,15 @@ public class PGServiceImplTest extends DBCleanTest {
         assertEquals(1, removed.size());
 
         // Large
-        largeMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("02.jpg");
-        largeSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("02.jpg");
+        largeMiniature = galleryDir.resolve(miniaturesDir).resolve("02.jpg");
+        largeSlideshow = galleryDir.resolve(slideshowDir).resolve("02.jpg");
         assertFalse(Files.exists(largeFile));
         assertFalse(Files.exists(largeMiniature));
         assertFalse(Files.exists(largeSlideshow));
 
         // Small
-        smallMiniature = galleryDir.resolve(conf.getMiniaturesDir()).resolve("03.jpg");
-        smallSlideshow = galleryDir.resolve(conf.getSlideshowDir()).resolve("03.jpg");
+        smallMiniature = galleryDir.resolve(miniaturesDir).resolve("03.jpg");
+        smallSlideshow = galleryDir.resolve(slideshowDir).resolve("03.jpg");
         assertTrue(Files.exists(smallFile));
         assertTrue(Files.exists(smallMiniature));
         assertFalse(Files.exists(smallSlideshow));
@@ -956,9 +913,6 @@ public class PGServiceImplTest extends DBCleanTest {
         assertNotNull(event.galleryId());
 
         eventBus.unsubscribe(eventsHandler);
-
-        PGConfiguration conf = new PGConfiguration();
-        configurationService.loadConfiguration(conf);
 
         List<PhotogalleryViewItemTO> items = pgService.getViewItems("testGallery", 0, 10);
         assertEquals(3, items.size());

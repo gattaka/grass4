@@ -37,9 +37,6 @@ public class HWServiceImplTest extends DBCleanTest {
     @Autowired
     private HWService hwService;
 
-    @Autowired
-    private ConfigurationService configurationService;
-
     @BeforeEach
     public void init() {
         fileSystemService.init();

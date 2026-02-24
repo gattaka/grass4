@@ -23,10 +23,6 @@ public class FMExplorerTest {
     @Autowired
     private MockFileSystemService fileSystemService;
 
-    @Autowired
-    private ConfigurationService configurationService;
-
-
     @BeforeEach
     public void init() {
         fileSystemService.init();

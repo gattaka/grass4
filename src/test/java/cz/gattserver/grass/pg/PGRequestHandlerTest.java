@@ -1,7 +1,6 @@
 package cz.gattserver.grass.pg;
 
 import cz.gattserver.grass.core.mock.MockFileSystemService;
-import cz.gattserver.grass.pg.config.PGConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,9 +21,6 @@ public class PGRequestHandlerTest {
     private MockFileSystemService fileSystemService;
 
     @Autowired
-    private ConfigurationService configurationService;
-
-    @Autowired
     private PGRequestHandler pgRequestHandler;
 
     @BeforeEach
@@ -35,11 +31,6 @@ public class PGRequestHandlerTest {
     private Path prepareFS(FileSystem fs) throws IOException {
         Path rootDir = fs.getPath("/some/path/pg/root/");
         Files.createDirectories(rootDir);
-
-        PGConfiguration conf = new PGConfiguration();
-        conf.setRootDir(rootDir.toString());
-        configurationService.saveConfiguration(conf);
-
         return rootDir;
     }
 
@@ -55,5 +46,4 @@ public class PGRequestHandlerTest {
         assertEquals("testFile", file.getFileName().toString());
         assertEquals("/some/path/pg/root/testFile", file.toString());
     }
-
 }
