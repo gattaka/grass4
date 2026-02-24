@@ -11,5 +11,4 @@ public abstract class AbstractPageFragmentFactory {
 	}
 
 	public abstract void createFragment(Div layout);
-
 }

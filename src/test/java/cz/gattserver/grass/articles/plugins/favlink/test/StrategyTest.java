@@ -2,9 +2,7 @@ package cz.gattserver.grass.articles.plugins.favlink.test;
 
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
-import cz.gattserver.grass.articles.plugins.favlink.config.FavlinkConfiguration;
 import cz.gattserver.grass.core.mock.MockFileSystemService;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,9 +17,6 @@ public abstract class StrategyTest extends DBCleanTest {
 
     @Autowired
     protected MockFileSystemService fileSystemService;
-
-    @Autowired
-    protected ConfigurationService configurationService;
 
     protected WireMockServer wireMockServer;
 
@@ -40,11 +35,6 @@ public abstract class StrategyTest extends DBCleanTest {
     protected Path prepareFS(FileSystem fs) throws IOException {
         Path outputDir = fs.getPath("/some/path/favlink/cache/");
         Files.createDirectories(outputDir);
-
-        FavlinkConfiguration configuration = new FavlinkConfiguration();
-        configuration.setOutputPath(outputDir.toString());
-        configurationService.saveConfiguration(configuration);
-
         return outputDir;
     }
 

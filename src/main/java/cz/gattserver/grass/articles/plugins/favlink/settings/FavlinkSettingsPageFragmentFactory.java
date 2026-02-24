@@ -1,6 +1,6 @@
 package cz.gattserver.grass.articles.plugins.favlink.settings;
 
-import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -9,9 +9,6 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -20,23 +17,20 @@ import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
-import cz.gattserver.grass.articles.plugins.favlink.config.FavlinkConfiguration;
 import cz.gattserver.grass.articles.plugins.favlink.strategies.CombinedFaviconObtainStrategy;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.core.ui.pages.settings.AbstractPageFragmentFactory;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.stream.Stream;
@@ -45,20 +39,12 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
 
     private static final Logger logger = LoggerFactory.getLogger(FavlinkSettingsPageFragmentFactory.class);
 
-    @Autowired
-    private ConfigurationService configurationService;
-
-    @Autowired
-    private FileSystemService fileSystemService;
-
     private String filterName;
 
     @Override
     public void createFragment(Div div) {
-        final FavlinkConfiguration configuration = loadConfiguration();
-        final FileSystem fs = fileSystemService.getFileSystem();
-
-        div.add(new H2("Nastavení favicon pluginu"));
+        String favlinkRootPath = SpringContextHelper.getContext().getEnvironment().getProperty("favlink.root.path");
+        FileSystemService fileSystemService = SpringContextHelper.getBean(FileSystemService.class);
 
         VerticalLayout layout = new VerticalLayout();
         layout.setWidthFull();
@@ -66,43 +52,15 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
         layout.setPadding(false);
         div.add(layout);
 
-        // Výstupní cesta
-        TextField outputPathField = new TextField("Nastavení kořenového adresáře");
-        outputPathField.setValue(configuration.getOutputPath());
-        outputPathField.setWidth("300px");
-        layout.add(outputPathField);
-
-        Binder<FavlinkConfiguration> binder = new Binder<>();
-        binder.forField(outputPathField).asRequired("Výstupní adresář je povinný").withValidator((val, c) -> {
-            try {
-                return Files.exists(fs.getPath(val)) ? ValidationResult.ok() :
-                        ValidationResult.error("Výstupní adresář musí existovat");
-            } catch (InvalidPathException e) {
-                return ValidationResult.error("Neplatná cesta");
-            }
-        }).bind(FavlinkConfiguration::getOutputPath, FavlinkConfiguration::setOutputPath);
-
         ComponentFactory componentFactory = new ComponentFactory();
-        Div btnLayout = componentFactory.createButtonLayout();
-        layout.add(btnLayout);
 
-        // Save tlačítko
-        Button saveButton = componentFactory.createSaveButton(event -> {
-            if (binder.validate().isOk()) {
-                configuration.setOutputPath(outputPathField.getValue());
-                storeConfiguration(configuration);
-            }
-        });
-        binder.addValueChangeListener(l -> saveButton.setEnabled(binder.isValid()));
-        btnLayout.add(saveButton);
-
-        Path path = fileSystemService.getFileSystem().getPath(configuration.getOutputPath());
+        Path path = fileSystemService.getFileSystem().getPath(favlinkRootPath);
 
         if (Files.exists(path)) {
-            layout.add(new H2("Přehled existujících favicon"));
+            layout.add(new H2("Přehled uložených favicon"));
             Grid<Path> grid = new Grid<>();
             grid.setWidthFull();
-            grid.setHeight("500px");
+            grid.setHeight(500,Unit.PIXELS);
             UIUtils.applyGrassDefaultStyle(grid);
 
             div.add(grid);
@@ -116,8 +74,8 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
                     }
                     return null;
                 }), p.getFileName().toString());
-                img.setWidth("16px");
-                img.setHeight("16px");
+                img.setWidth(16, Unit.PIXELS);
+                img.setHeight(16, Unit.PIXELS);
                 img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
                 return img;
             }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER);
@@ -132,7 +90,7 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
                 String name = p.getFileName().toString();
                 int dotIndex = name.lastIndexOf('.');
                 return dotIndex > 0 ? name.substring(dotIndex) : "";
-            })).setHeader("Typ").setWidth("40px").setFlexGrow(0);
+            })).setHeader("Typ").setWidth("50px").setFlexGrow(0);
 
             grid.addColumn(new ComponentRenderer<>(p -> componentFactory.createInlineButton("Smazat", be -> {
                 new ConfirmDialog("Opravdu smazat favicon?", e -> {
@@ -140,7 +98,7 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
                         Files.delete(p);
                         populateGrid(grid, path);
                     } catch (IOException e1) {
-                        logger.error("Nezdařilo se smazat favicon " + p.getFileName().toString(), e);
+                        logger.error("Nezdařilo se smazat favicon {}", p.getFileName().toString(), e);
                     }
                 }).open();
             }))).setHeader("Smazat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
@@ -154,7 +112,7 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
                         new CombinedFaviconObtainStrategy().obtainFaviconURL(urlName, UIUtils.getContextPath());
                         populateGrid(grid, path);
                     } catch (IOException e1) {
-                        logger.error("Nezdařilo se smazat favicon " + p.getFileName().toString(), e);
+                        logger.error("Nezdařilo se smazat favicon {}", p.getFileName().toString(), e);
                     }
                 }).open();
             }))).setHeader("Přegenerovat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
@@ -213,15 +171,4 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
         }
         return "";
     }
-
-    private FavlinkConfiguration loadConfiguration() {
-        FavlinkConfiguration configuration = new FavlinkConfiguration();
-        configurationService.loadConfiguration(configuration);
-        return configuration;
-    }
-
-    private void storeConfiguration(FavlinkConfiguration configuration) {
-        configurationService.saveConfiguration(configuration);
-    }
-
 }

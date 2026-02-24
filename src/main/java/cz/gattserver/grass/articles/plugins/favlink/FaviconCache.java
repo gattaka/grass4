@@ -1,7 +1,6 @@
 package cz.gattserver.grass.articles.plugins.favlink;
 
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.grass.articles.plugins.favlink.config.FavlinkConfiguration;
 import cz.gattserver.grass.articles.editor.parser.exceptions.ParserException;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
@@ -15,82 +14,71 @@ import java.util.Optional;
 
 /**
  * Cache již stažených ikon
- * 
+ *
  * @author Hynek
  *
  */
 public class FaviconCache {
 
-	@Autowired
-	private ConfigurationService configurationService;
+    private Path cacheDir;
 
-	@Autowired
-	private FileSystemService fileSystemService;
+    public FaviconCache() {
+        SpringContextHelper.inject(this);
+        cacheDir = getCacheDirectoryPath();
+    }
 
-	private Path cacheDir;
+    public String getFavicon(String pageAddress) {
+        URL pageURL = FaviconUtils.getPageURL(pageAddress);
+        String faviconRootFilename = FaviconUtils.createFaviconRootFilename(pageURL);
 
-	public FaviconCache() {
-		SpringContextHelper.inject(this);
-		cacheDir = getCacheDirectoryPath();
-	}
+        try {
+            Optional<Path> result = Files.list(cacheDir)
+                    .filter(p -> p.getFileName().toString().matches(faviconRootFilename + "\\.[^.]+")).findFirst();
+            if (result.isPresent()) return result.get().getFileName().toString();
+        } catch (IOException e) {
+            throw new ParserException("Nezdařilo se prohledat favicony z adresáře favicon", e);
+        }
 
-	public String getFavicon(String pageAddress) {
-		URL pageURL = FaviconUtils.getPageURL(pageAddress);
-		String faviconRootFilename = FaviconUtils.createFaviconRootFilename(pageURL);
+        return null;
+    }
 
-		try {
-			Optional<Path> result = Files.list(cacheDir)
-					.filter(p -> p.getFileName().toString().matches(faviconRootFilename + "\\.[^.]+")).findFirst();
-			if (result.isPresent())
-				return result.get().getFileName().toString();
-		} catch (IOException e) {
-			throw new ParserException("Nezdařilo se prohledat favicony z adresáře favicon", e);
-		}
+    /**
+     * Pokusí se stáhnout a uložit faviconu dle adresy stránky a adresy favicon
+     * souboru a vrátit jméno souboru, pod kterým byla favicona uložena
+     *
+     * @param pageURL        adresa stránky jejíž favicon hledám
+     * @param faviconAddress adresa souboru favicony
+     * @return název staženého souboru favicony, nebo <code>null</code>, pokud
+     * se stažení nezdařilo (soubor na adrese neexistuje apod.)
+     */
+    public String downloadAndSaveFavicon(URL pageURL, String faviconAddress) {
+        String filename = FaviconUtils.getFaviconFilename(pageURL, faviconAddress);
+        if (FaviconUtils.downloadFile(cacheDir.resolve(filename), faviconAddress)) {
+            return filename;
+        } else {
+            return null;
+        }
+    }
 
-		return null;
-	}
+    /**
+     * Zjistí dle aktuální konfigurace výstupní adresář
+     */
+    public Path getCacheDirectoryPath() {
+        // existuje cesta cache?
+        String favlinkRootPath = SpringContextHelper.getContext().getEnvironment().getProperty("favlink.root.path");
+        FileSystemService fileSystemService = SpringContextHelper.getBean(FileSystemService.class);
+        Path path = fileSystemService.getFileSystem().getPath(favlinkRootPath);
+        if (Files.exists(path)) {
+            if (!Files.isDirectory(path)) throw new ParserException("Favicon cache soubor není adresář");
+        } else {
+            try {
+                fileSystemService.createDirectoriesWithPerms(path);
+            } catch (Exception e) {
+                throw new ParserException("Vytváření favicon cache adresáře se nezdařilo", e);
+            }
+        }
 
-	/**
-	 * Pokusí se stáhnout a uložit faviconu dle adresy stránky a adresy favicon
-	 * souboru a vrátit jméno souboru, pod kterým byla favicona uložena
-	 * 
-	 * @param pageURL
-	 *            adresa stránky jejíž favicon hledám
-	 * @param faviconAddress
-	 *            adresa souboru favicony
-	 * @return název staženého souboru favicony, nebo <code>null</code>, pokud
-	 *         se stažení nezdařilo (soubor na adrese neexistuje apod.)
-	 */
-	public String downloadAndSaveFavicon(URL pageURL, String faviconAddress) {
-		String filename = FaviconUtils.getFaviconFilename(pageURL, faviconAddress);
-		if (FaviconUtils.downloadFile(cacheDir.resolve(filename), faviconAddress)) {
-			return filename;
-		} else {
-			return null;
-		}
-	}
-
-	/**
-	 * Zjistí dle aktuální konfigurace výstupní adresář
-	 */
-	public Path getCacheDirectoryPath() {
-		FavlinkConfiguration configuration = new FavlinkConfiguration();
-		configurationService.loadConfiguration(configuration);
-
-		// existuje cesta cache?
-		Path path = fileSystemService.getFileSystem().getPath(configuration.getOutputPath());
-		if (Files.exists(path)) {
-			if (!Files.isDirectory(path))
-				throw new ParserException("Favicon cache soubor není adresář");
-		} else {
-			try {
-				fileSystemService.createDirectoriesWithPerms(path);
-			} catch (Exception e) {
-				throw new ParserException("Vytváření favicon cache adresáře se nezdařilo", e);
-			}
-		}
-
-		return path;
-	}
+        return path;
+    }
 
 }

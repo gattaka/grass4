@@ -1,8 +1,6 @@
 package cz.gattserver.grass.articles.plugins.favlink.server;
 
-import cz.gattserver.grass.articles.plugins.favlink.config.FavlinkConfiguration;
 import cz.gattserver.grass.core.mock.MockFileSystemService;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +20,6 @@ public class FavlinkImageRequestHandlerTest extends DBCleanTest {
     private MockFileSystemService fileSystemService;
 
     @Autowired
-    private ConfigurationService configurationService;
-
-    @Autowired
     private FavlinkImageRequestHandler favlinkImageRequestHandler;
 
     @BeforeEach
@@ -35,11 +30,6 @@ public class FavlinkImageRequestHandlerTest extends DBCleanTest {
     private Path prepareFS(FileSystem fs) throws IOException {
         Path outputDir = fs.getPath("/some/path/favlink/cache/");
         Files.createDirectories(outputDir);
-
-        FavlinkConfiguration configuration = new FavlinkConfiguration();
-        configuration.setOutputPath(outputDir.toString());
-        configurationService.saveConfiguration(configuration);
-
         return outputDir;
     }
 
