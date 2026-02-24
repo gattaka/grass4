@@ -29,7 +29,7 @@ public class PGRequestHandlerTest {
     }
 
     private Path prepareFS(FileSystem fs) throws IOException {
-        Path rootDir = fs.getPath("/some/path/pg/root/");
+        Path rootDir = fs.getPath("files/pg");
         Files.createDirectories(rootDir);
         return rootDir;
     }
@@ -44,6 +44,6 @@ public class PGRequestHandlerTest {
         assertTrue(Files.exists(file));
         assertEquals(3L, Files.size(file));
         assertEquals("testFile", file.getFileName().toString());
-        assertEquals("/some/path/pg/root/testFile", file.toString());
+        assertEquals("files/pg/testFile", file.toString());
     }
 }

@@ -33,7 +33,7 @@ public abstract class StrategyTest extends DBCleanTest {
     }
 
     protected Path prepareFS(FileSystem fs) throws IOException {
-        Path outputDir = fs.getPath("/some/path/favlink/cache/");
+        Path outputDir = fs.getPath("files/favlink");
         Files.createDirectories(outputDir);
         return outputDir;
     }

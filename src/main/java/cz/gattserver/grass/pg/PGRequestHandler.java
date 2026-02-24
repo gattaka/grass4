@@ -20,8 +20,7 @@ public class PGRequestHandler extends AbstractGrassRequestHandler {
     private final FileSystemService fileSystemService;
 
     @Value("${pg.root.path}")
-    private String rootPath;
-
+    private String rootPathName;
 
     public PGRequestHandler(FileSystemService fileSystemService) {
         this.fileSystemService = fileSystemService;
@@ -29,8 +28,9 @@ public class PGRequestHandler extends AbstractGrassRequestHandler {
 
     @Override
     protected Path getPath(String fileName, HttpServletRequest httpRequest) throws FileNotFoundException {
-        Path path = fileSystemService.getFileSystem().getPath(rootPath, fileName);
-        if (!path.toAbsolutePath().startsWith(rootPath))
+        Path rootPath = fileSystemService.getFileSystem().getPath(rootPathName);
+        Path path = rootPath.resolve(fileName);
+        if (!path.toAbsolutePath().startsWith(rootPath.toAbsolutePath()))
             throw new IllegalArgumentException("Podtečení cesty");
         return path;
     }

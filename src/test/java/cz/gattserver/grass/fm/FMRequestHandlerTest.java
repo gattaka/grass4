@@ -29,7 +29,7 @@ public class FMRequestHandlerTest {
     }
 
     private Path prepareFS(FileSystem fs) throws IOException {
-        Path rootDir = fs.getPath("/some/path/fm/root/");
+        Path rootDir = fs.getPath("files/fm");
         Files.createDirectories(rootDir);
         return rootDir;
     }
@@ -45,6 +45,6 @@ public class FMRequestHandlerTest {
         assertTrue(Files.exists(file));
         assertEquals(3L, Files.size(file));
         assertEquals("testFile", file.getFileName().toString());
-        assertEquals("/some/path/fm/root/testFile", file.toString());
+        assertEquals("files/fm/testFile", file.toString());
     }
 }

@@ -58,7 +58,7 @@ public class HWServiceImplTest extends DBCleanTest {
     private String hwPrint3dDir;
 
     private Path prepareFS(FileSystem fs) throws IOException {
-        Path rootDir = fs.getPath("/some/path/hw/root/");
+        Path rootDir = fs.getPath("files/hw");
         Files.createDirectories(rootDir);
         return rootDir;
     }

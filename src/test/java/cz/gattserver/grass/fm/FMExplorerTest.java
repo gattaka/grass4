@@ -29,7 +29,7 @@ public class FMExplorerTest {
     }
 
     private Path prepareFS(FileSystem fs) throws IOException {
-        Path rootDir = fs.getPath("/some/path/fm/root/");
+        Path rootDir = fs.getPath("files/fm");
         Files.createDirectories(rootDir);
         return rootDir;
     }
@@ -339,18 +339,14 @@ public class FMExplorerTest {
     }
 
     @Test
-    public void test_failNullFS() throws IOException {
+    public void test_failNullFS()  {
         assertThrows(NullPointerException.class, () -> new FMExplorer(null), "Filesystem nesmí být null");
     }
 
     @Test
-    public void test_failRoot() throws IOException {
+    public void test_failRoot() {
         FileSystem fs = fileSystemService.getFileSystem();
-
-        Path rootDir = fs.getPath("/some/path/fm/root/");
-
         assertThrows(IllegalStateException.class, () -> new FMExplorer(fs),
                 "Kořenový adresář FM modulu musí existovat");
     }
-
 }

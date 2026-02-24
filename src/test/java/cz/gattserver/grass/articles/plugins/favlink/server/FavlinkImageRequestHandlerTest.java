@@ -28,7 +28,7 @@ public class FavlinkImageRequestHandlerTest extends DBCleanTest {
     }
 
     private Path prepareFS(FileSystem fs) throws IOException {
-        Path outputDir = fs.getPath("/some/path/favlink/cache/");
+        Path outputDir = fs.getPath("files/favlink");
         Files.createDirectories(outputDir);
         return outputDir;
     }
@@ -44,6 +44,6 @@ public class FavlinkImageRequestHandlerTest extends DBCleanTest {
         assertTrue(Files.exists(file));
         assertEquals(3L, Files.size(file));
         assertEquals("testFile", file.getFileName().toString());
-        assertEquals("/some/path/favlink/cache/testFile", file.toString());
+        assertEquals("files/favlink/testFile", file.toString());
     }
 }

@@ -28,7 +28,7 @@ public class PGUtilsTest {
 	}
 
 	private Path prepareFS(FileSystem fs) throws IOException {
-		Path rootDir = fs.getPath("/some/path/pg/root/");
+		Path rootDir = fs.getPath("files/pg/");
 		Files.createDirectories(rootDir);
 		return rootDir;
 	}

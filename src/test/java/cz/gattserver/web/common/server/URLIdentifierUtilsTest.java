@@ -46,7 +46,7 @@ public class URLIdentifierUtilsTest {
 	public void testParseURLIdentifier_unicode() {
 		URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(
 				"45-test+%C4%8Desk%C3%BDch+zn%C3%A1%C4%8Dk%C5%AF+a+%C5%BElu%C5%A5ou%C4%8Dk%C3%BDch+%C5%BEiraf+%C5%87%21");
-		assertEquals(Long.valueOf(45L), identifier.name());
+		assertEquals(Long.valueOf(45L), identifier.id());
 		assertEquals("test českých znáčků a žluťoučkých žiraf Ň!", identifier.name());
 	}
 
