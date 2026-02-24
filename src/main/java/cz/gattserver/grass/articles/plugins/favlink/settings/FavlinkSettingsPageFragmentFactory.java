@@ -92,6 +92,9 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
                 return dotIndex > 0 ? name.substring(dotIndex) : "";
             })).setHeader("Typ").setWidth("50px").setFlexGrow(0);
 
+            grid.addColumn(new TextRenderer<>(p -> formatSize(p))).setHeader("Velikost")
+                    .setTextAlign(ColumnTextAlign.END).setFlexGrow(0).setWidth("70px");
+
             grid.addColumn(new ComponentRenderer<>(p -> componentFactory.createInlineButton("Smazat", be -> {
                 new ConfirmDialog("Opravdu smazat favicon?", e -> {
                     try {
@@ -116,9 +119,6 @@ public class FavlinkSettingsPageFragmentFactory extends AbstractPageFragmentFact
                     }
                 }).open();
             }))).setHeader("Přegenerovat").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
-
-            grid.addColumn(new TextRenderer<>(p -> formatSize(p))).setHeader("Velikost")
-                    .setTextAlign(ColumnTextAlign.END).setFlexGrow(0).setWidth("60px");
 
             HeaderRow filteringHeader = grid.appendHeaderRow();
 

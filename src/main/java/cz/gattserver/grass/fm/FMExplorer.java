@@ -2,9 +2,7 @@ package cz.gattserver.grass.fm;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
-import cz.gattserver.grass.fm.config.FMConfiguration;
 import cz.gattserver.grass.fm.interfaces.FMItemTO;
 import cz.gattserver.grass.fm.service.FMService;
 import lombok.extern.slf4j.Slf4j;
@@ -55,20 +53,10 @@ public class FMExplorer {
         Validate.notNull(fileSystem, "Filesystem nesmí být null");
         this.fmService = SpringContextHelper.getBean(FMService.class);
         this.fileSystemService = SpringContextHelper.getBean(FileSystemService.class);
-
-        FMConfiguration configuration = loadConfiguration();
-        String rootDir = configuration.getRootDir();
-        rootPath = fileSystem.getPath(rootDir).normalize();
+        String rootPathName = SpringContextHelper.getContext().getEnvironment().getProperty("fm.root.path");
+        rootPath = fileSystem.getPath(rootPathName).normalize();
         if (!Files.exists(rootPath)) throw new IllegalStateException("Kořenový adresář FM modulu musí existovat");
         currentAbsolutePath = rootPath;
-    }
-
-    private FMConfiguration loadConfiguration() {
-        ConfigurationService configurationService =
-                SpringContextHelper.getContext().getBean(ConfigurationService.class);
-        FMConfiguration c = new FMConfiguration();
-        configurationService.loadConfiguration(c);
-        return c;
     }
 
     /**
@@ -268,7 +256,7 @@ public class FMExplorer {
         StringBuilder sb = new StringBuilder();
         sb.append(contextRootURL);
         if (!contextRootURL.endsWith("/")) sb.append("/");
-        sb.append(FMConfiguration.FM_PATH);
+        sb.append(FMRequestHandlerConfig.FM_PATH);
         for (Path part : getCurrentRelativePath()) {
             sb.append("/");
             sb.append(part.toString());

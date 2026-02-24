@@ -1,4 +1,4 @@
-package cz.gattserver.grass.fm.service.impl;
+package cz.gattserver.grass.fm.service;
 
 import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.grass.core.events.EventBus;
@@ -6,7 +6,6 @@ import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.fm.events.FMZipProcessProgressEvent;
 import cz.gattserver.grass.fm.events.FMZipProcessResultEvent;
 import cz.gattserver.grass.fm.events.FMZipProcessStartEvent;
-import cz.gattserver.grass.fm.service.FMService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,8 +1,6 @@
 package cz.gattserver.grass.fm;
 
 import cz.gattserver.grass.core.mock.MockFileSystemService;
-import cz.gattserver.grass.core.services.ConfigurationService;
-import cz.gattserver.grass.fm.config.FMConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,9 +21,6 @@ public class FMRequestHandlerTest {
     private MockFileSystemService fileSystemService;
 
     @Autowired
-    private ConfigurationService configurationService;
-
-    @Autowired
     private FMRequestHandler fmRequestHandler;
 
     @BeforeEach
@@ -36,11 +31,6 @@ public class FMRequestHandlerTest {
     private Path prepareFS(FileSystem fs) throws IOException {
         Path rootDir = fs.getPath("/some/path/fm/root/");
         Files.createDirectories(rootDir);
-
-        FMConfiguration fmc = new FMConfiguration();
-        fmc.setRootDir(rootDir.toString());
-        configurationService.saveConfiguration(fmc);
-
         return rootDir;
     }
 

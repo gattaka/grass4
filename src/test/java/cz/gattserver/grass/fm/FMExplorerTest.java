@@ -2,7 +2,6 @@ package cz.gattserver.grass.fm;
 
 import cz.gattserver.grass.core.mock.MockFileSystemService;
 import cz.gattserver.grass.core.services.ConfigurationService;
-import cz.gattserver.grass.fm.config.FMConfiguration;
 import cz.gattserver.grass.fm.interfaces.FMItemTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,11 +36,6 @@ public class FMExplorerTest {
     private Path prepareFS(FileSystem fs) throws IOException {
         Path rootDir = fs.getPath("/some/path/fm/root/");
         Files.createDirectories(rootDir);
-
-        FMConfiguration fmc = new FMConfiguration();
-        fmc.setRootDir(rootDir.toString());
-        configurationService.saveConfiguration(fmc);
-
         return rootDir;
     }
 
@@ -134,7 +128,7 @@ public class FMExplorerTest {
         FMExplorer explorer = new FMExplorer(fs);
         explorer.goToDir("subDir1");
 
-        assertEquals("http://test/web/" + FMConfiguration.FM_PATH + "/subDir1/testFile",
+        assertEquals("http://test/web/" + FMRequestHandlerConfig.FM_PATH + "/subDir1/testFile",
                 explorer.getDownloadLink("http://test/web", "testFile"));
     }
 
@@ -359,10 +353,6 @@ public class FMExplorerTest {
         FileSystem fs = fileSystemService.getFileSystem();
 
         Path rootDir = fs.getPath("/some/path/fm/root/");
-
-        FMConfiguration fmc = new FMConfiguration();
-        fmc.setRootDir(rootDir.toString());
-        configurationService.saveConfiguration(fmc);
 
         assertThrows(IllegalStateException.class, () -> new FMExplorer(fs),
                 "Kořenový adresář FM modulu musí existovat");
