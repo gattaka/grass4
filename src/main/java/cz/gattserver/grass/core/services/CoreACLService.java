@@ -128,22 +128,6 @@ public interface CoreACLService {
     boolean canShowUserDetails(UserInfoTO targetUserInfoTO, UserInfoTO userInfoTO);
 
     /**
-     * Může se uživatel zaregistrovat ?
-     *
-     * @param userInfoTO přihlášený uživatel
-     * @return <code>true</code> pokud může
-     */
-    boolean canRegistrate(UserInfoTO userInfoTO);
-
-    /**
-     * Může zobrazit stránku s nastavením ?
-     *
-     * @param userInfoTO přihlášený uživatel
-     * @return <code>true</code> pokud může
-     */
-    boolean canShowSettings(UserInfoTO userInfoTO);
-
-    /**
      * Může zobrazit stránku s nastavením aplikace ?
      *
      * @param userInfoTO přihlášený uživatel

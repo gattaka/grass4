@@ -8,7 +8,6 @@ import cz.gattserver.grass.core.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import cz.gattserver.grass.core.config.CoreConfiguration;
 import cz.gattserver.grass.core.modules.SectionService;
 import cz.gattserver.grass.core.security.CoreRole;
 
@@ -24,9 +23,6 @@ public final class CoreACLServiceImpl implements CoreACLService {
 
 	@Autowired
 	private UserService userFacade;
-
-	@Autowired
-	private ConfigurationService configurationService;
 
 	/**
 	 * =======================================================================
@@ -151,27 +147,6 @@ public final class CoreACLServiceImpl implements CoreACLService {
 
 		// administrator může vidět detaily od všech uživatelů
 		return userInfoTO.isAdmin();
-	}
-
-	/**
-	 * Může se uživatel zaregistrovat ?
-	 */
-	public boolean canRegistrate(UserInfoTO userInfoTO) {
-		if (!isLoggedIn(userInfoTO)) {
-			// jenom host se může registrovat
-			CoreConfiguration configuration = new CoreConfiguration();
-			configurationService.loadConfiguration(configuration);
-			return configuration.isRegistrations();
-		}
-		// jinak false
-		return false;
-	}
-
-	/**
-	 * Může zobrazit stránku s nastavením ?
-	 */
-	public boolean canShowSettings(UserInfoTO userInfoTO) {
-		return isLoggedIn(userInfoTO);
 	}
 
 	/**
