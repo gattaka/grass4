@@ -1,4 +1,4 @@
-package cz.gattserver.grass.campgames.service.impl;
+package cz.gattserver.grass.campgames.service;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
-import cz.gattserver.grass.campgames.service.CampgamesMapperService;
 import org.springframework.stereotype.Component;
 
 import cz.gattserver.grass.campgames.interfaces.CampgameOverviewTO;

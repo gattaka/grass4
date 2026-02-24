@@ -1,4 +1,4 @@
-package cz.gattserver.grass.campgames.service.impl;
+package cz.gattserver.grass.campgames.service;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,18 +14,17 @@ import java.util.stream.Stream;
 
 import cz.gattserver.grass.campgames.interfaces.CampgameFileTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
-import cz.gattserver.grass.campgames.service.CampgamesMapperService;
 import cz.gattserver.grass.core.exception.GrassException;
 import cz.gattserver.grass.core.services.ConfigurationService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.types.OrderSpecifier;
 
-import cz.gattserver.grass.campgames.CampgamesConfiguration;
 import cz.gattserver.grass.campgames.interfaces.CampgameFilterTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameKeywordTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameOverviewTO;
@@ -33,13 +32,18 @@ import cz.gattserver.grass.campgames.model.domain.Campgame;
 import cz.gattserver.grass.campgames.model.domain.CampgameKeyword;
 import cz.gattserver.grass.campgames.model.repositories.CampgameKeywordRepository;
 import cz.gattserver.grass.campgames.model.repositories.CampgameRepository;
-import cz.gattserver.grass.campgames.service.CampgamesService;
 
 @Transactional
 @Component
 public class CampgamesServiceImpl implements CampgamesService {
 
-	private static final String ILLEGAL_PATH_IMGS_ERR = "Podtečení adresáře grafických příloh";
+    private static final String ILLEGAL_PATH_IMGS_ERR = "Podtečení adresáře grafických příloh";
+
+    @Value("${campgames.root.dir}")
+    private String campgamesRootDirectory;
+
+    @Value("${campgames.images.dir}")
+    private String campgamesImagesDirectory;
 
 	@Autowired
 	private FileSystemService fileSystemService;
@@ -56,16 +60,6 @@ public class CampgamesServiceImpl implements CampgamesService {
 	@Autowired
 	private CampgamesMapperService campgamesMapper;
 
-	/*
-	 * Config
-	 */
-
-	private CampgamesConfiguration loadConfiguration() {
-		CampgamesConfiguration configuration = new CampgamesConfiguration();
-		configurationService.loadConfiguration(configuration);
-		return configuration;
-	}
-
 	/**
 	 * Získá {@link Path} dle jména adresáře hry
 	 * 
@@ -80,9 +74,7 @@ public class CampgamesServiceImpl implements CampgamesService {
 	 */
 	private Path getCampgamePath(Long id) {
 		Validate.notNull(id, "ID hry nesmí být null");
-		CampgamesConfiguration configuration = loadConfiguration();
-		String rootDir = configuration.getRootDir();
-		Path rootPath = fileSystemService.getFileSystem().getPath(rootDir);
+		Path rootPath = fileSystemService.getFileSystem().getPath(campgamesRootDirectory);
 		if (!Files.exists(rootPath))
 			throw new IllegalStateException("Kořenový adresář modulu her musí existovat");
 		rootPath = rootPath.normalize();
@@ -93,9 +85,8 @@ public class CampgamesServiceImpl implements CampgamesService {
 	}
 
 	private Path getCampgameImagesPath(Long id) throws IOException {
-		CampgamesConfiguration configuration = loadConfiguration();
 		Path campgamePath = getCampgamePath(id);
-		Path file = campgamePath.resolve(configuration.getImagesDir());
+		Path file = campgamePath.resolve(campgamesImagesDirectory);
 		if (!Files.exists(file))
 			fileSystemService.createDirectoriesWithPerms(file);
 		return file;

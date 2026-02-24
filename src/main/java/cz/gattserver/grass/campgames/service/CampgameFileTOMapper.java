@@ -1,4 +1,4 @@
-package cz.gattserver.grass.campgames.service.impl;
+package cz.gattserver.grass.campgames.service;
 
 import java.io.IOException;
 import java.nio.file.Files;

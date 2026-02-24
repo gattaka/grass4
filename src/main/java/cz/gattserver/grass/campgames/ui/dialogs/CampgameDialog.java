@@ -1,14 +1,10 @@
 package cz.gattserver.grass.campgames.ui.dialogs;
 
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
@@ -25,7 +21,7 @@ import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.campgames.CampgamesConfiguration;
+import cz.gattserver.grass.campgames.CampgamesRequestHandlerConfig;
 import cz.gattserver.grass.campgames.interfaces.CampgameFileTO;
 import cz.gattserver.grass.campgames.interfaces.CampgameTO;
 import cz.gattserver.grass.campgames.service.CampgamesService;
@@ -34,8 +30,6 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.TokenField;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
-import cz.gattserver.grass.medic.interfaces.MedicamentTO;
-import cz.gattserver.grass.medic.web.MedicamentDialog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -220,7 +214,7 @@ public class CampgameDialog extends EditWebDialog {
 
         grid.addColumn(new ComponentRenderer<>(to -> componentFactory.createInlineButton("Detail",
                         e -> UI.getCurrent().getPage()
-                                .open(CampgamesConfiguration.CAMPGAMES_PATH + "/" + originalTO.getId() + "/" + to.getName()))))
+                                .open(CampgamesRequestHandlerConfig.CAMPGAMES_PATH + "/" + originalTO.getId() + "/" + to.getName()))))
                 .setHeader("Detail").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
         if (isAdmin) {
