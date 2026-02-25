@@ -1,5 +1,6 @@
 package cz.gattserver.grass.books.ui;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -49,6 +50,8 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
     private Grid<BookOverviewTO> grid;
     private BookFilterTO filterTO;
     private BookTO choosenBook;
+
+    private URLIdentifierUtils.URLIdentifier currentURLIdentifier;
 
     private CallbackDataProvider<BookOverviewTO, BookOverviewTO> dataProvider;
 
@@ -101,8 +104,8 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
         populateBtnLayout(btnLayout);
 
         if (parameter != null) {
-            URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(parameter);
-            selectBook(identifier.id());
+            currentURLIdentifier = URLIdentifierUtils.parseURLIdentifier(parameter);
+            selectBook(currentURLIdentifier.id());
         }
     }
 
@@ -218,13 +221,8 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
     protected void showDetail(BookTO choosenBook) {
         this.choosenBook = choosenBook;
         dataDiv.removeAll();
-        if (choosenBook == null) {
-            // TODO
-            // String currentURL = request.getContextRoot() + "/" +
-            // getBooksPageFactory().getPageName();
-            // UI.getCurrent().getRouter().
-            // Page.getCurrent().pushState(currentURL);
-        } else {
+        String listURL;
+        if (choosenBook != null) {
             byte[] co = choosenBook.getImage();
             if (co != null) {
                 // https://vaadin.com/forum/thread/260778
@@ -239,17 +237,15 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
 
             populateDetail(dataDiv);
 
-            // TODO
-            // String currentURL;
-            // try {
-            // currentURL = request.getContextRoot() + "/" +
-            // getBooksPageFactory().getPageName() + "/"
-            // + +choosenBook.getId() + "-" +
-            // URLEncoder.encode(choosenBook.getName(), "UTF-8");
-            // Page.getCurrent().pushState(currentURL);
-            // } catch (UnsupportedEncodingException e) {
-            // logger.error("UnsupportedEncodingException in URL", e);
-            // }
+            if (currentURLIdentifier == null || !currentURLIdentifier.id().equals(choosenBook.getId())) {
+                String newURLIdentifier =
+                        URLIdentifierUtils.createURLIdentifier(choosenBook.getId(), choosenBook.getName());
+                listURL = RouteConfiguration.forSessionScope().getUrl(BooksPage.class, newURLIdentifier);
+                UI.getCurrent().getPage().getHistory().pushState(null, listURL);
+            }
+        } else {
+            listURL = RouteConfiguration.forSessionScope().getUrl(BooksPage.class);
+            UI.getCurrent().getPage().getHistory().pushState(null, listURL);
         }
     }
 

@@ -17,16 +17,14 @@ public class URLIdentifierUtils {
             case 'á' -> 'a';
             case 'č' -> 'c';
             case 'ď' -> 'd';
-            case 'é' -> 'e';
-            case 'ě' -> 'e';
+            case 'é', 'ě' -> 'e';
             case 'í' -> 'i';
             case 'ň' -> 'n';
             case 'ó' -> 'o';
             case 'ř' -> 'r';
             case 'š' -> 's';
             case 'ť' -> 't';
-            case 'ú' -> 'u';
-            case 'ů' -> 'u';
+            case 'ú', 'ů' -> 'u';
             case 'ý' -> 'y';
             case 'ž' -> 'z';
             case ' ' -> '-';
