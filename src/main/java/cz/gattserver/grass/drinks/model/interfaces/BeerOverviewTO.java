@@ -3,10 +3,19 @@ package cz.gattserver.grass.drinks.model.interfaces;
 import com.querydsl.core.annotations.QueryProjection;
 import cz.gattserver.grass.drinks.model.domain.DrinkType;
 import cz.gattserver.grass.drinks.model.domain.MaltType;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serial;
+
+@Setter
+@Getter
 public class BeerOverviewTO extends DrinkOverviewTO {
 
-	/**
+    @Serial
+    private static final long serialVersionUID = -4938923900066751505L;
+
+    /**
 	 * DB id
 	 */
 	private Long infoId;
@@ -63,69 +72,4 @@ public class BeerOverviewTO extends DrinkOverviewTO {
 		this.malts = malts;
 		this.hops = hops;
 	}
-
-	public Long getInfoId() {
-		return infoId;
-	}
-
-	public void setInfoId(Long infoId) {
-		this.infoId = infoId;
-	}
-
-	public String getBrewery() {
-		return brewery;
-	}
-
-	public void setBrewery(String brewery) {
-		this.brewery = brewery;
-	}
-
-	public Integer getIbu() {
-		return ibu;
-	}
-
-	public void setIbu(Integer ibu) {
-		this.ibu = ibu;
-	}
-
-	public Double getDegrees() {
-		return degrees;
-	}
-
-	public void setDegrees(Double degrees) {
-		this.degrees = degrees;
-	}
-
-	public String getCategory() {
-		return category;
-	}
-
-	public void setCategory(String category) {
-		this.category = category;
-	}
-
-	public MaltType getMaltType() {
-		return maltType;
-	}
-
-	public void setMaltType(MaltType maltType) {
-		this.maltType = maltType;
-	}
-
-	public String getMalts() {
-		return malts;
-	}
-
-	public void setMalts(String malts) {
-		this.malts = malts;
-	}
-
-	public String getHops() {
-		return hops;
-	}
-
-	public void setHops(String hops) {
-		this.hops = hops;
-	}
-
 }

@@ -13,10 +13,15 @@ import cz.gattserver.grass.drinks.model.interfaces.BeerOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.BeerTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.function.Consumer;
 
 public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
+
+    @Serial
+    private static final long serialVersionUID = -2131362413662659705L;
 
     @Override
     protected BeerOverviewTO createNewOverviewTO() {
@@ -33,9 +38,8 @@ public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
         Column<BeerOverviewTO> categoryColumn =
                 grid.addColumn(BeerOverviewTO::getCategory).setHeader("Kategorie").setWidth("100px").setFlexGrow(0)
                         .setSortProperty("category");
-        Column<BeerOverviewTO> degreesColumn = grid.addColumn(
-                        new NumberRenderer<>(BeerOverviewTO::getDegrees,
-                                NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")))).setHeader("Stupně (°)")
+        Column<BeerOverviewTO> degreesColumn = grid.addColumn(new NumberRenderer<>(BeerOverviewTO::getDegrees,
+                        NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")))).setHeader("Stupně (°)")
                 .setWidth("100px").setFlexGrow(0).setSortProperty("degrees");
 
         addAlcoholColumn(grid);
@@ -44,10 +48,10 @@ public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
                 grid.addColumn(BeerOverviewTO::getIbu).setHeader("IBU").setWidth("50px").setFlexGrow(0)
                         .setSortProperty("ibu");
         Column<BeerOverviewTO> maltsColumn =
-                grid.addColumn(new TextRenderer<>(to -> to.getMalts())).setHeader("Slad").setWidth("60px")
+                grid.addColumn(new TextRenderer<>(BeerOverviewTO::getMalts)).setHeader("Slad").setWidth("60px")
                         .setFlexGrow(0).setSortProperty("malts");
         Column<BeerOverviewTO> hopsColumn =
-                grid.addColumn(new TextRenderer<>(to -> to.getHops())).setHeader("Chmel").setWidth("80px")
+                grid.addColumn(new TextRenderer<>(BeerOverviewTO::getHops)).setHeader("Chmel").setWidth("80px")
                         .setFlexGrow(0).setSortProperty("hops");
 
         addRatingStarsColumn(grid);
@@ -104,23 +108,16 @@ public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
     @Override
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
-        btnLayout.add(componentFactory.createCreateButton(event -> new BeerDialog() {
-            @Override
-            protected void onSave(BeerTO to) {
-                to = getDrinksFacade().saveBeer(to);
-                showDetail(to);
-                populate();
-            }
-        }.open()));
 
-        btnLayout.add(componentFactory.createEditGridButton(event -> new BeerDialog(choosenDrink) {
-            @Override
-            protected void onSave(BeerTO to) {
-                to = getDrinksFacade().saveBeer(to);
-                showDetail(to);
-                populate();
-            }
-        }.open(), grid));
+        Consumer<BeerTO> onSave = to -> {
+            to = getDrinksFacade().saveBeer(to);
+            showDetail(to);
+            populate();
+        };
+
+        btnLayout.add(componentFactory.createCreateButton(event -> new BeerDialog(onSave).open()));
+        btnLayout.add(
+                componentFactory.createEditGridButton(event -> new BeerDialog(choosenDrink, onSave).open(), grid));
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (BeerOverviewTO s : items)
@@ -146,11 +143,6 @@ public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
                 String.valueOf(choosenDrink.getAlcohol()),
                 choosenDrink.getIbu() == null ? "" : String.valueOf(choosenDrink.getIbu()),
                 choosenDrink.getMaltType().getCaption(), choosenDrink.getMalts(), choosenDrink.getHops()};
-    }
-
-    @Override
-    protected String getURLPath() {
-        return "beer";
     }
 
     @Override

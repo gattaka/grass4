@@ -3,10 +3,19 @@ package cz.gattserver.grass.drinks.model.interfaces;
 import com.querydsl.core.annotations.QueryProjection;
 import cz.gattserver.grass.drinks.model.domain.DrinkType;
 import cz.gattserver.grass.drinks.model.domain.WineType;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serial;
+
+@Setter
+@Getter
 public class WineOverviewTO extends DrinkOverviewTO {
 
-	/**
+    @Serial
+    private static final long serialVersionUID = 2639491741912954571L;
+
+    /**
 	 * DB id
 	 */
 	private Long infoId;
@@ -38,37 +47,4 @@ public class WineOverviewTO extends DrinkOverviewTO {
 		this.year = year;
 		this.wineType = wineType;
 	}
-
-	public Long getInfoId() {
-		return infoId;
-	}
-
-	public void setInfoId(Long infoId) {
-		this.infoId = infoId;
-	}
-
-	public String getWinery() {
-		return winery;
-	}
-
-	public void setWinery(String winery) {
-		this.winery = winery;
-	}
-
-	public Integer getYear() {
-		return year;
-	}
-
-	public void setYear(Integer year) {
-		this.year = year;
-	}
-
-	public WineType getWineType() {
-		return wineType;
-	}
-
-	public void setWineType(WineType wineType) {
-		this.wineType = wineType;
-	}
-
 }

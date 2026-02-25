@@ -2,7 +2,6 @@ package cz.gattserver.grass.drinks.rest;
 
 import cz.gattserver.grass.drinks.facades.DrinksFacade;
 import cz.gattserver.grass.drinks.model.interfaces.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -16,16 +15,19 @@ import java.util.List;
 @RequestMapping("/ws/drinks")
 public class DrinksResource {
 
-	@Autowired
-	private DrinksFacade drinksFacade;
+	private final DrinksFacade drinksFacade;
 
-	/*
+    public DrinksResource(DrinksFacade drinksFacade) {
+        this.drinksFacade = drinksFacade;
+    }
+
+    /*
 	 * Pivo
 	 */
 
 	@RequestMapping("/beer-list")
-	public ResponseEntity<List<BeerOverviewTO>> beerList(@RequestParam(value = "page", required = true) int page,
-														 @RequestParam(value = "pageSize", required = true) int pageSize,
+	public ResponseEntity<List<BeerOverviewTO>> beerList(@RequestParam(value = "page") int page,
+														 @RequestParam(value = "pageSize") int pageSize,
 														 @RequestParam(value = "filter", required = false) String filter) {
 		int count = drinksFacade.countBeers(filter);
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
@@ -41,7 +43,7 @@ public class DrinksResource {
 	}
 
 	@RequestMapping("/beer")
-	public @ResponseBody BeerTO beer(@RequestParam(value = "id", required = true) Long id) {
+	public @ResponseBody BeerTO beer(@RequestParam(value = "id") Long id) {
 		return drinksFacade.getBeerById(id);
 	}
 
@@ -50,8 +52,8 @@ public class DrinksResource {
 	 */
 
 	@RequestMapping("/rum-list")
-	public ResponseEntity<List<RumOverviewTO>> rumList(@RequestParam(value = "page", required = true) int page,
-													   @RequestParam(value = "pageSize", required = true) int pageSize,
+	public ResponseEntity<List<RumOverviewTO>> rumList(@RequestParam(value = "page") int page,
+													   @RequestParam(value = "pageSize") int pageSize,
 													   @RequestParam(value = "filter", required = false) String filter) {
 		int count = drinksFacade.countRums(filter);
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
@@ -67,7 +69,8 @@ public class DrinksResource {
 	}
 
 	@RequestMapping("/rum")
-	public @ResponseBody RumTO rum(@RequestParam(value = "id", required = true) Long id) {
+	public @ResponseBody RumTO rum(@RequestParam(value = "id"
+    ) Long id) {
 		return drinksFacade.getRumById(id);
 	}
 
@@ -76,8 +79,8 @@ public class DrinksResource {
 	 */
 
 	@RequestMapping("/whiskey-list")
-	public ResponseEntity<List<WhiskeyOverviewTO>> whiskeyList(@RequestParam(value = "page", required = true) int page,
-															   @RequestParam(value = "pageSize", required = true) int pageSize,
+	public ResponseEntity<List<WhiskeyOverviewTO>> whiskeyList(@RequestParam(value = "page") int page,
+															   @RequestParam(value = "pageSize") int pageSize,
 															   @RequestParam(value = "filter", required = false) String filter) {
 		int count = drinksFacade.countWhiskeys(filter);
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
@@ -93,7 +96,7 @@ public class DrinksResource {
 	}
 
 	@RequestMapping("/whiskey")
-	public @ResponseBody WhiskeyTO whiskey(@RequestParam(value = "id", required = true) Long id) {
+	public @ResponseBody WhiskeyTO whiskey(@RequestParam(value = "id") Long id) {
 		return drinksFacade.getWhiskeyById(id);
 	}
 
@@ -102,8 +105,8 @@ public class DrinksResource {
 	 */
 
 	@RequestMapping("/wine-list")
-	public ResponseEntity<List<WineOverviewTO>> wineList(@RequestParam(value = "page", required = true) int page,
-														 @RequestParam(value = "pageSize", required = true) int pageSize) {
+	public ResponseEntity<List<WineOverviewTO>> wineList(@RequestParam(value = "page") int page,
+														 @RequestParam(value = "pageSize") int pageSize) {
 		int count = drinksFacade.countWines();
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho
@@ -118,7 +121,7 @@ public class DrinksResource {
 	}
 
 	@RequestMapping("/wine")
-	public @ResponseBody WineTO wine(@RequestParam(value = "id", required = true) Long id) {
+	public @ResponseBody WineTO wine(@RequestParam(value = "id") Long id) {
 		return drinksFacade.getWineById(id);
 	}
 
@@ -127,8 +130,8 @@ public class DrinksResource {
 	 */
 
 	@RequestMapping("/other-list")
-	public ResponseEntity<List<OtherOverviewTO>> otherList(@RequestParam(value = "page", required = true) int page,
-														   @RequestParam(value = "pageSize", required = true) int pageSize) {
+	public ResponseEntity<List<OtherOverviewTO>> otherList(@RequestParam(value = "page") int page,
+														   @RequestParam(value = "pageSize") int pageSize) {
 		int count = drinksFacade.countOthers();
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho
@@ -143,7 +146,7 @@ public class DrinksResource {
 	}
 
 	@RequestMapping("/other")
-	public @ResponseBody OtherTO other(@RequestParam(value = "id", required = true) Long id) {
+	public @ResponseBody OtherTO other(@RequestParam(value = "id") Long id) {
 		return drinksFacade.getOtherById(id);
 	}
 

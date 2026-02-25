@@ -19,7 +19,6 @@ import cz.gattserver.grass.drinks.model.interfaces.DrinkOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.DrinkTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -29,6 +28,7 @@ import cz.gattserver.common.vaadin.Strong;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayInputStream;
+import java.io.Serial;
 import java.text.NumberFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,14 +36,14 @@ import java.util.Locale;
 
 public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> extends Div {
 
-    private static final long serialVersionUID = 594189301140808163L;
+    @Serial
+    private static final long serialVersionUID = 4941396317717622059L;
 
     private transient SecurityService securityService;
-    private transient PageFactory drinksPageFactory;
     private transient DrinksFacade drinksFacade;
 
-    private Image image;
-    private Div dataLayout;
+    private final Image image;
+    private final Div dataLayout;
 
     protected Grid<O> grid;
     protected O filterTO;
@@ -123,7 +123,7 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
 
     protected void addAlcoholColumn(Grid<O> grid) {
         Column<O> alcoholColumn = grid.addColumn(
-                        new NumberRenderer<O>(O::getAlcohol, NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")), null))
+                        new NumberRenderer<>(O::getAlcohol, NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")), null))
                 .setHeader("%").setWidth("50px").setFlexGrow(0).setSortProperty("alcohol");
         UIUtils.addHeaderTextField(getHeaderRow().getCell(alcoholColumn), e -> {
             filterTO.setAlcohol(Double.parseDouble(e.getValue()));
@@ -132,7 +132,7 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
     }
 
     protected void addRatingStarsColumn(Grid<O> grid) {
-        grid.addColumn(new ComponentRenderer<RatingStars, O>(to -> {
+        grid.addColumn(new ComponentRenderer<>(to -> {
             RatingStars rs = new RatingStars();
             rs.setValue(to.getRating());
             rs.setReadOnly(true);
@@ -144,12 +144,6 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
     protected SecurityService getSecurityService() {
         if (securityService == null) securityService = SpringContextHelper.getBean(SecurityService.class);
         return securityService;
-    }
-
-    protected PageFactory getDrinksPageFactory() {
-        if (drinksPageFactory == null)
-            drinksPageFactory = (PageFactory) SpringContextHelper.getBean("drinksPageFactory");
-        return drinksPageFactory;
     }
 
     protected DrinksFacade getDrinksFacade() {
@@ -249,8 +243,6 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
     protected abstract void populate();
 
     protected abstract void populateBtnLayout(Div btnLayout);
-
-    protected abstract String getURLPath();
 
     protected abstract T findById(Long id);
 

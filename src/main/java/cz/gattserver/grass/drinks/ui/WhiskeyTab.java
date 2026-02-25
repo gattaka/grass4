@@ -13,6 +13,8 @@ import cz.gattserver.grass.drinks.model.interfaces.WhiskeyOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.WhiskeyTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.util.function.Consumer;
+
 public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
 
     private static final long serialVersionUID = 594189301140808163L;
@@ -67,23 +69,17 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
     @Override
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
-        btnLayout.add(componentFactory.createCreateButton(event -> new WhiskeyDialog() {
-            @Override
-            protected void onSave(WhiskeyTO to) {
-                to = getDrinksFacade().saveWhiskey(to);
-                showDetail(to);
-                populate();
-            }
-        }.open()));
 
-        btnLayout.add(componentFactory.createEditGridButton(event -> new WhiskeyDialog(choosenDrink) {
-            @Override
-            protected void onSave(WhiskeyTO to) {
-                to = getDrinksFacade().saveWhiskey(to);
-                showDetail(to);
-                populate();
-            }
-        }.open(), grid));
+        Consumer<WhiskeyTO> onSave = to -> {
+            to = getDrinksFacade().saveWhiskey(to);
+            showDetail(to);
+            populate();
+        };
+
+        btnLayout.add(componentFactory.createCreateButton(event -> new WhiskeyDialog(onSave).open()));
+
+        btnLayout.add(
+                componentFactory.createEditGridButton(event -> new WhiskeyDialog(choosenDrink, onSave).open(), grid));
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (WhiskeyOverviewTO s : items)
@@ -110,13 +106,7 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
     }
 
     @Override
-    protected String getURLPath() {
-        return "whiskey";
-    }
-
-    @Override
     protected WhiskeyTO findById(Long id) {
         return getDrinksFacade().getWhiskeyById(id);
     }
-
 }

@@ -12,17 +12,6 @@ public interface PageFactoriesRegister {
 	 *            klíč, pod kterým je hledaná factory zaregistrována
 	 * @return factory nebo <code>null</code>
 	 */
-	public PageFactory get(String key);
-
-	/**
-	 * Původní put metoda - má prakticky jediné použití a tím je tvorba aliasů
-	 * 
-	 * @param pageName
-	 *            název stránky pro kterou je registrován alias
-	 * @param factory
-	 *            factory stránky
-	 * @return zaregistrovaná factory stránky
-	 */
-	public PageFactory putAlias(String pageName, PageFactory factory);
+	PageFactory get(String key);
 
 }

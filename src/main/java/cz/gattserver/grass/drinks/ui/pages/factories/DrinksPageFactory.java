@@ -9,4 +9,5 @@ public class DrinksPageFactory extends AbstractPageFactory {
 	public DrinksPageFactory() {
 		super("drinks");
 	}
+
 }

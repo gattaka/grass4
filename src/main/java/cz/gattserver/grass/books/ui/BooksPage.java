@@ -1,6 +1,7 @@
 package cz.gattserver.grass.books.ui;
 
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -27,12 +28,12 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.Strong;
 
 import java.io.ByteArrayInputStream;
+import java.io.Serial;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -40,15 +41,17 @@ import java.time.format.DateTimeFormatter;
 @Route(value = "books", layout = MainView.class)
 public class BooksPage extends Div implements HasUrlParameter<String> {
 
-    private transient SecurityService securityService;
-    private transient BooksService booksService;
+    @Serial
+    private static final long serialVersionUID = -1788123173388067692L;
+
+    private final SecurityService securityService;
+    private final BooksService booksService;
 
     private Image image;
     private Div dataDiv;
     private Div imageDiv;
 
     private Grid<BookOverviewTO> grid;
-    private BookFilterTO filterTO;
     private BookTO choosenBook;
 
     private URLIdentifierUtils.URLIdentifier currentURLIdentifier;
@@ -68,7 +71,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        filterTO = new BookFilterTO();
+        BookFilterTO filterTO = new BookFilterTO();
         grid = createGrid(filterTO);
         UIUtils.applyGrassDefaultStyle(grid);
         layout.add(grid);
@@ -98,7 +101,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
         contentLayout.add(dataDiv);
 
         Div btnLayout = componentFactory.createButtonLayout();
-        btnLayout.setVisible(getSecurityService().getCurrentUser().getRoles().contains(CoreRole.ADMIN));
+        btnLayout.setVisible(securityService.getCurrentUser().getRoles().contains(CoreRole.ADMIN));
         layout.add(btnLayout);
 
         populateBtnLayout(btnLayout);
@@ -113,7 +116,7 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
         final Grid<BookOverviewTO> grid = new Grid<>();
         UIUtils.applyGrassDefaultStyle(grid);
         grid.setWidthFull();
-        grid.setHeight("400px");
+        grid.setHeight(400, Unit.PIXELS);
 
         Column<BookOverviewTO> authorColumn =
                 grid.addColumn(BookOverviewTO::getAuthor).setHeader("Autor").setFlexGrow(50).setAutoWidth(true)
@@ -144,8 +147,8 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
         });
 
         FetchCallback<BookOverviewTO, BookOverviewTO> fetchCallback =
-                q -> getBooksFacade().getBooks(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
-        CountCallback<BookOverviewTO, BookOverviewTO> countCallback = q -> getBooksFacade().countBooks(filterTO);
+                q -> booksService.getBooks(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
+        CountCallback<BookOverviewTO, BookOverviewTO> countCallback = q -> booksService.countBooks(filterTO);
         dataProvider = DataProvider.fromFilteringCallbacks(fetchCallback, countCallback);
         grid.setDataProvider(dataProvider);
 
@@ -155,20 +158,20 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton(event -> new BookDialog(to -> {
-            to = getBooksFacade().saveBook(to);
+            to = booksService.saveBook(to);
             showDetail(to);
             dataProvider.refreshAll();
         }).open()));
 
         btnLayout.add(componentFactory.createEditGridButton(event -> new BookDialog(choosenBook, to -> {
-            to = getBooksFacade().saveBook(to);
+            to = booksService.saveBook(to);
             showDetail(to);
             dataProvider.refreshItem(new BookOverviewTO());
         }).open(), grid));
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (BookOverviewTO s : items)
-                getBooksFacade().deleteBook(s.getId());
+                booksService.deleteBook(s.getId());
             dataProvider.refreshAll();
             showDetail(null);
         }, grid));
@@ -202,16 +205,6 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
 
         HtmlDiv description = new HtmlDiv(choosenBook.getDescription().replaceAll("\n", "<br/>"));
         dataLayout.add(description);
-    }
-
-    protected SecurityService getSecurityService() {
-        if (securityService == null) securityService = SpringContextHelper.getBean(SecurityService.class);
-        return securityService;
-    }
-
-    protected BooksService getBooksFacade() {
-        if (booksService == null) booksService = SpringContextHelper.getBean(BooksService.class);
-        return booksService;
     }
 
     public void selectBook(Long id) {
@@ -250,6 +243,6 @@ public class BooksPage extends Div implements HasUrlParameter<String> {
     }
 
     protected BookTO findById(Long id) {
-        return getBooksFacade().getBookById(id);
+        return booksService.getBookById(id);
     }
 }

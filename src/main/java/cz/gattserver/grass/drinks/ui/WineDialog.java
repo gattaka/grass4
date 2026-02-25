@@ -17,15 +17,16 @@ import java.io.Serial;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Consumer;
 
-public abstract class WineDialog extends DrinkDialog<WineTO> {
+public class WineDialog extends DrinkDialog<WineTO> {
 
-    public WineDialog(WineTO to) {
-        super(to);
+    public WineDialog(WineTO to, Consumer<WineTO> onSave) {
+        super(to, onSave);
     }
 
-    public WineDialog() {
-        super();
+    public WineDialog(Consumer<WineTO> onSave) {
+        super(onSave);
     }
 
     @Override
@@ -101,5 +102,4 @@ public abstract class WineDialog extends DrinkDialog<WineTO> {
 
         return layout;
     }
-
 }

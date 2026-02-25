@@ -11,7 +11,13 @@ import cz.gattserver.grass.drinks.model.interfaces.OtherOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.OtherTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
+import java.util.function.Consumer;
+
 public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
+
+    @Serial
+    private static final long serialVersionUID = 477733384593589030L;
 
     @Override
     protected OtherOverviewTO createNewOverviewTO() {
@@ -52,23 +58,17 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
     @Override
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
-        btnLayout.add(componentFactory.createCreateButton(event -> new OtherDialog() {
-            @Override
-            protected void onSave(OtherTO to) {
-                to = getDrinksFacade().saveOther(to);
-                showDetail(to);
-                populate();
-            }
-        }.open()));
 
-        btnLayout.add(componentFactory.createEditGridButton(event -> new OtherDialog(choosenDrink) {
-            @Override
-            protected void onSave(OtherTO to) {
-                to = getDrinksFacade().saveOther(to);
-                showDetail(to);
-                populate();
-            }
-        }.open(), grid));
+
+        Consumer<OtherTO> onSave = to -> {
+            to = getDrinksFacade().saveOther(to);
+            showDetail(to);
+            populate();
+        };
+
+        btnLayout.add(componentFactory.createCreateButton(event -> new OtherDialog(onSave).open()));
+        btnLayout.add(
+                componentFactory.createEditGridButton(event -> new OtherDialog(choosenDrink, onSave).open(), grid));
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (OtherOverviewTO s : items)
@@ -92,11 +92,6 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
     protected String[] getProperties() {
         return new String[]{choosenDrink.getIngredient(),
                 choosenDrink.getAlcohol() == null ? "" : String.valueOf(choosenDrink.getAlcohol())};
-    }
-
-    @Override
-    protected String getURLPath() {
-        return "other";
     }
 
     @Override

@@ -9,9 +9,14 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.drinks.ui.*;
 import cz.gattserver.common.server.URLIdentifierUtils;
 
+import java.io.Serial;
+
 @PageTitle("Nápoje")
 @Route(value = "drinks", layout = MainView.class)
 public class DrinksPage extends Div implements HasUrlParameter<String> {
+
+    @Serial
+    private static final long serialVersionUID = 6942552661683864811L;
 
     private Tabs tabSheet;
 
@@ -21,7 +26,6 @@ public class DrinksPage extends Div implements HasUrlParameter<String> {
     private Tab wineTab;
     private Tab otherTab;
 
-    private Div layout;
     private Div tabLayout;
 
     private String tabParam;
@@ -55,10 +59,6 @@ public class DrinksPage extends Div implements HasUrlParameter<String> {
         tabSheet.addSelectedChangeListener(e -> {
             tabLayout.removeAll();
             switch (tabSheet.getSelectedIndex()) {
-                default:
-                case 0:
-                    switchBeersTab();
-                    break;
                 case 1:
                     switchRumTab();
                     break;
@@ -71,6 +71,10 @@ public class DrinksPage extends Div implements HasUrlParameter<String> {
                 case 4:
                     switchOtherTab();
                     break;
+                case 0:
+                default:
+                    switchBeersTab();
+                    break;
             }
         });
 
@@ -81,11 +85,6 @@ public class DrinksPage extends Div implements HasUrlParameter<String> {
                 itemId = identifier.id();
             }
             switch (tabParam.toLowerCase()) {
-                default:
-                case "beer":
-                    BeersTab beersTab = switchBeersTab();
-                    if (itemId != null) beersTab.selectDrink(itemId);
-                    break;
                 case "rum":
                     RumTab rumTab = switchRumTab();
                     if (itemId != null) rumTab.selectDrink(itemId);
@@ -101,6 +100,11 @@ public class DrinksPage extends Div implements HasUrlParameter<String> {
                 case "other":
                     OtherTab otherTab = switchOtherTab();
                     if (itemId != null) otherTab.selectDrink(itemId);
+                    break;
+                case "beer":
+                default:
+                    BeersTab beersTab = switchBeersTab();
+                    if (itemId != null) beersTab.selectDrink(itemId);
                     break;
             }
         } else {

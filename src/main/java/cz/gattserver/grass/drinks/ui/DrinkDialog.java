@@ -4,11 +4,9 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.JustifyContentMode;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.server.streams.DownloadHandler;
@@ -16,33 +14,35 @@ import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.ImageUtils;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.drinks.model.interfaces.DrinkTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.function.Consumer;
 
+@Slf4j
 public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
 
-    private static final Logger logger = LoggerFactory.getLogger(DrinkDialog.class);
+    @Serial
+    private static final long serialVersionUID = -5230507386391587351L;
 
-    private VerticalLayout imageLayout;
-    private Upload upload;
-    private Image image;
+    private final Consumer<T> onSave;
 
-    public DrinkDialog() {
-        this(null);
+    private final VerticalLayout imageLayout;
+    private final Upload upload;
+    private final Image image;
+
+    public DrinkDialog(Consumer<T> onSave) {
+        this(null, onSave);
     }
 
-    public DrinkDialog(final T originalTO) {
+    public DrinkDialog(final T originalTO, Consumer<T> onSave) {
         super("Nápoj");
+        this.onSave = onSave;
+
         T formTO = createNewInstance();
 
         Binder<T> binder = new Binder<>();
@@ -69,7 +69,7 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
                 placeImage(formTO);
             } catch (IOException ex) {
                 String err = "Nezdařilo se nahrát obrázek nápoje";
-                logger.error(err, ex);
+                log.error(err, ex);
                 UIUtils.showError(err);
             }
         }));
@@ -88,22 +88,12 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
         FormLayout fieldsLayout = createForm(binder);
         rightPartLayout.add(fieldsLayout);
 
-        HorizontalLayout btnsLayout = new HorizontalLayout();
-        btnsLayout.setSpacing(false);
-        btnsLayout.setPadding(false);
-        btnsLayout.setJustifyContentMode(JustifyContentMode.BETWEEN);
-        btnsLayout.setWidthFull();
-        rightPartLayout.add(btnsLayout);
-
-        if (originalTO != null) btnsLayout.add(componentFactory.createEditButton(e -> save(originalTO, binder)));
-        else btnsLayout.add(componentFactory.createCreateButton(event -> save(originalTO, binder)));
-
-        btnsLayout.add(componentFactory.createStornoButton(e -> close()));
-
         HorizontalLayout mainLayout = new HorizontalLayout(imageLayout, rightPartLayout);
         mainLayout.expand(rightPartLayout);
         mainLayout.setPadding(false);
         addComponent(mainLayout);
+
+        getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(e->save(originalTO,binder), event -> close()));
 
         if (originalTO != null) binder.readBean(originalTO);
     }
@@ -113,7 +103,7 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
             T writeTO = originalTO == null ? createNewInstance() : originalTO;
             binder.writeBean(writeTO);
             writeTO.setImage(binder.getBean().getImage());
-            onSave(writeTO);
+            onSave.accept(writeTO);
             close();
         } catch (ValidationException ex) {
             // ValidationException je zpracována přes UI a zbytek chci, aby vyskočil do error dialogu
@@ -143,8 +133,6 @@ public abstract class DrinkDialog<T extends DrinkTO> extends EditWebDialog {
         imageLayout.add(upload);
         imageLayout.setHorizontalComponentAlignment(Alignment.CENTER, upload);
     }
-
-    protected abstract void onSave(T to);
 
     protected abstract T createNewInstance();
 

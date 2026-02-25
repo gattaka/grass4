@@ -13,6 +13,8 @@ import cz.gattserver.grass.drinks.model.interfaces.RumOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.RumTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.util.function.Consumer;
+
 public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
 
     @Override
@@ -64,24 +66,15 @@ public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
     @Override
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
-        btnLayout.add(componentFactory.createCreateButton(event -> new RumDialog() {
-            @Override
-            protected void onSave(RumTO to) {
-                to = getDrinksFacade().saveRum(to);
-                showDetail(to);
-                populate();
-            }
-        }.open()));
 
-        btnLayout.add(componentFactory.createEditGridButton(event -> new RumDialog(choosenDrink) {
-            @Override
-            protected void onSave(RumTO to) {
-                to = getDrinksFacade().saveRum(to);
-                showDetail(to);
-                populate();
-            }
-        }.open(), grid));
+        Consumer<RumTO> onSave = to -> {
+            to = getDrinksFacade().saveRum(to);
+            showDetail(to);
+            populate();
+        };
 
+        btnLayout.add(componentFactory.createCreateButton(event -> new RumDialog(onSave).open()));
+        btnLayout.add(componentFactory.createEditGridButton(event -> new RumDialog(choosenDrink, onSave).open(), grid));
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (RumOverviewTO s : items)
                 getDrinksFacade().deleteDrink(s.getId());
@@ -104,11 +97,6 @@ public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
     protected String[] getProperties() {
         return new String[]{choosenDrink.getYears() == null ? "" : String.valueOf(choosenDrink.getYears()),
                 String.valueOf(choosenDrink.getAlcohol()), choosenDrink.getRumType().getCaption()};
-    }
-
-    @Override
-    protected String getURLPath() {
-        return "rum";
     }
 
     @Override

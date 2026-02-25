@@ -1,17 +1,16 @@
 package cz.gattserver.grass.drinks.model.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum WineType {
 
-	RED("Červené"), WHITE("Bílé"), ROSE("Růžové"), FRUIT("Ovocné"), MEAD("Medové");
+    RED("Červené"), WHITE("Bílé"), ROSE("Růžové"), FRUIT("Ovocné"), MEAD("Medové");
 
-	private String caption;
+    private final String caption;
 
-	private WineType(String caption) {
-		this.caption = caption;
-	}
-
-	public String getCaption() {
-		return caption;
-	}
+    WineType(String caption) {
+        this.caption = caption;
+    }
 
 }

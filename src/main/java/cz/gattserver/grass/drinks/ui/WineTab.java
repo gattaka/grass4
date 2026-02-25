@@ -13,6 +13,8 @@ import cz.gattserver.grass.drinks.model.interfaces.WineOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.WineTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.util.function.Consumer;
+
 public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
 
     @Override
@@ -74,24 +76,16 @@ public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
     @Override
     protected void populateBtnLayout(Div btnLayout) {
         ComponentFactory componentFactory = new ComponentFactory();
-        btnLayout.add(componentFactory.createCreateButton(event -> new WineDialog() {
-            @Override
-            protected void onSave(WineTO to) {
-                to = getDrinksFacade().saveWine(to);
-                showDetail(to);
-                populate();
-            }
-        }.open()));
 
-        btnLayout.add(componentFactory.createEditGridButton(event -> new WineDialog(choosenDrink) {
-            @Override
-            protected void onSave(WineTO to) {
-                to = getDrinksFacade().saveWine(to);
-                showDetail(to);
-                populate();
-            }
-        }.open(), grid));
+        Consumer<WineTO> onSave = to -> {
+            to = getDrinksFacade().saveWine(to);
+            showDetail(to);
+            populate();
+        };
 
+        btnLayout.add(componentFactory.createCreateButton(event -> new WineDialog(onSave).open()));
+        btnLayout.add(
+                componentFactory.createEditGridButton(event -> new WineDialog(choosenDrink, onSave).open(), grid));
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (WineOverviewTO s : items)
                 getDrinksFacade().deleteDrink(s.getId());
@@ -115,11 +109,6 @@ public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
         return new String[]{choosenDrink.getYear() == null ? "" : String.valueOf(choosenDrink.getYear()),
                 choosenDrink.getAlcohol() == null ? "" : String.valueOf(choosenDrink.getAlcohol()),
                 choosenDrink.getWineType().getCaption()};
-    }
-
-    @Override
-    protected String getURLPath() {
-        return "wine";
     }
 
     @Override

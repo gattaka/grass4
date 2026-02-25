@@ -1,12 +1,23 @@
 package cz.gattserver.grass.drinks.model.interfaces;
 
 import cz.gattserver.grass.drinks.model.domain.DrinkType;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 
+@Setter
+@Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public abstract class DrinkTO implements Serializable {
 
-	private Long id;
+    @Serial
+    private static final long serialVersionUID = -6849271991826979044L;
+
+    @EqualsAndHashCode.Include
+    private Long id;
 
 	/**
 	 * Název
@@ -58,81 +69,4 @@ public abstract class DrinkTO implements Serializable {
 		this.alcohol = alcohol;
 		this.country = country;
 	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Double getAlcohol() {
-		return alcohol;
-	}
-
-	public void setAlcohol(Double alcohol) {
-		this.alcohol = alcohol;
-	}
-
-	public String getCountry() {
-		return country;
-	}
-
-	public void setCountry(String country) {
-		this.country = country;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public DrinkType getType() {
-		return type;
-	}
-
-	public void setType(DrinkType type) {
-		this.type = type;
-	}
-
-	public Double getRating() {
-		return rating;
-	}
-
-	public void setRating(Double rating) {
-		this.rating = rating;
-	}
-
-	public String getDescription() {
-		return description;
-	}
-
-	public void setDescription(String description) {
-		this.description = description;
-	}
-
-	public byte[] getImage() {
-		return image;
-	}
-
-	public void setImage(byte[] image) {
-		this.image = image;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof DrinkTO))
-			return false;
-		return ((DrinkTO) obj).getId() == getId();
-	}
-
-	@Override
-	public int hashCode() {
-		return getId().hashCode();
-	}
-
 }

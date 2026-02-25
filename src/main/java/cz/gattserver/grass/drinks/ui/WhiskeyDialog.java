@@ -18,81 +18,82 @@ import java.io.Serial;
 import java.text.NumberFormat;
 import java.util.Arrays;
 import java.util.Locale;
+import java.util.function.Consumer;
 
-public abstract class WhiskeyDialog extends DrinkDialog<WhiskeyTO> {
+public class WhiskeyDialog extends DrinkDialog<WhiskeyTO> {
 
-	public WhiskeyDialog(WhiskeyTO to) {
-		super(to);
-	}
+    public WhiskeyDialog(WhiskeyTO to, Consumer<WhiskeyTO> onSave) {
+        super(to, onSave);
+    }
 
-	public WhiskeyDialog() {
-		super();
-	}
+    public WhiskeyDialog(Consumer<WhiskeyTO> onSave) {
+        super(onSave);
+    }
 
-	@Override
-	protected WhiskeyTO createNewInstance() {
-		WhiskeyTO formTO = new WhiskeyTO();
-		formTO.setAlcohol(0d);
-		formTO.setYears(0);
+    @Override
+    protected WhiskeyTO createNewInstance() {
+        WhiskeyTO formTO = new WhiskeyTO();
+        formTO.setAlcohol(0d);
+        formTO.setYears(0);
         formTO.setRating(2.5);
-		return formTO;
-	}
+        return formTO;
+    }
 
-	@Override
-	protected FormLayout createForm(Binder<WhiskeyTO> binder) {
-		FormLayout layout = new FormLayout();
-		layout.setResponsiveSteps(new FormLayout.ResponsiveStep("100px", 3));
+    @Override
+    protected FormLayout createForm(Binder<WhiskeyTO> binder) {
+        FormLayout layout = new FormLayout();
+        layout.setResponsiveSteps(new FormLayout.ResponsiveStep("100px", 3));
 
-		TextField nameField = new TextField("Název");
-		binder.forField(nameField).asRequired().bind(WhiskeyTO::getName, WhiskeyTO::setName);
-		layout.add(nameField);
-		nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
+        TextField nameField = new TextField("Název");
+        binder.forField(nameField).asRequired().bind(WhiskeyTO::getName, WhiskeyTO::setName);
+        layout.add(nameField);
+        nameField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
 
-		TextField countryField = new TextField("Země");
-		binder.forField(countryField).asRequired().bind(WhiskeyTO::getCountry, WhiskeyTO::setCountry);
-		layout.add(countryField);
-		countryField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
+        TextField countryField = new TextField("Země");
+        binder.forField(countryField).asRequired().bind(WhiskeyTO::getCountry, WhiskeyTO::setCountry);
+        layout.add(countryField);
+        countryField.addClassName(UIUtils.TOP_CLEAN_CSS_CLASS);
 
-		RatingStars ratingStars = new RatingStars();
-		binder.forField(ratingStars).asRequired().bind(WhiskeyTO::getRating, WhiskeyTO::setRating);
-		layout.add(ratingStars);
+        RatingStars ratingStars = new RatingStars();
+        binder.forField(ratingStars).asRequired().bind(WhiskeyTO::getRating, WhiskeyTO::setRating);
+        layout.add(ratingStars);
 
-		TextField yearsField = new TextField("Stáří (roky)");
-		binder.forField(yearsField)
-				.withConverter(new StringToIntegerConverter(null, "Stáří (roky) musí být celé číslo"))
-				.asRequired(new IntegerRangeValidator("Stáří je mimo rozsah (1-100)", 1, 100))
-				.bind(WhiskeyTO::getYears, WhiskeyTO::setYears);
-		layout.add(yearsField);
+        TextField yearsField = new TextField("Stáří (roky)");
+        binder.forField(yearsField)
+                .withConverter(new StringToIntegerConverter(null, "Stáří (roky) musí být celé číslo"))
+                .asRequired(new IntegerRangeValidator("Stáří je mimo rozsah (1-100)", 1, 100))
+                .bind(WhiskeyTO::getYears, WhiskeyTO::setYears);
+        layout.add(yearsField);
 
-		TextField alcoholField = new TextField("Alkohol (%)");
-		binder.forField(alcoholField)
-				.withConverter(new StringToDoubleConverter(null, "Alkohol (%) musí být celé číslo") {
+        TextField alcoholField = new TextField("Alkohol (%)");
+        binder.forField(alcoholField)
+                .withConverter(new StringToDoubleConverter(null, "Alkohol (%) musí být celé číslo") {
 
                     @Serial
                     private static final long serialVersionUID = -3065677006005053078L;
 
-					@Override
-					protected NumberFormat getFormat(Locale locale) {
-						return NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ"));
-					}
+                    @Override
+                    protected NumberFormat getFormat(Locale locale) {
+                        return NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ"));
+                    }
 
-				}).asRequired(new DoubleRangeValidator("Obsah alkoholu je mimo rozsah (1-100)", 1d, 100d))
-				.bind(WhiskeyTO::getAlcohol, WhiskeyTO::setAlcohol);
-		layout.add(alcoholField);
+                }).asRequired(new DoubleRangeValidator("Obsah alkoholu je mimo rozsah (1-100)", 1d, 100d))
+                .bind(WhiskeyTO::getAlcohol, WhiskeyTO::setAlcohol);
+        layout.add(alcoholField);
 
-		ComboBox<WhiskeyType> whiskeyTypeField = new ComboBox<>("Typ Whiskey", Arrays.asList(WhiskeyType.values()));
-		whiskeyTypeField.setItemLabelGenerator(WhiskeyType::getCaption);
-		binder.forField(whiskeyTypeField).asRequired().bind(WhiskeyTO::getWhiskeyType, WhiskeyTO::setWhiskeyType);
-		layout.add(whiskeyTypeField);
+        ComboBox<WhiskeyType> whiskeyTypeField = new ComboBox<>("Typ Whiskey", Arrays.asList(WhiskeyType.values()));
+        whiskeyTypeField.setItemLabelGenerator(WhiskeyType::getCaption);
+        binder.forField(whiskeyTypeField).asRequired().bind(WhiskeyTO::getWhiskeyType, WhiskeyTO::setWhiskeyType);
+        layout.add(whiskeyTypeField);
 
-		TextArea descriptionField = new TextArea("Popis");
-		binder.forField(descriptionField).asRequired().bind(WhiskeyTO::getDescription, WhiskeyTO::setDescription);
-		descriptionField.setWidth("600px");
-		descriptionField.setHeight("300px");
-		layout.add(descriptionField);
-		layout.setColspan(descriptionField, 3);
+        TextArea descriptionField = new TextArea("Popis");
+        binder.forField(descriptionField).asRequired().bind(WhiskeyTO::getDescription, WhiskeyTO::setDescription);
+        descriptionField.setWidth("600px");
+        descriptionField.setHeight("300px");
+        layout.add(descriptionField);
+        layout.setColspan(descriptionField, 3);
 
-		return layout;
-	}
+        return layout;
+    }
 
 }

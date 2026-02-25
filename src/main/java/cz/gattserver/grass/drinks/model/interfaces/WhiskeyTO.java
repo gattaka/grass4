@@ -3,10 +3,19 @@ package cz.gattserver.grass.drinks.model.interfaces;
 import com.querydsl.core.annotations.QueryProjection;
 import cz.gattserver.grass.drinks.model.domain.DrinkType;
 import cz.gattserver.grass.drinks.model.domain.WhiskeyType;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serial;
+
+@Setter
+@Getter
 public class WhiskeyTO extends DrinkTO {
 
-	/**
+    @Serial
+    private static final long serialVersionUID = 9136627674830829308L;
+
+    /**
 	 * DB id
 	 */
 	private Long infoId;
@@ -32,29 +41,4 @@ public class WhiskeyTO extends DrinkTO {
 		this.years = years;
 		this.whiskeyType = whiskeyType;
 	}
-
-	public Long getInfoId() {
-		return infoId;
-	}
-
-	public void setInfoId(Long infoId) {
-		this.infoId = infoId;
-	}
-
-	public WhiskeyType getWhiskeyType() {
-		return whiskeyType;
-	}
-
-	public void setWhiskeyType(WhiskeyType whiskeyType) {
-		this.whiskeyType = whiskeyType;
-	}
-
-	public Integer getYears() {
-		return years;
-	}
-
-	public void setYears(Integer years) {
-		this.years = years;
-	}
-
 }

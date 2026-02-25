@@ -4,7 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 @Entity(name = "DRINKS_OTHERINFO")
 public class OtherInfo {
 
@@ -27,21 +31,4 @@ public class OtherInfo {
 		super();
 		this.ingredient = ingredient;
 	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getIngredient() {
-		return ingredient;
-	}
-
-	public void setIngredient(String ingredient) {
-		this.ingredient = ingredient;
-	}
-
 }

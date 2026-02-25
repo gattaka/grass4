@@ -1,16 +1,16 @@
 package cz.gattserver.grass.drinks.model.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum RumType {
 
 	BLANCO("Světlý"), DARK("Tmavý");
 
-	private String caption;
+	private final String caption;
 
-	private RumType(String caption) {
+	RumType(String caption) {
 		this.caption = caption;
 	}
 
-	public String getCaption() {
-		return caption;
-	}
 }

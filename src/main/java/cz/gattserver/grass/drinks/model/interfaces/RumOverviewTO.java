@@ -3,10 +3,19 @@ package cz.gattserver.grass.drinks.model.interfaces;
 import com.querydsl.core.annotations.QueryProjection;
 import cz.gattserver.grass.drinks.model.domain.DrinkType;
 import cz.gattserver.grass.drinks.model.domain.RumType;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serial;
+
+@Setter
+@Getter
 public class RumOverviewTO extends DrinkOverviewTO {
 
-	/**
+    @Serial
+    private static final long serialVersionUID = 4656488873038057357L;
+
+    /**
 	 * DB id
 	 */
 	private Long infoId;
@@ -32,29 +41,4 @@ public class RumOverviewTO extends DrinkOverviewTO {
 		this.years = years;
 		this.rumType = rumType;
 	}
-
-	public Long getInfoId() {
-		return infoId;
-	}
-
-	public void setInfoId(Long infoId) {
-		this.infoId = infoId;
-	}
-
-	public RumType getRumType() {
-		return rumType;
-	}
-
-	public void setRumType(RumType rumType) {
-		this.rumType = rumType;
-	}
-
-	public Integer getYears() {
-		return years;
-	}
-
-	public void setYears(Integer years) {
-		this.years = years;
-	}
-
 }

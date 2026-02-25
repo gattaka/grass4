@@ -1,17 +1,16 @@
 package cz.gattserver.grass.drinks.model.domain;
 
+import lombok.Getter;
+
+@Getter
 public enum WhiskeyType {
 
 	SINGLE_MALT("Jednodruhová"), BLEND("Směsná");
 
-	private String caption;
+	private final String caption;
 
-	private WhiskeyType(String caption) {
+	 WhiskeyType(String caption) {
 		this.caption = caption;
-	}
-
-	public String getCaption() {
-		return caption;
 	}
 
 }

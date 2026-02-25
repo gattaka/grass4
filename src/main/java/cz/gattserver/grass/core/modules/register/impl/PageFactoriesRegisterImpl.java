@@ -5,9 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.Resource;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import cz.gattserver.grass.core.modules.register.PageFactoriesRegister;
@@ -19,10 +17,13 @@ public class PageFactoriesRegisterImpl implements PageFactoriesRegister {
     /**
      * Hlavní mapa stránek
      */
-    @Autowired
-    private List<PageFactory> pageFactories;
+    private final List<PageFactory> pageFactories;
 
-    private Map<String, PageFactory> factories = new HashMap<>();
+    private final Map<String, PageFactory> factories = new HashMap<>();
+
+    public PageFactoriesRegisterImpl(List<PageFactory> pageFactories) {
+        this.pageFactories = pageFactories;
+    }
 
     @PostConstruct
     public void init() {
@@ -32,13 +33,6 @@ public class PageFactoriesRegisterImpl implements PageFactoriesRegister {
 
     public PageFactory get(String key) {
         return factories.get(key);
-    }
-
-    /**
-     * Původní put metoda - má prakticky jediné použití a tím je tvorba aliasů
-     */
-    public PageFactory putAlias(String pageName, PageFactory factory) {
-        return factories.put(pageName, factory);
     }
 
 }
