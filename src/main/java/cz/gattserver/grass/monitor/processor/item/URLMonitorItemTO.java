@@ -17,6 +17,7 @@ public class URLMonitorItemTO extends MonitorItemTO {
         name = jsonObject.get("name").asText();
         url = jsonObject.get("url").asText();
         monitorState = MonitorState.valueOf(jsonObject.get("monitorState").asText());
+        stateDetails = jsonObject.get("stateDetails").asText();
     }
 
     public String getName() {

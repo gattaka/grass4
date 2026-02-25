@@ -74,8 +74,8 @@ public class MonitorPage extends Div {
     private VerticalLayout servicesLayout;
 
     public MonitorPage(SecurityService securityService) {
-        if (!SpringContextHelper.getBean(MonitorSection.class).isVisibleForRoles(securityService.getCurrentUser().getRoles()))
-            throw new GrassPageException(403);
+        if (!SpringContextHelper.getBean(MonitorSection.class)
+                .isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
 
         removeAll();
         ComponentFactory componentFactory = new ComponentFactory();
@@ -143,16 +143,15 @@ public class MonitorPage extends Div {
             return;
         }
         for (URLMonitorItemTO to : data.getItems()) {
-            String content = to.getName();
             Anchor anchor = new Anchor(to.getUrl(), to.getUrl());
             anchor.setTarget("_blank");
             switch (to.getMonitorState()) {
                 case SUCCESS:
-                    serversTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(content).add(anchor);
+                    serversTableLayout.newRow().add(new SuccessMonitorStateLabel()).add(to.getName()).add(anchor);
                     break;
                 case ERROR:
                 default:
-                    serversTableLayout.newRow().add(new ErrorMonitorStateLabel()).add(content).add(anchor);
+                    serversTableLayout.newRow().add(new ErrorMonitorStateLabel()).add(to.getName() + "(" + to.getStateDetails() + ")").add(anchor);
             }
         }
     }

@@ -337,7 +337,7 @@ public class MonitorServiceImpl implements MonitorService {
 						.build();
 
 		final BasicCredentialsProvider provider = new BasicCredentialsProvider();
-		AuthScope authScope = null;
+		AuthScope authScope;
 		try {
 			URL url = new URL(address);
 			authScope = new AuthScope(url.getHost(), url.getPort());
@@ -352,13 +352,6 @@ public class MonitorServiceImpl implements MonitorService {
 							 .setDefaultCredentialsProvider(provider)
 							 .setDefaultRequestConfig(config).build()) {
 			HttpGet httpGet = new HttpGet(address);
-
-			/*
-			final List<NameValuePair> params = new ArrayList<>();
-			params.add(new BasicNameValuePair("username", monitorUsername));
-			params.add(new BasicNameValuePair("password", monitorPassword));
-			httpGet.setEntity(new UrlEncodedFormEntity(params));
-			*/
 			try (CloseableHttpResponse resp = httpclient.execute(httpGet)) {
 				itemTO.setStateDetails(EntityUtils.toString(resp.getEntity()));
 				int statusCode = resp.getCode();
@@ -369,6 +362,7 @@ public class MonitorServiceImpl implements MonitorService {
 				}
 			}
 		} catch (IOException | ParseException e) {
+            logger.error("Testing {} failed", address, e.getMessage());
 			itemTO.setStateDetails(e.getMessage());
 			itemTO.setMonitorState(MonitorState.ERROR);
 		}
