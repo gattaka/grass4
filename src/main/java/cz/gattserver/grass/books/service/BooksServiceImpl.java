@@ -1,14 +1,12 @@
-package cz.gattserver.grass.books.facades.impl;
+package cz.gattserver.grass.books.service;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import cz.gattserver.grass.books.facades.BooksService;
 import cz.gattserver.grass.books.model.dao.BookRepository;
 import cz.gattserver.grass.books.model.domain.Book;
 import cz.gattserver.grass.books.model.interfaces.BookFilterTO;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,10 +16,13 @@ import java.util.List;
 @Component
 public class BooksServiceImpl implements BooksService {
 
-	@Autowired
-	private BookRepository bookRepository;
+	private final BookRepository bookRepository;
 
-	@Override
+    public BooksServiceImpl(BookRepository bookRepository) {
+        this.bookRepository = bookRepository;
+    }
+
+    @Override
 	public void deleteBook(Long id) {
 		bookRepository.deleteById(id);
 	}

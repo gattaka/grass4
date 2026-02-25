@@ -30,5 +30,4 @@ public class BooksSection implements SectionService {
 	public Role[] getSectionRoles() {
 		return new Role[0];
 	}
-
 }

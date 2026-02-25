@@ -1,5 +1,6 @@
 package cz.gattserver.grass.books.ui;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
@@ -9,7 +10,6 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import com.vaadin.flow.server.streams.DownloadHandler;
@@ -21,24 +21,22 @@ import cz.gattserver.grass.books.model.interfaces.BookTO;
 import cz.gattserver.common.ImageUtils;
 import cz.gattserver.common.ui.RatingStars;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
 
+@Slf4j
 public class BookDialog extends EditWebDialog {
 
-    private static final Logger logger = LoggerFactory.getLogger(BookDialog.class);
+    @Serial
+    private static final long serialVersionUID = -2835256150245210887L;
 
-    private VerticalLayout imageLayout;
-    private Upload upload;
-    private Image image;
+    private final VerticalLayout imageLayout;
+    private final Upload upload;
+    private final Image image;
 
     public BookDialog(Consumer<BookTO> onSave) {
         this(null, onSave);
@@ -68,15 +66,16 @@ public class BookDialog extends EditWebDialog {
                 placeImage(formTO);
             } catch (IOException ex) {
                 String err = "Nezdařilo se nahrát obrázek nápoje";
-                logger.error(err, ex);
+                log.error(err, ex);
                 UIUtils.showError(err);
             }
         }));
         upload.setMaxFileSize(2000000);
         upload.setAcceptedFileTypes("image/jpg", "image/jpeg", "image/png");
 
-        if (originalTO == null || originalTO.getImage() == null) placeUpload();
-        else {
+        if (originalTO == null || originalTO.getImage() == null) {
+            placeUpload();
+        } else {
             placeImage(originalTO);
             formTO.setImage(originalTO.getImage());
         }
@@ -96,8 +95,8 @@ public class BookDialog extends EditWebDialog {
                 onSave.accept(writeTO);
                 close();
             } catch (ValidationException ve) {
-                new ErrorDialog("Chybná vstupní data\n\n   " +
-                        ve.getValidationErrors().iterator().next().getErrorMessage()).open();
+                new ErrorDialog(
+                        "Chybná vstupní data\n\n   " + ve.getValidationErrors().getFirst().getErrorMessage()).open();
             } catch (Exception ve) {
                 new ErrorDialog("Uložení se nezdařilo").open();
             }
@@ -117,9 +116,8 @@ public class BookDialog extends EditWebDialog {
     private void placeImage(BookTO to) {
         // https://vaadin.com/forum/thread/260778
         String name = to.getName() + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        image.setSrc(DownloadHandler.fromInputStream(e -> {
-            return new DownloadResponse(new ByteArrayInputStream(to.getImage()), name, null, -1);
-        }));
+        image.setSrc(DownloadHandler.fromInputStream(
+                e -> new DownloadResponse(new ByteArrayInputStream(to.getImage()), name, null, -1)));
         image.setVisible(true);
         imageLayout.removeAll();
         imageLayout.add(image);
@@ -141,13 +139,13 @@ public class BookDialog extends EditWebDialog {
 
     protected VerticalLayout createForm(Binder<BookTO> binder) {
         TextField nameField = new TextField("Název");
-        nameField.setWidth("600px");
+        nameField.setWidth(600, Unit.PIXELS);
         binder.forField(nameField).asRequired().bind(BookTO::getName, BookTO::setName);
 
         HorizontalLayout line1Layout = new HorizontalLayout(nameField);
 
         TextField authorField = new TextField("Autor");
-        authorField.setWidth("200px");
+        authorField.setWidth(200, Unit.PIXELS);
         binder.forField(authorField).asRequired().bind(BookTO::getAuthor, BookTO::setAuthor);
 
         TextField releasedField = new TextField("Vydáno");
@@ -162,10 +160,9 @@ public class BookDialog extends EditWebDialog {
 
         TextArea descriptionField = new TextArea("Popis");
         binder.forField(descriptionField).asRequired().bind(BookTO::getDescription, BookTO::setDescription);
-        descriptionField.setWidth("600px");
-        descriptionField.setHeight("200px");
+        descriptionField.setWidth(600, Unit.PIXELS);
+        descriptionField.setHeight(200, Unit.PIXELS);
 
         return new VerticalLayout(line1Layout, line2Layout, descriptionField);
     }
-
 }

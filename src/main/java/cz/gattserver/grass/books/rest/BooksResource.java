@@ -1,6 +1,6 @@
 package cz.gattserver.grass.books.rest;
 
-import cz.gattserver.grass.books.facades.BooksService;
+import cz.gattserver.grass.books.service.BooksService;
 import cz.gattserver.grass.books.model.interfaces.BookOverviewTO;
 import cz.gattserver.grass.books.model.interfaces.BookTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,12 +17,15 @@ import java.util.List;
 @RequestMapping("/ws/books")
 public class BooksResource {
 
-	@Autowired
-	private BooksService booksService;
+	private final BooksService booksService;
 
-	@RequestMapping("/list")
-	public ResponseEntity<List<BookOverviewTO>> list(@RequestParam(value = "page", required = true) int page,
-													 @RequestParam(value = "pageSize", required = true) int pageSize) {
+    public BooksResource(BooksService booksService) {
+        this.booksService = booksService;
+    }
+
+    @RequestMapping("/list")
+	public ResponseEntity<List<BookOverviewTO>> list(@RequestParam(value = "page") int page,
+													 @RequestParam(value = "pageSize") int pageSize) {
 		int count = booksService.countBooks();
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho
@@ -37,7 +40,7 @@ public class BooksResource {
 	}
 
 	@RequestMapping("/book")
-	public @ResponseBody BookTO beer(@RequestParam(value = "id", required = true) Long id) {
+	public @ResponseBody BookTO beer(@RequestParam(value = "id") Long id) {
 		return booksService.getBookById(id);
 	}
 

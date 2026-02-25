@@ -5,10 +5,16 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 @Getter
 @Setter
 @NoArgsConstructor
-public class BookTO {
+public class BookTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = -278972065709596379L;
 
     private Long id;
     private String name;
