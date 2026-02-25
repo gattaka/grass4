@@ -1,7 +1,7 @@
 package cz.gattserver.grass.pg.util;
 
 import at.dhyan.open_imaging.GifDecoder;
-import at.dhyan.open_imaging.GifDecoder.GifImage;
+import at.dhyan.open_imaging.GifImage;
 import com.drew.imaging.ImageMetadataReader;
 import com.drew.imaging.ImageProcessingException;
 import com.drew.lang.GeoLocation;
