@@ -13,9 +13,13 @@ import cz.gattserver.grass.drinks.model.interfaces.WineOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.WineTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
 import java.util.function.Consumer;
 
 public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
+
+    @Serial
+    private static final long serialVersionUID = -6189267797258673246L;
 
     @Override
     protected WineOverviewTO createNewOverviewTO() {
@@ -68,8 +72,8 @@ public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
     @Override
     protected void populate() {
         FetchCallback<WineOverviewTO, WineOverviewTO> fetchCallback =
-                q -> getDrinksFacade().getWines(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
-        CountCallback<WineOverviewTO, WineOverviewTO> countCallback = q -> getDrinksFacade().countWines(filterTO);
+                q -> drinksService.getWines(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
+        CountCallback<WineOverviewTO, WineOverviewTO> countCallback = q -> drinksService.countWines(filterTO);
         grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
     }
 
@@ -78,7 +82,7 @@ public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
         ComponentFactory componentFactory = new ComponentFactory();
 
         Consumer<WineTO> onSave = to -> {
-            to = getDrinksFacade().saveWine(to);
+            to = drinksService.saveWine(to);
             showDetail(to);
             populate();
         };
@@ -88,7 +92,7 @@ public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
                 componentFactory.createEditGridButton(event -> new WineDialog(choosenDrink, onSave).open(), grid));
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (WineOverviewTO s : items)
-                getDrinksFacade().deleteDrink(s.getId());
+                drinksService.deleteDrink(s.getId());
             populate();
             showDetail(null);
         }, grid));
@@ -113,7 +117,7 @@ public class WineTab extends DrinksTab<WineTO, WineOverviewTO> {
 
     @Override
     protected WineTO findById(Long id) {
-        return getDrinksFacade().getWineById(id);
+        return drinksService.getWineById(id);
     }
 
 }

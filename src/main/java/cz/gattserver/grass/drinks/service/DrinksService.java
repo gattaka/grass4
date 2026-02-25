@@ -1,11 +1,11 @@
-package cz.gattserver.grass.drinks.facades;
+package cz.gattserver.grass.drinks.service;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import cz.gattserver.grass.drinks.model.interfaces.*;
 
 import java.util.List;
 
-public interface DrinksFacade {
+public interface DrinksService {
 
 	/**
 	 * Smaže nápoj

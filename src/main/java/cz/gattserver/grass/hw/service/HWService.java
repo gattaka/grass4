@@ -73,6 +73,8 @@ public interface HWService {
 
     InputStream findHWItemIconFileInputStream(Long id);
 
+    boolean hasIcon(Long id);
+
     InputStream findHWItemIconMiniFileInputStream(Long id);
 
     void deleteHWItemIconFile(Long id);

@@ -34,7 +34,7 @@ public class NodeTree extends VerticalLayout {
     private static final String PREJMENOVAT_LABEL = "Přejmenovat";
     private static final String VYTVORIT_LABEL = "Vytvořit";
 
-    private transient NodeService nodeFacade;
+    private transient NodeService nodeService;
 
     // Serializable HashMap
     private HashMap<Long, NodeOverviewTO> cache;
@@ -50,8 +50,8 @@ public class NodeTree extends VerticalLayout {
     }
 
     private NodeService getNodeService() {
-        if (nodeFacade == null) nodeFacade = SpringContextHelper.getBean(NodeService.class);
-        return nodeFacade;
+        if (nodeService == null) nodeService = SpringContextHelper.getBean(NodeService.class);
+        return nodeService;
     }
 
     public TreeGrid<NodeOverviewTO> getGrid() {

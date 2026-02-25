@@ -13,9 +13,13 @@ import cz.gattserver.grass.drinks.model.interfaces.RumOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.RumTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
 import java.util.function.Consumer;
 
 public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
+
+    @Serial
+    private static final long serialVersionUID = 8990907952742124519L;
 
     @Override
     protected RumOverviewTO createNewOverviewTO() {
@@ -58,8 +62,8 @@ public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
     @Override
     protected void populate() {
         FetchCallback<RumOverviewTO, RumOverviewTO> fetchCallback =
-                q -> getDrinksFacade().getRums(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
-        CountCallback<RumOverviewTO, RumOverviewTO> countCallback = q -> getDrinksFacade().countRums(filterTO);
+                q -> drinksService.getRums(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
+        CountCallback<RumOverviewTO, RumOverviewTO> countCallback = q -> drinksService.countRums(filterTO);
         grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
     }
 
@@ -68,7 +72,7 @@ public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
         ComponentFactory componentFactory = new ComponentFactory();
 
         Consumer<RumTO> onSave = to -> {
-            to = getDrinksFacade().saveRum(to);
+            to = drinksService.saveRum(to);
             showDetail(to);
             populate();
         };
@@ -77,7 +81,7 @@ public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
         btnLayout.add(componentFactory.createEditGridButton(event -> new RumDialog(choosenDrink, onSave).open(), grid));
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (RumOverviewTO s : items)
-                getDrinksFacade().deleteDrink(s.getId());
+                drinksService.deleteDrink(s.getId());
             populate();
             showDetail(null);
         }, grid));
@@ -101,7 +105,7 @@ public class RumTab extends DrinksTab<RumTO, RumOverviewTO> {
 
     @Override
     protected RumTO findById(Long id) {
-        return getDrinksFacade().getRumById(id);
+        return drinksService.getRumById(id);
     }
 
 }

@@ -13,12 +13,18 @@ import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemChooseDialog;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 
+import java.io.Serial;
+
 public class UsedInChooser extends CustomField<HWItemOverviewTO> {
 
+    @Serial
+    private static final long serialVersionUID = -3510655382822268784L;
+
+    private final Button clearBtn;
+    private final Button chooseUsedInBtn;
+    private final TextField nameField;
+
     private HWItemOverviewTO value;
-    private Button clearBtn;
-    private Button chooseUsedInBtn;
-    private TextField nameField;
 
     public UsedInChooser(Long ignoreId) {
         setLabel("Je součástí");
@@ -35,7 +41,7 @@ public class UsedInChooser extends CustomField<HWItemOverviewTO> {
         layout.add(clearBtn);
 
         chooseUsedInBtn = new Button("Vybrat", VaadinIcon.SEARCH.create(),
-                e -> new HWItemChooseDialog(ignoreId, to -> setValue(to)).open());
+                e -> new HWItemChooseDialog(ignoreId, this::setValue).open());
         layout.add(chooseUsedInBtn);
 
         nameField = new TextField();

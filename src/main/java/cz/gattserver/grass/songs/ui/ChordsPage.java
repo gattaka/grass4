@@ -17,12 +17,11 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
-import cz.gattserver.grass.songs.facades.SongsService;
+import cz.gattserver.grass.songs.service.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;
 import cz.gattserver.grass.songs.util.ChordImageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;

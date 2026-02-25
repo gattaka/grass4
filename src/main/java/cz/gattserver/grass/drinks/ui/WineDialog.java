@@ -21,6 +21,9 @@ import java.util.function.Consumer;
 
 public class WineDialog extends DrinkDialog<WineTO> {
 
+    @Serial
+    private static final long serialVersionUID = -6261035196853958648L;
+
     public WineDialog(WineTO to, Consumer<WineTO> onSave) {
         super(to, onSave);
     }

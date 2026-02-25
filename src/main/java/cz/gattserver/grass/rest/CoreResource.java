@@ -18,12 +18,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/ws/core")
 public class CoreResource {
 
-	@Autowired
-	private SecurityService securityFacade;
+	private final SecurityService securityService;
 
-	@RequestMapping("/logged")
+    public CoreResource(SecurityService securityService) {
+        this.securityService = securityService;
+    }
+
+    @RequestMapping("/logged")
 	public ResponseEntity<String> logged() {
-		UserInfoTO user = securityFacade.getCurrentUser();
+		UserInfoTO user = securityService.getCurrentUser();
 		if (user.getName() == null) {
 			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
 		} else {
@@ -36,7 +39,7 @@ public class CoreResource {
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
 	public ResponseEntity<String> login(@RequestParam("login") String username,
 			@RequestParam("password") String password, HttpServletRequest request, HttpServletResponse response) {
-		LoginResult result = securityFacade.login(username, password, false, request, response);
+		LoginResult result = securityService.login(username, password, false, request, response);
 		if (LoginResult.SUCCESS.equals(result)) {
 			return new ResponseEntity<>(request.getSession().getId(), HttpStatus.OK);
 		} else {
@@ -46,7 +49,7 @@ public class CoreResource {
 
 	@RequestMapping(value = "/logout", method = RequestMethod.POST)
 	public ResponseEntity<String> logout(HttpServletRequest request, HttpServletResponse response) {
-		securityFacade.logout(request, response);
+		securityService.logout(request, response);
 		return new ResponseEntity<>(HttpStatus.OK);
 	}
 

@@ -21,7 +21,7 @@ import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
-import cz.gattserver.grass.songs.facades.SongsService;
+import cz.gattserver.grass.songs.service.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 import org.apache.commons.lang3.StringUtils;
 

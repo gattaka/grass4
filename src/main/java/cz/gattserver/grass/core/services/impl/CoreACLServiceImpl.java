@@ -21,7 +21,7 @@ import cz.gattserver.grass.core.security.CoreRole;
 public final class CoreACLServiceImpl implements CoreACLService {
 
 	@Autowired
-	private UserService userFacade;
+	private UserService userService;
 
 	/**
 	 * =======================================================================
@@ -173,13 +173,13 @@ public final class CoreACLServiceImpl implements CoreACLService {
 	 * Může přidat obsah do svých oblíbených ?
 	 */
 	public boolean canAddContentToFavourites(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO) {
-		return isLoggedIn(userInfoTO) && !userFacade.hasInFavourites(contentNodeTO.contentNodeId(), userInfoTO.getId());
+		return isLoggedIn(userInfoTO) && !userService.hasInFavourites(contentNodeTO.contentNodeId(), userInfoTO.getId());
 	}
 
 	/**
 	 * Může odebrat obsah ze svých oblíbených ?
 	 */
 	public boolean canRemoveContentFromFavourites(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO) {
-		return isLoggedIn(userInfoTO) && userFacade.hasInFavourites(contentNodeTO.contentNodeId(), userInfoTO.getId());
+		return isLoggedIn(userInfoTO) && userService.hasInFavourites(contentNodeTO.contentNodeId(), userInfoTO.getId());
 	}
 }

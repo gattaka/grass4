@@ -1,4 +1,4 @@
-package cz.gattserver.grass.recipes.facades.impl;
+package cz.gattserver.grass.recipes.service;
 
 import java.util.List;
 
@@ -7,10 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import cz.gattserver.grass.recipes.facades.RecipesService;
 import cz.gattserver.grass.recipes.model.dao.RecipeRepository;
 import cz.gattserver.grass.recipes.model.domain.Recipe;
-import cz.gattserver.grass.recipes.model.dto.RecipeDTO;
+import cz.gattserver.grass.recipes.model.dto.RecipeTO;
 import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 import cz.gattserver.grass.recipes.util.Mapper;
 
@@ -25,12 +24,12 @@ public class RecipesServiceImpl implements RecipesService {
 	private RecipeRepository recipeRepository;
 
 	@Override
-	public RecipeDTO getRecipeById(Long id) {
+	public RecipeTO getRecipeById(Long id) {
 		Recipe recipe = recipeRepository.findById(id).orElse(null);
 		if (recipe == null)
 			return null;
-		RecipeDTO recipeDTO = mapper.mapRecipe(recipe);
-		return recipeDTO;
+		RecipeTO recipeTO = mapper.mapRecipe(recipe);
+		return recipeTO;
 	}
 
 	@Override

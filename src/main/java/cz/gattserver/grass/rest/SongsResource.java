@@ -1,6 +1,6 @@
 package cz.gattserver.grass.rest;
 
-import cz.gattserver.grass.songs.facades.SongsService;
+import cz.gattserver.grass.songs.service.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,33 +17,35 @@ import java.util.List;
 @RequestMapping("/ws/songs")
 public class SongsResource {
 
-	@Autowired
-	private SongsService songsFacade;
+	private final SongsService songsService;
 
-	@RequestMapping("/list")
+    public SongsResource(SongsService songsService) {
+        this.songsService = songsService;
+    }
+
+    @RequestMapping("/list")
 	public ResponseEntity<List<SongOverviewTO>> list(@RequestParam(value = "page", required = true) int page,
 			@RequestParam(value = "pageSize", required = true) int pageSize,
 			@RequestParam(value = "filter", required = false) String filter) {
 		SongOverviewTO overviewTO = new SongOverviewTO();
 		overviewTO.setName(filter);
-		int count = songsFacade.getSongsCount(overviewTO);
+		int count = songsService.getSongsCount(overviewTO);
 		// startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
 		// poradí a sníží ho
 		if (page * pageSize > count)
 			return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-		return new ResponseEntity<>(songsFacade.getSongs(overviewTO, page * pageSize, pageSize, null), HttpStatus.OK);
+		return new ResponseEntity<>(songsService.getSongs(overviewTO, page * pageSize, pageSize, null), HttpStatus.OK);
 	}
 
 	@RequestMapping("/count")
 	public ResponseEntity<Integer> count(@RequestParam(value = "filter", required = false) String filter) {
 		SongOverviewTO overviewTO = new SongOverviewTO();
 		overviewTO.setName(filter);
-		return new ResponseEntity<>(songsFacade.getSongsCount(overviewTO), HttpStatus.OK);
+		return new ResponseEntity<>(songsService.getSongsCount(overviewTO), HttpStatus.OK);
 	}
 
 	@RequestMapping("/song")
 	public @ResponseBody SongTO song(@RequestParam(value = "id", required = true) Long id) {
-		return songsFacade.getSongById(id);
+		return songsService.getSongById(id);
 	}
-
 }

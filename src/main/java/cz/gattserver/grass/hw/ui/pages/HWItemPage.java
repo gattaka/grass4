@@ -11,7 +11,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.ui.components.Breadcrumb;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
@@ -23,11 +22,13 @@ import cz.gattserver.grass.hw.ui.tabs.HWItemPhotosTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemPrint3dTab;
 import cz.gattserver.grass.hw.ui.tabs.HWItemRecordsTab;
 
-import java.util.List;
-import java.util.function.Consumer;
+import java.io.Serial;
 
 @Route(value = "hw-item", layout = MainView.class)
 public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamicTitle {
+
+    @Serial
+    private static final long serialVersionUID = 3966561555491050473L;
 
     private transient HWService hwService;
 
@@ -41,8 +42,6 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
     private Div tabLayout;
 
     private HWItemTO hwItem;
-
-    private Consumer<HWItemTO> onRefreshListener;
 
     public HWItemPage(HWService hwService) {
         this.hwService = hwService;
@@ -92,21 +91,8 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
         switchInfoTab();
     }
 
-    public Consumer<HWItemTO> getOnRefreshListener() {
-        return onRefreshListener;
-    }
-
-    public HWItemPage setOnRefreshListener(Consumer<HWItemTO> onRefreshListener) {
-        this.onRefreshListener = onRefreshListener;
-        return this;
-    }
-
     private void switchToTab(int tabId) {
         switch (tabId) {
-            default:
-            case 0:
-                switchInfoTab();
-                break;
             case 1:
                 switchServiceNotesTab();
                 break;
@@ -119,15 +105,17 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
             case 4:
                 switchDocsTab();
                 break;
+            case 0:
+            default:
+                switchInfoTab();
+                break;
         }
     }
 
-    public HWItemTO refreshItem() {
+    public void refreshItem() {
         hwItem = getHWService().findHWItem(hwItem.getId());
         refreshTabLabels();
         switchToTab(tabs.getSelectedIndex());
-        if (onRefreshListener != null) onRefreshListener.accept(hwItem);
-        return hwItem;
     }
 
     public void refreshTabLabels() {

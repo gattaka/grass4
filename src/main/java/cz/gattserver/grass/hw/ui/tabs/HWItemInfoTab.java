@@ -1,7 +1,7 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,8 +25,6 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.HWRequestHandlerConfig;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
 import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
@@ -51,15 +49,16 @@ import cz.gattserver.grass.hw.ui.dialogs.HWItemDialog;
 
 public class HWItemInfoTab extends Div {
 
-    private static final Logger logger = LoggerFactory.getLogger(HWItemInfoTab.class);
+    @Serial
+    private static final long serialVersionUID = -8557929906033909871L;
 
     private final HWService hwService;
     private final SecurityService securityService;
 
     private VerticalLayout hwImageLayout;
-    private HWItemTO hwItem;
+    private final HWItemTO hwItem;
 
-    public HWItemInfoTab( HWItemTO hwItem) {
+    public HWItemInfoTab(HWItemTO hwItem) {
         securityService = SpringContextHelper.getBean(SecurityService.class);
         hwService = SpringContextHelper.getBean(HWService.class);
         setHeightFull();
@@ -125,10 +124,10 @@ public class HWItemInfoTab extends Div {
         tableLayout.add(stateValue);
 
         DateTimeFormatter format = DateTimeFormatter.ofPattern("d. M. yyyy");
-        Div purchDateValue =
+        Div purchasedDateValue =
                 new Div(new Text(hwItem.getPurchaseDate() == null ? "-" : hwItem.getPurchaseDate().format(format)));
-        purchDateValue.setMinWidth("100px");
-        tableLayout.add(purchDateValue);
+        purchasedDateValue.setMinWidth("100px");
+        tableLayout.add(purchasedDateValue);
 
         if (getUser().isAdmin()) {
             Div priceValue = new Div(new Text(createPriceString(hwItem.getPrice())));
@@ -252,15 +251,15 @@ public class HWItemInfoTab extends Div {
      * Pokusí se získat ikonu HW
      */
     private boolean tryCreateHWImage(final HWItemTO hwItem) {
-        InputStream iconIs;
-        iconIs = hwService.findHWItemIconMiniFileInputStream(hwItem.getId());
-        if (iconIs == null) return false;
+        // stream bude zavřen automaticky po použití v DownloadResponse (viz níže)
+        if (!hwService.hasIcon(hwItem.getId())) return false;
 
         hwImageLayout.removeAll();
 
         // musí se jmenovat s příponou, aby se vůbec zobrazil
-        Image image =
-                new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(iconIs, "icon", null, -1)), "icon");
+        Image image = new Image(DownloadHandler.fromInputStream(
+                e -> new DownloadResponse(hwService.findHWItemIconMiniFileInputStream(hwItem.getId()), "icon", null,
+                        -1)), "icon");
         image.addClassName("thumbnail-200");
 
         hwImageLayout.add(image);
@@ -273,8 +272,8 @@ public class HWItemInfoTab extends Div {
 
         ComponentFactory componentFactory = new ComponentFactory();
 
-        Button hwItemImageDetailBtn = componentFactory.createDetailButton(
-                e -> UI.getCurrent().getPage().open(HWRequestHandlerConfig.HW_PATH + "/" + hwItem.getId() + "/icon/show"));
+        Button hwItemImageDetailBtn = componentFactory.createDetailButton(e -> UI.getCurrent().getPage()
+                .open(HWRequestHandlerConfig.HW_PATH + "/" + hwItem.getId() + "/icon/show"));
         btnLayout.add(hwItemImageDetailBtn);
 
         if (getUser().isAdmin()) {

@@ -13,11 +13,13 @@ import cz.gattserver.grass.drinks.model.interfaces.WhiskeyOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.WhiskeyTO;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
 import java.util.function.Consumer;
 
 public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
 
-    private static final long serialVersionUID = 594189301140808163L;
+    @Serial
+    private static final long serialVersionUID = 5998841754730302104L;
 
     @Override
     protected WhiskeyOverviewTO createNewOverviewTO() {
@@ -60,9 +62,9 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
     @Override
     protected void populate() {
         FetchCallback<WhiskeyOverviewTO, WhiskeyOverviewTO> fetchCallback =
-                q -> getDrinksFacade().getWhiskeys(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
+                q -> drinksService.getWhiskeys(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
         CountCallback<WhiskeyOverviewTO, WhiskeyOverviewTO> countCallback =
-                q -> getDrinksFacade().countWhiskeys(filterTO);
+                q -> drinksService.countWhiskeys(filterTO);
         grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
     }
 
@@ -71,7 +73,7 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
         ComponentFactory componentFactory = new ComponentFactory();
 
         Consumer<WhiskeyTO> onSave = to -> {
-            to = getDrinksFacade().saveWhiskey(to);
+            to = drinksService.saveWhiskey(to);
             showDetail(to);
             populate();
         };
@@ -83,7 +85,7 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (WhiskeyOverviewTO s : items)
-                getDrinksFacade().deleteDrink(s.getId());
+                drinksService.deleteDrink(s.getId());
             populate();
             showDetail(null);
         }, grid));
@@ -107,6 +109,6 @@ public class WhiskeyTab extends DrinksTab<WhiskeyTO, WhiskeyOverviewTO> {
 
     @Override
     protected WhiskeyTO findById(Long id) {
-        return getDrinksFacade().getWhiskeyById(id);
+        return drinksService.getWhiskeyById(id);
     }
 }

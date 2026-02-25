@@ -8,15 +8,15 @@ import com.vaadin.flow.component.html.Div;
 
 public abstract class AbstractModuleSettingsPageFactory implements ModuleSettingsPageFactory {
 
-	private String tabName;
-	private String tabURL;
-
-	@Autowired
-	private SecurityService securityFacade;
+    @Autowired
+	private SecurityService securityService;
+    
+    private String tabName;
+    private String tabURL;
 
 	/**
 	 * Konstruktor
-	 * 
+	 *
 	 * @param name
 	 *            název karty nastavení, který bude zobrazen v levém menu - měl
 	 *            by začínat velkým písmenem
@@ -34,7 +34,7 @@ public abstract class AbstractModuleSettingsPageFactory implements ModuleSetting
 	 * Získá aktuálního přihlášeného uživatele jako {@link UserInfoTO} objekt
 	 */
 	protected UserInfoTO getUser() {
-		return securityFacade.getCurrentUser();
+		return securityService.getCurrentUser();
 	}
 
 	public String getSettingsCaption() {

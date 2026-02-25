@@ -1,12 +1,10 @@
-package cz.gattserver.grass.drinks.facades.impl;
+package cz.gattserver.grass.drinks.service;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
-import cz.gattserver.grass.drinks.facades.DrinksFacade;
 import cz.gattserver.grass.drinks.model.dao.*;
 import cz.gattserver.grass.drinks.model.domain.*;
 import cz.gattserver.grass.drinks.model.interfaces.*;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,27 +13,27 @@ import java.util.List;
 
 @Transactional
 @Component
-public class DrinksFacadeImpl implements DrinksFacade {
+public class DrinksServiceImpl implements DrinksService {
 
-	@Autowired
-	private DrinkRepository drinkRepository;
+	private final DrinkRepository drinkRepository;
+	private final BeerInfoRepository beerInfoRepository;
+	private final RumInfoRepository rumInfoRepository;
+	private final WhiskeyInfoRepository whiskeyInfoRepository;
+	private final WineInfoRepository wineInfoRepository;
+	private final OtherInfoRepository otherInfoRepository;
 
-	@Autowired
-	private BeerInfoRepository beerInfoRepository;
+    public DrinksServiceImpl(DrinkRepository drinkRepository, BeerInfoRepository beerInfoRepository,
+                             RumInfoRepository rumInfoRepository, WhiskeyInfoRepository whiskeyInfoRepository,
+                             WineInfoRepository wineInfoRepository, OtherInfoRepository otherInfoRepository) {
+        this.drinkRepository = drinkRepository;
+        this.beerInfoRepository = beerInfoRepository;
+        this.rumInfoRepository = rumInfoRepository;
+        this.whiskeyInfoRepository = whiskeyInfoRepository;
+        this.wineInfoRepository = wineInfoRepository;
+        this.otherInfoRepository = otherInfoRepository;
+    }
 
-	@Autowired
-	private RumInfoRepository rumInfoRepository;
-
-	@Autowired
-	private WhiskeyInfoRepository whiskeyInfoRepository;
-
-	@Autowired
-	private WineInfoRepository wineInfoRepository;
-	
-	@Autowired
-	private OtherInfoRepository otherInfoRepository;
-
-	@Override
+    @Override
 	public void deleteDrink(Long id) {
 		drinkRepository.deleteById(id);
 	}

@@ -7,7 +7,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import cz.gattserver.grass.recipes.model.domain.Recipe;
-import cz.gattserver.grass.recipes.model.dto.RecipeDTO;
+import cz.gattserver.grass.recipes.model.dto.RecipeTO;
 import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 
 /**
@@ -32,26 +32,26 @@ import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 public class Mapper {
 
 	/**
-	 * Převede {@link Recipe} na {@link RecipeDTO}
+	 * Převede {@link Recipe} na {@link RecipeTO}
 	 * 
 	 * @param e
 	 * @return
 	 */
-	public RecipeDTO mapRecipe(Recipe e) {
+	public RecipeTO mapRecipe(Recipe e) {
 		if (e == null)
 			return null;
 
-		RecipeDTO recipeDTO = new RecipeDTO();
+		RecipeTO recipeTO = new RecipeTO();
 
-		recipeDTO.setId(e.getId());
-		recipeDTO.setName(e.getName());
-		recipeDTO.setDescription(e.getDescription());
+		recipeTO.setId(e.getId());
+		recipeTO.setName(e.getName());
+		recipeTO.setDescription(e.getDescription());
 
-		return recipeDTO;
+		return recipeTO;
 	}
 
 	/**
-	 * Převede list {@link Recipe} na list {@link RecipeDTO}
+	 * Převede list {@link Recipe} na list {@link RecipeTO}
 	 * 
 	 * @param recipes
 	 * @return

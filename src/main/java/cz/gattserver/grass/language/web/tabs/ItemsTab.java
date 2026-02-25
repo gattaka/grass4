@@ -28,7 +28,7 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
-import cz.gattserver.grass.language.facades.LanguageService;
+import cz.gattserver.grass.language.service.LanguageService;
 import cz.gattserver.grass.language.model.domain.ItemType;
 import cz.gattserver.grass.language.model.dto.LanguageItemTO;
 import cz.gattserver.grass.language.model.dto.LanguageTO;

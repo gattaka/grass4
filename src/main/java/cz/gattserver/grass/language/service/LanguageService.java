@@ -1,4 +1,4 @@
-package cz.gattserver.grass.language.facades;
+package cz.gattserver.grass.language.service;
 
 import java.util.List;
 

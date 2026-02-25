@@ -1,5 +1,6 @@
 package cz.gattserver.grass.hw.ui.tabs;
 
+import java.io.Serial;
 import java.util.Arrays;
 
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -24,15 +25,18 @@ import cz.gattserver.grass.hw.ui.dialogs.HWItemRecordDialog;
 
 public class HWItemRecordsTab extends Div {
 
+    @Serial
+    private static final long serialVersionUID = -7851997294065127850L;
+
     private static final String DEFAULT_NOTE_LABEL_VALUE = "- Zvolte servisní záznam -";
 
     private final HWService hwService;
     private final SecurityService securityService;
 
-    private Column<HWItemRecordTO> dateColumn;
+    private final HWItemTO hwItem;
+    private final HWItemPage hwItemPage;
+
     private Grid<HWItemRecordTO> grid;
-    private HWItemTO hwItem;
-    private HWItemPage hwItemPage;
 
     public HWItemRecordsTab(HWItemTO hwItem, HWItemPage hwItemPage) {
         securityService = SpringContextHelper.getBean(SecurityService.class);
@@ -51,8 +55,9 @@ public class HWItemRecordsTab extends Div {
         grid.setSelectionMode(SelectionMode.SINGLE);
         grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         Column<HWItemRecordTO> idColumn = grid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getId())));
-        dateColumn = grid.addColumn(new LocalDateRenderer<>(HWItemRecordTO::getDate, "d. M. yyyy")).setHeader("Datum")
-                .setTextAlign(ColumnTextAlign.END).setWidth("90px").setFlexGrow(0);
+        Column<HWItemRecordTO> dateColumn =
+                grid.addColumn(new LocalDateRenderer<>(HWItemRecordTO::getDate, "d. M. yyyy")).setHeader("Datum")
+                        .setTextAlign(ColumnTextAlign.END).setWidth("90px").setFlexGrow(0);
         grid.addColumn(hw -> hw.getState().getName()).setHeader("Stav").setWidth("110px").setFlexGrow(0);
         grid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getDescription()))).setHeader("Obsah");
         idColumn.setVisible(false);
@@ -87,7 +92,7 @@ public class HWItemRecordsTab extends Div {
             add(operationsLayout);
 
             operationsLayout.add(
-                    componentFactory.createCreateButton(e -> HWItemRecordDialog.create(hwItem.getId(), to -> {
+                    componentFactory.createCreateButton(e -> HWItemRecordDialog.create(to -> {
                         hwService.saveHWItemRecord(hwItem, to);
                         populateServiceNotesGrid();
                         hwItemPage.refreshItem();

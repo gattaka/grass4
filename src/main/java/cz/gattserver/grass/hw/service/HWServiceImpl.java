@@ -479,6 +479,16 @@ public class HWServiceImpl implements HWService {
     }
 
     @Override
+    public boolean hasIcon(Long id) {
+        try {
+            Path path = findHWItemIconMiniFile(id);
+            return path != null;
+        } catch (IOException e) {
+            throw new GrassException("Nezdařilo se získat ikonu HW položky.", e);
+        }
+    }
+
+    @Override
     public InputStream findHWItemIconMiniFileInputStream(Long id) {
         try {
             Path path = findHWItemIconMiniFile(id);

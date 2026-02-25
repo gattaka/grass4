@@ -26,7 +26,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-import cz.gattserver.grass.language.facades.LanguageService;
+import cz.gattserver.grass.language.service.LanguageService;
 import cz.gattserver.grass.language.model.domain.ItemType;
 import cz.gattserver.grass.language.model.dto.LanguageItemTO;
 import cz.gattserver.grass.language.model.dto.LanguageTO;

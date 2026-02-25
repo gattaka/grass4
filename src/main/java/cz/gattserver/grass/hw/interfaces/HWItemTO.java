@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,7 +20,10 @@ import java.util.Set;
 @Setter
 @Getter
 @NoArgsConstructor
-public class HWItemTO {
+public class HWItemTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 2092075711049582778L;
 
     private Long id;
     private String name;

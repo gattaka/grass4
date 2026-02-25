@@ -17,12 +17,16 @@ import cz.gattserver.grass.hw.ui.HWItemsGrid;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.dialogs.HWItemDialog;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.Map;
 
 @PageTitle("Evidence HW")
 @Route(value = "hw", layout = MainView.class)
 public class HWItemsPage extends Div implements HasUrlParameter<String> {
+
+    @Serial
+    private static final long serialVersionUID = -7383259167330561473L;
 
     private final HWService hwService;
     private final SecurityService securityService;
@@ -69,10 +73,10 @@ public class HWItemsPage extends Div implements HasUrlParameter<String> {
 
         if (securityService.getCurrentUser().isAdmin()) {
             // Oprava údajů existující položky HW
-            buttonLayout.add(componentFactory.createEditGridButton(item -> onEdit(item), itemsGrid.getGrid()));
+            buttonLayout.add(componentFactory.createEditGridButton(this::onEdit, itemsGrid.getGrid()));
 
             // Smazání položky HW
-            Button deleteBtn = componentFactory.createDeleteGridButton(item -> deleteItem(item), itemsGrid.getGrid());
+            Button deleteBtn = componentFactory.createDeleteGridButton(this::deleteItem, itemsGrid.getGrid());
             buttonLayout.add(deleteBtn);
         }
 

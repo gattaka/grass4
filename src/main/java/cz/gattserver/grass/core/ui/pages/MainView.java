@@ -134,8 +134,8 @@ public class MainView extends Div implements AfterNavigationObserver, RouterLayo
          */
 
         // sekce článků je rozbalená rovnou jako její kořenové kategorie
-        NodeService nodeFacade = SpringContextHelper.getBean(NodeService.class);
-        List<NodeOverviewTO> nodes = nodeFacade.getRootNodes();
+        NodeService nodeService = SpringContextHelper.getBean(NodeService.class);
+        List<NodeOverviewTO> nodes = nodeService.getRootNodes();
         for (NodeOverviewTO node : nodes)
             menuLeft.add(new Anchor(UIUtils.getPageURL(nodePageFactory, node.getId() + "-" + node.getName()),
                     node.getName()));

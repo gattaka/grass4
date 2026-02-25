@@ -6,6 +6,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
+
 /**
  * Typ hw
  */
@@ -13,7 +16,10 @@ import lombok.Setter;
 @Getter
 @NoArgsConstructor
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
-public class HWTypeTO {
+public class HWTypeTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 53799968348098827L;
 
     /**
      * Identifikátor hw
@@ -30,10 +36,6 @@ public class HWTypeTO {
      * Počet instancí daného typu
      */
     private Integer count;
-
-    public HWTypeTO(String name) {
-        this.name = name;
-    }
 
     public HWTypeTO(Long id) {
         this.id = id;

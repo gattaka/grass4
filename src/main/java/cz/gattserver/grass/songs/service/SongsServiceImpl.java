@@ -1,12 +1,9 @@
-package cz.gattserver.grass.songs.facades.impl;
+package cz.gattserver.grass.songs.service;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
-import cz.gattserver.grass.core.export.ExportType;
 import cz.gattserver.grass.core.export.ExportsService;
-import cz.gattserver.grass.core.export.ExportsServiceImpl;
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
-import cz.gattserver.grass.songs.facades.SongsService;
 import cz.gattserver.grass.songs.model.dao.ChordsRepository;
 import cz.gattserver.grass.songs.model.dao.SongsRepository;
 import cz.gattserver.grass.songs.model.domain.Chord;
@@ -25,25 +22,24 @@ import org.thymeleaf.context.Context;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Transactional
 @Component
-public class SongsFacadeImpl implements SongsService {
+public class SongsServiceImpl implements SongsService {
 
-    @Autowired
-    private Mapper mapper;
+    private final Mapper mapper;
+    private final SongsRepository songsRepository;
+    private final ChordsRepository chordsRepository;
+    private final ExportsService exportsService;
 
-    @Autowired
-    private SongsRepository songsRepository;
-
-    @Autowired
-    private ChordsRepository chordsRepository;
-
-    @Autowired
-    private ExportsService exportsService;
+    public SongsServiceImpl(Mapper mapper, SongsRepository songsRepository, ChordsRepository chordsRepository,
+                            ExportsService exportsService) {
+        this.mapper = mapper;
+        this.songsRepository = songsRepository;
+        this.chordsRepository = chordsRepository;
+        this.exportsService = exportsService;
+    }
 
     @Override
     public SongTO getSongById(Long id) {

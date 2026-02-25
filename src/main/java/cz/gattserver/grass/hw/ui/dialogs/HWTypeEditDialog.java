@@ -9,9 +9,13 @@ import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.hw.interfaces.HWTypeTO;
 
+import java.io.Serial;
 import java.util.function.Consumer;
 
 public class HWTypeEditDialog extends EditWebDialog {
+
+    @Serial
+    private static final long serialVersionUID = -4942202549161563207L;
 
     public static HWTypeEditDialog detail(HWTypeTO originalTO) {
         return new HWTypeEditDialog(originalTO, null, true);

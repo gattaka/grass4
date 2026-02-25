@@ -31,11 +31,8 @@ public class MonitorResource {
 
 	private static Logger logger = LoggerFactory.getLogger(MonitorResource.class);
 
-	@Autowired
-	private MonitorService monitorFacade;
-
-	@Autowired
-	private SecurityService securityService;
+	private final MonitorService monitorService;
+	private final SecurityService securityService;
 
 	@RequestMapping(value = "online", headers = "Accept=application/json")
 	@ResponseBody
@@ -48,7 +45,7 @@ public class MonitorResource {
 		UserInfoTO user = securityService.getCurrentUser();
 		if (user.getId() == null)
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		return new ResponseEntity<>(monitorFacade.getServicesStatus(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getServicesStatus(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/servers")
@@ -56,27 +53,27 @@ public class MonitorResource {
 		UserInfoTO user = securityService.getCurrentUser();
 		if (user.getId() == null)
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		return new ResponseEntity<>(monitorFacade.getServersStatus(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getServersStatus(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/system-uptime")
 	public ResponseEntity<SystemUptimeMonitorItemTO> getSystemUptime() {
-		return new ResponseEntity<>(monitorFacade.getSystemUptime(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getSystemUptime(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/system-memory-status")
 	public ResponseEntity<SystemMemoryMonitorItemTO> getSystemMemoryStatus() {
-		return new ResponseEntity<>(monitorFacade.getSystemMemoryStatus(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getSystemMemoryStatus(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/system-swap-status")
 	public ResponseEntity<SystemSwapMonitorItemTO> getSystemSwapStatus() {
-		return new ResponseEntity<>(monitorFacade.getSystemSwapStatus(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getSystemSwapStatus(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/jvm-uptime")
 	public ResponseEntity<JVMUptimeMonitorItemTO> getJVMUptime() {
-		return new ResponseEntity<>(monitorFacade.getJVMUptime(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getJVMUptime(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/jvm-pid")
@@ -84,7 +81,7 @@ public class MonitorResource {
 		UserInfoTO user = securityService.getCurrentUser();
 		if (user.getId() == null)
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		return new ResponseEntity<>(monitorFacade.getJVMPID(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getJVMPID(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/jvm-threads")
@@ -92,17 +89,17 @@ public class MonitorResource {
 		UserInfoTO user = securityService.getCurrentUser();
 		if (user.getId() == null)
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		return new ResponseEntity<>(monitorFacade.getJVMThreads(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getJVMThreads(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/jvm-memory")
 	public ResponseEntity<JVMMemoryMonitorItemTO> getJVMMemory() {
-		return new ResponseEntity<>(monitorFacade.getJVMMemory(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getJVMMemory(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/backup-status")
 	public ResponseEntity<BackupStatusPartItemTO> getBackupDiskMounted() {
-		return new ResponseEntity<>(monitorFacade.getBackupStatus(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getBackupStatus(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/disk-status")
@@ -110,7 +107,7 @@ public class MonitorResource {
 		UserInfoTO user = securityService.getCurrentUser();
 		if (user.getId() == null)
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		return new ResponseEntity<>(monitorFacade.getDiskStatus(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getDiskStatus(), HttpStatus.OK);
 	}
 
 	@RequestMapping("/smart-info")
@@ -118,11 +115,13 @@ public class MonitorResource {
 		UserInfoTO user = securityService.getCurrentUser();
 		if (user.getId() == null)
 			return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-		return new ResponseEntity<>(monitorFacade.getSMARTInfo(), HttpStatus.OK);
+		return new ResponseEntity<>(monitorService.getSMARTInfo(), HttpStatus.OK);
 	}
 
-	public MonitorResource() {
+	public MonitorResource(MonitorService monitorService, SecurityService securityService) {
 		logger.info("System monitor resource online");
-	}
+        this.monitorService = monitorService;
+        this.securityService = securityService;
+    }
 
 }

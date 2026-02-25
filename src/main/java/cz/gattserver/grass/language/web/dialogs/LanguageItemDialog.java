@@ -22,7 +22,7 @@ import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.binder.Validator;
 import com.vaadin.flow.data.renderer.TextRenderer;
 
-import cz.gattserver.grass.language.facades.LanguageService;
+import cz.gattserver.grass.language.service.LanguageService;
 import cz.gattserver.grass.language.model.domain.ItemType;
 
 public class LanguageItemDialog extends EditWebDialog {

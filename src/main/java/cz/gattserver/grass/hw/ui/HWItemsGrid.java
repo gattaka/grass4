@@ -1,6 +1,6 @@
 package cz.gattserver.grass.hw.ui;
 
-import java.io.InputStream;
+import java.io.Serial;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -44,9 +44,13 @@ import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LocalDateRenderer;
 
 import cz.gattserver.grass.hw.service.HWService;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 public class HWItemsGrid extends Div {
+
+    @Serial
+    private static final long serialVersionUID = -639531675713635797L;
 
     private static final String ID_QUERY_TOKEN = "id";
     private static final String NAME_QUERY_TOKEN = "n";
@@ -63,20 +67,19 @@ public class HWItemsGrid extends Div {
     private static final String PURCHASE_DATE_BIND = "purchaseDateBind";
 
     private final HWService hwService;
-    private final SecurityService securityFacade;
+    private final SecurityService securityService;
 
-    private Grid<HWItemOverviewTO> grid;
-    private TokenField hwTypesFilter;
+    @Getter
+    private final Grid<HWItemOverviewTO> grid;
 
-    private Map<String, HWTypeTokenTO> tokenMap = new HashMap<>();
-    private Map<Long, Integer> indexMap = new HashMap<>();
-    private Binder<HWFilterTO> binder;
+    private final Map<Long, Integer> indexMap = new HashMap<>();
+    private final Binder<HWFilterTO> binder;
 
-    private Div iconDiv;
+    private final Div iconDiv;
 
     public HWItemsGrid(HWFilterTO filterTO, Consumer<HWItemOverviewTO> onSelect) {
         this.hwService = SpringContextHelper.getBean(HWService.class);
-        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
+        this.securityService = SpringContextHelper.getBean(SecurityService.class);
 
         iconDiv = new Div();
         iconDiv.addClassName("hw-hover-icon");
@@ -90,6 +93,10 @@ public class HWItemsGrid extends Div {
 
         // Tabulka HW
         grid = new Grid<>() {
+
+            @Serial
+            private static final long serialVersionUID = -317056143721377820L;
+
             @AllowInert
             @ClientCallable
             private void scrollToId(Long id) {
@@ -144,7 +151,7 @@ public class HWItemsGrid extends Div {
         Column<HWItemOverviewTO> supervizedColumn =
                 grid.addColumn(HWItemOverviewTO::getSupervizedFor).setKey(SUPERVIZED_FOR_BIND)
                         .setHeader("Spravováno pro").setWidth("120px").setFlexGrow(0).setSortable(true);
-        if (securityFacade.getCurrentUser().isAdmin()) {
+        if (securityService.getCurrentUser().isAdmin()) {
             grid.addColumn(hw -> FieldUtils.formatMoney(hw.getPrice())).setHeader("Cena").setKey(PRICE_BIND)
                     .setTextAlign(ColumnTextAlign.END).setWidth("100px").setFlexGrow(0).setSortable(true);
         }
@@ -177,11 +184,12 @@ public class HWItemsGrid extends Div {
         populate();
 
         // Filtr na typy HW není veřejný, aby nenapovídal, co vše host nevidí
-        if (securityFacade.getCurrentUser().isAdmin()) {
+        if (securityService.getCurrentUser().isAdmin()) {
+            Map<String, HWTypeTokenTO> tokenMap = new HashMap<>();
             for (HWTypeTokenTO type : hwService.findAllHWTypes())
                 tokenMap.put(type.getName(), type);
 
-            hwTypesFilter = new TokenField(null, tokenMap.keySet());
+            TokenField hwTypesFilter = new TokenField(null, tokenMap.keySet());
             hwTypesFilter.getInputField().setWidth("200px");
             hwTypesFilter.setAllowNewItems(false);
             hwTypesFilter.getInputField().setPlaceholder("Filtrovat dle typu hw");
@@ -203,21 +211,21 @@ public class HWItemsGrid extends Div {
         for (String key : parametersMap.keySet()) {
             List<String> values = parametersMap.get(key);
             if (ID_QUERY_TOKEN.equals(key)) {
-                filterTO.setId(Long.valueOf(values.get(0)));
+                filterTO.setId(Long.valueOf(values.getFirst()));
             } else if (NAME_QUERY_TOKEN.equals(key)) {
-                filterTO.setName(values.get(0));
+                filterTO.setName(values.getFirst());
             } else if (SUPERVIZED_FOR_QUERY_TOKEN.equals(key)) {
-                filterTO.setSupervizedFor(values.get(0));
+                filterTO.setSupervizedFor(values.getFirst());
             } else if (STATE_QUERY_TOKEN.equals(key)) {
                 try {
-                    filterTO.setState(HWItemState.valueOf(values.get(0)));
+                    filterTO.setState(HWItemState.valueOf(values.getFirst()));
                 } catch (IllegalArgumentException e) {
                     // chybná neexistující konstanta
                 }
             } else if (USED_IN_QUERY_TOKEN.equals(key)) {
-                filterTO.setUsedInName(values.get(0));
+                filterTO.setUsedInName(values.getFirst());
             } else if (key.startsWith(TYPE_QUERY_TOKEN)) {
-                types.add(values.get(0));
+                types.add(values.getFirst());
             }
         }
         if (!types.isEmpty()) filterTO.setTypes(types);
@@ -246,12 +254,12 @@ public class HWItemsGrid extends Div {
 
     @ClientCallable
     private void imgShowCallback(Long id, double x, double y) {
-        InputStream iconIs = hwService.findHWItemIconMiniFileInputStream(id);
-        if (iconIs == null) return;
+        if (!hwService.hasIcon(id)) return;
         iconDiv.removeAll();
         iconDiv.setVisible(true);
         String name = "hw-item-" + id;
-        Image img = new Image(DownloadHandler.fromInputStream(e -> new DownloadResponse(iconIs, name, null, -1)), name);
+        Image img = new Image(DownloadHandler.fromInputStream(
+                e -> new DownloadResponse(hwService.findHWItemIconMiniFileInputStream(id), name, null, -1)), name);
         iconDiv.add(img);
         iconDiv.getStyle().set("left", (15 + x) + "px").set("top", y + "px");
         img.setMaxWidth("200px");
@@ -259,7 +267,7 @@ public class HWItemsGrid extends Div {
     }
 
     public void populate() {
-        if (!securityFacade.getCurrentUser().isAdmin()) binder.getBean().setPublicItem(true);
+        if (!securityService.getCurrentUser().isAdmin()) binder.getBean().setPublicItem(true);
 
         if (grid.getDataProvider() == null || !(grid.getDataProvider() instanceof CallbackDataProvider)) {
             FetchCallback<HWItemOverviewTO, HWItemOverviewTO> fetchCallback = q -> {
@@ -304,10 +312,6 @@ public class HWItemsGrid extends Div {
     private void onGridScrollToId(Long id) {
         Integer index = indexMap.get(id);
         if (index != null) grid.scrollToIndex(index);
-    }
-
-    public Grid<HWItemOverviewTO> getGrid() {
-        return grid;
     }
 
     public HWFilterTO getFilterTO() {

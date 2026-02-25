@@ -29,7 +29,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
     @Autowired
-    private UserService userFacade;
+    private UserService userService;
 
     @Lazy
     @Autowired
@@ -57,7 +57,7 @@ public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactor
         grid.addColumn(UserInfoTO::getEmail).setHeader("Email");
         grid.addColumn(u -> u.isConfirmed() ? "Ano" : "Ne").setHeader("Aktivní");
 
-        List<UserInfoTO> users = userFacade.getUserInfoFromAllUsers();
+        List<UserInfoTO> users = userService.getUserInfoFromAllUsers();
         grid.setItems(users);
 
         HorizontalLayout buttonLayout = new HorizontalLayout();
@@ -69,14 +69,14 @@ public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactor
         buttonLayout.add(componentFactory.createGridSetButton("Aktivovat", VaadinIcon.UNLOCK.create(),
                 selectedUsers -> selectedUsers.forEach(u -> {
                     u.setConfirmed(true);
-                    userFacade.activateUser(u.getId());
+                    userService.activateUser(u.getId());
                     grid.getDataProvider().refreshItem(u);
                 }), grid, selectedUsers -> !selectedUsers.isEmpty() && !selectedUsers.iterator().next().isConfirmed()));
 
         buttonLayout.add(componentFactory.createGridSetButton("Zablokovat", VaadinIcon.LOCK.create(),
                 selectedUsers -> selectedUsers.forEach(user -> {
                     user.setConfirmed(false);
-                    userFacade.banUser(user.getId());
+                    userService.banUser(user.getId());
                     grid.getDataProvider().refreshItem(user);
                 }), grid, selectedUsers -> !selectedUsers.isEmpty() && selectedUsers.iterator().next().isConfirmed()));
 
@@ -107,7 +107,7 @@ public class UsersSettingsPageFragmentFactory extends AbstractPageFragmentFactor
             w.getFooter().add(btnLayout);
 
             btnLayout.add(new Button("Upravit oprávnění", event -> {
-                userFacade.changeUserRoles(user.getId(), user.getRoles());
+                userService.changeUserRoles(user.getId(), user.getRoles());
                 grid.getDataProvider().refreshItem(user);
                 w.close();
             }));

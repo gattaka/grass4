@@ -40,9 +40,8 @@ import cz.gattserver.grass.print3d.interfaces.Print3dCreateTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
 import cz.gattserver.grass.print3d.service.Print3dService;
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serial;
@@ -53,6 +52,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Slf4j
 @PageTitle("Editor 3D projektu")
 @Route(value = "print3d-editor", layout = MainView.class)
 public class Print3dEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
@@ -60,10 +60,8 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
     @Serial
     private static final long serialVersionUID = -1922351429364968659L;
 
-    private static final Logger logger = LoggerFactory.getLogger(Print3dEditorPage.class);
-
     private final Print3dService print3dService;
-    private final ContentTagService contentTagFacade;
+    private final ContentTagService contentTagService;
     private final SecurityService securityService;
     private final NodeService nodeService;
     private final EventBus eventBus;
@@ -90,12 +88,12 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
     private String operationToken;
     private String identifierToken;
 
-    public Print3dEditorPage(Print3dService print3dService, ContentTagService contentTagFacade,
+    public Print3dEditorPage(Print3dService print3dService, ContentTagService contentTagService,
                              SecurityService securityService, NodeService nodeService, EventBus eventBus) {
         this.securityService = securityService;
         this.nodeService = nodeService;
         this.print3dService = print3dService;
-        this.contentTagFacade = contentTagFacade;
+        this.contentTagService = contentTagService;
         this.eventBus = eventBus;
         this.componentFactory = new ComponentFactory();
     }
@@ -118,14 +116,14 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) {
-            logger.debug("Nezdařilo se vytěžit URL identifikátor z řetězce: '{}'", identifierToken);
+            log.debug("Nezdařilo se vytěžit URL identifikátor z řetězce: '{}'", identifierToken);
             throw new GrassPageException(404);
         }
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagFacade.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
+                q -> contentTagService.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagFacade.countByFilter(q.getFilter());
+                q -> contentTagService.countByFilter(q.getFilter());
         keywords = new TokenField(null, fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
@@ -158,7 +156,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
             if (!project.getContentNode().getAuthor().getName().equals(securityService.getCurrentUser().getName()) &&
                     !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
-            logger.debug("Neznámá operace: '{}'", operationToken);
+            log.debug("Neznámá operace: '{}'", operationToken);
             throw new GrassPageException(404);
         }
 

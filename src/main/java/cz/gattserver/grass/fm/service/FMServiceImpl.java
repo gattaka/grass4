@@ -6,9 +6,7 @@ import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.fm.events.FMZipProcessProgressEvent;
 import cz.gattserver.grass.fm.events.FMZipProcessResultEvent;
 import cz.gattserver.grass.fm.events.FMZipProcessStartEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,20 +19,21 @@ import java.util.Set;
 
 @Transactional
 @Service
+@Slf4j
 public class FMServiceImpl implements FMService {
 
-	private static Logger logger = LoggerFactory.getLogger(FMServiceImpl.class);
+	private final FileSystemService fileSystemService;
+	private final EventBus eventBus;
 
-	@Autowired
-	private FileSystemService fileSystemService;
+    public FMServiceImpl(FileSystemService fileSystemService, EventBus eventBus) {
+        this.fileSystemService = fileSystemService;
+        this.eventBus = eventBus;
+    }
 
-	@Autowired
-	private EventBus eventBus;
-
-	@Async
+    @Async
 	@Override
 	public void zipFiles(Set<Path> items) {
-		logger.info("zipFM thread: " + Thread.currentThread().getId());
+        log.info("zipFM thread: {}", Thread.currentThread().threadId());
 
 		final ReferenceHolder<Integer> total = new ReferenceHolder<>();
 		final ReferenceHolder<Integer> progress = new ReferenceHolder<>();
@@ -88,12 +87,12 @@ public class FMServiceImpl implements FMService {
 			} catch (Exception e) {
 				String msg = "Nezdařilo se vytvořit ZIP";
 				eventBus.publish(new FMZipProcessResultEvent(msg, e));
-				logger.error(msg, e);
+				log.error(msg, e);
 			}
 		} catch (Exception e) {
 			String msg = "Nezdařilo se vytvořit dočasný adresář pro ZIP";
 			eventBus.publish(new FMZipProcessResultEvent(msg, e));
-			logger.error(msg, e);
+			log.error(msg, e);
 		}
 	}
 
@@ -101,9 +100,9 @@ public class FMServiceImpl implements FMService {
 	public void deleteZipFile(Path zipFile) {
 		try {
 			Files.delete(zipFile);
-			logger.info("zipFile " + zipFile.getFileName() + " deleted");
+            log.info("zipFile {} deleted", zipFile.getFileName());
 		} catch (IOException e) {
-			logger.error("Nezdařilo se smazat ZIP soubor {}", zipFile.getFileName().toString());
+			log.error("Nezdařilo se smazat ZIP soubor {}", zipFile.getFileName().toString());
 		}
 	}
 }

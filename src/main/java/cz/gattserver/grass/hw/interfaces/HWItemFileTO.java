@@ -6,13 +6,18 @@ import cz.gattserver.common.slideshow.SlideshowItem;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Setter
 @Getter
-public class HWItemFileTO implements SlideshowItem {
+public class HWItemFileTO implements SlideshowItem, Serializable {
 
-	private String name;
+    @Serial
+    private static final long serialVersionUID = 648049593899110826L;
+
+    private String name;
 	private String size;
 	private LocalDateTime lastModified;
 

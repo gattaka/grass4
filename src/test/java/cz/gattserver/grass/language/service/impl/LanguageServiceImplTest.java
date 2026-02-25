@@ -1,4 +1,4 @@
-package cz.gattserver.grass.language.facades.impl;
+package cz.gattserver.grass.language.service.impl;
 
 import java.util.Arrays;
 import java.util.List;
@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import com.vaadin.flow.data.provider.SortDirection;
 
-import cz.gattserver.grass.language.facades.LanguageService;
+import cz.gattserver.grass.language.service.LanguageService;
 import cz.gattserver.grass.language.model.dao.LanguageRepository;
 import cz.gattserver.grass.language.model.domain.ItemType;
 import cz.gattserver.grass.language.model.dto.LanguageItemTO;

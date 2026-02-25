@@ -2,6 +2,7 @@ package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -18,8 +19,7 @@ import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.hw.HWRequestHandlerConfig;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
@@ -32,19 +32,21 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+@Slf4j
 public class HWItemPhotosTab extends Div {
 
-    private static final Logger logger = LoggerFactory.getLogger(HWItemPhotosTab.class);
+    @Serial
+    private static final long serialVersionUID = 4226630601283651307L;
 
     private final HWService hwService;
-    private final SecurityService securityFacade;
+    private final SecurityService securityService;
 
-    private HWItemTO hwItem;
+    private final HWItemTO hwItem;
+    private final HWItemPage hwItemPage;
     private Div containerDiv;
-    private HWItemPage hwItemPage;
 
     public HWItemPhotosTab(HWItemTO hwItem, HWItemPage hwItemPage) {
-        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
+        this.securityService = SpringContextHelper.getBean(SecurityService.class);
         this.hwService = SpringContextHelper.getBean(HWService.class);
         this.hwItem = hwItem;
         this.hwItemPage = hwItemPage;
@@ -53,7 +55,7 @@ public class HWItemPhotosTab extends Div {
 
 
     private UserInfoTO getUser() {
-        return securityFacade.getCurrentUser();
+        return securityService.getCurrentUser();
     }
 
     private void init() {
@@ -69,7 +71,7 @@ public class HWItemPhotosTab extends Div {
                     hwService.saveImagesFile(new FileInputStream(file), metadata.fileName(), hwItem);
                 } catch (IOException e) {
                     String msg = "Nezdařilo se uložit obrázek";
-                    logger.error(msg, e);
+                    log.error(msg, e);
                     new ErrorDialog(msg).open();
                 }
             }));
@@ -133,10 +135,10 @@ public class HWItemPhotosTab extends Div {
         Consumer<Integer> pageUpdateListener = currentIndex -> {
         };
 
-        Function<Integer, HWItemFileTO> itemByIndexProvider = i -> images.get(i);
+        Function<Integer, HWItemFileTO> itemByIndexProvider = images::get;
 
         // Nemáme slideshow verze -- jen miniatury a full
-        Function<HWItemFileTO, String> itemPathProvider = item -> createPhotoItemURL(item);
+        Function<HWItemFileTO, String> itemPathProvider = this::createPhotoItemURL;
 
         ImageSlideshow<HWItemFileTO> slideshow =
                 new ImageSlideshow<>(images.size(), pageUpdateListener, itemByIndexProvider, itemPathProvider,

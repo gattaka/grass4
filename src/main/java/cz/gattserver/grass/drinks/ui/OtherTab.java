@@ -50,8 +50,8 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
     @Override
     protected void populate() {
         FetchCallback<OtherOverviewTO, OtherOverviewTO> fetchCallback =
-                q -> getDrinksFacade().getOthers(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
-        CountCallback<OtherOverviewTO, OtherOverviewTO> countCallback = q -> getDrinksFacade().countOthers(filterTO);
+                q -> drinksService.getOthers(filterTO, q.getOffset(), q.getLimit(), q.getSortOrders()).stream();
+        CountCallback<OtherOverviewTO, OtherOverviewTO> countCallback = q -> drinksService.countOthers(filterTO);
         grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
     }
 
@@ -61,7 +61,7 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
 
 
         Consumer<OtherTO> onSave = to -> {
-            to = getDrinksFacade().saveOther(to);
+            to = drinksService.saveOther(to);
             showDetail(to);
             populate();
         };
@@ -72,7 +72,7 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
 
         btnLayout.add(componentFactory.createDeleteGridSetButton(items -> {
             for (OtherOverviewTO s : items)
-                getDrinksFacade().deleteDrink(s.getId());
+                drinksService.deleteDrink(s.getId());
             populate();
             showDetail(null);
         }, grid));
@@ -96,7 +96,7 @@ public class OtherTab extends DrinksTab<OtherTO, OtherOverviewTO> {
 
     @Override
     protected OtherTO findById(Long id) {
-        return getDrinksFacade().getOtherById(id);
+        return drinksService.getOtherById(id);
     }
 
 }

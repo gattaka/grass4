@@ -18,7 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 
-import cz.gattserver.grass.language.facades.LanguageService;
+import cz.gattserver.grass.language.service.LanguageService;
 import cz.gattserver.grass.language.model.domain.ItemType;
 import cz.gattserver.grass.language.model.dto.LanguageItemTO;
 import cz.gattserver.grass.language.web.ChartUtils;

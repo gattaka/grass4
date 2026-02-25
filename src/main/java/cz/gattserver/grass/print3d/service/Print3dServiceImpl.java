@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 @Service
 public class Print3dServiceImpl implements Print3dService {
 
-    private final ContentNodeService contentNodeFacade;
+    private final ContentNodeService contentNodeService;
     private final Print3dMapper projectMapper;
     private final Print3dRepository print3dRepository;
     private final FileSystemService fileSystemService;
@@ -45,10 +45,10 @@ public class Print3dServiceImpl implements Print3dService {
     @Value("${print3d.root.path}")
     private String rootPathName;
 
-    public Print3dServiceImpl(ContentNodeService contentNodeFacade, Print3dMapper projectMapper,
+    public Print3dServiceImpl(ContentNodeService contentNodeService, Print3dMapper projectMapper,
                               Print3dRepository print3dRepository, FileSystemService fileSystemService,
                               EventBus eventBus) {
-        this.contentNodeFacade = contentNodeFacade;
+        this.contentNodeService = contentNodeService;
         this.projectMapper = projectMapper;
         this.print3dRepository = print3dRepository;
         this.fileSystemService = fileSystemService;
@@ -71,7 +71,7 @@ public class Print3dServiceImpl implements Print3dService {
         Path path = getProjectPath(dir);
 
         print3dRepository.deleteById(id);
-        contentNodeFacade.deleteByContentId(Print3dModule.ID, id);
+        contentNodeService.deleteByContentId(Print3dModule.ID, id);
 
         // musí se řešit return stavem, protože exception by způsobilo rollback
         // transakce, což nechci
@@ -108,7 +108,7 @@ public class Print3dServiceImpl implements Print3dService {
         if (existingId == null) {
             // vytvoř odpovídající content node
             Long contentNodeId =
-                    contentNodeFacade.save(Print3dModule.ID, project.getId(), payloadTO.getName(), payloadTO.getTags(),
+                    contentNodeService.save(Print3dModule.ID, project.getId(), payloadTO.getName(), payloadTO.getTags(),
                             payloadTO.isPublicated(), nodeId, authorId, false, LocalDateTime.now(), null);
 
             // ulož do článku referenci na jeho contentnode
@@ -116,7 +116,7 @@ public class Print3dServiceImpl implements Print3dService {
             contentNode.setId(contentNodeId);
             project.setContentNode(contentNode);
         } else {
-            contentNodeFacade.modify(project.getContentNode().getId(), payloadTO.getName(), payloadTO.getTags(),
+            contentNodeService.modify(project.getContentNode().getId(), payloadTO.getName(), payloadTO.getTags(),
                     payloadTO.isPublicated());
         }
 

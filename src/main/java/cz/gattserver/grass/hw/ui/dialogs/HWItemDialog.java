@@ -1,5 +1,6 @@
 package cz.gattserver.grass.hw.ui.dialogs;
 
+import java.io.Serial;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Arrays;
@@ -33,11 +34,12 @@ import cz.gattserver.grass.hw.ui.UsedInChooser;
 
 public class HWItemDialog extends EditWebDialog {
 
-    private final HWService hwService;
+    @Serial
+    private static final long serialVersionUID = -6978782229584546560L;
 
     public HWItemDialog(HWItemTO originalTO, Consumer<HWItemTO> onSave) {
         super("Záznam");
-        this.hwService = SpringContextHelper.getBean(HWService.class);
+        HWService hwService = SpringContextHelper.getBean(HWService.class);
 
         layout.setSizeFull();
         setWidth(900, Unit.PIXELS);

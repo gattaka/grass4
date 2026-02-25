@@ -1,4 +1,4 @@
-package cz.gattserver.grass.songs.facades;
+package cz.gattserver.grass.songs.service;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 import cz.gattserver.grass.songs.model.interfaces.ChordTO;

@@ -1,8 +1,8 @@
-package cz.gattserver.grass.recipes.facades;
+package cz.gattserver.grass.recipes.service;
 
 import java.util.List;
 
-import cz.gattserver.grass.recipes.model.dto.RecipeDTO;
+import cz.gattserver.grass.recipes.model.dto.RecipeTO;
 import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 
 public interface RecipesService {
@@ -26,7 +26,7 @@ public interface RecipesService {
 	/**
 	 * Získá recept dle id
 	 */
-	RecipeDTO getRecipeById(Long id);
+	RecipeTO getRecipeById(Long id);
 
 	/**
 	 * Založí/uprav nový recept

@@ -1,4 +1,4 @@
-package cz.gattserver.grass.songs.facades.impl;
+package cz.gattserver.grass.songs.service;
 
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 

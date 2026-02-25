@@ -14,7 +14,7 @@ import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
-import cz.gattserver.grass.drinks.facades.DrinksFacade;
+import cz.gattserver.grass.drinks.service.DrinksService;
 import cz.gattserver.grass.drinks.model.interfaces.DrinkOverviewTO;
 import cz.gattserver.grass.drinks.model.interfaces.DrinkTO;
 import cz.gattserver.grass.core.security.CoreRole;
@@ -39,8 +39,8 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
     @Serial
     private static final long serialVersionUID = 4941396317717622059L;
 
-    private transient SecurityService securityService;
-    private transient DrinksFacade drinksFacade;
+    protected final SecurityService securityService;
+    protected final DrinksService drinksService;
 
     private final Image image;
     private final Div dataLayout;
@@ -52,7 +52,8 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
     private HeaderRow filteringHeader;
 
     public DrinksTab() {
-        SpringContextHelper.inject(this);
+        securityService = SpringContextHelper.getBean(SecurityService.class);
+        drinksService = SpringContextHelper.getBean(DrinksService.class);
 
         filterTO = createNewOverviewTO();
         grid = new Grid<>();
@@ -91,7 +92,7 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
         contentLayout.add(dataLayout);
 
         ComponentFactory componentFactory = new ComponentFactory();
-        if (getSecurityService().getCurrentUser().getRoles().contains(CoreRole.ADMIN)) {
+        if (securityService.getCurrentUser().getRoles().contains(CoreRole.ADMIN)) {
             Div btnLayout = componentFactory.createButtonLayout();
             add(btnLayout);
             populateBtnLayout(btnLayout);
@@ -123,8 +124,8 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
 
     protected void addAlcoholColumn(Grid<O> grid) {
         Column<O> alcoholColumn = grid.addColumn(
-                        new NumberRenderer<>(O::getAlcohol, NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")), null))
-                .setHeader("%").setWidth("50px").setFlexGrow(0).setSortProperty("alcohol");
+                new NumberRenderer<>(O::getAlcohol, NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")),
+                        null)).setHeader("%").setWidth("50px").setFlexGrow(0).setSortProperty("alcohol");
         UIUtils.addHeaderTextField(getHeaderRow().getCell(alcoholColumn), e -> {
             filterTO.setAlcohol(Double.parseDouble(e.getValue()));
             populate();
@@ -139,16 +140,6 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
             rs.setSize("15px");
             return rs;
         })).setHeader("Hodnocení").setWidth("90px").setFlexGrow(0).setSortProperty("rating");
-    }
-
-    protected SecurityService getSecurityService() {
-        if (securityService == null) securityService = SpringContextHelper.getBean(SecurityService.class);
-        return securityService;
-    }
-
-    protected DrinksFacade getDrinksFacade() {
-        if (drinksFacade == null) drinksFacade = SpringContextHelper.getBean(DrinksFacade.class);
-        return drinksFacade;
     }
 
     public void selectDrink(Long id) {

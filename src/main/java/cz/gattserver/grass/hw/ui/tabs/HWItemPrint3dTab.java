@@ -2,6 +2,7 @@ package cz.gattserver.grass.hw.ui.tabs;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.Serial;
 
 import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -13,8 +14,7 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.stlviewer.STLViewer;
 import cz.gattserver.grass.hw.HWRequestHandlerConfig;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
@@ -29,22 +29,25 @@ import com.vaadin.flow.data.renderer.TextRenderer;
 import cz.gattserver.grass.hw.interfaces.HWItemFileTO;
 import cz.gattserver.grass.hw.interfaces.HWItemTO;
 import cz.gattserver.grass.hw.service.HWService;
+import org.jspecify.annotations.NonNull;
 
+@Slf4j
 public class HWItemPrint3dTab extends Div {
 
-    private static final Logger logger = LoggerFactory.getLogger(HWItemPrint3dTab.class);
+    @Serial
+    private static final long serialVersionUID = -4313383169978940513L;
 
     private final HWService hwService;
-    private final SecurityService securityFacade;
+    private final SecurityService securityService;
 
-    private HWItemTO hwItem;
-    private HWItemPage hwItemPage;
+    private final HWItemTO hwItem;
+    private final HWItemPage hwItemPage;
     private Grid<HWItemFileTO> grid;
 
     private STLViewer stlViewer;
 
     public HWItemPrint3dTab(HWItemTO hwItem, HWItemPage hwItemPage) {
-        this.securityFacade = SpringContextHelper.getBean(SecurityService.class);
+        this.securityService = SpringContextHelper.getBean(SecurityService.class);
         this.hwService = SpringContextHelper.getBean(HWService.class);
         this.hwItem = hwItem;
         this.hwItemPage = hwItemPage;
@@ -52,7 +55,7 @@ public class HWItemPrint3dTab extends Div {
     }
 
     private UserInfoTO getUser() {
-        return securityFacade.getCurrentUser();
+        return securityService.getCurrentUser();
     }
 
     private void populateGrid() {
@@ -96,20 +99,7 @@ public class HWItemPrint3dTab extends Div {
         populateGrid();
 
         if (getUser().isAdmin()) {
-            Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
-                try {
-                    hwService.savePrint3dFile(new FileInputStream(file), metadata.fileName(), hwItem.getId());
-                } catch (IOException e) {
-                    String msg = "Nezdařilo se uložit soubor";
-                    logger.error(msg, e);
-                    new ErrorDialog(msg).open();
-                }
-            }));
-            upload.addAllFinishedListener(e -> {
-                populateGrid();
-                hwItemPage.refreshTabLabels();
-            });
-            upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+            Upload upload = getUpload();
             add(upload);
         }
 
@@ -118,7 +108,7 @@ public class HWItemPrint3dTab extends Div {
         });
 
         grid.addSelectionListener(item -> {
-            if (!item.getFirstSelectedItem().isPresent()) return;
+            if (item.getFirstSelectedItem().isEmpty()) return;
             HWItemFileTO to = item.getFirstSelectedItem().get();
             stlViewer.show(getFileURL(to));
         });
@@ -127,7 +117,7 @@ public class HWItemPrint3dTab extends Div {
         Div operationsLayout = componentFactory.createButtonLayout();
         add(operationsLayout);
 
-        operationsLayout.add(componentFactory.createDownloadGridButton(item -> downloadPrint3d(item), grid));
+        operationsLayout.add(componentFactory.createDownloadGridButton(this::downloadPrint3d, grid));
 
         if (getUser().isAdmin()) {
             Button deleteBtn = componentFactory.createDeleteGridButton(item -> {
@@ -137,5 +127,23 @@ public class HWItemPrint3dTab extends Div {
             }, grid);
             operationsLayout.add(deleteBtn);
         }
+    }
+
+    private @NonNull Upload getUpload() {
+        Upload upload = new Upload(UploadHandler.toTempFile((metadata, file) -> {
+            try {
+                hwService.savePrint3dFile(new FileInputStream(file), metadata.fileName(), hwItem.getId());
+            } catch (IOException e) {
+                String msg = "Nezdařilo se uložit soubor";
+                log.error(msg, e);
+                new ErrorDialog(msg).open();
+            }
+        }));
+        upload.addAllFinishedListener(e -> {
+            populateGrid();
+            hwItemPage.refreshTabLabels();
+        });
+        upload.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+        return upload;
     }
 }

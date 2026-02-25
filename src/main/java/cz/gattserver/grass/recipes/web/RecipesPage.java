@@ -18,8 +18,8 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
-import cz.gattserver.grass.recipes.facades.RecipesService;
-import cz.gattserver.grass.recipes.model.dto.RecipeDTO;
+import cz.gattserver.grass.recipes.service.RecipesService;
+import cz.gattserver.grass.recipes.model.dto.RecipeTO;
 import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
 
 @PageTitle("Recepty")
@@ -31,7 +31,7 @@ public class RecipesPage extends Div {
     private Grid<RecipeOverviewTO> grid;
     private H2 nameLabel;
     private HtmlDiv contentLabel;
-    private RecipeDTO choosenRecipe;
+    private RecipeTO choosenRecipe;
     private RecipeOverviewTO filterTO;
 
     public RecipesPage(RecipesService recipesService, SecurityService securityService) {
@@ -94,7 +94,7 @@ public class RecipesPage extends Div {
                 @Override
                 protected void onSave(String name, String desc, Long id) {
                     id = recipesService.saveRecipe(name, desc);
-                    RecipeDTO to = new RecipeDTO(id, name, desc);
+                    RecipeTO to = new RecipeTO(id, name, desc);
                     showDetail(to);
                     populate();
                 }
@@ -107,7 +107,7 @@ public class RecipesPage extends Div {
                 @Override
                 protected void onSave(String name, String desc, Long id) {
                     recipesService.saveRecipe(name, desc, id);
-                    RecipeDTO to = new RecipeDTO(id, name, desc);
+                    RecipeTO to = new RecipeTO(id, name, desc);
                     showDetail(to);
                     populate();
                 }
@@ -122,7 +122,7 @@ public class RecipesPage extends Div {
     }
 
 
-    private void showDetail(RecipeDTO choosenRecipe) {
+    private void showDetail(RecipeTO choosenRecipe) {
         nameLabel.setVisible(true);
         nameLabel.setText(choosenRecipe.getName());
         String value = recipesService.eolToBreakline(choosenRecipe.getDescription());

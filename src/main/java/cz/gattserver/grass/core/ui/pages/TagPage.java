@@ -20,17 +20,17 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 @Route(value = "tag", layout = MainView.class)
 public class TagPage extends Div implements HasUrlParameter<String>, HasDynamicTitle {
 
-	private ContentTagService contentTagFacade;
-	private ContentNodeService contentNodeFacade;
+	private ContentTagService contentTagService;
+	private ContentNodeService contentNodeService;
     private SecurityService securityService;
 
 	private String tagParameter;
 	private ContentTagTO tag;
 
-    public TagPage(ContentTagService contentTagFacade, ContentNodeService contentNodeFacade,
+    public TagPage(ContentTagService contentTagService, ContentNodeService contentNodeService,
                    SecurityService securityService) {
-        this.contentTagFacade = contentTagFacade;
-        this.contentNodeFacade = contentNodeFacade;
+        this.contentTagService = contentTagService;
+        this.contentNodeService = contentNodeService;
         this.securityService = securityService;
     }
 
@@ -47,7 +47,7 @@ public class TagPage extends Div implements HasUrlParameter<String>, HasDynamicT
 		if (identifier == null)
 			throw new GrassPageException(404);
 
-		tag = contentTagFacade.getTagById(identifier.id());
+		tag = contentTagService.getTagById(identifier.id());
 
 		if (tag == null)
 			throw new GrassPageException(404);
@@ -57,8 +57,8 @@ public class TagPage extends Div implements HasUrlParameter<String>, HasDynamicT
 
 		ContentsLazyGrid tagContentsTable = new ContentsLazyGrid();
 		tagContentsTable.populate(securityService.getCurrentUser().getId() != null,
-				q -> contentNodeFacade.getByTag(tag.getId(), q.getOffset(), q.getLimit()).stream(),
-				q -> contentNodeFacade.getCountByTag(tag.getId()));
+				q -> contentNodeService.getByTag(tag.getId(), q.getOffset(), q.getLimit()).stream(),
+				q -> contentNodeService.getCountByTag(tag.getId()));
 		tagContentsTable.setWidthFull();
 		layout.add(tagContentsTable);
 	}

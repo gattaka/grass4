@@ -6,7 +6,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
-import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.internal.AllowInert;
 import com.vaadin.flow.component.textfield.TextField;
@@ -28,11 +27,15 @@ import cz.gattserver.grass.hw.ui.HWItemsGrid;
 import cz.gattserver.grass.hw.ui.HWUIUtils;
 import cz.gattserver.grass.hw.ui.dialogs.HWTypeEditDialog;
 
+import java.io.Serial;
 import java.util.*;
 
 @PageTitle("Evidence HW")
 @Route(value = "hw-types", layout = MainView.class)
 public class HWTypesPage extends Div implements HasUrlParameter<String> {
+
+    @Serial
+    private static final long serialVersionUID = 3559290784942690680L;
 
     private static final String ID_QUERY_TOKEN = "id";
     private static final String NAME_QUERY_TOKEN = "name";
@@ -41,17 +44,15 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
     private static final String COUNT_BIND = "countBind";
 
     private final HWService hwService;
-    private final SecurityService securityService;
 
     private Grid<HWTypeTO> grid;
     private HWTypeTO filterTO;
 
     private TextField nameField;
-    private Map<Long, Integer> indexMap = new HashMap<>();
+    private final Map<Long, Integer> indexMap = new HashMap<>();
 
     public HWTypesPage(HWService hwService, SecurityService securityService) {
         this.hwService = hwService;
-        this.securityService = securityService;
 
         if (!securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
     }
@@ -70,6 +71,9 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
 
         // Tabulka HW
         grid = new Grid<>() {
+            @Serial
+            private static final long serialVersionUID = -5922981806556552421L;
+
             @AllowInert
             @ClientCallable
             private void scrollToId(Long id) {
@@ -88,7 +92,7 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
             filter.setTypes(types);
             Map<String, String> params = HWItemsGrid.processFilterToQuery(filter);
             QueryParameters queryParams = QueryParameters.simple(params);
-            Anchor anchor = componentFactory.createAnchor(to.getName(), e -> {
+            return componentFactory.createAnchor(to.getName(), e -> {
                 Map<String, String> replaceParams = new HashMap<>();
                 replaceParams.put(ID_QUERY_TOKEN, to.getId().toString());
                 if (nameField.getValue() != null) replaceParams.put(NAME_QUERY_TOKEN, nameField.getValue());
@@ -101,7 +105,6 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
                 String url = RouteConfiguration.forSessionScope().getUrl(HWItemsPage.class) + "?" + query;
                 UI.getCurrent().getPage().open(url, "_blank");
             });
-            return anchor;
         })).setHeader("Název").setSortable(true).setKey(NAME_BIND).setFlexGrow(1);
         grid.setWidthFull();
         grid.setHeight("500px");
@@ -120,20 +123,9 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
         Div buttonLayout = componentFactory.createButtonLayout();
         layout.add(buttonLayout);
 
-        /**
-         * Založení nového typu
-         */
         Button newTypeBtn = componentFactory.createCreateButton(e -> openCreateDialog());
         buttonLayout.add(newTypeBtn);
-
-        /**
-         * Úprava typu
-         */
         buttonLayout.add(componentFactory.createEditGridButton(item -> openEditDialog(item.getId()), grid));
-
-        /**
-         * Smazání typu
-         */
         buttonLayout.add(componentFactory.createDeleteGridButton(item -> {
             try {
                 hwService.deleteHWType(item.getId());
@@ -147,8 +139,9 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
         Map<String, List<String>> parametersMap = params.getParameters();
         HWFilterTO filterTO = new HWFilterTO();
         if (parametersMap.containsKey(ID_QUERY_TOKEN))
-            filterTO.setId(Long.parseLong(parametersMap.get(ID_QUERY_TOKEN).get(0)));
-        if (parametersMap.containsKey(NAME_QUERY_TOKEN)) filterTO.setName(parametersMap.get(NAME_QUERY_TOKEN).get(0));
+            filterTO.setId(Long.parseLong(parametersMap.get(ID_QUERY_TOKEN).getFirst()));
+        if (parametersMap.containsKey(NAME_QUERY_TOKEN))
+            filterTO.setName(parametersMap.get(NAME_QUERY_TOKEN).getFirst());
         setFilterTO(filterTO);
 
         populate();
@@ -172,15 +165,10 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
 
     private void populate() {
         CallbackDataProvider.FetchCallback<HWTypeTO, HWTypeTO> fetchCallback = q -> {
-            OrderSpecifier<?>[] order = QuerydslUtil.transformOrdering(q.getSortOrders(), column -> {
-                switch (column) {
-                    case NAME_BIND:
-                        return "name";
-                    case COUNT_BIND:
-                        return "count";
-                    default:
-                        return column;
-                }
+            OrderSpecifier<?>[] order = QuerydslUtil.transformOrdering(q.getSortOrders(), column -> switch (column) {
+                case NAME_BIND -> "name";
+                case COUNT_BIND -> "count";
+                default -> column;
             });
             if (order.length == 0) {
                 order = new OrderSpecifier[1];

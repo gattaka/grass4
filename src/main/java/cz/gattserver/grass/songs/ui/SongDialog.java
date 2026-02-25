@@ -11,7 +11,7 @@ import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.songs.facades.SongsService;
+import cz.gattserver.grass.songs.service.SongsService;
 import cz.gattserver.grass.songs.model.interfaces.SongTO;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -19,16 +19,13 @@ import java.util.function.Consumer;
 
 public class SongDialog extends EditWebDialog {
 
-    @Autowired
-    private SongsService songsFacade;
-
     public SongDialog(Consumer<SongTO> onSave) {
         this(null, onSave);
     }
 
     public SongDialog(final SongTO originalTO, Consumer<SongTO> onSave) {
         super("Píseň");
-        SpringContextHelper.inject(this);
+        SongsService songsService = SpringContextHelper.getBean(SongsService.class);
         setWidth("600px");
 
         SongTO songTO = new SongTO();
@@ -79,7 +76,7 @@ public class SongDialog extends EditWebDialog {
 
         if (originalTO != null) {
             binder.readBean(originalTO);
-            textField.setValue(songsFacade.breaklineToEol(originalTO.getText()));
+            textField.setValue(songsService.breaklineToEol(originalTO.getText()));
         }
     }
 

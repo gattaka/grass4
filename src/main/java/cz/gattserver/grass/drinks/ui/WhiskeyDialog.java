@@ -22,6 +22,9 @@ import java.util.function.Consumer;
 
 public class WhiskeyDialog extends DrinkDialog<WhiskeyTO> {
 
+    @Serial
+    private static final long serialVersionUID = -1917641666845387422L;
+
     public WhiskeyDialog(WhiskeyTO to, Consumer<WhiskeyTO> onSave) {
         super(to, onSave);
     }

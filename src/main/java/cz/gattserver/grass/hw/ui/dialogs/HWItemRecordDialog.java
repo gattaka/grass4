@@ -1,7 +1,7 @@
 package cz.gattserver.grass.hw.ui.dialogs;
 
+import java.io.Serial;
 import java.time.LocalDate;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 import com.vaadin.flow.component.Unit;
@@ -15,7 +15,10 @@ import cz.gattserver.grass.hw.interfaces.HWItemRecordTO;
 
 public class HWItemRecordDialog extends EditWebDialog {
 
-    public static HWItemRecordDialog create(Long hwItemId, Consumer<HWItemRecordTO> onSave) {
+    @Serial
+    private static final long serialVersionUID = -6091328749394040314L;
+
+    public static HWItemRecordDialog create(Consumer<HWItemRecordTO> onSave) {
         return new HWItemRecordDialog(null, onSave, false);
     }
 

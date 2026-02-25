@@ -1,4 +1,4 @@
-package cz.gattserver.grass.language.facades.impl;
+package cz.gattserver.grass.language.service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
 
-import cz.gattserver.grass.language.facades.LanguageService;
 import cz.gattserver.grass.language.model.dao.LanguageItemRepository;
 import cz.gattserver.grass.language.model.dao.LanguageRepository;
 import cz.gattserver.grass.language.model.domain.ItemType;

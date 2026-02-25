@@ -1,8 +1,20 @@
 package cz.gattserver.grass.songs.model.interfaces;
 
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.io.Serial;
+
+@Setter
+@Getter
+@NoArgsConstructor
 public class SongTO extends SongOverviewTO {
 
-	/**
+    @Serial
+    private static final long serialVersionUID = 2223110707299084497L;
+
+    /**
 	 * Text
 	 */
 	private String text;
@@ -12,41 +24,9 @@ public class SongTO extends SongOverviewTO {
 	 */
 	private String embedded;
 
-	public SongTO() {
-	}
-
 	public SongTO(String name, String author, Integer year, String text, Long id, Boolean publicated, String embedded) {
 		super(name, author, year, id, publicated);
 		this.text = text;
 		this.embedded = embedded;
 	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof SongTO))
-			return false;
-		return ((SongTO) obj).getId() == getId();
-	}
-
-	@Override
-	public int hashCode() {
-		return getId().hashCode();
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	public void setText(String text) {
-		this.text = text;
-	}
-
-	public String getEmbedded() {
-		return embedded;
-	}
-
-	public void setEmbedded(String embedded) {
-		this.embedded = embedded;
-	}
-
 }

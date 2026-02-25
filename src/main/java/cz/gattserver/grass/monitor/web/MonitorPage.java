@@ -43,14 +43,9 @@ import tools.jackson.databind.JsonNode;
 @Route(value = "system-monitor", layout = MainView.class)
 public class MonitorPage extends Div {
 
-    @Autowired
-    private MonitorService monitorFacade;
-
-    @Autowired
-    private MonitorEmailNotifier emailNotifier;
-
-    @Autowired
-    private MailService mailService;
+    private final MonitorService monitorService;
+    private final MonitorEmailNotifier emailNotifier;
+    private final MailService mailService;
 
     private final String TIMEOUTS_JS_ARRAY = "timeoutsArray";
 
@@ -73,7 +68,8 @@ public class MonitorPage extends Div {
 
     private VerticalLayout servicesLayout;
 
-    public MonitorPage(SecurityService securityService) {
+    public MonitorPage(SecurityService securityService, MonitorService monitorService,
+                       MonitorEmailNotifier emailNotifier, MailService mailService) {
         if (!SpringContextHelper.getBean(MonitorSection.class)
                 .isVisibleForRoles(securityService.getCurrentUser().getRoles())) throw new GrassPageException(403);
 
@@ -89,6 +85,9 @@ public class MonitorPage extends Div {
         this.monitorLayout.addClassName("monitor-content");
         layout.add(this.monitorLayout);
         populateMonitor();
+        this.monitorService = monitorService;
+        this.emailNotifier = emailNotifier;
+        this.mailService = mailService;
     }
 
     private String humanFormat(long value) {
@@ -192,7 +191,7 @@ public class MonitorPage extends Div {
         systemSwapStatusLayout.removeAll();
         TableLayout systemSwapStatusTableLayout = prepareTableLayout();
         systemSwapStatusLayout.add(systemSwapStatusTableLayout);
-        swapTO = monitorFacade.getSystemSwapStatus();
+        swapTO = monitorService.getSystemSwapStatus();
         switch (swapTO.getMonitorState()) {
             case SUCCESS:
                 systemSwapStatusTableLayout.newRow().add(new SuccessMonitorStateLabel())

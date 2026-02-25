@@ -48,10 +48,9 @@ import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
+import lombok.extern.slf4j.Slf4j;
 import net.engio.mbassy.listener.Handler;
 import org.jspecify.annotations.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serial;
@@ -62,6 +61,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @PageTitle("Editor fotogalerie")
 @Route(value = "pg-editor", layout = MainView.class)
 public class PGEditorPage extends Div implements HasUrlParameter<String>, BeforeLeaveObserver {
@@ -69,10 +69,8 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     @Serial
     private static final long serialVersionUID = 2801021108823739183L;
 
-    private static final Logger logger = LoggerFactory.getLogger(PGEditorPage.class);
-
     private final PGService pgService;
-    private final ContentTagService contentTagFacade;
+    private final ContentTagService contentTagService;
     private final EventBus eventBus;
     private final NodeService nodeService;
     private final SecurityService securityService;
@@ -103,10 +101,10 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     private final ComponentFactory componentFactory;
 
-    public PGEditorPage(PGService pgService, ContentTagService contentTagFacade, EventBus eventBus,
+    public PGEditorPage(PGService pgService, ContentTagService contentTagService, EventBus eventBus,
                         NodeService nodeService, SecurityService securityService) {
         this.pgService = pgService;
-        this.contentTagFacade = contentTagFacade;
+        this.contentTagService = contentTagService;
         this.eventBus = eventBus;
         this.nodeService = nodeService;
         this.securityService = securityService;
@@ -125,7 +123,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) {
-            logger.debug("Nezdařilo se vytěžit URL identifikátor z řetězce: '{}'", identifierToken);
+            log.debug("Nezdařilo se vytěžit URL identifikátor z řetězce: '{}'", identifierToken);
             throw new GrassPageException(404);
         }
 
@@ -136,9 +134,9 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         add(editorLayout);
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagFacade.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
+                q -> contentTagService.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagFacade.countByFilter(q.getFilter());
+                q -> contentTagService.countByFilter(q.getFilter());
         photogalleryKeywords = new TokenField(null, fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
@@ -178,7 +176,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             if (!existingPhotogalleryTO.authorName().equals(securityService.getCurrentUser().getName()) &&
                     !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
-            logger.debug("Neznámá operace: '{}'", operationToken);
+            log.debug("Neznámá operace: '{}'", operationToken);
             throw new GrassPageException(404);
         }
 
@@ -349,7 +347,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     }
 
     private void saveOrUpdatePhotogallery() {
-        logger.info("saveOrUpdatePhotogallery thread: {}", Thread.currentThread().threadId());
+        log.info("saveOrUpdatePhotogallery thread: {}", Thread.currentThread().threadId());
 
         for (PhotogalleryCreateItemTO item : newFiles) {
             try {

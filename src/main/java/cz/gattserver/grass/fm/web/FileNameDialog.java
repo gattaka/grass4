@@ -6,13 +6,15 @@ import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.fm.interfaces.FMCreateDirectoryTO;
-import cz.gattserver.grass.fm.interfaces.FMItemTO;
 
+import java.io.Serial;
 import java.util.function.Consumer;
 
 public class FileNameDialog extends EditWebDialog {
+
+    @Serial
+    private static final long serialVersionUID = 3279714188741874491L;
 
     public FileNameDialog(Consumer<FMCreateDirectoryTO> onSave) {
         this(null, onSave);
