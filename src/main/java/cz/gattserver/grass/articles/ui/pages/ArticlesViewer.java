@@ -1,10 +1,10 @@
 package cz.gattserver.grass.articles.ui.pages;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.router.*;
-import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
 import cz.gattserver.grass.articles.services.ArticleService;
@@ -24,8 +24,11 @@ import java.io.Serial;
 @Route(value = "articles", layout = MainView.class)
 public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasDynamicTitle, BeforeLeaveListener {
 
-    private ArticleService articleService;
-    private SecurityService securityService;
+    @Serial
+    private static final long serialVersionUID = -6269047534539406343L;
+
+    private final ArticleService articleService;
+    private final SecurityService securityService;
 
     private ArticleTO articleTO;
 
@@ -34,9 +37,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         return articleTO.name();
     }
 
-    public ArticlesViewer(ArticleService articleFacade, SecurityService securityService,
-                          ArticleService articleService) {
-        this.articleService = articleFacade;
+    public ArticlesViewer(SecurityService securityService, ArticleService articleService) {
         this.securityService = securityService;
         this.articleService = articleService;
     }
@@ -72,34 +73,29 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
                 .navigate(ArticlesEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
                 new RouterLink(articleTO.name(), ArticlesViewer.class, parameter)));
 
-        String jsInitDivId = "grass-js-init-div";
-        Div jsInitDiv = new Div() {
-
-            @Serial
-            private static final long serialVersionUID = 7826406055666115094L;
-
-            @ClientCallable
-            private void initJS() {
-                // JS resources
-                int jsResourcesSize = articleTO.pluginJSResources().size();
-                int jsCodesSize = articleTO.pluginJSCodes().size();
-
-                JScriptItem[] jsResourcesArr = new JScriptItem[jsResourcesSize + jsCodesSize];
-                int i = 0;
-                for (String resource : articleTO.pluginJSResources())
-                    jsResourcesArr[i++] = new JScriptItem(resource);
-                for (String code : articleTO.pluginJSCodes())
-                    jsResourcesArr[i++] = new JScriptItem(code, true);
-
-                UIUtils.loadJS(jsResourcesArr);
-            }
-        };
-        jsInitDiv.setId(jsInitDivId);
-        jsInitDiv.addAttachListener(e -> UI.getCurrent().getPage()
-                .executeJs("document.getElementById('" + jsInitDivId + "').$server.initJS();"));
-        add(jsInitDiv);
-
         UIUtils.turnOffRouterAnchors();
+    }
+
+    @Override
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
+        UI.getCurrent().getPage().executeJs("$0.$server.initJS();", ArticlesViewer.this.getElement());
+    }
+
+    @ClientCallable
+    private void initJS() {
+        // JS resources
+        int jsResourcesSize = articleTO.pluginJSResources().size();
+        int jsCodesSize = articleTO.pluginJSCodes().size();
+
+        JScriptItem[] jsResourcesArr = new JScriptItem[jsResourcesSize + jsCodesSize];
+        int i = 0;
+        for (String resource : articleTO.pluginJSResources())
+            jsResourcesArr[i++] = new JScriptItem(resource);
+        for (String code : articleTO.pluginJSCodes())
+            jsResourcesArr[i++] = new JScriptItem(code, true);
+
+        UIUtils.loadJS(jsResourcesArr);
     }
 
     private HtmlDiv createHTMLDiv() {

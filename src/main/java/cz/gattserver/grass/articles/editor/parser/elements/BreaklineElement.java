@@ -6,11 +6,10 @@ import java.util.List;
 
 public class BreaklineElement implements Element {
 
-	private String text = "<br/>";
-
-	@Override
+    @Override
 	public void apply(Context ctx) {
-		ctx.println(text);
+        String text = "<br/>";
+        ctx.println(text);
 	}
 
 	@Override

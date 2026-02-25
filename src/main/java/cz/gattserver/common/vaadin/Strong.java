@@ -3,10 +3,15 @@ package cz.gattserver.common.vaadin;
 import com.vaadin.flow.component.Tag;
 import com.vaadin.flow.component.html.Span;
 
+import java.io.Serial;
+
 @Tag(Tag.STRONG)
 public class Strong extends Span {
 
-	public Strong(String value) {
+    @Serial
+    private static final long serialVersionUID = 202704721123121265L;
+
+    public Strong(String value) {
 		super(value);
 	}
 }

@@ -9,22 +9,16 @@ public interface Context {
 
 	/**
 	 * Zapíše do výstupu
-	 * 
-	 * @param msg
 	 */
 	void print(String msg);
 
 	/**
 	 * Zapíše do výstupu a ukončí novou řádkou
-	 * 
-	 * @param msg
 	 */
 	void println(String msg);
 
 	/**
 	 * Nastaví úroveň textu dle nadpisu (1-4)
-	 * 
-	 * @param level
 	 */
 	void setHeaderLevel(int level);
 

@@ -16,7 +16,7 @@ import java.util.List;
  */
 public class SortParser implements Parser {
 
-	private String tag;
+	private final String tag;
 
 	public SortParser(String tag) {
 		this.tag = tag;
@@ -50,7 +50,7 @@ public class SortParser implements Parser {
 			case TEXT:
 				TextElement textElement = pluginBag.getTextTree();
 				if (line.getComparable() == null)
-					line.setComparable(textElement.getText());
+					line.setComparable(textElement.text());
 				line.getElements().add(textElement);
 				break;
 			// Konec řádku značí konec položky listu
@@ -92,7 +92,7 @@ public class SortParser implements Parser {
 	private String findText(List<Element> elements) {
 		for (Element e : elements) {
 			if (e instanceof TextElement) {
-				return ((TextElement) e).getText();
+				return ((TextElement) e).text();
 			} else {
 				String val = findText(e.getSubElements());
 				if (StringUtils.isNotBlank(val))
@@ -101,5 +101,4 @@ public class SortParser implements Parser {
 		}
 		return null;
 	}
-
 }

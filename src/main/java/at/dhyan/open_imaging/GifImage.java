@@ -31,7 +31,7 @@ public class GifImage {
     final CodeTable codes = new CodeTable();
     Graphics2D g;
 
-    private final int[] decode(final GifFrame fr, final int[] activeColTbl) {
+    private int[] decode(final GifFrame fr, final int[] activeColTbl) {
         codes.init(fr, activeColTbl, bits);
         bits.init(fr.data); // Incoming codes
         final int clearCode = fr.clearCode, endCode = fr.endOfInfoCode;
@@ -74,11 +74,12 @@ public class GifImage {
                 codes.add(prevValsAndK); // Previous indices + K
             }
         } catch (final ArrayIndexOutOfBoundsException e) {
+            // ?
         }
         return out;
     }
 
-    private final int[] deinterlace(final int[] src, final GifFrame fr) {
+    private  int[] deinterlace(final int[] src, final GifFrame fr) {
         final int w = fr.w, h = fr.h, wh = fr.wh;
         final int[] dest = new int[src.length];
         // Interlaced images are organized in 4 sets of pixel lines
@@ -106,7 +107,7 @@ public class GifImage {
         return dest; // All pixel lines have now been rearranged
     }
 
-    private final void drawFrame(final GifFrame fr) {
+    private void drawFrame(final GifFrame fr) {
         // Determine the color table that will be active for this frame
         final int[] activeColTbl = fr.hasLocColTbl ? fr.localColTbl : globalColTbl;
         // Get pixels from data stream
@@ -157,7 +158,7 @@ public class GifImage {
      * @return 32 bit ARGB color in the form 0xAARRGGBB
      */
     public final int getBackgroundColor() {
-        final GifFrame frame = frames.get(0);
+        final GifFrame frame = frames.getFirst();
         if (frame.hasLocColTbl) {
             return frame.localColTbl[bgColIndex];
         } else if (hasGlobColTbl) {

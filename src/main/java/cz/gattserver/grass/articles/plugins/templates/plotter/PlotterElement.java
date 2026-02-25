@@ -9,14 +9,13 @@ import java.util.UUID;
 
 public class PlotterElement implements Element {
 
-	private double xUnit;
-	private double yUnit;
-	private double xCenter;
-	private double yCenter;
-	private String function;
-
-	private String width;
-	private String height;
+	private final double xUnit;
+	private final double yUnit;
+	private final double xCenter;
+	private final double yCenter;
+	private final String function;
+	private final String width;
+	private final String height;
 
 	protected UUID generateRandomUUID() {
 		return UUID.randomUUID();

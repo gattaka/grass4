@@ -35,7 +35,7 @@ public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
                         .setSortProperty("category");
         Column<BeerOverviewTO> degreesColumn = grid.addColumn(
                         new NumberRenderer<>(BeerOverviewTO::getDegrees,
-                                NumberFormat.getNumberInstance(new Locale("cs", "CZ")))).setHeader("Stupně (°)")
+                                NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")))).setHeader("Stupně (°)")
                 .setWidth("100px").setFlexGrow(0).setSortProperty("degrees");
 
         addAlcoholColumn(grid);

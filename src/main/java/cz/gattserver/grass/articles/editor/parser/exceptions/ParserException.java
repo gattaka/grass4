@@ -1,5 +1,7 @@
 package cz.gattserver.grass.articles.editor.parser.exceptions;
 
+import java.io.Serial;
+
 /**
  * Obecná výjimka pro hlášení chyby během parsování
  * 
@@ -8,9 +10,8 @@ package cz.gattserver.grass.articles.editor.parser.exceptions;
  */
 public class ParserException extends RuntimeException {
 
-	public ParserException(Throwable cause) {
-		super(cause);
-	}
+    @Serial
+    private static final long serialVersionUID = 6434432342382364093L;
 
 	public ParserException(String message) {
 		super(message);

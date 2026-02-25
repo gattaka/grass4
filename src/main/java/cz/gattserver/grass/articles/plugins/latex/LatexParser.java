@@ -34,7 +34,7 @@ public class LatexParser implements Parser {
 			if ((pluginBag.getToken() == Token.END_TAG && pluginBag.getEndTag().equals(tag))
 					|| pluginBag.getToken() == Token.EOF)
 				break;
-			formulaBuilder.append(pluginBag.getCodeTextTree().getText());
+			formulaBuilder.append(pluginBag.getCodeTextTree().text());
 		}
 
 		return formulaBuilder.toString();

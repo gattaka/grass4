@@ -1,7 +1,5 @@
 package cz.gattserver.common.util;
 
-import cz.gattserver.common.Identifiable;
-
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;

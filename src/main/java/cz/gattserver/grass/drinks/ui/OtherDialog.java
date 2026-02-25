@@ -66,7 +66,7 @@ public abstract class OtherDialog extends DrinkDialog<OtherTO> {
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
-						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
+						return NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ"));
 					}
 
 				}).bind(OtherTO::getAlcohol, OtherTO::setAlcohol);

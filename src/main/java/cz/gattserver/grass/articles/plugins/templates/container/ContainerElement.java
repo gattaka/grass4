@@ -2,14 +2,13 @@ package cz.gattserver.grass.articles.plugins.templates.container;
 
 import cz.gattserver.grass.articles.editor.parser.elements.Element;
 import cz.gattserver.grass.articles.editor.parser.Context;
-import cz.gattserver.grass.articles.editor.parser.elements.Element;
 
 import java.util.List;
 import java.util.UUID;
 
 public class ContainerElement implements Element {
 
-	private List<Element> elist;
+	private final List<Element> elist;
 
 	public ContainerElement(List<Element> elist) {
 		this.elist = elist;

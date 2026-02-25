@@ -72,7 +72,7 @@ public abstract class RumDialog extends DrinkDialog<RumTO> {
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
-						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
+						return NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ"));
 					}
 
 				}).asRequired(new DoubleRangeValidator("Obsah alkoholu je mimo rozsah (1-100)", 1d, 100d))

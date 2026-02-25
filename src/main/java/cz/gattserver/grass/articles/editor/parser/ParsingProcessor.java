@@ -127,14 +127,16 @@ public class ParsingProcessor {
         return lexer.getEndTag();
     }
 
+    private void logActivePluginsMsg() {
+        log.debug("activePlugins: {}", activePlugins);
+    }
+
     /**
      * ParserCore
      */
     private Element parseTag() {
         String tag = getStartTag();
         log.debug("Looking for the right ParserPlugin for tag '{}'", tag);
-
-        String activePluginsMsg = "activePlugins: {}";
 
         Plugin plugin = registerSnapshot.get(tag);
         if (plugin != null) {
@@ -144,33 +146,33 @@ public class ParsingProcessor {
                 // => nastav si, že tento plugin je právě u prohledávání
                 activePlugins.push(new StackElement(tag, parser));
                 log.debug("{} was pushed in stack and launched", parser.getClass());
-                log.debug(activePluginsMsg, activePlugins);
+                logActivePluginsMsg();
 
                 // Spusť plugin
                 Element elementTree = parser.parse(this);
 
                 parser = activePlugins.pop().parserPlugin();
                 log.debug("{} terminates (clean) and was poped from stack", parser.getClass());
-                log.debug(activePluginsMsg, activePlugins);
+                logActivePluginsMsg();
 
                 return elementTree;
             } catch (TokenException ex) {
                 // Plugin běží, ale je problém s očekávanou posloupností Tokenů
                 parser = activePlugins.pop().parserPlugin();
                 log.debug("{} terminates (token exception) and was poped from stack", parser.getClass());
-                log.debug("activePlugins: {}", activePlugins);
+                logActivePluginsMsg();
                 return new ParserErrorElement(tag, ex.toString(), activePlugins.toString());
             } catch (ParserException pe) {
                 // Plugin běží, ale došlo v něm k nějaké jiné chybě
                 parser = activePlugins.pop().parserPlugin();
                 log.warn("{} terminates (parse exception) and was poped from stack", parser.getClass());
-                log.warn(activePluginsMsg, activePlugins);
+                log.warn("activePlugins: {}", activePlugins);
                 return new ParserErrorElement(tag, pe.getMessage(), activePlugins.toString());
             } catch (Exception ex) {
                 // Došlo k chybě
                 parser = activePlugins.pop().parserPlugin();
                 log.error("{} terminates (plugin exception) and was poped from stack", parser.getClass());
-                log.error(activePluginsMsg, activePlugins);
+                log.error("activePlugins: {}", activePlugins);
                 log.error("Plugin error", ex);
                 return new PluginErrorElement(tag);
             }

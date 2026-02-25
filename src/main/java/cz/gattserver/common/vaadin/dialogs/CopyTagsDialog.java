@@ -1,6 +1,5 @@
 package cz.gattserver.common.vaadin.dialogs;
 
-import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
@@ -15,12 +14,15 @@ import cz.gattserver.grass.core.ui.components.ContentsLazyGrid;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import org.apache.commons.lang3.StringUtils;
 
+import java.io.Serial;
 import java.util.ArrayList;
-import java.util.EventListener;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class CopyTagsDialog extends WebDialog {
+
+    @Serial
+    private static final long serialVersionUID = 4893194327164703312L;
 
     public CopyTagsDialog(Consumer<List<String>> onSubmit) {
         super("Výběr obsahu");

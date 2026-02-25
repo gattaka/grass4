@@ -86,7 +86,7 @@ public abstract class BeerDialog extends DrinkDialog<BeerTO> {
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
-						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
+						return NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ"));
 					}
 
 				}).bind(BeerTO::getDegrees, BeerTO::setDegrees);
@@ -103,7 +103,7 @@ public abstract class BeerDialog extends DrinkDialog<BeerTO> {
 
 					@Override
 					protected NumberFormat getFormat(Locale locale) {
-						return NumberFormat.getNumberInstance(new Locale("cs", "CZ"));
+						return NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ"));
 					}
 
 				}).bind(BeerTO::getAlcohol, BeerTO::setAlcohol);

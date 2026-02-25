@@ -2,7 +2,12 @@ package cz.gattserver.common.vaadin.dialogs;
 
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
+
 public class EditWebDialog extends WebDialog {
+
+    @Serial
+    private static final long serialVersionUID = -432908336516831406L;
 
     protected final boolean readOnly;
 

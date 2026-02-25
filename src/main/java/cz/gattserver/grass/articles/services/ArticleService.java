@@ -2,7 +2,6 @@ package cz.gattserver.grass.articles.services;
 
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
 import cz.gattserver.grass.articles.editor.parser.interfaces.*;
-import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -51,8 +50,6 @@ public interface ArticleService {
 
     /**
      * Získá z konfigurace dobu intervalu (v sekundách) pravidelné zálohy rozpracovaných článků.
-     *
-     * @return
      */
     Integer getBackupTimeout();
 

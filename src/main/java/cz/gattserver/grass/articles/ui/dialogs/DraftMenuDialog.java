@@ -14,10 +14,14 @@ import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOvervie
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
+import java.io.Serial;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class DraftMenuDialog extends WebDialog {
+
+    @Serial
+    private static final long serialVersionUID = 7978737632096038837L;
 
     private boolean continueFlag = false;
 
@@ -42,7 +46,7 @@ public class DraftMenuDialog extends WebDialog {
         grid.setWidth("900px");
         grid.setSelectionMode(SelectionMode.SINGLE);
 
-        grid.addColumn(new TextRenderer<>(a -> a.name())).setHeader("Název").setWidth("200px")
+        grid.addColumn(new TextRenderer<>(ArticleDraftOverviewTO::name)).setHeader("Název").setWidth("200px")
                 .setFlexGrow(0);
         grid.addColumn(
                         new TextRenderer<>(a -> a.text().length() < 100 ? a.text() : a.text().substring(0, 100)))

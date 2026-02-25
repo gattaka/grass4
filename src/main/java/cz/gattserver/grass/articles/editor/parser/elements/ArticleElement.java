@@ -2,6 +2,7 @@ package cz.gattserver.grass.articles.editor.parser.elements;
 
 import cz.gattserver.grass.articles.editor.parser.Context;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -9,7 +10,7 @@ import java.util.List;
  */
 public class ArticleElement implements Element {
 
-	private List<Element> children;
+	private final List<Element> children;
 
 	public ArticleElement(List<Element> elements) {
 		this.children = elements;
@@ -27,6 +28,6 @@ public class ArticleElement implements Element {
 
 	@Override
 	public List<Element> getSubElements() {
-		return children;
+		return Collections.unmodifiableList(children);
 	}
 }

@@ -9,10 +9,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
+import java.io.Serial;
 import java.nio.file.Path;
 
 @Component
 public class AttachmentsRequestHandler extends AbstractGrassRequestHandler {
+
+    @Serial
+    private static final long serialVersionUID = 9074938509479420000L;
 
     private final ArticleService articleService;
 

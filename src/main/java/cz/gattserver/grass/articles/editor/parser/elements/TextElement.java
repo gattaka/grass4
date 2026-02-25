@@ -4,25 +4,15 @@ import cz.gattserver.grass.articles.editor.parser.Context;
 
 import java.util.List;
 
-public class TextElement implements cz.gattserver.grass.articles.editor.parser.elements.Element {
+public record TextElement(String text) implements Element {
 
-	private String text;
+    @Override
+    public void apply(Context ctx) {
+        ctx.println(text);
+    }
 
-	public TextElement(String text) {
-		this.text = text;
-	}
-
-	@Override
-	public void apply(Context ctx) {
-		ctx.println(text);
-	}
-
-	public String getText() {
-		return text;
-	}
-
-	@Override
-	public List<Element> getSubElements() {
-		return null;
-	}
+    @Override
+    public List<Element> getSubElements() {
+        return null;
+    }
 }

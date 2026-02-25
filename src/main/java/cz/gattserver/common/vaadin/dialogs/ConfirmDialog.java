@@ -5,12 +5,18 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.io.Serial;
 import java.io.Serializable;
 
+@Getter
+@Setter
 public class ConfirmDialog extends WebDialog {
 
-    private static final long serialVersionUID = 4123506060675738841L;
+    @Serial
+    private static final long serialVersionUID = 2220892707142552312L;
 
     private ConfirmAction confirmAction;
 
@@ -54,13 +60,4 @@ public class ConfirmDialog extends WebDialog {
             close();
         }, e -> close()));
     }
-
-    public ConfirmAction getConfirmAction() {
-        return confirmAction;
-    }
-
-    public void setConfirmAction(ConfirmAction confirmAction) {
-        this.confirmAction = confirmAction;
-    }
-
 }

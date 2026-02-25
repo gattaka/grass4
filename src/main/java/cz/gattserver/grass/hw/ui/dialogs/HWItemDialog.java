@@ -74,7 +74,7 @@ public class HWItemDialog extends EditWebDialog {
         BigDecimalField priceField = new BigDecimalField("Cena");
         priceField.addThemeVariants(TextFieldVariant.LUMO_ALIGN_RIGHT);
         priceField.setWidth(100, Unit.PIXELS);
-        priceField.setLocale(new Locale("cs", "CZ"));
+        priceField.setLocale(Locale.forLanguageTag("cs-CZ"));
         binder.forField(priceField).withNullRepresentation(BigDecimal.ZERO)
                 .bind(HWItemTO::getPrice, HWItemTO::setPrice);
         topLayout.add(priceField);

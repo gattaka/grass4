@@ -5,8 +5,7 @@ import cz.gattserver.grass.articles.editor.parser.Parser;
 import cz.gattserver.grass.articles.editor.parser.ParsingProcessor;
 import cz.gattserver.grass.articles.editor.parser.elements.ArticleElement;
 import cz.gattserver.grass.articles.editor.parser.elements.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,9 +31,8 @@ import java.util.List;
  * 
  * @author gatt
  */
+@Slf4j
 public class ArticleParser implements Parser {
-
-	private static Logger logger = LoggerFactory.getLogger(ArticleParser.class);
 
 	private ParsingProcessor parsingProcessor;
 
@@ -55,7 +53,7 @@ public class ArticleParser implements Parser {
 	 * @return strom článku
 	 */
 	private ArticleElement article() {
-		logger.debug("article: {}", parsingProcessor.getToken());
+		log.debug("article: {}", parsingProcessor.getToken());
 		if (Token.EOF.equals(parsingProcessor.getToken())) {
 			// Konec článku = prázdný článek
 			return new ArticleElement(null);

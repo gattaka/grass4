@@ -1,11 +1,15 @@
 package cz.gattserver.common.vaadin;
 
 import com.vaadin.flow.component.html.Div;
+import lombok.NoArgsConstructor;
 
+import java.io.Serial;
+
+@NoArgsConstructor
 public class HtmlDiv extends Div {
 
-	public HtmlDiv() {
-	}
+    @Serial
+    private static final long serialVersionUID = -4907503228381589255L;
 
 	public HtmlDiv(String value) {
 		setValue(value);

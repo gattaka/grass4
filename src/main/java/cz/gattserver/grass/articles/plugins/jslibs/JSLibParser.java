@@ -24,7 +24,7 @@ public class JSLibParser implements Parser {
 		// zpracovat text
 		StringBuilder link = new StringBuilder();
 		if (Token.TEXT.equals(processor.getToken()))
-			link.append(processor.getTextTree().getText());
+			link.append(processor.getTextTree().text());
 		else
 			throw new TokenException(Token.TEXT, processor.getToken(), processor.getText());
 

@@ -1,7 +1,9 @@
 package cz.gattserver.common.vaadin;
 
 import com.vaadin.flow.component.html.Image;
+import lombok.Getter;
 
+@Getter
 public enum ImageIcon {
 
     /**
@@ -193,11 +195,7 @@ public enum ImageIcon {
      */
     WARNING_16_ICON("warning_16.png");
 
-    private String imageName;
-
-    public String getImageName() {
-        return imageName;
-    }
+    private final String imageName;
 
     ImageIcon(String name) {
         this.imageName = name;

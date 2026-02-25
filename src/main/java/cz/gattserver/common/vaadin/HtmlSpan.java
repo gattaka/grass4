@@ -2,9 +2,14 @@ package cz.gattserver.common.vaadin;
 
 import com.vaadin.flow.component.html.Span;
 
+import java.io.Serial;
+
 public class HtmlSpan extends Span {
 
-	public HtmlSpan(String value) {
+    @Serial
+    private static final long serialVersionUID = 1340755668510217229L;
+
+    public HtmlSpan(String value) {
 		super();
 		setValue(value);
 	}

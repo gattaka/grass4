@@ -1,4 +1,4 @@
-package cz.gattserver.grass.articles.services.impl;
+package cz.gattserver.grass.articles.services;
 
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.util.ServiceUtils;
@@ -13,12 +13,11 @@ import cz.gattserver.grass.articles.editor.parser.impl.ArticleParser;
 import cz.gattserver.grass.articles.editor.parser.impl.ContextImpl;
 import cz.gattserver.grass.articles.editor.parser.interfaces.*;
 import cz.gattserver.grass.articles.editor.parser.util.HTMLTagsFilter;
-import cz.gattserver.grass.articles.events.impl.ArticlesProcessProgressEvent;
-import cz.gattserver.grass.articles.events.impl.ArticlesProcessResultEvent;
-import cz.gattserver.grass.articles.events.impl.ArticlesProcessStartEvent;
+import cz.gattserver.grass.articles.events.ArticlesProcessProgressEvent;
+import cz.gattserver.grass.articles.events.ArticlesProcessResultEvent;
+import cz.gattserver.grass.articles.events.ArticlesProcessStartEvent;
 import cz.gattserver.grass.articles.model.*;
 import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
-import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.modules.ArticlesContentModule;
@@ -28,7 +27,6 @@ import cz.gattserver.grass.core.services.FileSystemService;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -58,35 +56,35 @@ public class ArticleServiceImpl implements ArticleService {
     @Value("${articles.backup.timeout}")
     private Integer articlesBackupTimeout;
 
-    @Autowired
-    private EventBus eventBus;
+    private final EventBus eventBus;
+    private final ContentNodeService contentNodeService;
+    private final ArticleRepository articleRepository;
+    private final PluginRegisterService pluginRegister;
+    private final FileSystemService fileSystemService;
+    private final SecurityService securityService;
+    private final ArticleCSSResourceRepository articleCSSResourceRepository;
+    private final ArticleJSResourceRepository articleJSResourceRepository;
+    private final ArticleJSCodeRepository articleJSCodeRepository;
+    private final ContentNodeContentTagRepository contentNodeContentTagRepository;
 
-    @Autowired
-    private ContentNodeService contentNodeService;
-
-    @Autowired
-    private ArticleRepository articleRepository;
-
-    @Autowired
-    private PluginRegisterService pluginRegister;
-
-    @Autowired
-    private FileSystemService fileSystemService;
-
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    private ArticleCSSResourceRepository articleCSSResourceRepository;
-
-    @Autowired
-    private ArticleJSResourceRepository articleJSResourceRepository;
-
-    @Autowired
-    private ArticleJSCodeRepository articleJSCodeRepository;
-
-    @Autowired
-    private ContentNodeContentTagRepository contentNodeContentTagRepository;
+    public ArticleServiceImpl(EventBus eventBus, ContentNodeService contentNodeService,
+                              ArticleRepository articleRepository, PluginRegisterService pluginRegister,
+                              FileSystemService fileSystemService, SecurityService securityService,
+                              ArticleCSSResourceRepository articleCSSResourceRepository,
+                              ArticleJSResourceRepository articleJSResourceRepository,
+                              ArticleJSCodeRepository articleJSCodeRepository,
+                              ContentNodeContentTagRepository contentNodeContentTagRepository) {
+        this.eventBus = eventBus;
+        this.contentNodeService = contentNodeService;
+        this.articleRepository = articleRepository;
+        this.pluginRegister = pluginRegister;
+        this.fileSystemService = fileSystemService;
+        this.securityService = securityService;
+        this.articleCSSResourceRepository = articleCSSResourceRepository;
+        this.articleJSResourceRepository = articleJSResourceRepository;
+        this.articleJSCodeRepository = articleJSCodeRepository;
+        this.contentNodeContentTagRepository = contentNodeContentTagRepository;
+    }
 
     private Context processArticle(String source, String contextRoot) {
         Validate.notNull(contextRoot, "ContextRoot nemůže být null");
@@ -194,15 +192,14 @@ public class ArticleServiceImpl implements ArticleService {
                             try {
                                 Files.delete(p);
                             } catch (IOException e) {
-                                logger.error(
-                                        "Chyba při mazání přílohy článku [" + article.getAttachmentsDirId() + "] (" +
-                                                p.getFileName().toString() + ")", e);
+                                logger.error("Chyba při mazání přílohy článku [{}] ({})", article.getAttachmentsDirId(),
+                                        p.getFileName().toString(), e);
                             }
                         });
                     }
                 }
             } catch (Exception e) {
-                logger.warn("Nezdařilo se smazat adresář příloh článku [" + article.getAttachmentsDirId() + "]");
+                logger.warn("Nezdařilo se smazat adresář příloh článku [{}]", article.getAttachmentsDirId());
             }
         }
     }
@@ -352,8 +349,8 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<AttachmentTO> findAttachments(Long articleId) {
         Path path = getAttachmentsPath(articleId, true);
-        try {
-            return Files.list(path).map(this::mapPathToAttachmentTO).toList();
+        try (Stream<Path> stream = Files.list(path)) {
+            return stream.map(this::mapPathToAttachmentTO).toList();
         } catch (IOException e) {
             throw new RuntimeException("Nezdařilo se získat přílohy článku " + articleId, e);
         }

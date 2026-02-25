@@ -23,11 +23,6 @@ public class ImageUtils {
 		return filename.substring(dot + 1);
 	}
 
-	public static boolean isSmallerThenMaxArea(File inputFile, int maxArea) throws IOException {
-		BufferedImage image = ImageIO.read(inputFile);
-		return image.getHeight() * image.getWidth() < maxArea;
-	}
-
 	public static void resizeImageFile(String filename, InputStream in, ByteArrayOutputStream bos, int maxWidth,
 			int maxHeight) throws IOException {
 		BufferedImage image = ImageIO.read(in);

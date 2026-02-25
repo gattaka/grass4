@@ -6,7 +6,12 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import cz.gattserver.common.ui.ComponentFactory;
 
+import java.io.Serial;
+
 public class WebDialog extends Dialog {
+
+    @Serial
+    private static final long serialVersionUID = -1763915962916916542L;
 
     protected ComponentFactory componentFactory;
     protected VerticalLayout layout = new VerticalLayout();
@@ -14,10 +19,6 @@ public class WebDialog extends Dialog {
     public WebDialog(String caption) {
         setHeaderTitle(caption);
         componentFactory = new ComponentFactory();
-        init();
-    }
-
-    protected void init() {
         add(layout);
         setCloseOnOutsideClick(false);
         setCloseOnEsc(false);
@@ -39,5 +40,4 @@ public class WebDialog extends Dialog {
     public void setComponentAlignment(Component component, Alignment alignment) {
         layout.setHorizontalComponentAlignment(alignment, component);
     }
-
 }

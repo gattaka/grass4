@@ -7,8 +7,9 @@ import com.vaadin.flow.server.streams.UploadMetadata;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.Serial;
@@ -17,35 +18,20 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+@Slf4j
 public class UploadBuilder {
-
-    private static final Logger logger = LoggerFactory.getLogger(UploadBuilder.class);
 
     private final Set<String> refusedFiles;
     private final Set<UploadFile> uploadedFiles;
 
+    @Setter
+    @Getter
     public static class UploadFile {
         private UploadMetadata metadata;
         private File file;
 
         public UploadFile(UploadMetadata metadata, File file) {
             this.metadata = metadata;
-            this.file = file;
-        }
-
-        public UploadMetadata getMetadata() {
-            return metadata;
-        }
-
-        public void setMetadata(UploadMetadata metadata) {
-            this.metadata = metadata;
-        }
-
-        public File getFile() {
-            return file;
-        }
-
-        public void setFile(File file) {
             this.file = file;
         }
     }
@@ -82,10 +68,10 @@ public class UploadBuilder {
                 @Override
                 protected void createDetails(String details) {
                     HtmlDiv div = new HtmlDiv();
-                    String value = "";
+                    StringBuilder value = new StringBuilder();
                     for (String existing : refusedFiles)
-                        value += existing + "<br/>";
-                    div.setValue(value);
+                        value.append(existing).append("<br/>");
+                    div.setValue(value.toString());
                     addComponent(div);
                 }
 
@@ -97,7 +83,7 @@ public class UploadBuilder {
                     refusedFiles.clear();
                 }
             };
-            ProgressDialog.runInUI(() -> warnWindow.open(), UI.getCurrent());
+            ProgressDialog.runInUI(warnWindow::open, UI.getCurrent());
         }
     }
 }

@@ -4,6 +4,9 @@ import cz.gattserver.common.util.StringPreviewCreator;
 import cz.gattserver.grass.articles.editor.lexer.Token;
 import org.apache.commons.lang3.Validate;
 
+import java.io.Serial;
+import java.util.Arrays;
+
 /**
  * Výjimka přesně pro případy, kdy byl očekáván nějaký {@link Token} a místo
  * toho byla nalezen jiný
@@ -13,12 +16,15 @@ import org.apache.commons.lang3.Validate;
  */
 public class TokenException extends RuntimeException {
 
-	private static final String EXPECTED_TOKEN_CHUNK = "Expected Token: ";
-	private static final String ACTUAL_TOKEN_CHUNK = " Actual Token: ";
-	private static final String EXPECTED_CONTENT_CHUNK = "Expected content: ";
-	private static final String ACTUAL_CONTENT_CHUNK = " Actual content: ";
-	
-	private final String message;
+    @Serial
+    private static final long serialVersionUID = 3906676660393062035L;
+
+    private static final String EXPECTED_TOKEN_CHUNK = "Expected Token: ";
+    private static final String ACTUAL_TOKEN_CHUNK = " Actual Token: ";
+    private static final String EXPECTED_CONTENT_CHUNK = "Expected content: ";
+    private static final String ACTUAL_CONTENT_CHUNK = " Actual content: ";
+
+    private final String message;
 
 	private void validateExpected(Object expected) {
 		Validate.notNull(expected, "Expected nesmí být null");
@@ -49,7 +55,7 @@ public class TokenException extends RuntimeException {
 
 	public TokenException(Token[] expected) {
 		validateExpected(expected);
-		this.message = "Expected Tokens: " + expected + ACTUAL_TOKEN_CHUNK + Token.EOF;
+		this.message = "Expected Tokens: " + Arrays.toString(expected) + ACTUAL_TOKEN_CHUNK + Token.EOF;
 	}
 
 	public TokenException(Token expected) {

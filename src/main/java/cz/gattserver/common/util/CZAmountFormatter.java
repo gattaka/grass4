@@ -16,10 +16,10 @@ public class CZAmountFormatter {
 
 	private static final String DEFAULT_NULL_VALUE = "-";
 
-	private String format1;
-	private String format2to4;
-	private String format5AndMore;
-	private String nullValue;
+	private final String format1;
+	private final String format2to4;
+	private final String format5AndMore;
+	private final String nullValue;
 
 	/**
 	 * 
@@ -62,18 +62,11 @@ public class CZAmountFormatter {
 	public String format(Integer number) {
 		if (number == null)
 			return nullValue;
-		switch (number) {
-		case 0:
-			return nullValue;
-		case 1:
-			return String.format(format1, number);
-		case 2:
-		case 3:
-		case 4:
-			return String.format(format2to4, number);
-		default:
-			return String.format(format5AndMore, number);
-		}
+        return switch (number) {
+            case 0 -> nullValue;
+            case 1 -> String.format(format1, number);
+            case 2, 3, 4 -> String.format(format2to4, number);
+            default -> String.format(format5AndMore, number);
+        };
 	}
-
 }

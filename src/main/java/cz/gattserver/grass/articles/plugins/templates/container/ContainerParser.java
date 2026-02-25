@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class ContainerParser implements Parser {
 
-	private String tag;
+	private final String tag;
 
 	public ContainerParser(String tag) {
 		this.tag = tag;

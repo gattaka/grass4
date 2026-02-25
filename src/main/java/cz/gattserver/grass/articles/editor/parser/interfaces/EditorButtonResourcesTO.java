@@ -1,7 +1,5 @@
 package cz.gattserver.grass.articles.editor.parser.interfaces;
 
-import lombok.Builder;
-
 /**
  * Třída obsahující všechny potřebné informace pro začlenění pluginu do UI
  * nabídky elementů v editoru

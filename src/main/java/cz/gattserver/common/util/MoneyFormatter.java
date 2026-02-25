@@ -6,7 +6,7 @@ import java.util.Locale;
 
 public class MoneyFormatter {
 
-    private static NumberFormat priceFormat;
+    private final static NumberFormat priceFormat;
 
     private MoneyFormatter() {
     }
@@ -22,7 +22,6 @@ public class MoneyFormatter {
      * Toto je potřeba zohlednit především v testech.
      *
      * @param price cena
-     * @return
      */
     public static String format(BigDecimal price) {
         return priceFormat.format(price.doubleValue());

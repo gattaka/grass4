@@ -1,7 +1,6 @@
 package cz.gattserver.grass.articles.editor.lexer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import static cz.gattserver.grass.articles.editor.lexer.Token.*;
 
@@ -9,11 +8,13 @@ import static cz.gattserver.grass.articles.editor.lexer.Token.*;
  * 
  * @author gatt
  */
+@Slf4j
 public class Lexer {
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+	private final String source;
 
-	private String source;
+    // načtený identifikátor
+    private final StringBuilder word = new StringBuilder();
 
 	// pozice na řádce
 	private int index;
@@ -26,15 +27,11 @@ public class Lexer {
 	// napřed
 	private boolean br = false;
 
-	// načtený identifikátor
-	private StringBuilder word = new StringBuilder();
-
 	/**
 	 * Bere zdrojový text a seká ho na tokeny
 	 * 
 	 * @param source
 	 *            zdrojový text
-	 * @param debugOutput
 	 */
 	public Lexer(String source) {
 		this.source = source == null ? "" : source;
@@ -115,7 +112,7 @@ public class Lexer {
 	 */
 	public cz.gattserver.grass.articles.editor.lexer.Token nextToken() {
 		cz.gattserver.grass.articles.editor.lexer.Token symbol = readNextToken();
-		logger.debug("LEXER: Token made -> {}", symbol);
+		log.debug("LEXER: Token made -> {}", symbol);
 		return symbol;
 	}
 
@@ -194,5 +191,4 @@ public class Lexer {
 		// jinak to nechám dojet jako text
 		return null;
 	}
-
 }

@@ -402,9 +402,9 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             // vždy ukládá do draft adresáře; při ostrém uložení se přesune
             AttachmentsOperationResult result = articleService.saveDraftAttachment(articleEditorTO.getDraftId(),
                     articleEditorTO.getExistingArticleId(), new FileInputStream(file), metadata.fileName());
-            switch (result.getState()) {
+            switch (result.state()) {
                 case SUCCESS:
-                    AttachmentTO attachmentTO = result.getAttachment();
+                    AttachmentTO attachmentTO = result.attachment();
                     articleEditorTO.getDraftAttachments().add(attachmentTO);
                     populateGrid();
                     break;

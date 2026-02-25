@@ -10,7 +10,7 @@ public class AttachmentsRequestHandlerConfig {
     public static final String ATTACHMENTS_PATH = "articles-attachments";
 
     @Bean
-    public ServletRegistrationBean attachmentsRequestHandlerRegisterBean(AttachmentsRequestHandler handler) {
+    public ServletRegistrationBean<AttachmentsRequestHandler> attachmentsRequestHandlerRegisterBean(AttachmentsRequestHandler handler) {
         return new ServletRegistrationBean<>(handler, "/" + ATTACHMENTS_PATH + "/*");
     }
 }

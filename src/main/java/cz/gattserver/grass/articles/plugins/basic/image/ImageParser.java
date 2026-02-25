@@ -5,53 +5,49 @@ import cz.gattserver.grass.articles.editor.parser.Parser;
 import cz.gattserver.grass.articles.editor.parser.ParsingProcessor;
 import cz.gattserver.grass.articles.editor.parser.elements.Element;
 import cz.gattserver.grass.articles.editor.parser.exceptions.TokenException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * 
  * @author gatt
  */
+@Slf4j
 public class ImageParser implements Parser {
 
-	private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private final String tag;
 
-	private String tag;
+    public ImageParser(String tag) {
+        this.tag = tag;
+    }
 
-	public ImageParser(String tag) {
-		this.tag = tag;
-	}
+    @Override
+    public Element parse(ParsingProcessor processor) {
 
-	@Override
-	public Element parse(ParsingProcessor processor) {
+        // zpracovat počáteční tag
+        String startTag = processor.getStartTag();
+        log.debug("{}", processor.getToken());
 
-		// zpracovat počáteční tag
-		String startTag = processor.getStartTag();
-		logger.debug("{}", processor.getToken());
+        if (!startTag.equals(tag)) throw new TokenException(tag, startTag);
 
-		if (!startTag.equals(tag))
-			throw new TokenException(tag, startTag);
+        // START_TAG byl zpracován
+        processor.nextToken();
 
-		// START_TAG byl zpracován
-		processor.nextToken();
+        // zpracovat text
+        StringBuilder link = new StringBuilder();
+        if (Token.TEXT.equals(processor.getToken())) {
+            link.append(processor.getTextTree().text());
+        } else {
+            throw new TokenException(Token.TEXT, processor.getToken(), processor.getText());
+        }
 
-		// zpracovat text
-		StringBuilder link = new StringBuilder();
-		if (Token.TEXT.equals(processor.getToken()))
-			link.append(processor.getTextTree().getText());
-		else
-			throw new TokenException(Token.TEXT, processor.getToken(), processor.getText());
+        // zpracovat koncový tag
+        String endTag = processor.getEndTag();
+        log.debug("{}", processor.getToken());
 
-		// zpracovat koncový tag
-		String endTag = processor.getEndTag();
-		logger.debug("{}", processor.getToken());
+        if (!endTag.equals(tag)) throw new TokenException(tag, endTag);
 
-		if (!endTag.equals(tag))
-			throw new TokenException(tag, endTag);
+        // END_TAG byl zpracován
+        processor.nextToken();
 
-		// END_TAG byl zpracován
-		processor.nextToken();
-
-		return new ImageElement(link.toString());
-	}
+        return new ImageElement(link.toString());
+    }
 }

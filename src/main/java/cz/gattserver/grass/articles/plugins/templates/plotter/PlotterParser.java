@@ -15,7 +15,7 @@ public class PlotterParser implements Parser {
 
 	private static final String FORMAT_ERROR = "Invalid plotter format. Expected: function;x1;x2;y1;y2";
 
-	private String tag;
+	private final String tag;
 
 	public PlotterParser(String tag) {
 		this.tag = tag;
