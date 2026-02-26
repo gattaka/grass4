@@ -13,17 +13,11 @@ import java.util.List;
 
 	/**
 	 * Získá počet písniček v DB
-	 * 
-	 * @param filterTO
-	 *            filtr
 	 */
 	 int getSongsCount(SongOverviewTO filterTO);
 
 	/**
 	 * Získá všechny písničky
-	 *
-	 * @param filterTO   filtr
-	 * @param sortOrders
 	 */
 	 List<SongOverviewTO> getSongs(SongOverviewTO filterTO, int offset, int limit, List<QuerySortOrder> sortOrders);
 
@@ -51,57 +45,31 @@ import java.util.List;
 
 	/**
 	 * Smaže písničku
-	 * 
-	 * @param id
 	 */
 	 void deleteSong(Long id);
 
 	/**
-	 * Provede import písničky ze souboru
-	 * 
-	 * @param in
-	 * @param fileName
-	 * @return
-	 */
-	 SongTO importSong(InputStream in, String fileName);
+     * Provede import písničky ze souboru
+     */
+	 void importSong(InputStream in, String fileName);
 
 	/**
 	 * Uloží akord
-	 * 
-	 * @param to
-	 *            akord
-	 * @return
 	 */
 	 ChordTO saveChord(ChordTO to);
 
 	/**
 	 * Smaže akord
-	 * 
-	 * @param id
 	 */
 	 void deleteChord(Long id);
 
 	/**
 	 * Vyhledá akordy dle filtru
-	 * 
-	 * @param filterTO
-	 * @return
 	 */
 	 List<ChordTO> getChords(ChordTO filterTO);
 
-	/**
-	 * Vyhledá akord dle id
-	 * 
-	 * @param id
-	 * @return
-	 */
-	 ChordTO getChordById(Long id);
-
-	/**
+     /**
 	 * Vyhledá akord dle názvu
-	 * 
-	 * @param name
-	 * @return
 	 */
 	 ChordTO getChordByName(String name);
 

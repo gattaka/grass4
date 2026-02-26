@@ -20,27 +20,30 @@ import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.service.SongsService;
 import cz.gattserver.grass.songs.interfaces.ChordTO;
 import cz.gattserver.grass.songs.util.ChordImageUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @PageTitle("Akordy")
 @Route(value = "chords", layout = MainView.class)
 public class ChordsPage extends Div implements HasUrlParameter<String> {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChordsPage.class);
+    @Serial
+    private static final long serialVersionUID = 2255657055006050217L;
 
-    private SongsService songsService;
-    private SecurityService securityService;
+    private final SongsService songsService;
+    private final SecurityService securityService;
+
+    private final Map<ChordTO, Integer> indexMap = new HashMap<>();
 
     private Grid<ChordTO> grid;
     private H2 nameLabel;
@@ -48,7 +51,6 @@ public class ChordsPage extends Div implements HasUrlParameter<String> {
 
     private ChordTO choosenChord;
     private List<ChordTO> chords;
-    private Map<ChordTO, Integer> indexMap = new HashMap<>();
     private ChordTO filterTO;
 
     private String chordName;
@@ -179,17 +181,16 @@ public class ChordsPage extends Div implements HasUrlParameter<String> {
     }
 
     private void createDisplay(ChordTO choosenChord) {
-        BufferedImage image = ChordImageUtils.drawChord(choosenChord, 30);
         VerticalLayout layout = new VerticalLayout();
         chordDescriptionLayout.add(layout);
         String name = "Chord-" + choosenChord.getName();
         layout.add(new Image(DownloadHandler.fromInputStream(e -> {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             try {
-                ImageIO.write(image, "png", os);
+                ImageIO.write(ChordImageUtils.drawChord(choosenChord, 30), "png", os);
                 return new DownloadResponse(new ByteArrayInputStream(os.toByteArray()), name, null, -1);
             } catch (IOException ex) {
-                logger.error("Nezdařilo se vytváření thumbnail akordu", ex);
+                log.error("Nezdařilo se vytváření thumbnail akordu", ex);
                 return null;
             }
         }), name));

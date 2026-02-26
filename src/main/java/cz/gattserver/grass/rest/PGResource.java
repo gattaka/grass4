@@ -9,10 +9,8 @@ import cz.gattserver.grass.pg.events.PGEventsHandler;
 import cz.gattserver.grass.pg.events.PGProcessResultEvent;
 import cz.gattserver.grass.pg.interfaces.*;
 import cz.gattserver.grass.pg.service.PGService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -33,20 +31,20 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Controller
 @RequestMapping("/ws/pg")
 public class PGResource {
 
-    private static Logger logger = LoggerFactory.getLogger(PGResource.class);
+    private final PGService pgService;
+    private final SecurityService securityService;
+    private final EventBus eventBus;
 
-    @Autowired
-    private PGService pgService;
-
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    private EventBus eventBus;
+    public PGResource(PGService pgService, SecurityService securityService, EventBus eventBus) {
+        this.pgService = pgService;
+        this.securityService = securityService;
+        this.eventBus = eventBus;
+    }
 
     // http://localhost:8180/web/ws/pg/count
     @RequestMapping("/count")
@@ -60,8 +58,8 @@ public class PGResource {
     // http://localhost:8180/web/ws/pg/list?page=1&pageSize=10
     @RequestMapping("/list")
     public ResponseEntity<List<PhotogalleryRESTOverviewTO>> list(
-            @RequestParam(value = "page", required = true) int page,
-            @RequestParam(value = "pageSize", required = true) int pageSize,
+            @RequestParam(value = "page") int page,
+            @RequestParam(value = "pageSize") int pageSize,
             @RequestParam(value = "filter", required = false) String filter) {
         UserInfoTO currentUser = securityService.getCurrentUser();
         int count = pgService.countAllPhotogalleriesForREST(filter, currentUser.getId(), currentUser.isAdmin());
@@ -75,7 +73,7 @@ public class PGResource {
 
     // http://localhost:8180/web/ws/pg/gallery?id=364
     @RequestMapping("/gallery")
-    public ResponseEntity<PhotogalleryRESTTO> gallery(@RequestParam(value = "id", required = true) Long id) {
+    public ResponseEntity<PhotogalleryRESTTO> gallery(@RequestParam(value = "id") Long id) {
         PhotogalleryRESTTO gallery;
         try {
             UserInfoTO currentUser = securityService.getCurrentUser();
@@ -107,39 +105,38 @@ public class PGResource {
             response.setStatus(HttpStatus.OK.value());
             response.flushBuffer();
         } catch (IOException e) {
-            logger.error("Nezdařilo se zapsat obsah souboru na výstup", e);
+            log.error("Nezdařilo se zapsat obsah souboru na výstup", e);
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return;
         }
     }
 
     // http://localhost:8180/web/ws/pg/photo?id=364&fileName=shocked_kittens_cr.jpg
     @RequestMapping("/photo")
-    public void photo(@RequestParam(value = "id", required = true) Long id, String fileName,
+    public void photo(@RequestParam(value = "id") Long id, String fileName,
                       HttpServletResponse response) {
         innerPhoto(id, fileName, PhotoVersion.FULL, response);
     }
 
     // http://localhost:8180/web/ws/pg/slideshow?id=364&fileName=shocked_kittens_cr.jpg
     @RequestMapping("/slideshow")
-    public void slideshow(@RequestParam(value = "id", required = true) Long id, String fileName,
+    public void slideshow(@RequestParam(value = "id") Long id, String fileName,
                           HttpServletResponse response) {
         innerPhoto(id, fileName, PhotoVersion.SLIDESHOW, response);
     }
 
     // http://localhost:8180/web/ws/pg/mini?id=364&fileName=shocked_kittens_cr.jpg
     @RequestMapping("/mini")
-    public void mini(@RequestParam(value = "id", required = true) Long id, String fileName,
+    public void mini(@RequestParam(value = "id") Long id, String fileName,
                      HttpServletResponse response) {
         innerPhoto(id, fileName, PhotoVersion.MINI, response);
     }
 
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public ResponseEntity<Long> create(@RequestParam(value = "galleryName", required = true) String galleryName)
+    public ResponseEntity<Long> create(@RequestParam(value = "galleryName") String galleryName)
             throws IllegalStateException, IOException {
         UserInfoTO user = securityService.getCurrentUser();
         if (user.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        logger.info("/create volán");
+        log.info("/create volán");
         try {
             String galleryDir = pgService.createGalleryDir();
 
@@ -155,45 +152,45 @@ public class PGResource {
             eventsHandler = future.get();
             PGProcessResultEvent event = eventsHandler.getResultAndDelete(operationId);
             if (!event.success()) {
-                logger.info("/create chyba", event.resultDetails());
+                log.info("/create chyba {}", event.resultDetails());
                 return new ResponseEntity<>(event.galleryId(), HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            logger.info("/create dokončen");
+            log.info("/create dokončen");
             return new ResponseEntity<>(event.galleryId(), HttpStatus.OK);
         } catch (Exception e) {
-            logger.error("/upload chyba", e);
+            log.error("/upload chyba", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public ResponseEntity<String> upload(@RequestParam(value = "galleryId", required = true) Long galleryId,
-                                         @RequestParam(value = "files", required = true) MultipartFile[] uploadedFile)
+    public ResponseEntity<String> upload(@RequestParam(value = "galleryId") Long galleryId,
+                                         @RequestParam(value = "files") MultipartFile[] uploadedFile)
             throws IllegalStateException, IOException {
         UserInfoTO userInfoTO = securityService.getCurrentUser();
         if (userInfoTO.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        logger.info("/upload volán");
+        log.info("/upload volán");
         try {
             PhotogalleryTO to =
                     pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
             for (MultipartFile file : uploadedFile)
                 pgService.uploadFile(file.getInputStream(), file.getOriginalFilename(), to.photogalleryPath());
 
-            logger.info("/upload dokončen");
+            log.info("/upload dokončen");
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
-            logger.error("/upload chyba", e);
+            log.error("/upload chyba", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @RequestMapping(value = "/process", method = RequestMethod.POST)
-    public ResponseEntity<String> process(@RequestParam(value = "galleryId", required = true) Long galleryId)
+    public ResponseEntity<String> process(@RequestParam(value = "galleryId") Long galleryId)
             throws IllegalStateException, IOException {
         UserInfoTO userInfoTO = securityService.getCurrentUser();
         if (userInfoTO.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-        logger.info("/process volán");
+        log.info("/process volán");
         try {
             UUID operationId = UUID.randomUUID();
 
@@ -210,14 +207,14 @@ public class PGResource {
             eventsHandler = future.get();
             PGProcessResultEvent event = eventsHandler.getResultAndDelete(operationId);
             if (!event.success()) {
-                logger.info("/create chyba", event.resultDetails());
+                log.info("/create chyba {}", event.resultDetails());
                 return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
             }
 
-            logger.info("/process dokončen");
+            log.info("/process dokončen");
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
-            logger.error("/process chyba", e);
+            log.error("/process chyba", e);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }

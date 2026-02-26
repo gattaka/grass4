@@ -10,9 +10,7 @@ import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,23 +22,23 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Controller
 @RequestMapping("/ws/articles")
 public class ArticlesResource {
 
-    private static Logger logger = LoggerFactory.getLogger(ArticlesResource.class);
+    private final SecurityService securityService;
+    private final ArticleService articleService;
+    private final ContentNodeService contentNodeService;
+    private final NodeService nodeService;
 
-    @Autowired
-    private SecurityService securityService;
-
-    @Autowired
-    private ArticleService articleService;
-
-    @Autowired
-    private ContentNodeService contentNodeService;
-
-    @Autowired
-    private NodeService nodeService;
+    public ArticlesResource(SecurityService securityService, ArticleService articleService,
+                            ContentNodeService contentNodeService, NodeService nodeService) {
+        this.securityService = securityService;
+        this.articleService = articleService;
+        this.contentNodeService = contentNodeService;
+        this.nodeService = nodeService;
+    }
 
     // http://localhost:8180/web/ws/articles/create
     // http://resttesttest.com/ (pozor na http -- nedá se posílaz na http, pokud
@@ -49,7 +47,7 @@ public class ArticlesResource {
     // text test článku...
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public ResponseEntity<Long> smsImport(@RequestParam(value = "text") String text) {
-        logger.info("articles /create volán");
+        log.info("articles /create volán");
         UserInfoTO user = securityService.getCurrentUser();
         if (user.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         // TODO "dummy" context root?
@@ -58,11 +56,11 @@ public class ArticlesResource {
                 "GrassAndroid Import " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("d.M.yyyy")));
         payload.setDraftText(text);
         payload.setDraftPublicated(false);
-        payload.setNodeId(nodeService.getRootNodes().get(0).getId());
+        payload.setNodeId(nodeService.getRootNodes().getFirst().getId());
 
         long articleId = articleService.saveArticle(payload);
 
-        logger.info("articles /create dokončen");
+        log.info("articles /create dokončen");
         return new ResponseEntity<>(articleId, HttpStatus.OK);
     }
 
@@ -73,7 +71,7 @@ public class ArticlesResource {
     }
 
     @RequestMapping("/list")
-    public ResponseEntity<List<ContentNodeOverviewTO>> list(@RequestParam(value = "page", required = true) int page,
+    public ResponseEntity<List<ContentNodeOverviewTO>> list(@RequestParam(value = "page") int page,
                                                             @RequestParam(value = "pageSize") int pageSize,
                                                             @RequestParam(value = "filter", required = false)
                                                             String filter) {
@@ -90,7 +88,7 @@ public class ArticlesResource {
 
     @RequestMapping(value = "/article", method = RequestMethod.GET)
     public ResponseEntity<ArticleTO> show(@RequestParam(value = "id") Long id) {
-        logger.info("articles /article volán");
+        log.info("articles /article volán");
         UserInfoTO user = securityService.getCurrentUser();
         ArticleTO articleRESTTO;
         articleRESTTO = articleService.getArticleForDetail(id, user.getId(), user.isAdmin());

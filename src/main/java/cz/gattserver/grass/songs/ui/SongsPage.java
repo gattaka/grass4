@@ -1,7 +1,6 @@
 package cz.gattserver.grass.songs.ui;
 
 import com.vaadin.flow.component.ClientCallable;
-import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridSortOrder;
@@ -15,18 +14,12 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.SortDirection;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
-import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
-import cz.gattserver.grass.hw.ui.pages.HWItemPage;
-import cz.gattserver.grass.hw.ui.pages.HWItemsPage;
-import cz.gattserver.grass.hw.ui.pages.HWTypesPage;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.service.SongsService;
 import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
@@ -61,8 +54,6 @@ public class SongsPage extends Div implements HasUrlParameter<String> {
 
     private final Map<Long, Integer> indexMap = new HashMap<>();
 
-    private Div pageLayout;
-
     public SongsPage(SongsService songsService, SecurityService securityService) {
         this.songsService = songsService;
         this.securityService = securityService;
@@ -78,7 +69,7 @@ public class SongsPage extends Div implements HasUrlParameter<String> {
 
         layout.add(new Menu());
 
-        pageLayout = new Div();
+        Div pageLayout = new Div();
         pageLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(pageLayout);
 
@@ -106,7 +97,7 @@ public class SongsPage extends Div implements HasUrlParameter<String> {
                 grid.addColumn(SongOverviewTO::getId).setHeader("Id").setSortable(true).setKey("id").setWidth("50px")
                         .setFlexGrow(0);
         Grid.Column<SongOverviewTO> nazevColumn =
-                grid.addColumn(new ComponentRenderer<>(to -> createSongLink(to))).setHeader("Název").setSortable(true)
+                grid.addColumn(new ComponentRenderer<>(this::createSongLink)).setHeader("Název").setSortable(true)
                         .setKey("name");
         Grid.Column<SongOverviewTO> authorColumn =
                 grid.addColumn(SongOverviewTO::getAuthor).setHeader("Autor").setSortable(true).setKey("author")
@@ -207,8 +198,8 @@ public class SongsPage extends Div implements HasUrlParameter<String> {
         return componentFactory.createAnchor(to.getName(), e -> {
             Map<String, String> params = new LinkedHashMap<>();
             params.put(SONG_ID_PARAM, to.getId().toString());
-            if (filterTO.getName() != null) params.put(NAME_PARAM, filterTO.getName().toString());
-            if (filterTO.getAuthor() != null) params.put(AUTHOR_PARAM, filterTO.getAuthor().toString());
+            if (filterTO.getName() != null) params.put(NAME_PARAM, filterTO.getName());
+            if (filterTO.getAuthor() != null) params.put(AUTHOR_PARAM, filterTO.getAuthor());
             if (filterTO.getYear() != null) params.put(YEAR_PARAM, filterTO.getYear().toString());
             if (!grid.getSortOrder().isEmpty()) {
                 params.put(SORT_KEY_PARAM, grid.getSortOrder().getFirst().getSorted().getKey());

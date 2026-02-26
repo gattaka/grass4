@@ -96,14 +96,14 @@ public class SongsServiceImpl implements SongsService {
     }
 
     @Override
-    public SongTO importSong(InputStream in, String fileName) {
+    public void importSong(InputStream in, String fileName) {
         SongTO to = SongFileParser.parseSongInfo(fileName);
         try {
             to.setText(IOUtils.toString(in, "cp1250"));
         } catch (IOException e) {
             to.setText("Nezdařilo se zpracovat obsah souboru");
         }
-        return saveSong(to);
+        saveSong(to);
     }
 
     @Override
@@ -122,11 +122,6 @@ public class SongsServiceImpl implements SongsService {
     @Override
     public List<ChordTO> getChords(ChordTO filterTO) {
         return chordsRepository.findAllOrderByName(filterTO);
-    }
-
-    @Override
-    public ChordTO getChordById(Long id) {
-        return chordsRepository.findAndMapById(id);
     }
 
     @Override
