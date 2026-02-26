@@ -2,15 +2,13 @@ package cz.gattserver.grass.songs.ui;
 
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.VaadinIcon;
-import com.vaadin.flow.router.BeforeEnterEvent;
-import com.vaadin.flow.router.BeforeEnterObserver;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
@@ -41,8 +39,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @PageTitle("Zpěvník")
-@Route(value = "song/:id([0-9]*)", layout = MainView.class)
-public class SongPage extends Div implements BeforeEnterObserver {
+@Route(value = "song", layout = MainView.class)
+public class SongPage extends Div implements HasUrlParameter<Long> {
 
     @Serial
     private static final long serialVersionUID = -8084741651374016146L;
@@ -71,12 +69,7 @@ public class SongPage extends Div implements BeforeEnterObserver {
     }
 
     @Override
-    public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-        Optional<Long> param = beforeEnterEvent.getRouteParameters().get("id").map(Long::parseLong);
-
-        Long id = param.get();
-        VaadinSession.getCurrent().setAttribute(SongsPage.SONG_ID_TAB_VAR, id);
-
+    public void setParameter(BeforeEvent event, Long id) {
         removeAll();
         ComponentFactory componentFactory = new ComponentFactory();
 
@@ -101,7 +94,7 @@ public class SongPage extends Div implements BeforeEnterObserver {
         wrapperDiv.add(authorYearLabel);
 
         contentLabel = new HtmlDiv();
-        contentLabel.setHeight("700px");
+        contentLabel.setHeight(700, Unit.PIXELS);
         contentLabel.setWidth(null);
         contentLabel.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         contentLabel.getStyle().set("font-family", "monospace").set("tab-size", "4").set("font-size", "12px")
@@ -120,7 +113,7 @@ public class SongPage extends Div implements BeforeEnterObserver {
         btnLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(btnLayout);
 
-        Button modifyButton = componentFactory.createEditButton(event -> new SongDialog(choosenSong, to -> {
+        Button modifyButton = componentFactory.createEditButton(e -> new SongDialog(choosenSong, to -> {
             to = songsService.saveSong(to);
             showDetail(to);
         }).open());
