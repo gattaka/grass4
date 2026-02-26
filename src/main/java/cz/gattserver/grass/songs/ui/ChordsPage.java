@@ -18,7 +18,7 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.service.SongsService;
-import cz.gattserver.grass.songs.model.interfaces.ChordTO;
+import cz.gattserver.grass.songs.interfaces.ChordTO;
 import cz.gattserver.grass.songs.util.ChordImageUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

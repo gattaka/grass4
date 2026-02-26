@@ -1,9 +1,9 @@
 package cz.gattserver.grass.songs.service;
 
 import com.vaadin.flow.data.provider.QuerySortOrder;
-import cz.gattserver.grass.songs.model.interfaces.ChordTO;
-import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
-import cz.gattserver.grass.songs.model.interfaces.SongTO;
+import cz.gattserver.grass.songs.interfaces.ChordTO;
+import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
+import cz.gattserver.grass.songs.interfaces.SongTO;
 
 import java.io.InputStream;
 import java.nio.file.Path;

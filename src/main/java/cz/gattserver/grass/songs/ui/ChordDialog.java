@@ -9,11 +9,15 @@ import com.vaadin.flow.data.binder.Binder;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
-import cz.gattserver.grass.songs.model.interfaces.ChordTO;
+import cz.gattserver.grass.songs.interfaces.ChordTO;
 
+import java.io.Serial;
 import java.util.function.Consumer;
 
 public class ChordDialog extends EditWebDialog {
+
+    @Serial
+    private static final long serialVersionUID = -3291213134572801169L;
 
     public ChordDialog(Consumer<ChordTO> onSaveAction) {
         this(null, onSaveAction);

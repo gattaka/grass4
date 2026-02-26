@@ -12,12 +12,15 @@ import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.common.vaadin.dialogs.ErrorDialog;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.service.SongsService;
-import cz.gattserver.grass.songs.model.interfaces.SongTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import cz.gattserver.grass.songs.interfaces.SongTO;
 
+import java.io.Serial;
 import java.util.function.Consumer;
 
 public class SongDialog extends EditWebDialog {
+
+    @Serial
+    private static final long serialVersionUID = -1832124015223618703L;
 
     public SongDialog(Consumer<SongTO> onSave) {
         this(null, onSave);

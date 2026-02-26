@@ -1,6 +1,6 @@
 package cz.gattserver.grass.songs.service.impl;
 
-import cz.gattserver.grass.songs.model.interfaces.SongTO;
+import cz.gattserver.grass.songs.interfaces.SongTO;
 import cz.gattserver.grass.songs.service.SongFileParser;
 import org.junit.jupiter.api.Test;
 

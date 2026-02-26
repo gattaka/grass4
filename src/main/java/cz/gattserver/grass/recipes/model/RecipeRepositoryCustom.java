@@ -1,8 +1,6 @@
-package cz.gattserver.grass.recipes.model.dao;
+package cz.gattserver.grass.recipes.model;
 
 import java.util.List;
-
-import cz.gattserver.grass.recipes.model.domain.Recipe;
 
 public interface RecipeRepositoryCustom {
 

@@ -1,6 +1,6 @@
 package cz.gattserver.grass.songs.util;
 
-import cz.gattserver.grass.songs.model.interfaces.ChordTO;
+import cz.gattserver.grass.songs.interfaces.ChordTO;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

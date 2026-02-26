@@ -1,4 +1,4 @@
-package cz.gattserver.grass.songs.model.interfaces;
+package cz.gattserver.grass.songs.interfaces;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

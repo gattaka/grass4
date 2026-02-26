@@ -1,17 +1,13 @@
-package cz.gattserver.grass.songs.model.dao;
+package cz.gattserver.grass.songs.model;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
-import com.vaadin.flow.component.grid.GridSortOrder;
-import com.vaadin.flow.data.provider.QuerySortOrder;
-import com.vaadin.flow.data.provider.SortDirection;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
-import cz.gattserver.grass.core.model.util.QuerydslUtil;
 import cz.gattserver.grass.songs.model.domain.QSong;
 import cz.gattserver.grass.songs.model.interfaces.QSongOverviewTO;
-import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
+import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.EntityManager;

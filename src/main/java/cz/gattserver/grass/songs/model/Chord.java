@@ -1,4 +1,4 @@
-package cz.gattserver.grass.songs.model.domain;
+package cz.gattserver.grass.songs.model;
 
 import jakarta.persistence.GenerationType;
 

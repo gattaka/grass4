@@ -1,6 +1,6 @@
 package cz.gattserver.grass.songs.service;
 
-import cz.gattserver.grass.songs.model.interfaces.SongTO;
+import cz.gattserver.grass.songs.interfaces.SongTO;
 
 public class SongFileParser {
 

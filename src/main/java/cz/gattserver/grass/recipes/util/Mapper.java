@@ -6,9 +6,9 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
-import cz.gattserver.grass.recipes.model.domain.Recipe;
-import cz.gattserver.grass.recipes.model.dto.RecipeTO;
-import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
+import cz.gattserver.grass.recipes.model.Recipe;
+import cz.gattserver.grass.recipes.interfaces.RecipeTO;
+import cz.gattserver.grass.recipes.interfaces.RecipeOverviewTO;
 
 /**
  * <b>Mapper pro různé typy.</b>
@@ -33,9 +33,6 @@ public class Mapper {
 
 	/**
 	 * Převede {@link Recipe} na {@link RecipeTO}
-	 * 
-	 * @param e
-	 * @return
 	 */
 	public RecipeTO mapRecipe(Recipe e) {
 		if (e == null)
@@ -52,15 +49,12 @@ public class Mapper {
 
 	/**
 	 * Převede list {@link Recipe} na list {@link RecipeTO}
-	 * 
-	 * @param recipes
-	 * @return
 	 */
 	public List<RecipeOverviewTO> mapRecipes(Collection<Recipe> recipes) {
 		if (recipes == null)
 			return null;
 
-		List<RecipeOverviewTO> recipeDTOs = new ArrayList<RecipeOverviewTO>();
+		List<RecipeOverviewTO> recipeDTOs = new ArrayList<>();
 		for (Recipe recipe : recipes) {
 			recipeDTOs.add(new RecipeOverviewTO(recipe.getId(), recipe.getName()));
 		}

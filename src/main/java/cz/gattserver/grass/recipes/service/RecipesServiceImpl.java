@@ -7,10 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import cz.gattserver.grass.recipes.model.dao.RecipeRepository;
-import cz.gattserver.grass.recipes.model.domain.Recipe;
-import cz.gattserver.grass.recipes.model.dto.RecipeTO;
-import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
+import cz.gattserver.grass.recipes.model.RecipeRepository;
+import cz.gattserver.grass.recipes.model.Recipe;
+import cz.gattserver.grass.recipes.interfaces.RecipeTO;
+import cz.gattserver.grass.recipes.interfaces.RecipeOverviewTO;
 import cz.gattserver.grass.recipes.util.Mapper;
 
 @Transactional

@@ -1,6 +1,5 @@
-package cz.gattserver.grass.songs.model.dao;
+package cz.gattserver.grass.songs.model;
 
-import cz.gattserver.grass.songs.model.domain.Chord;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

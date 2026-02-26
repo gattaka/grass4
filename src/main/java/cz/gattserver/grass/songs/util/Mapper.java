@@ -1,10 +1,10 @@
 package cz.gattserver.grass.songs.util;
 
-import cz.gattserver.grass.songs.model.domain.Chord;
-import cz.gattserver.grass.songs.model.domain.Song;
-import cz.gattserver.grass.songs.model.interfaces.ChordTO;
-import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
-import cz.gattserver.grass.songs.model.interfaces.SongTO;
+import cz.gattserver.grass.songs.model.Chord;
+import cz.gattserver.grass.songs.model.Song;
+import cz.gattserver.grass.songs.interfaces.ChordTO;
+import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
+import cz.gattserver.grass.songs.interfaces.SongTO;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -144,11 +144,10 @@ public class Mapper {
 		if (chords == null)
 			return new ArrayList<>();
 
-		List<ChordTO> chordsTOs = new ArrayList<ChordTO>();
+		List<ChordTO> chordsTOs = new ArrayList<>();
 		for (Chord chord : chords)
-			chordsTOs.add(new ChordTO(chord.getName(), chord.getConfiguration(), chord.getId()));
+			chordsTOs.add(new ChordTO(chord.getId(),chord.getName(), chord.getConfiguration()));
 
 		return chordsTOs;
 	}
-
 }

@@ -1,7 +1,7 @@
-package cz.gattserver.grass.songs.model.dao;
+package cz.gattserver.grass.songs.model;
 
 import com.querydsl.core.types.OrderSpecifier;
-import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
+import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
 
 import java.util.List;
 

@@ -1,4 +1,4 @@
-package cz.gattserver.grass.recipes.model.dto;
+package cz.gattserver.grass.recipes.interfaces;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,14 +11,14 @@ import lombok.Setter;
 @NoArgsConstructor
 public class RecipeOverviewTO {
 
+    /**
+     * DB identifikátor
+     */
+    private Long id;
+
 	/**
 	 * Název receptu
 	 */
 	private String name;
-
-	/**
-	 * DB identifikátor
-	 */
-	private Long id;
 
 }

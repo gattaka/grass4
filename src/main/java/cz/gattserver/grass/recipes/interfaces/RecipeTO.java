@@ -1,4 +1,4 @@
-package cz.gattserver.grass.recipes.model.dto;
+package cz.gattserver.grass.recipes.interfaces;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,15 +1,14 @@
-package cz.gattserver.grass.recipes.web;
+package cz.gattserver.grass.recipes.ui;
 
 import com.vaadin.flow.component.Unit;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 
 import cz.gattserver.grass.recipes.service.RecipesService;
-import cz.gattserver.grass.recipes.model.dto.RecipeTO;
+import cz.gattserver.grass.recipes.interfaces.RecipeTO;
 
 import java.io.Serial;
 

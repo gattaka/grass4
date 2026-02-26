@@ -1,12 +1,11 @@
-package cz.gattserver.grass.songs.model.dao;
+package cz.gattserver.grass.songs.model;
 
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQuery;
 import cz.gattserver.grass.core.model.util.PredicateBuilder;
-import cz.gattserver.grass.songs.model.domain.Chord;
 import cz.gattserver.grass.songs.model.domain.QChord;
-import cz.gattserver.grass.songs.model.interfaces.ChordTO;
+import cz.gattserver.grass.songs.interfaces.ChordTO;
 import org.springframework.stereotype.Repository;
 
 import jakarta.persistence.EntityManager;

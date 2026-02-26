@@ -2,9 +2,7 @@ package cz.gattserver.grass.rest;
 
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -25,11 +23,10 @@ import cz.gattserver.grass.monitor.processor.item.SystemSwapMonitorItemTO;
 import cz.gattserver.grass.monitor.processor.item.SystemUptimeMonitorItemTO;
 import cz.gattserver.grass.monitor.services.MonitorService;
 
+@Slf4j
 @Controller
 @RequestMapping("/ws/system-monitor")
 public class MonitorResource {
-
-	private static Logger logger = LoggerFactory.getLogger(MonitorResource.class);
 
 	private final MonitorService monitorService;
 	private final SecurityService securityService;
@@ -119,9 +116,8 @@ public class MonitorResource {
 	}
 
 	public MonitorResource(MonitorService monitorService, SecurityService securityService) {
-		logger.info("System monitor resource online");
+		log.info("System monitor resource online");
         this.monitorService = monitorService;
         this.securityService = securityService;
     }
-
 }

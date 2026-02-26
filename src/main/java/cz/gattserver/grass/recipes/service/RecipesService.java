@@ -2,8 +2,8 @@ package cz.gattserver.grass.recipes.service;
 
 import java.util.List;
 
-import cz.gattserver.grass.recipes.model.dto.RecipeTO;
-import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
+import cz.gattserver.grass.recipes.interfaces.RecipeTO;
+import cz.gattserver.grass.recipes.interfaces.RecipeOverviewTO;
 
 public interface RecipesService {
 

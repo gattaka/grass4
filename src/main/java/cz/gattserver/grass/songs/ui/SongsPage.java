@@ -22,7 +22,7 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.service.SongsService;
-import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
+import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.FileInputStream;

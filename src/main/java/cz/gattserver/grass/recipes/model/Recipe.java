@@ -1,4 +1,4 @@
-package cz.gattserver.grass.recipes.model.domain;
+package cz.gattserver.grass.recipes.model;
 
 import jakarta.persistence.*;
 

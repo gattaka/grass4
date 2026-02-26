@@ -1,4 +1,4 @@
-package cz.gattserver.grass.recipes.web;
+package cz.gattserver.grass.recipes.ui;
 
 import cz.gattserver.grass.core.ui.pages.factories.template.AbstractPageFactory;
 import org.springframework.stereotype.Component;

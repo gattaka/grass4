@@ -1,4 +1,4 @@
-package cz.gattserver.grass.recipes.model.dao;
+package cz.gattserver.grass.recipes.model;
 
 import java.util.List;
 
@@ -12,7 +12,6 @@ import com.querydsl.core.types.Predicate;
 import com.querydsl.jpa.impl.JPAQuery;
 
 import cz.gattserver.grass.recipes.model.domain.QRecipe;
-import cz.gattserver.grass.recipes.model.domain.Recipe;
 
 @Repository
 public class RecipeRepositoryCustomImpl implements RecipeRepositoryCustom {

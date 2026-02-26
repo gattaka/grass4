@@ -1,4 +1,4 @@
-package cz.gattserver.grass.recipes.web;
+package cz.gattserver.grass.recipes.ui;
 
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
@@ -19,8 +19,8 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 
 import cz.gattserver.grass.recipes.service.RecipesService;
-import cz.gattserver.grass.recipes.model.dto.RecipeTO;
-import cz.gattserver.grass.recipes.model.dto.RecipeOverviewTO;
+import cz.gattserver.grass.recipes.interfaces.RecipeTO;
+import cz.gattserver.grass.recipes.interfaces.RecipeOverviewTO;
 
 @PageTitle("Recepty")
 @Route(value = "recipes", layout = MainView.class)

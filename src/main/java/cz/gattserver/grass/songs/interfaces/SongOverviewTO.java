@@ -1,4 +1,4 @@
-package cz.gattserver.grass.songs.model.interfaces;
+package cz.gattserver.grass.songs.interfaces;
 
 import com.querydsl.core.annotations.QueryProjection;
 import lombok.EqualsAndHashCode;

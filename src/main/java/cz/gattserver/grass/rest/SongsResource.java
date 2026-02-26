@@ -1,9 +1,8 @@
 package cz.gattserver.grass.rest;
 
 import cz.gattserver.grass.songs.service.SongsService;
-import cz.gattserver.grass.songs.model.interfaces.SongOverviewTO;
-import cz.gattserver.grass.songs.model.interfaces.SongTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
+import cz.gattserver.grass.songs.interfaces.SongTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,8 +23,8 @@ public class SongsResource {
     }
 
     @RequestMapping("/list")
-	public ResponseEntity<List<SongOverviewTO>> list(@RequestParam(value = "page", required = true) int page,
-			@RequestParam(value = "pageSize", required = true) int pageSize,
+	public ResponseEntity<List<SongOverviewTO>> list(@RequestParam(value = "page") int page,
+			@RequestParam(value = "pageSize") int pageSize,
 			@RequestParam(value = "filter", required = false) String filter) {
 		SongOverviewTO overviewTO = new SongOverviewTO();
 		overviewTO.setName(filter);
@@ -45,7 +44,7 @@ public class SongsResource {
 	}
 
 	@RequestMapping("/song")
-	public @ResponseBody SongTO song(@RequestParam(value = "id", required = true) Long id) {
+	public @ResponseBody SongTO song(@RequestParam(value = "id") Long id) {
 		return songsService.getSongById(id);
 	}
 }
