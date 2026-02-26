@@ -17,6 +17,7 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.server.streams.UploadHandler;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -24,6 +25,8 @@ import cz.gattserver.grass.core.ui.pages.MainView;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.hw.interfaces.HWItemOverviewTO;
 import cz.gattserver.grass.hw.ui.pages.HWItemPage;
+import cz.gattserver.grass.hw.ui.pages.HWItemsPage;
+import cz.gattserver.grass.hw.ui.pages.HWTypesPage;
 import cz.gattserver.grass.songs.SongsRole;
 import cz.gattserver.grass.songs.service.SongsService;
 import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
@@ -58,10 +61,7 @@ public class SongsPage extends Div implements HasUrlParameter<String> {
 
     private final Map<Long, Integer> indexMap = new HashMap<>();
 
-    private TabsMenu tabsMenu;
-
     private Div pageLayout;
-    private Long songId;
 
     public SongsPage(SongsService songsService, SecurityService securityService) {
         this.songsService = songsService;
@@ -76,8 +76,7 @@ public class SongsPage extends Div implements HasUrlParameter<String> {
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        tabsMenu = new TabsMenu();
-        layout.add(tabsMenu);
+        layout.add(new Menu());
 
         pageLayout = new Div();
         pageLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);

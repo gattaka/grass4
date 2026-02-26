@@ -133,5 +133,4 @@ public class HWItemsPage extends Div implements HasUrlParameter<String> {
     public void select(Long idParameter) {
         itemsGrid.selectAndScroll(idParameter);
     }
-
 }

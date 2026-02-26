@@ -76,9 +76,7 @@ public class SongPage extends Div implements HasUrlParameter<Long> {
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        TabsMenu tabsMenu = new TabsMenu();
-        layout.add(tabsMenu);
-        tabsMenu.selectSongTab();
+        layout.add(new Menu());
 
         Div wrapperDiv = new Div();
         wrapperDiv.getStyle().set("padding", "10px").set("background", "white").set("border-radius", "3px")

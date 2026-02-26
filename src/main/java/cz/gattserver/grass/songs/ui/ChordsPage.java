@@ -42,8 +42,6 @@ public class ChordsPage extends Div implements HasUrlParameter<String> {
     private SongsService songsService;
     private SecurityService securityService;
 
-    private TabsMenu tabsMenu;
-
     private Grid<ChordTO> grid;
     private H2 nameLabel;
     private VerticalLayout chordDescriptionLayout;
@@ -70,9 +68,7 @@ public class ChordsPage extends Div implements HasUrlParameter<String> {
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        tabsMenu = new TabsMenu();
-        layout.add(tabsMenu);
-        tabsMenu.selectChordsTab();
+        layout.add(new Menu());
 
         chords = new ArrayList<>();
         filterTO = new ChordTO();
