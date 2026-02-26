@@ -46,11 +46,11 @@ public class SongOverviewTO implements Serializable {
 	}
 
 	@QueryProjection
-	public SongOverviewTO(String name, String author, Integer year, Long id, Boolean publicated) {
-		this.name = name;
-		this.author = author;
-		this.year = year;
-		this.id = id;
+	public SongOverviewTO(Long id, String name, String author, Integer year, Boolean publicated) {
+        this.id = id;
+        this.name = name;
+        this.author = author;
+        this.year = year;
 		this.publicated = publicated;
 	}
 }

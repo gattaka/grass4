@@ -1,5 +1,6 @@
 package cz.gattserver.grass.songs.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,18 +16,19 @@ public class SongTO extends SongOverviewTO {
     private static final long serialVersionUID = 2223110707299084497L;
 
     /**
-	 * Text
-	 */
-	private String text;
+     * Text
+     */
+    private String text;
 
-	/**
-	 * Embedded link
-	 */
-	private String embedded;
+    /**
+     * Embedded link
+     */
+    private String embedded;
 
-	public SongTO(String name, String author, Integer year, String text, Long id, Boolean publicated, String embedded) {
-		super(name, author, year, id, publicated);
-		this.text = text;
-		this.embedded = embedded;
-	}
+    @QueryProjection
+    public SongTO(Long id, String name, String author, Integer year, String text, Boolean publicated, String embedded) {
+        super(id, name, author, year, publicated);
+        this.text = text;
+        this.embedded = embedded;
+    }
 }

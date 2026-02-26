@@ -6,5 +6,10 @@ import java.util.List;
 
 public interface ChordsRepositoryCustom {
 
-	List<Chord> findAllOrderByName(ChordTO filterTO);
+	List<ChordTO> findAllOrderByName(ChordTO filterTO);
+
+    ChordTO findAndMapById(Long id);
+
+    ChordTO findByName(String name);
+
 }

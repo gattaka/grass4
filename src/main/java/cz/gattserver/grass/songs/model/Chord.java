@@ -5,8 +5,14 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import lombok.*;
 
+@Setter
+@Getter
 @Entity(name = "CHORD")
+@NoArgsConstructor
+@AllArgsConstructor
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Chord {
 
     /**
@@ -14,6 +20,7 @@ public class Chord {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
 	/**
@@ -25,41 +32,5 @@ public class Chord {
 	 * Konfigurace
 	 */
 	private Long configuration;
-
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof Chord))
-			return false;
-		return ((Chord) obj).getId() == getId();
-	}
-
-	@Override
-	public int hashCode() {
-		return getId().hashCode();
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Long getConfiguration() {
-		return configuration;
-	}
-
-	public void setConfiguration(Long configuration) {
-		this.configuration = configuration;
-	}
 
 }

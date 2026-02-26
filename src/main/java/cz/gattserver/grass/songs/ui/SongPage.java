@@ -16,7 +16,6 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.HtmlDiv;
-import cz.gattserver.grass.core.export.ExportsService;
 import cz.gattserver.grass.core.server.ExportRequestHandler;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.MainView;
@@ -27,6 +26,7 @@ import cz.gattserver.grass.songs.interfaces.ChordTO;
 import cz.gattserver.grass.songs.interfaces.SongTO;
 import cz.gattserver.grass.songs.util.ChordImageUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,15 +44,15 @@ import java.util.stream.Collectors;
 @Route(value = "song/:id([0-9]*)", layout = MainView.class)
 public class SongPage extends Div implements BeforeEnterObserver {
 
-    private static final long serialVersionUID = 594189301140808163L;
+    @Serial
+    private static final long serialVersionUID = -8084741651374016146L;
 
     private static final Logger logger = LoggerFactory.getLogger(SongPage.class);
 
-    private static final String JS_DIV_ID = "js-div";
+    private static final String SONGS_PAGE_ID = "songs-page-id";
 
-    private SongsService songsService;
-    private SecurityService securityService;
-    private ExportsService exportsService;
+    private final SongsService songsService;
+    private final SecurityService securityService;
 
     private H2 nameLabel;
     private HtmlDiv authorYearLabel;
@@ -61,10 +61,13 @@ public class SongPage extends Div implements BeforeEnterObserver {
 
     private SongTO choosenSong;
 
-    public SongPage(SongsService songsService, SecurityService securityService, ExportsService exportsService) {
+    private Div chordDiv;
+
+    public SongPage(SongsService songsService, SecurityService securityService) {
         this.songsService = songsService;
         this.securityService = securityService;
-        this.exportsService = exportsService;
+
+        setId(SONGS_PAGE_ID);
     }
 
     @Override
@@ -144,59 +147,51 @@ public class SongPage extends Div implements BeforeEnterObserver {
         });
         btnLayout.add(printButton2);
 
-        Div chordDiv = new Div();
+        chordDiv = new Div();
         chordDiv.setVisible(false);
         chordDiv.getStyle().set("position", "absolute").set("background", "white").set("padding", "5px")
                 .set("border-radius", "3px").set("border", "1px solid #d5d5d5");
         layout.add(chordDiv);
 
-        Div callbackDiv = new Div() {
-
-            @Serial
-            private static final long serialVersionUID = -7346472262736524073L;
-
-            @ClientCallable
-            private void chordCallback(String chord, double x, double y) {
-                chordDiv.setVisible(true);
-                chordDiv.removeAll();
-                ChordTO to = songsService.getChordByName(chord);
-                BufferedImage image = ChordImageUtils.drawChord(to, 20);
-                String name = "Chord-" + chord;
-                chordDiv.add(new Image(DownloadHandler.fromInputStream(e -> {
-                    ByteArrayOutputStream os = new ByteArrayOutputStream();
-                    try {
-                        ImageIO.write(image, "png", os);
-                        return new DownloadResponse(new ByteArrayInputStream(os.toByteArray()), name, null, -1);
-                    } catch (IOException ex) {
-                        logger.error("Nezdařilo se vytváření thumbnail akordu", ex);
-                        return null;
-                    }
-                }), name));
-                chordDiv.getStyle().set("left", (15 + x) + "px").set("top", y + "px");
-            }
-
-            @ClientCallable
-            private void hideCallback() {
-                chordDiv.setVisible(false);
-            }
-
-            @ClientCallable
-            private void chordClickCallback(String chord) {
-                UI.getCurrent().navigate(ChordsPage.class, chord);
-            }
-
-        };
-        callbackDiv.setId(JS_DIV_ID);
-        layout.add(callbackDiv);
-
         choosenSong = songsService.getSongById(id);
         showDetail(choosenSong);
     }
 
+    @ClientCallable
+    private void chordCallback(String chord, double x, double y) {
+        chordDiv.setVisible(true);
+        chordDiv.removeAll();
+        ChordTO to = songsService.getChordByName(chord);
+        String name = "Chord-" + chord;
+        chordDiv.add(new Image(DownloadHandler.fromInputStream(e -> {
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            try {
+                BufferedImage image = ChordImageUtils.drawChord(to, 20);
+                ImageIO.write(image, "png", os);
+                return new DownloadResponse(new ByteArrayInputStream(os.toByteArray()), name, null, -1);
+            } catch (IOException ex) {
+                logger.error("Nezdařilo se vytváření thumbnail akordu", ex);
+                return null;
+            }
+        }), name));
+        chordDiv.getStyle().set("left", (15 + x) + "px").set("top", y + "px");
+    }
+
+    @ClientCallable
+    private void hideCallback() {
+        chordDiv.setVisible(false);
+    }
+
+    @ClientCallable
+    private void chordClickCallback(String chord) {
+        UI.getCurrent().navigate(ChordsPage.class, chord);
+    }
+
     private Path createReportPath(SongTO choosenSong, boolean twoColumn) {
-        SongTO s = new SongTO(choosenSong.getName(), choosenSong.getAuthor(), choosenSong.getYear(),
-                choosenSong.getText().replaceAll("<br/>", "\n"), choosenSong.getId(), choosenSong.getPublicated(),
-                choosenSong.getEmbedded());
+        SongTO s =
+                new SongTO(choosenSong.getId(), choosenSong.getName(), choosenSong.getAuthor(), choosenSong.getYear(),
+                        choosenSong.getText().replaceAll("<br/>", "\n"), choosenSong.getPublicated(),
+                        choosenSong.getEmbedded());
         return songsService.print(s, twoColumn);
     }
 
@@ -208,12 +203,12 @@ public class SongPage extends Div implements BeforeEnterObserver {
         } else {
             nameLabel.setText(choosenSong.getName());
             String value = choosenSong.getAuthor();
-            if (choosenSong.getYear() != null && choosenSong.getYear().intValue() > 0)
+            if (choosenSong.getYear() != null && choosenSong.getYear() > 0)
                 value = value + " (" + choosenSong.getYear() + ")";
             authorYearLabel.setValue(value);
             Set<String> chords =
                     songsService.getChords(new ChordTO()).stream().map(ChordTO::getName).collect(Collectors.toSet());
-            String htmlText = "";
+            StringBuilder htmlText = new StringBuilder();
             for (String line : choosenSong.getText().split("<br/>")) {
                 boolean chordLine = true;
                 for (String chunk : line.split(" +| +|,|\t+"))
@@ -223,25 +218,19 @@ public class SongPage extends Div implements BeforeEnterObserver {
                         break;
                     }
                 for (String c : chords) {
-                    String chordLink = c;
-                    chordLink = "<span style='cursor: pointer' onclick='document.getElementById(\"" + JS_DIV_ID +
-                            "\").\\$server.chordClickCallback(\"" + c + "\")' " +
-                            "onmouseover='let bound = document.body.getBoundingClientRect(); document" +
-                            ".getElementById" + "(\"" + JS_DIV_ID + "\").\\$server.chordCallback(\"" + c +
-                            "\", event.clientX - bound.x, event.clientY - bound.y)' " + "onmouseout='document" +
-                            ".getElementById(\"" + JS_DIV_ID + "\").\\$server.hideCallback()'>" + c + "</span>";
+                    String chordLink = createChordLink(c);
                     line = line.replaceAll(c + " ", chordLink + " ");
                     line = line.replaceAll(c + ",", chordLink + ",");
                     line = line.replaceAll(c + "\\)", chordLink + ")");
                     line = line.replaceAll(c + "\\(", chordLink + "(");
                     line = line.replaceAll(c + "$", chordLink);
                 }
-                htmlText +=
+                htmlText.append(
                         chordLine ? ("<span style='color: blue; white-space: pre; height: 15px'>" + line + "</span>") :
                                 ("<span style='white-space: pre; padding-right: 20px; height: 15px'>" + line +
-                                        "</span>");
+                                        "</span>"));
             }
-            contentLabel.setValue(htmlText);
+            contentLabel.setValue(htmlText.toString());
             if (StringUtils.isNotBlank(choosenSong.getEmbedded())) {
                 embeddedLabel.setVisible(true);
                 String val = "<iframe width=\"100%\" height=\"300\" src=\"https://www.youtube.com/embed/" +
@@ -253,5 +242,16 @@ public class SongPage extends Div implements BeforeEnterObserver {
                 embeddedLabel.setVisible(false);
             }
         }
+    }
+
+    private static @NonNull String createChordLink(String c) {
+        String chordLink;
+        chordLink = "<span style='cursor: pointer' onclick='document.getElementById(\"" + SONGS_PAGE_ID +
+                "\").\\$server.chordClickCallback(\"" + c + "\")' " +
+                "onmouseover='let bound = document.body.getBoundingClientRect(); document" +
+                ".getElementById" + "(\"" + SONGS_PAGE_ID + "\").\\$server.chordCallback(\"" + c +
+                "\", event.clientX - bound.x, event.clientY - bound.y)' " + "onmouseout='document" +
+                ".getElementById(\"" + SONGS_PAGE_ID + "\").\\$server.hideCallback()'>" + c + "</span>";
+        return chordLink;
     }
 }

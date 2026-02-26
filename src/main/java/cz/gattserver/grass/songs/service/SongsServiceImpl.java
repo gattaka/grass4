@@ -11,7 +11,6 @@ import cz.gattserver.grass.songs.model.Song;
 import cz.gattserver.grass.songs.interfaces.ChordTO;
 import cz.gattserver.grass.songs.interfaces.SongOverviewTO;
 import cz.gattserver.grass.songs.interfaces.SongTO;
-import cz.gattserver.grass.songs.util.Mapper;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
@@ -27,14 +26,12 @@ import java.util.List;
 @Component
 public class SongsServiceImpl implements SongsService {
 
-    private final Mapper mapper;
     private final SongsRepository songsRepository;
     private final ChordsRepository chordsRepository;
     private final ExportsService exportsService;
 
-    public SongsServiceImpl(Mapper mapper, SongsRepository songsRepository, ChordsRepository chordsRepository,
+    public SongsServiceImpl(SongsRepository songsRepository, ChordsRepository chordsRepository,
                             ExportsService exportsService) {
-        this.mapper = mapper;
         this.songsRepository = songsRepository;
         this.chordsRepository = chordsRepository;
         this.exportsService = exportsService;
@@ -42,17 +39,16 @@ public class SongsServiceImpl implements SongsService {
 
     @Override
     public SongTO getSongById(Long id) {
-        Song song = songsRepository.findById(id).orElse(null);
-        if (song == null) return null;
-        return mapper.mapSong(song);
+        return songsRepository.findAndMapById(id);
     }
 
     @Override
     public SongTO saveSong(SongTO to) {
-        Song song = mapper.mapSong(to);
-        song.setText(eolToBreakline(to.getText()));
+        Song song = new Song(to.getId(), to.getName(), to.getAuthor(), to.getYear(), eolToBreakline(to.getText()),
+                to.getPublicated(), to.getEmbedded());
         song = songsRepository.save(song);
-        return mapper.mapSong(song);
+        to.setId(song.getId());
+        return to;
     }
 
     @Override
@@ -112,7 +108,7 @@ public class SongsServiceImpl implements SongsService {
 
     @Override
     public ChordTO saveChord(ChordTO to) {
-        Chord chord = mapper.mapChord(to);
+        Chord chord = new Chord(to.getId(),to.getName(), to.getConfiguration());
         chord = chordsRepository.save(chord);
         to.setId(chord.getId());
         return to;
@@ -125,17 +121,17 @@ public class SongsServiceImpl implements SongsService {
 
     @Override
     public List<ChordTO> getChords(ChordTO filterTO) {
-        return mapper.mapChords(chordsRepository.findAllOrderByName(filterTO));
+        return chordsRepository.findAllOrderByName(filterTO);
     }
 
     @Override
     public ChordTO getChordById(Long id) {
-        return mapper.mapChord(chordsRepository.findById(id).orElse(null));
+        return chordsRepository.findAndMapById(id);
     }
 
     @Override
     public ChordTO getChordByName(String name) {
-        return mapper.mapChord(chordsRepository.findByName(name));
+        return chordsRepository.findByName(name);
     }
 
     @Override
