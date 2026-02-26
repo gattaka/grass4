@@ -106,10 +106,10 @@ public class ArticleServiceImpl implements ArticleService {
     public Long saveArticle(ArticleEditorTO articleEditorTO) {
         Article article = innerSaveArticle(articleEditorTO, true, false, true);
 
-        // Nejprve smaž draft, ale ponech přílohy (ty se musí přenést do ostrého článku).
+        // Pokud se už stihl vytvořit draft, smaž ho, ale ponech přílohy (ty se musí přenést do ostrého článku).
         // Pokud dojde k problémům se soubory, dá se provést DB rollback, pokud by pořadí operací bylo obráceně,
         // mohl by nastat problém, protože filesystem nemá rollback
-        deleteArticleInner(articleEditorTO.getDraftId(), false);
+        if (articleEditorTO.getDraftId() != null) deleteArticleInner(articleEditorTO.getDraftId(), false);
 
         Path existingArticleDirPath = getAttachmentsPath(articleEditorTO.getExistingArticleId(), true);
 
@@ -144,14 +144,16 @@ public class ArticleServiceImpl implements ArticleService {
             }
         }
 
-        // Smaž adresář příloh draftu
-        Path draftAttachmentsDirPath = getAttachmentsPath(articleEditorTO.getDraftId(), false);
-        if (draftAttachmentsDirPath != null) {
-            try {
-                Files.delete(draftAttachmentsDirPath);
-            } catch (IOException e) {
-                throw new RuntimeException("Chyba při mazání adresáře příloh článku " + articleEditorTO.getDraftId(),
-                        e);
+        if (articleEditorTO.getDraftId() != null) {
+            // Smaž adresář příloh draftu
+            Path draftAttachmentsDirPath = getAttachmentsPath(articleEditorTO.getDraftId(), false);
+            if (draftAttachmentsDirPath != null) {
+                try {
+                    Files.delete(draftAttachmentsDirPath);
+                } catch (IOException e) {
+                    throw new RuntimeException(
+                            "Chyba při mazání adresáře příloh článku " + articleEditorTO.getDraftId(), e);
+                }
             }
         }
 
