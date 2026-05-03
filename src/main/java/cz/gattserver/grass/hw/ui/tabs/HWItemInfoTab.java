@@ -119,7 +119,7 @@ public class HWItemInfoTab extends Div {
 
         tableLayout.newRow();
 
-        Div stateValue = new Div(new Text(hwItem.getState().getName()));
+        Div stateValue = new Div(new Text(hwItem.getState() == null ? "" : hwItem.getState().getName()));
         stateValue.setMinWidth("100px");
         tableLayout.add(stateValue);
 
