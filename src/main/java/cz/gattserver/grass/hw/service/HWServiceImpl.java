@@ -710,6 +710,7 @@ public class HWServiceImpl implements HWService {
     @Override
     public HWItemTO findHWItem(Long itemId) {
         HWItemTO to = hwItemRepository.findByIdAndMapForDetail(itemId);
+        if (to == null) return null;
         to.setItemRecords(hwItemRecordRepository.findByItemId(itemId));
         to.setTypes(hwTypeRepository.findByItemId(itemId));
         return to;
@@ -733,9 +734,11 @@ public class HWServiceImpl implements HWService {
     public void deleteHWItem(Long id) {
         // TODO usedIn DB FK ?
         hwItemRecordRepository.deleteByItemId(id);
+        hwItemTypeRepository.deleteByItemId(id);
         hwItemRepository.deleteById(id);
 
         Path hwPath = getHWPath(id);
+        if (!Files.exists(hwPath)) return;
         try (Stream<Path> s = Files.walk(hwPath)) {
             s.sorted(Comparator.reverseOrder()).forEach(p -> {
                 try {

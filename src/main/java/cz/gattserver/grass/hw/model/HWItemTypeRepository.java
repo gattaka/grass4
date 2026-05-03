@@ -12,4 +12,7 @@ public interface HWItemTypeRepository extends JpaRepository<HWItemType, HWItemTy
     @Query("delete HW_ITEM_TYPE where id.hwItemId = ?1 and id.hwTypeId in ?2")
     void deleteItemType(Long hwItemId, Set<Long> hwTypeIdSet);
 
+    @Modifying
+    @Query("delete HW_ITEM_TYPE where id.hwItemId = ?1")
+    void deleteByItemId(Long id);
 }

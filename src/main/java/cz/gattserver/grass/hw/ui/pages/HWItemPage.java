@@ -55,6 +55,8 @@ public class HWItemPage extends Div implements HasUrlParameter<Long>, HasDynamic
     @Override
     public void setParameter(BeforeEvent event, Long parameter) {
         hwItem = hwService.findHWItem(parameter);
+        if (hwItem == null)
+            throw new GrassPageException(404);
 
         if (Boolean.TRUE != hwItem.getPublicItem() &&
                 !SpringContextHelper.getBean(SecurityService.class).getCurrentUser().getRoles()
