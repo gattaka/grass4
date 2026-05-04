@@ -58,7 +58,7 @@ public class HWItemRecordsTab extends Div {
         Column<HWItemRecordTO> dateColumn =
                 grid.addColumn(new LocalDateRenderer<>(HWItemRecordTO::getDate, "d. M. yyyy")).setHeader("Datum")
                         .setTextAlign(ColumnTextAlign.END).setWidth("90px").setFlexGrow(0);
-        grid.addColumn(hw -> hw.getState().getName()).setHeader("Stav").setWidth("110px").setFlexGrow(0);
+        grid.addColumn(hw -> hw.getState() == null ? "" : hw.getState().getName()).setHeader("Stav").setWidth("110px").setFlexGrow(0);
         grid.addColumn(new TextRenderer<>(to -> String.valueOf(to.getDescription()))).setHeader("Obsah");
         idColumn.setVisible(false);
         grid.setHeight("300px");
