@@ -763,10 +763,10 @@ public class HWServiceImpl implements HWService {
         itemRecord.setHwItemId(hwItemTO.getId());
         itemRecord.setDate(itemRecordTO.getDate());
         itemRecord.setDescription(itemRecordTO.getDescription());
-        itemRecord.setState(itemRecordTO.getState());
+        itemRecord.setState(hwItemTO.getState());
         itemRecord = hwItemRecordRepository.save(itemRecord);
 
-        hwItemRepository.updateState(hwItemTO.getId(), itemRecord.getState());
+        if (itemRecord.getState() != null) hwItemRepository.updateState(hwItemTO.getId(), itemRecord.getState());
     }
 
     @Override
