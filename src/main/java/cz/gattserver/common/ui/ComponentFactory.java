@@ -355,7 +355,8 @@ public class ComponentFactory {
 
     public DatePicker.DatePickerI18n createDatePickerI18n() {
         DatePicker.DatePickerI18n i18n = new DatePicker.DatePickerI18n();
-        i18n.setDateFormats("d. M. yyyy", "d.M.yyyy", "d. M.yyyy", "d. M.yyyy");
+        i18n.setDateFormats("d. M. yyyy", "d.M.yyyy", "d. M.yyyy", "d.M. yyyy", "dd.MM.yyyy", "dd. MM. yyyy",
+                "dd.MM. yyyy", "dd. MM.yyyy");
         i18n.setFirstDayOfWeek(1);
         i18n.setMonthNames(createMonthNames());
         i18n.setWeekdays(Arrays.asList("Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"));
