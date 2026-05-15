@@ -132,7 +132,7 @@ public class HWItemsGrid extends Div {
             UI.getCurrent().getPage().executeJs("$0.onmouseover = function(event) {"
                     /*      */ + "let bound = document.body.getBoundingClientRect(); "
                     /*      */ + "$1.$server.imgShowCallback(\"" + to.getId()
-                    /*      */ + "\", event.clientX - bound.x, event.clientY - bound.y); "
+                    /*      */ + "\", event.clientX - bound.x - window.pageXOffset, event.clientY - bound.y - window.pageYOffset); "
                     /*  */ + "}", anchor.getElement(), HWItemsGrid.this.getElement());
             anchor.getElement().addEventListener("mouseout", e -> iconDiv.setVisible(false));
             return anchor;
