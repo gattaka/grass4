@@ -23,5 +23,4 @@ public class ApplicationErrorHandler implements ErrorHandler {
         ApplicationErrorHandler.log.error(log);
         if (UI.getCurrent() != null) UI.getCurrent().access(() -> new ExceptionDialog(throwable).open());
     }
-
 }

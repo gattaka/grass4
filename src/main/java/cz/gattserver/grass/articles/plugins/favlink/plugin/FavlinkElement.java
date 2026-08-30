@@ -44,7 +44,7 @@ public class FavlinkElement implements Element {
 			ctx.print(shortDescription);
 			ctx.print(" ");
 		}
-		ctx.print("<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"" + link + "\" ");
+		ctx.print("<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"" + link + "\" router-ignore ");
 		if (StringUtils.isNotBlank(description))
 			ctx.print("title=\"" + description + "\" ");
 		ctx.print(">");

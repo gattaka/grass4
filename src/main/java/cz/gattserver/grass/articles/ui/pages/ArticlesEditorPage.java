@@ -165,9 +165,6 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setDraftName("");
             articleEditorTO.setDraftText("");
             articleEditorTO.setDraftPublicated(true);
-
-            // rovnou ulož, ať máme draft id
-            articleEditorTO.setDraftId(articleService.saveDraft(articleEditorTO, false));
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             ArticleTO existingArticleTO =
                     articleService.getArticleForDetail(identifier.id(), securityService.getCurrentUser().getId(),
@@ -188,6 +185,9 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             logger.debug("Neznámá operace: {}", operationToken);
             throw new GrassPageException(404);
         }
+
+        // rovnou ulož, ať máme draft id -- bez draft-id nepůjdou správně ukládat přílohy apod.
+        articleEditorTO.setDraftId(articleService.saveDraft(articleEditorTO, false));
 
         createFields();
     }

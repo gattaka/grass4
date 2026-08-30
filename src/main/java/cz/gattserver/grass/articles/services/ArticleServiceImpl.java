@@ -24,6 +24,7 @@ import cz.gattserver.grass.modules.ArticlesContentModule;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,12 +107,12 @@ public class ArticleServiceImpl implements ArticleService {
     public Long saveArticle(ArticleEditorTO articleEditorTO) {
         Article article = innerSaveArticle(articleEditorTO, true, false, true);
 
-        // Pokud se už stihl vytvořit draft, smaž ho, ale ponech přílohy (ty se musí přenést do ostrého článku).
+        // Smaž draft, ale ponech přílohy (ty se musí přenést do ostrého článku).
         // Pokud dojde k problémům se soubory, dá se provést DB rollback, pokud by pořadí operací bylo obráceně,
         // mohl by nastat problém, protože filesystem nemá rollback
         if (articleEditorTO.getDraftId() != null) deleteArticleInner(articleEditorTO.getDraftId(), false);
 
-        Path existingArticleDirPath = getAttachmentsPath(articleEditorTO.getExistingArticleId(), true);
+        Path existingArticleDirPath = getAttachmentsPath(article.getId(), true);
 
         Set<String> draftAttachmentsNames =
                 articleEditorTO.getDraftAttachments().stream().map(AttachmentTO::getName).collect(Collectors.toSet());
@@ -123,13 +124,12 @@ public class ArticleServiceImpl implements ArticleService {
                 try {
                     if (!draftAttachmentsNames.contains(fileName)) Files.delete(p);
                 } catch (IOException e) {
-                    throw new RuntimeException("Chyba při mazání přílohy " + fileName + " článku " +
-                            articleEditorTO.getExistingArticleId(), e);
+                    throw new RuntimeException("Chyba při mazání přílohy " + fileName + " článku " + article.getId(),
+                            e);
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException(
-                    "Nezdařilo se získat přehled příloh článku " + articleEditorTO.getExistingArticleId(), e);
+            throw new RuntimeException("Nezdařilo se získat přehled příloh článku " + article.getId(), e);
         }
 
         // Ulož nové přílohy
@@ -148,8 +148,18 @@ public class ArticleServiceImpl implements ArticleService {
             // Smaž adresář příloh draftu
             Path draftAttachmentsDirPath = getAttachmentsPath(articleEditorTO.getDraftId(), false);
             if (draftAttachmentsDirPath != null) {
-                try {
-                    Files.delete(draftAttachmentsDirPath);
+                try (Stream<Path> s = Files.walk(draftAttachmentsDirPath)) {
+                    // reverseOrder, protože jinak by walk začal přímo adresářem,
+                    // namísto jeho obsahem. Maže se všechno, takže potřebuju i samotný
+                    // adresář -- jinak bych použil Files::list, namísto Files::walk
+                    s.sorted(Comparator.reverseOrder()).forEach(p -> {
+                        try {
+                            Files.delete(p);
+                        } catch (IOException e) {
+                            logger.error("Chyba při mazání přílohy článku [{}] ({})", article.getAttachmentsDirId(),
+                                    p.getFileName().toString(), e);
+                        }
+                    });
                 } catch (IOException e) {
                     throw new RuntimeException(
                             "Chyba při mazání adresáře příloh článku " + articleEditorTO.getDraftId(), e);
@@ -373,19 +383,22 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public AttachmentsOperationResult saveDraftAttachment(Long draftId, Long existingArticleId, InputStream inputStream,
-                                                          String name) {
+    public AttachmentsOperationResult saveDraftAttachment(@NotNull Long draftId, Long existingArticleId,
+                                                          @NotNull InputStream inputStream, @NotNull String name) {
+        Objects.requireNonNull(draftId);
         try {
             // kontrola, že nedojde ke kolizi při uložení a přesunu příloh z draftu do ostrého článku
-            Path existingArticleDirPath = getAttachmentsPath(existingArticleId, false);
-            if (existingArticleDirPath != null) {
-                Path futureTargetPath = existingArticleDirPath.resolve(name);
-                if (Files.exists(futureTargetPath)) {
-                    // Tohle je potřeba pro případ, že byla smazána příloha z reálného článku (příprava smazání) a záhy
-                    // byla příloha nahrána znova ... nemá smysl ji dávat do draftu, protože se vlastně nic nezměnilo.
-                    // Řešením je tedy vrátit původní AttachmentTO se záznamem z existujího článku
-                    AttachmentTO attachmentTO = mapPathToAttachmentTO(futureTargetPath);
-                    return AttachmentsOperationResult.success(attachmentTO);
+            if (existingArticleId != null) {
+                Path existingArticleDirPath = getAttachmentsPath(existingArticleId, false);
+                if (existingArticleDirPath != null) {
+                    Path futureTargetPath = existingArticleDirPath.resolve(name);
+                    if (Files.exists(futureTargetPath)) {
+                        // Tohle je potřeba pro případ, že byla smazána příloha z reálného článku (příprava smazání) a záhy
+                        // byla příloha nahrána znova ... nemá smysl ji dávat do draftu, protože se vlastně nic nezměnilo.
+                        // Řešením je tedy vrátit původní AttachmentTO se záznamem z existujího článku
+                        AttachmentTO attachmentTO = mapPathToAttachmentTO(futureTargetPath);
+                        return AttachmentsOperationResult.success(attachmentTO);
+                    }
                 }
             }
 
