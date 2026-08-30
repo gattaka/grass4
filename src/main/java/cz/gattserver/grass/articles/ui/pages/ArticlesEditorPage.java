@@ -447,7 +447,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     }
 
     private void deleteDraft() {
-        articleService.deleteArticle(articleEditorTO.getDraftId());
+        if (articleEditorTO.getDraftId() != null) articleService.deleteArticle(articleEditorTO.getDraftId());
     }
 
     private Button createCancelButton() {
@@ -571,7 +571,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     private String getDownloadLink(AttachmentTO item) {
         String id =
                 String.valueOf(item.isDraft() ? articleEditorTO.getDraftId() : articleEditorTO.getExistingArticleId());
-        return String.join("/", UIUtils.getURLBase(), AttachmentsRequestHandlerConfig.ATTACHMENTS_PATH, id, item.getName());
+        return String.join("/", UIUtils.getURLBase(), AttachmentsRequestHandlerConfig.ATTACHMENTS_PATH, id,
+                item.getName());
     }
 
     private void handleDownloadAction(AttachmentTO item) {
@@ -614,8 +615,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     @ClientCallable
     private void returnToNodeCallback() {
         UI.getCurrent().navigate(NodePage.class,
-                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getNodeId(),
-                        articleEditorTO.getNodeName()));
+                URLIdentifierUtils.createURLIdentifier(articleEditorTO.getNodeId(), articleEditorTO.getNodeName()));
     }
 
     @ClientCallable
