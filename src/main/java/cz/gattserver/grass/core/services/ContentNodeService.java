@@ -51,7 +51,7 @@ public interface ContentNodeService {
 	 *            identifikátor obsahu
 	 * @return obsah
 	 */
-	ContentNodeTO getByID(long id);
+	ContentNodeTO getById(long id);
 
 	/**
 	 * Upraví obsah a uloží ho do DB - verze metody pro obsah bez tagů

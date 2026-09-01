@@ -34,7 +34,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
 
     @Override
     public String getPageTitle() {
-        return articleTO.name();
+        return articleTO.getName();
     }
 
     public ArticlesViewer(SecurityService securityService, ArticleService articleService) {
@@ -53,13 +53,13 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
 
         // RESCUE -- tohle by se normálně stát nemělo, ale umožňuje to aspoň
         // vyřešit stav, ve kterém existuje takovýto nezobrazitelný obsah
-        if (articleTO.contentNodeId() == null) {
-            articleService.deleteArticle(articleTO.id());
+        if (articleTO.getContentNodeId() == null) {
+            articleService.deleteArticle(articleTO.getId());
             UI.getCurrent().navigate(MainView.class);
         }
 
         // CSS resources
-        for (String css : articleTO.pluginCSSResources()) {
+        for (String css : articleTO.getPluginCSSResources()) {
             // není to úplně nejhezčí řešení, ale dá se tak relativně elegantně
             // obejít problém se závislosí pluginů na úložišti theme apod. a
             // přitom umožnit aby se CSS odkazovali na externí zdroje
@@ -71,7 +71,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         removeAll();
         add(new ContentViewer(createHTMLDiv(), articleTO, e -> onDeleteOperation(), e -> UI.getCurrent()
                 .navigate(ArticlesEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(articleTO.name(), ArticlesViewer.class, parameter)));
+                new RouterLink(articleTO.getName(), ArticlesViewer.class, parameter)));
 
         UIUtils.turnOffRouterAnchors();
     }
@@ -85,21 +85,21 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
     @ClientCallable
     private void initJS() {
         // JS resources
-        int jsResourcesSize = articleTO.pluginJSResources().size();
-        int jsCodesSize = articleTO.pluginJSCodes().size();
+        int jsResourcesSize = articleTO.getPluginJSResources().size();
+        int jsCodesSize = articleTO.getPluginJSCodes().size();
 
         JScriptItem[] jsResourcesArr = new JScriptItem[jsResourcesSize + jsCodesSize];
         int i = 0;
-        for (String resource : articleTO.pluginJSResources())
+        for (String resource : articleTO.getPluginJSResources())
             jsResourcesArr[i++] = new JScriptItem(resource);
-        for (String code : articleTO.pluginJSCodes())
+        for (String code : articleTO.getPluginJSCodes())
             jsResourcesArr[i++] = new JScriptItem(code, true);
 
         UIUtils.loadJS(jsResourcesArr);
     }
 
     private HtmlDiv createHTMLDiv() {
-        HtmlDiv content = new HtmlDiv(articleTO.outputHTML());
+        HtmlDiv content = new HtmlDiv(articleTO.getOutputHTML());
         content.setWidthFull();
         content.addClassName("article-content");
         return content;
@@ -107,9 +107,9 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
 
     protected void onDeleteOperation() {
         try {
-            articleService.deleteArticle(articleTO.id());
+            articleService.deleteArticle(articleTO.getId());
             UI.getCurrent().navigate(NodePage.class,
-                    URLIdentifierUtils.createURLIdentifier(articleTO.parentId(), articleTO.parentName()));
+                    URLIdentifierUtils.createURLIdentifier(articleTO.getParentId(), articleTO.getParentName()));
         } catch (Exception e) {
             // Pokud ne, otevři warn okno a při
             // potvrzení jdi na kategorii

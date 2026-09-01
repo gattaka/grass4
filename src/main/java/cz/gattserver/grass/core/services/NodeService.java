@@ -2,9 +2,6 @@ package cz.gattserver.grass.core.services;
 
 import java.util.List;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
-import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 
 public interface NodeService {
@@ -13,23 +10,14 @@ public interface NodeService {
 	 * Získá kategorii dle id
 	 *
 	 * @param nodeId id kategorie
-	 * @return kategori dle id, namapovaná pro přehled
+	 * @return kategori dle id
 	 */
-	NodeOverviewTO getNodeByIdForOverview(long nodeId);
-
-	/**
-	 * Získá kategorii dle id a namapuje jí, aby se dala použít v detailu
-	 * kategorie
-	 *
-	 * @param nodeId id kategorie
-	 * @return kategori dle id, namapovaná pro detail
-	 */
-	NodeTO getNodeByIdForDetail(long nodeId);
+	NodeTO getNodeById(long nodeId);
 
 	/**
 	 * Získá všechny kořenové kategorie
 	 */
-	List<NodeOverviewTO> getRootNodes();
+	List<NodeTO> getRootNodes();
 
 	/**
 	 * Získá všechny kořenové kategorie
@@ -39,12 +27,12 @@ public interface NodeService {
 	/**
 	 * Získá všechny kategorie pro zobrazení ve stromu
 	 */
-	List<NodeOverviewTO> getNodesForTree();
+	List<NodeTO> getNodesForTree();
 
 	/**
 	 * Získá kategorie, které jsou jako potomci dané kategorie
 	 */
-	List<NodeOverviewTO> getNodesByParentNode(long nodeId);
+	List<NodeTO> getNodesByParentNode(long nodeId);
 
 	/**
 	 * Získá počet kategorií, které jsou jako potomci dané kategorie
@@ -106,5 +94,5 @@ public interface NodeService {
 	 * @param filter filter
 	 * @return list nalezených kategorií
 	 */
-	List<NodeOverviewTO> getByFilter(String filter);
+	List<NodeTO> getByFilter(String filter);
 }

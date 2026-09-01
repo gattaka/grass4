@@ -175,7 +175,7 @@ public class PGResource {
             PhotogalleryTO to =
                     pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
             for (MultipartFile file : uploadedFile)
-                pgService.uploadFile(file.getInputStream(), file.getOriginalFilename(), to.photogalleryPath());
+                pgService.uploadFile(file.getInputStream(), file.getOriginalFilename(), to.getPhotogalleryPath());
 
             log.info("/upload dokončen");
             return new ResponseEntity<>(HttpStatus.OK);
@@ -200,9 +200,9 @@ public class PGResource {
 
             PhotogalleryTO to =
                     pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
-            PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(to.name(), to.photogalleryPath(),
-                    to.contentTags().stream().map(ContentTagTO::getName).toList(), to.publicated(), true);
-            pgService.modifyPhotogallery(operationId, to.id(), payloadTO, LocalDateTime.now());
+            PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(to.getName(), to.getPhotogalleryPath(),
+                    to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isPublicated(), true);
+            pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
 
             eventsHandler = future.get();
             PGProcessResultEvent event = eventsHandler.getResultAndDelete(operationId);

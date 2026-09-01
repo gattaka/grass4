@@ -313,10 +313,10 @@ public class ArticleServiceImpl implements ArticleService {
     public ArticleTO getArticleForDetail(Long id, Long userId, boolean isAdmin) {
         ArticleTO to = articleRepository.findByForDetailId(id, userId, isAdmin);
         if (to == null) return null;
-        to.pluginCSSResources().addAll(articleCSSResourceRepository.findByArticleId(id));
-        to.pluginJSResources().addAll(articleJSResourceRepository.findByArticleId(id));
-        to.pluginJSCodes().addAll(articleJSCodeRepository.findByArticleId(id));
-        to.contentTags().addAll(contentNodeContentTagRepository.findByContendNodeId(to.contentNodeId()));
+        to.getPluginCSSResources().addAll(articleCSSResourceRepository.findByArticleId(id));
+        to.getPluginJSResources().addAll(articleJSResourceRepository.findByArticleId(id));
+        to.getPluginJSCodes().addAll(articleJSCodeRepository.findByArticleId(id));
+        to.getContentTags().addAll(contentNodeContentTagRepository.findByContendNodeIdAndMap(to.getContentNodeId()));
         return to;
     }
 
@@ -329,11 +329,11 @@ public class ArticleServiceImpl implements ArticleService {
         int current = 0;
         for (Long id : ids) {
             ArticleTO articleTO = getArticleForDetail(id, null, true);
-            Context context = processArticle(articleTO.text(), contextRoot);
-            articleRepository.updateOutputs(articleTO.id(), context.getOutput(),
+            Context context = processArticle(articleTO.getText(), contextRoot);
+            articleRepository.updateOutputs(articleTO.getId(), context.getOutput(),
                     HTMLTagsFilter.trim(context.getOutput()));
             processJSAndCSS(id, id, context);
-            eventBus.publish(new ArticlesProcessProgressEvent("(" + current + "/" + total + ") " + articleTO.name()));
+            eventBus.publish(new ArticlesProcessProgressEvent("(" + current + "/" + total + ") " + articleTO.getName()));
             current++;
         }
 

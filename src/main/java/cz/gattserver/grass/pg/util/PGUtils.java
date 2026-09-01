@@ -288,7 +288,7 @@ public class PGUtils {
     }
 
     public static String createPhotogalleryBaseURL(PhotogalleryTO photogallery) {
-        return UIUtils.getContextPath() + "/" + PGRequestHandlerConfig.PG_PATH + "/" + photogallery.photogalleryPath() +
+        return UIUtils.getContextPath() + "/" + PGRequestHandlerConfig.PG_PATH + "/" + photogallery.getPhotogalleryPath() +
                 "/";
     }
 

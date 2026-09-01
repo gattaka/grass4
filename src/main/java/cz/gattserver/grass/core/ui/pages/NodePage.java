@@ -9,7 +9,6 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.common.server.URLIdentifierUtils;
@@ -21,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -65,7 +63,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        nodeTO = nodeService.getNodeByIdForDetail(identifier.id());
+        nodeTO = nodeService.getNodeById(identifier.id());
 
         // Navigační breadcrumb
         createBreadcrumb(layout, nodeTO);
@@ -86,7 +84,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         buttonLayout.add(createButton);
     }
 
-    public void createNodeAction(NodeOverviewTO parentNode) {
+    public void createNodeAction(NodeTO parentNode) {
         final WebDialog dialog = new WebDialog("Vytvořit kategorii");
 
         final TextField newNameField = new TextField();
@@ -94,10 +92,10 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         newNameField.setWidthFull();
         dialog.addComponent(newNameField);
 
-        NodeOverviewTO to = new NodeOverviewTO();
-        Binder<NodeOverviewTO> binder = new Binder<>(NodeOverviewTO.class);
+        NodeTO to = new NodeTO();
+        Binder<NodeTO> binder = new Binder<>(NodeTO.class);
         binder.forField(newNameField).withValidator(StringUtils::isNotBlank, "Název kategorie nesmí být prázdný")
-                .bind(NodeOverviewTO::getName, NodeOverviewTO::setName);
+                .bind(NodeTO::getName, NodeTO::setName);
         binder.setBean(to);
 
         ComponentFactory componentFactory = new ComponentFactory();
@@ -130,9 +128,9 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
                     URLIdentifierUtils.createURLIdentifier(parent.getId(), parent.getName())));
 
             // pokud je můj předek null, pak je to konec a je to všechno
-            if (parent.getParent() == null) break;
+            if (parent.getParentId() == null) break;
 
-            parent = parent.getParent();
+            parent = nodeService.getNodeById(parent.getParentId());
         }
 
         breadcrumb.resetBreadcrumb(breadcrumbElements);
@@ -141,9 +139,9 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
     private void createSubnodesPart(Div layout, NodeTO node) {
         layout.add(new H2("Podkategorie"));
 
-        List<NodeOverviewTO> nodes = nodeService.getNodesByParentNode(node.getId());
+        List<NodeTO> nodes = nodeService.getNodesByParentNode(node.getId());
         if (nodes == null) throw new GrassPageException(500);
-        NodesGrid subNodesTable = new NodesGrid();
+        NodesGrid subNodesTable = new NodesGrid(securityService.getCurrentUser().isAdmin());
         subNodesTable.populate(nodes);
 
         layout.add(subNodesTable);

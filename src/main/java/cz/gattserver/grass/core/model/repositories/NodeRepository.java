@@ -2,33 +2,21 @@ package cz.gattserver.grass.core.model.repositories;
 
 import java.util.List;
 
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import cz.gattserver.grass.core.model.domain.Node;
 
-public interface NodeRepository extends JpaRepository<Node, Long> {
+public interface NodeRepository extends JpaRepository<Node, Long>, NodeRepositoryCustom {
 
-	List<Node> findByParentIsNull();
+    @Modifying
+    @Query("update NODE n set n.name = ?2 where n.id = ?1")
+    void rename(Long nodeId, String newName);
 
-	int countByParentIsNull();
+    @Query("select count(c) from NODE n join CONTENT_NODE c on c.parent.id = n.id where n.id = ?1")
+    int countSubNodes(Long nodeId);
 
-	List<Node> findByParentId(Long id);
-
-	int countByParentId(Long id);
-
-	@Modifying
-	@Query("update NODE n set n.name = ?2 where n.id = ?1")
-	void rename(Long nodeId, String newName);
-
-	@Query("select count(c) from NODE n join CONTENTNODE c on c.parent.id = n.id where n.id = ?1")
-	int countSubNodes(Long nodeId);
-
-	@Query("select count(s) from NODE n join NODE s on s.parent.id = n.id where n.id = ?1")
-	int countContentNodes(Long nodeId);
-
-	@Query("select n from NODE n where LOWER(n.name) like ?1")
-	List<Node> findByFilter(String filter);
+    @Query("select count(s) from NODE n join NODE s on s.parent.id = n.id where n.id = ?1")
+    int countContentNodes(Long nodeId);
 }

@@ -8,10 +8,10 @@ import java.io.Serializable;
 @Embeddable
 public class ContentNodeContentTagId implements Serializable {
 
-    @Column(name = "CONTENTNODES_ID")
+    @Column(name = "CONTENT_NODE_ID")
     private Long contentNodeId;
 
-    @Column(name = "CONTENTTAGS_ID")
+    @Column(name = "CONTENT_TAG_ID")
     private Long contentTagId;
 
     public ContentNodeContentTagId(Long contentNodeId, Long contentTagId) {

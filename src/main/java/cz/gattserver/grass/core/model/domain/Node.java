@@ -1,62 +1,53 @@
 package cz.gattserver.grass.core.model.domain;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity(name = "NODE")
 public class Node {
 
-	/**
-	 * Název uzlu
-	 */
-	private String name;
-
-	/**
-	 * Předek uzlu
-	 */
-	@ManyToOne(optional = true)
-	private Node parent;
-
-	/**
-	 * DB identifikátor
-	 */
-	@Id
+    /**
+     * DB identifikátor
+     */
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    private Long id;
 
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof Node))
-			return false;
-		return ((Node) obj).getId() == getId();
-	}
+    /**
+     * Název uzlu
+     */
+    private String name;
 
-	@Override
-	public int hashCode() {
-		return getId().hashCode();
-	}
+    /**
+     * Předek uzlu
+     */
+    @Column(name = "PARENT_ID")
+    private Long parentId;
 
-	public Long getId() {
-		return id;
-	}
+    /**
+     * Je uzel veřejný nebo soukromý?
+     */
+    @Column(nullable = false)
+    private Boolean publicated = true;
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    /**
+     * Je uzel veřejný nebo soukromý dle jeho předka?
+     */
+    @Column(nullable = false, name = "PUBLICATED_BY_PARENT")
+    private Boolean publicatedByParent = true;
 
-	public String getName() {
-		return name;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Node)) return false;
+        return ((Node) obj).getId() == getId();
+    }
 
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Node getParent() {
-		return parent;
-	}
-
-	public void setParent(Node parent) {
-		this.parent = parent;
-	}
+    @Override
+    public int hashCode() {
+        return getId().hashCode();
+    }
 
 }

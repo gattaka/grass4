@@ -30,7 +30,7 @@ public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport
             if (userId == null) {
                 query.where(c.publicated.isTrue());
             } else {
-                query.where(c.publicated.isTrue().or(c.author.id.eq(userId)));
+                query.where(c.publicated.isTrue().or(c.authorId.eq(userId)));
             }
         }
         return query;
@@ -44,7 +44,7 @@ public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport
     }
 
     private JPQLQuery<Photogallery> createDetailQuery(Long userId, boolean isAdmin) {
-        return createBaseQuery(userId, isAdmin).join(u).on(c.author.id.eq(u.id)).join(n).on(c.parent.id.eq(n.id));
+        return createBaseQuery(userId, isAdmin).join(u).on(c.authorId.eq(u.id)).join(n).on(c.parentId.eq(n.id));
     }
 
     @Override
@@ -82,7 +82,7 @@ public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport
     public PhotogalleryTO findForDetailById(Long id, Long userId, boolean isAdmin) {
         return createDetailQuery(userId, isAdmin).where(p.id.eq(id))
                 .select(new QPhotogalleryTO(p.id, p.contentNodeId, c.name, n.id, n.name, c.creationDate,
-                        c.lastModificationDate, u.id, u.name, p.photogalleryDir, c.publicated, c.draft,
-                        c.draftSourceId)).fetchFirst();
+                        c.lastModificationDate, u.id, u.name, p.photogalleryDir, c.publicated, c.publicatedByParent,
+                        c.draft, c.draftSourceId)).fetchFirst();
     }
 }

@@ -29,7 +29,7 @@ import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
@@ -99,7 +99,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
     @Override
     public String getPageTitle() {
-        return print3dTO.getContentNode().name();
+        return print3dTO.getContentNode().getName();
     }
 
     @Override
@@ -114,7 +114,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         print3dTO = print3dService.getProjectForDetail(identifier.id());
         if (print3dTO == null) throw new GrassPageException(404);
 
-        if (!"MAG1CK".equals(magickToken) && !print3dTO.getContentNode().publicated() && !isAdminOrAuthor())
+        if (!"MAG1CK".equals(magickToken) && !print3dTO.getContentNode().isPublicated() && !isAdminOrAuthor())
             throw new GrassPageException(403);
 
         projectDir = print3dTO.getProjectDir();
@@ -124,7 +124,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
                 e -> UI.getCurrent()
                         .navigate(Print3dEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(contentNodeTO.name(), Print3DViewerPage.class, parameter));
+                new RouterLink(contentNodeTO.getName(), Print3DViewerPage.class, parameter));
 
         add(contentViewer);
         contentViewer.getOperationsListLayout().add(componentFactory.createZipButton(
@@ -140,7 +140,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
     private boolean isAdminOrAuthor() {
         return securityService.getCurrentUser().isAdmin() ||
-                print3dTO.getContentNode().getAuthor().equals(securityService.getCurrentUser());
+                print3dTO.getContentNode().getAuthorId().equals(securityService.getCurrentUser().getId());
     }
 
     protected Div createContent() {
@@ -300,8 +300,8 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
                     throw new RuntimeException(e);
                 }
             }
-            Print3dCreateTO payloadTO = new Print3dCreateTO(print3dTO.getContentNode().name(), projectDir,
-                    print3dTO.getContentNode().getContentTagsAsStrings(), print3dTO.getContentNode().publicated());
+            Print3dCreateTO payloadTO = new Print3dCreateTO(print3dTO.getContentNode().getName(), projectDir,
+                    print3dTO.getContentNode().getContentTagsAsStrings(), print3dTO.getContentNode().isPublicated());
             print3dService.modifyProject(print3dTO.getId(), payloadTO);
             UI.getCurrent().getPage().reload();
         }, () -> print3dService.getItems(projectDir).stream().map(Print3dViewItemTO::getName)
@@ -367,9 +367,9 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
     protected void onDeleteOperation() {
         ConfirmDialog confirmSubwindow = new ConfirmDialog("Opravdu si přejete smazat tento projekt ?", ev -> {
-            NodeOverviewTO nodeDTO = print3dTO.getContentNode().getParent();
+            ContentNodeTO contentNodeTO = print3dTO.getContentNode();
 
-            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(nodeDTO.getId(), nodeDTO.getName());
+            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(contentNodeTO.getParentId(), contentNodeTO.getParentName());
 
             // zdařilo se ? Pokud ano, otevři info okno a při
             // potvrzení jdi na kategorii

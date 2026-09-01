@@ -13,7 +13,8 @@ import com.vaadin.flow.router.RouterLink;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
+import cz.gattserver.grass.core.interfaces.ContentNodeBaseTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
@@ -23,7 +24,6 @@ import cz.gattserver.grass.core.ui.pages.TagPage;
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.UserService;
 import cz.gattserver.grass.core.ui.components.Breadcrumb;
 import cz.gattserver.grass.core.ui.dialogs.ContentMoveDialog;
@@ -41,28 +41,27 @@ import cz.gattserver.common.vaadin.HtmlSpan;
 
 public class ContentViewer extends Div {
 
-    private UserService userService;
-    private SecurityService securityService;
-    private CoreACLService coreACLService;
-    private NodeService nodeService;
+    private final UserService userService;
+    private final SecurityService securityService;
+    private final CoreACLService coreACLService;
+    private final NodeService nodeService;
 
-    private ContentNodeTO2 contentNodeTO;
-    private H2 contentNameLabel;
-    private Span contentAuthorNameLabel;
-    private Span contentCreationDateNameLabel;
-    private Span contentLastModificationDateLabel;
-    private Div tagsListLayout;
-    private Div operationsDiv;
-    private Div operationsListLayout;
+    private final ContentNodeBaseTO contentNodeTO;
+    private final H2 contentNameLabel;
+    private final Span contentAuthorNameLabel;
+    private final Span contentCreationDateNameLabel;
+    private final Span contentLastModificationDateLabel;
+    private final Div tagsListLayout;
+    private final Div operationsListLayout;
 
     private Button removeFromFavouritesButton;
     private Button addToFavouritesButton;
 
-    private Breadcrumb breadcrumb;
+    private final Breadcrumb breadcrumb;
 
-    private RouterLink contentLink;
+    private final RouterLink contentLink;
 
-    public ContentViewer(Component contentComponent, ContentNodeTO2 contentNodeTO,
+    public ContentViewer(Component contentComponent, ContentNodeBaseTO contentNodeTO,
                          Consumer<ClickEvent<Button>> deleteAction, Consumer<ClickEvent<Button>> editAction,
                          RouterLink contentLink) {
         this.securityService = SpringContextHelper.getBean(SecurityService.class);
@@ -80,24 +79,24 @@ public class ContentViewer extends Div {
 
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm:ss");
 
-        contentNameLabel = new H2(this.contentNodeTO.name());
-        contentAuthorNameLabel = new Span(this.contentNodeTO.authorName());
-        contentCreationDateNameLabel = new HtmlSpan(this.contentNodeTO.creationDate() == null ? "" :
-                this.contentNodeTO.creationDate().format(dateFormat));
+        contentNameLabel = new H2(this.contentNodeTO.getName());
+        contentAuthorNameLabel = new Span(this.contentNodeTO.getAuthorName());
+        contentCreationDateNameLabel = new HtmlSpan(this.contentNodeTO.getCreationDate() == null ? "" :
+                this.contentNodeTO.getCreationDate().format(dateFormat));
         contentLastModificationDateLabel = new HtmlSpan(
-                this.contentNodeTO.lastModificationDate() == null ? "<em>-neupraveno-</em>" :
-                        dateFormat.format(this.contentNodeTO.lastModificationDate()));
+                this.contentNodeTO.getLastModificationDate() == null ? "<em>-neupraveno-</em>" :
+                        dateFormat.format(this.contentNodeTO.getLastModificationDate()));
 
         tagsListLayout = new Div();
         tagsListLayout.setId("content-info-tags");
-        for (ContentTagTO contentTag : this.contentNodeTO.contentTags()) {
+        for (ContentTagTO contentTag : this.contentNodeTO.getContentTags()) {
             RouterLink tagLink = new RouterLink(contentTag.getName(), TagPage.class,
                     URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()));
             tagsListLayout.add(new Div(tagLink));
         }
 
         operationsListLayout = componentFactory.createButtonLayout();
-        if (!this.contentNodeTO.draft()) createContentOperations(operationsListLayout, editAction, deleteAction);
+        if (!this.contentNodeTO.isDraft()) createContentOperations(operationsListLayout, editAction, deleteAction);
 
         Div leftColumnLayout = componentFactory.createLeftColumnLayout();
         add(leftColumnLayout);
@@ -133,7 +132,7 @@ public class ContentViewer extends Div {
         removeFromFavouritesButton = componentFactory.createUnmarkFavouriteButton(event -> {
             // zdařilo se ? Pokud ano, otevři info okno
             try {
-                userService.removeContentFromFavourites(contentNodeTO.contentNodeId(),
+                userService.removeContentFromFavourites(contentNodeTO.getContentNodeId(),
                         securityService.getCurrentUser().getId());
                 removeFromFavouritesButton.setVisible(false);
                 addToFavouritesButton.setVisible(true);
@@ -149,7 +148,7 @@ public class ContentViewer extends Div {
         addToFavouritesButton = componentFactory.createMarkFavouriteButton(event -> {
             // zdařilo se? Pokud ano, otevři info okno
             try {
-                userService.addContentToFavourites(contentNodeTO.contentNodeId(), securityService.getCurrentUser().getId());
+                userService.addContentToFavourites(contentNodeTO.getContentNodeId(), securityService.getCurrentUser().getId());
                 addToFavouritesButton.setVisible(false);
                 removeFromFavouritesButton.setVisible(true);
             } catch (Exception e) {
@@ -216,7 +215,7 @@ public class ContentViewer extends Div {
         modifiedPart.add(new Breakline());
         modifiedPart.add(contentLastModificationDateLabel);
 
-        if (!contentNodeTO.publicated()) {
+        if (!contentNodeTO.isPublicated()) {
             Div publicatedLayout = new Div();
             publicatedLayout.addClassName("not-publicated-info");
             publicatedLayout.add(ImageIcon.INFO_16_ICON.createImage("Info"));
@@ -229,12 +228,12 @@ public class ContentViewer extends Div {
         layout.add(tagsListLayout);
 
         // nástrojová lišta
-        operationsDiv = new Div();
+        Div operationsDiv = new Div();
         layout.add(operationsDiv);
         H3 operationsHeader = new H3("Operace s obsahem");
         operationsDiv.add(operationsHeader);
         operationsDiv.add(operationsListLayout);
-        operationsDiv.setVisible(operationsListLayout.getChildren().count() > 0);
+        operationsDiv.setVisible(operationsListLayout.getChildren().findAny().isPresent());
     }
 
     private void createRightColumnContent(Div rightContentLayout, Component contentComponent) {
@@ -246,7 +245,7 @@ public class ContentViewer extends Div {
     }
 
 
-    private void updateBreadcrumb(ContentNodeTO2 content) {
+    private void updateBreadcrumb(ContentNodeBaseTO content) {
 
         // pokud zjistím, že cesta neodpovídá, vyhodím 302 (přesměrování) na
         // aktuální polohu cílové kategorie
@@ -260,7 +259,7 @@ public class ContentViewer extends Div {
         /**
          * kategorie
          */
-        NodeTO parent = nodeService.getNodeByIdForDetail(content.parentId());
+        NodeTO parent = nodeService.getNodeById(content.getParentId());
         while (true) {
 
             // nejprve zkus zjistit, zda předek existuje
@@ -270,9 +269,9 @@ public class ContentViewer extends Div {
                     URLIdentifierUtils.createURLIdentifier(parent.getId(), parent.getName())));
 
             // pokud je můj předek null, pak je to konec a je to všechno
-            if (parent.getParent() == null) break;
+            if (parent.getParentId() == null) break;
 
-            parent = parent.getParent();
+            parent = nodeService.getNodeById(parent.getParentId());
         }
 
         breadcrumb.resetBreadcrumb(breadcrumbElements);

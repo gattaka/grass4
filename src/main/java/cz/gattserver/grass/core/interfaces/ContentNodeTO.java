@@ -1,10 +1,16 @@
 package cz.gattserver.grass.core.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ContentNodeTO implements ContentNodeTO2 {
+@Getter
+@Setter
+public class ContentNodeTO implements ContentNodeBaseTO {
 
     /**
      * DB identifikátor
@@ -14,12 +20,12 @@ public class ContentNodeTO implements ContentNodeTO2 {
     /**
      * ID služby, která daný obsah umí číst
      */
-    private String contentReaderID;
+    private String contentReaderId;
 
     /**
      * ID samotného obsahu v rámci dané služby (typu obsahu)
      */
-    private Long contentID;
+    private Long contentNodeId;
 
     /**
      * Název obsahu
@@ -29,7 +35,8 @@ public class ContentNodeTO implements ContentNodeTO2 {
     /**
      * nadřazený uzel (kategorie ve které obsah je)
      */
-    private NodeOverviewTO parent;
+    private Long parentId;
+    private String parentName;
 
     /**
      * Kdy byl obsah vytvořen
@@ -42,14 +49,20 @@ public class ContentNodeTO implements ContentNodeTO2 {
     private LocalDateTime lastModificationDate;
 
     /**
-     * Je obsah ve fázi příprav, nebo už má být publikován ?
+     * Je obsah veřejný nebo soukromý?
      */
     private boolean publicated = true;
 
     /**
+     * Je obsah veřejný nebo soukromý dle jeho předka?
+     */
+    private boolean publicatedByParent = true;
+
+    /**
      * Kdo ho vytvořil
      */
-    private UserInfoTO author;
+    private Long authorId;
+    private String authorName;
 
     /**
      * Jde o plnohodnotný článek, nebo jde o rozpracovaný obsah?
@@ -66,133 +79,25 @@ public class ContentNodeTO implements ContentNodeTO2 {
      */
     private Set<ContentTagTO> contentTags;
 
-    public String getContentReaderID() {
-        return contentReaderID;
-    }
-
-    public ContentNodeTO setContentReaderID(String contentReaderID) {
-        this.contentReaderID = contentReaderID;
-        return this;
-    }
-
-    public Long getContentID() {
-        return contentID;
-    }
-
-    public ContentNodeTO setContentID(Long contentID) {
-        this.contentID = contentID;
-        return this;
-    }
-
-    public String name() {
-        return name;
-    }
-
-    @Override
-    public String authorName() {
-        return author.getName();
-    }
-
-    public ContentNodeTO setName(String name) {
-        this.name = name;
-        return this;
-    }
-
-    public NodeOverviewTO getParent() {
-        return parent;
-    }
-
-    public ContentNodeTO setParent(NodeOverviewTO parent) {
-        this.parent = parent;
-        return this;
-    }
-
-    public LocalDateTime creationDate() {
-        return creationDate;
-    }
-
-    public ContentNodeTO setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-        return this;
-    }
-
-    public LocalDateTime lastModificationDate() {
-        return lastModificationDate;
-    }
-
-    public ContentNodeTO setLastModificationDate(LocalDateTime lastModificationDate) {
-        this.lastModificationDate = lastModificationDate;
-        return this;
-    }
-
-    @Override
-    public Long parentId() {
-        return parent.getId();
-    }
-
-    @Override
-    public String parentName() {
-        return parent.getName();
-    }
-
-    public boolean publicated() {
-        return publicated;
-    }
-
-    @Override
-    public Long authorId() {
-        return author.getId();
-    }
-
-    public ContentNodeTO setPublicated(boolean publicated) {
-        this.publicated = publicated;
-        return this;
-    }
-
-    public UserInfoTO getAuthor() {
-        return author;
-    }
-
-    public ContentNodeTO setAuthor(UserInfoTO author) {
-        this.author = author;
-        return this;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public ContentNodeTO setId(Long id) {
+    @QueryProjection
+    public ContentNodeTO(String contentReaderId, Long id, Long contentNodeId, String name, Long parentId,
+                         String parentName, LocalDateTime creationDate, LocalDateTime lastModificationDate,
+                         boolean publicated, boolean publicatedByParent, Long authorId, String authorName,
+                         boolean draft, Long draftSourceId) {
+        this.contentReaderId = contentReaderId;
         this.id = id;
-        return this;
-    }
-
-    public ContentNodeTO setDraft(boolean draft) {
+        this.contentNodeId = contentNodeId;
+        this.name = name;
+        this.parentId = parentId;
+        this.parentName = parentName;
+        this.creationDate = creationDate;
+        this.lastModificationDate = lastModificationDate;
+        this.publicated = publicated;
+        this.publicatedByParent = publicatedByParent;
+        this.authorId = authorId;
+        this.authorName = authorName;
         this.draft = draft;
-        return this;
-    }
-
-    public boolean draft() {
-        return draft;
-    }
-
-    @Override
-    public Long contentNodeId() {
-        return id;
-    }
-
-    @Override
-    public Long draftSourceId() {
-        return draftSourceId;
-    }
-
-    public ContentNodeTO setDraftSourceId(Long draftSourceId) {
         this.draftSourceId = draftSourceId;
-        return this;
-    }
-
-    public Set<ContentTagTO> contentTags() {
-        return contentTags;
     }
 
     public Set<String> getContentTagsAsStrings() {
@@ -201,8 +106,4 @@ public class ContentNodeTO implements ContentNodeTO2 {
         return set;
     }
 
-    public ContentNodeTO setContentTags(Set<ContentTagTO> contentTags) {
-        this.contentTags = contentTags;
-        return this;
-    }
 }

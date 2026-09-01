@@ -12,7 +12,7 @@ import com.vaadin.flow.server.VaadinServletRequest;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.modules.SectionService;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
@@ -135,8 +135,8 @@ public class MainView extends Div implements AfterNavigationObserver, RouterLayo
 
         // sekce článků je rozbalená rovnou jako její kořenové kategorie
         NodeService nodeService = SpringContextHelper.getBean(NodeService.class);
-        List<NodeOverviewTO> nodes = nodeService.getRootNodes();
-        for (NodeOverviewTO node : nodes)
+        List<NodeTO> nodes = nodeService.getRootNodes();
+        for (NodeTO node : nodes)
             menuLeft.add(new Anchor(UIUtils.getPageURL(nodePageFactory, node.getId() + "-" + node.getName()),
                     node.getName()));
 

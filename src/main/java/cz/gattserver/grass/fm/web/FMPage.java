@@ -22,6 +22,7 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.ui.NameDialog;
 import cz.gattserver.common.util.CZAmountFormatter;
 import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
@@ -353,8 +354,8 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     }
 
     private void handleNewDirectory() {
-        new FileNameDialog(to -> {
-            switch (explorer.createNewDir(to.getName())) {
+        new NameDialog("Vytvoření nového adresáře", "Název souboru", null, to -> {
+            switch (explorer.createNewDir(to.getValue())) {
                 case SUCCESS:
                     populateGrid();
                     break;
@@ -399,8 +400,8 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
     }
 
     private void handleRenameAction(final FMItemTO item) {
-        new FileNameDialog(item.name(), to -> {
-            switch (explorer.renameFile(item.name(), to.getName())) {
+        new NameDialog("Změna názvu", "Název souboru", item.name(), to -> {
+            switch (explorer.renameFile(item.name(), to.getValue())) {
                 case SUCCESS:
                     populateGrid();
                     break;

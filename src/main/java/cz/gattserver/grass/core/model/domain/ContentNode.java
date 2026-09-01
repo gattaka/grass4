@@ -4,8 +4,12 @@ import java.time.LocalDateTime;
 import java.util.Set;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
-@Entity(name = "CONTENTNODE")
+@Getter
+@Setter
+@Entity(name = "CONTENT_NODE")
 public class ContentNode {
 
     /**
@@ -18,11 +22,13 @@ public class ContentNode {
     /**
      * ID služby, která daný obsah umí číst
      */
+    @Column(name = "CONTENT_READER_ID")
     private String contentReaderId;
 
     /**
      * ID samotného obsahu v rámci dané služby (typu obsahu)
      */
+    @Column(name = "CONTENT_ID")
     private Long contentId;
 
     /**
@@ -33,24 +39,32 @@ public class ContentNode {
     /**
      * Nadřazený uzel (kategorie ve které obsah je)
      */
-    @ManyToOne(fetch = FetchType.EAGER)
-    private Node parent;
+    @Column(name = "PARENT_ID")
+    private Long parentId;
 
     /**
      * Kdy byl obsah vytvořen
      */
+    @Column(name = "CREATION_DATE")
     private LocalDateTime creationDate;
 
     /**
      * Kdy byl naposledy upraven
      */
+    @Column(name = "LAST_MODIFICATION_DATE")
     private LocalDateTime lastModificationDate;
 
     /**
-     * Je obsah určen k publikování nebo je soukromý?
+     * Je obsah veřejný nebo soukromý?
      */
     @Column(nullable = false)
     private Boolean publicated = true;
+
+    /**
+     * Je obsah veřejný nebo soukromý dle jeho předka?
+     */
+    @Column(nullable = false, name = "PUBLICATED_BY_PARENT")
+    private Boolean publicatedByParent = true;
 
     /**
      * Jde o plnohodnotný obsah, nebo jde o rozpracovaný obsah?
@@ -61,127 +75,24 @@ public class ContentNode {
     /**
      * Jde-li o draft upravovaného obsahu, jaké je jeho id (obsah modulu obsahů)
      */
+    @Column(name = "DRAFT_SOURCE_ID")
     private Long draftSourceId;
-
-    /**
-     * Tagy
-     */
-    @ManyToMany(fetch = FetchType.LAZY)
-    private Set<ContentTag> contentTags;
 
     /**
      * Kdo ho vytvořil
      */
-    @ManyToOne(fetch = FetchType.EAGER)
-    private User author;
-
-    public Boolean getDraft() {
-        // Zpětná kompatibilita s null záznamy
-        return Boolean.TRUE.equals(draft);
-    }
-
-    public void setDraft(Boolean draft) {
-        this.draft = draft;
-    }
-
-    public Long getDraftSourceId() {
-        return draftSourceId;
-    }
-
-    public void setDraftSourceId(Long draftSourceId) {
-        this.draftSourceId = draftSourceId;
-    }
+    @Column(name = "AUTHOR_ID")
+    private Long authorId;
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof ContentNode))
-            return false;
+        if (!(obj instanceof ContentNode)) return false;
         return ((ContentNode) obj).getId() == getId();
     }
 
     @Override
     public int hashCode() {
         return getId().hashCode();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getContentReaderId() {
-        return contentReaderId;
-    }
-
-    public void setContentReaderId(String contentReaderId) {
-        this.contentReaderId = contentReaderId;
-    }
-
-    public LocalDateTime getCreationDate() {
-        return creationDate;
-    }
-
-    public void setCreationDate(LocalDateTime creationDate) {
-        this.creationDate = creationDate;
-    }
-
-    public LocalDateTime getLastModificationDate() {
-        return lastModificationDate;
-    }
-
-    public void setLastModificationDate(LocalDateTime lastModificationDate) {
-        this.lastModificationDate = lastModificationDate;
-    }
-
-    public Boolean getPublicated() {
-        return publicated;
-    }
-
-    public void setPublicated(Boolean publicated) {
-        this.publicated = publicated;
-    }
-
-    public Long getContentId() {
-        return contentId;
-    }
-
-    public void setContentId(Long contentId) {
-        this.contentId = contentId;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public Set<ContentTag> getContentTags() {
-        return contentTags;
-    }
-
-    public void setContentTags(Set<ContentTag> contentTags) {
-        this.contentTags = contentTags;
-    }
-
-    public User getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(User author) {
-        this.author = author;
-    }
-
-    public Node getParent() {
-        return parent;
-    }
-
-    public void setParent(Node parent) {
-        this.parent = parent;
     }
 
 }

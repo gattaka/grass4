@@ -28,7 +28,7 @@ import cz.gattserver.grass.articles.services.ArticleService;
 import cz.gattserver.grass.articles.ui.dialogs.DraftMenuDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.services.NodeService;
@@ -155,7 +155,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
-            NodeOverviewTO node = nodeService.getNodeByIdForOverview(identifier.id());
+            NodeTO node = nodeService.getNodeById(identifier.id());
             if (node == null) {
                 logger.debug("Neexistující kategorie: {}", identifier.id());
                 throw new GrassPageException(404);
@@ -170,17 +170,17 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
                     articleService.getArticleForDetail(identifier.id(), securityService.getCurrentUser().getId(),
                             securityService.getCurrentUser().isAdmin());
             if (existingArticleTO == null) throw new GrassPageException(403);
-            articleEditorTO.setNodeId(existingArticleTO.parentId());
-            articleEditorTO.setNodeName(existingArticleTO.parentName());
-            articleEditorTO.setContentNodeId(existingArticleTO.contentNodeId());
-            articleEditorTO.setContentNodeName(existingArticleTO.name());
-            articleEditorTO.setExistingArticleId(existingArticleTO.id());
-            articleEditorTO.setDraftName(existingArticleTO.name());
-            articleEditorTO.setDraftText(existingArticleTO.text());
-            articleEditorTO.setDraftPublicated(existingArticleTO.publicated());
-            for (ContentTagTO tagDTO : existingArticleTO.contentTags())
+            articleEditorTO.setNodeId(existingArticleTO.getParentId());
+            articleEditorTO.setNodeName(existingArticleTO.getParentName());
+            articleEditorTO.setContentNodeId(existingArticleTO.getContentNodeId());
+            articleEditorTO.setContentNodeName(existingArticleTO.getName());
+            articleEditorTO.setExistingArticleId(existingArticleTO.getId());
+            articleEditorTO.setDraftName(existingArticleTO.getName());
+            articleEditorTO.setDraftText(existingArticleTO.getText());
+            articleEditorTO.setDraftPublicated(existingArticleTO.isPublicated());
+            for (ContentTagTO tagDTO : existingArticleTO.getContentTags())
                 articleEditorTO.getDraftTags().add(tagDTO.getName());
-            articleEditorTO.getDraftAttachments().addAll(articleService.findAttachments(existingArticleTO.id()));
+            articleEditorTO.getDraftAttachments().addAll(articleService.findAttachments(existingArticleTO.getId()));
         } else {
             logger.debug("Neznámá operace: {}", operationToken);
             throw new GrassPageException(404);
@@ -195,28 +195,28 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     private void populateByExistingDraft(Long draftId) {
         ArticleTO draftTO = articleService.getArticleForDetail(draftId, securityService.getCurrentUser().getId(),
                 securityService.getCurrentUser().isAdmin());
-        articleEditorTO.setDraftId(draftTO.id());
-        articleEditorTO.setNodeId(draftTO.parentId());
-        articleEditorTO.setNodeName(draftTO.parentName());
-        articleEditorTO.setContentNodeId(draftTO.contentNodeId());
-        articleEditorTO.setContentNodeName(draftTO.name());
-        articleEditorTO.setDraftName(draftTO.name());
-        articleEditorTO.setDraftText(draftTO.text());
-        articleEditorTO.setDraftPublicated(draftTO.publicated());
-        for (ContentTagTO tagDTO : draftTO.contentTags())
+        articleEditorTO.setDraftId(draftTO.getId());
+        articleEditorTO.setNodeId(draftTO.getParentId());
+        articleEditorTO.setNodeName(draftTO.getParentName());
+        articleEditorTO.setContentNodeId(draftTO.getContentNodeId());
+        articleEditorTO.setContentNodeName(draftTO.getName());
+        articleEditorTO.setDraftName(draftTO.getName());
+        articleEditorTO.setDraftText(draftTO.getText());
+        articleEditorTO.setDraftPublicated(draftTO.isPublicated());
+        for (ContentTagTO tagDTO : draftTO.getContentTags())
             articleEditorTO.getDraftTags().add(tagDTO.getName());
 
         // jedná se o draft již existujícího obsahu?
-        if (draftTO.draftSourceId() != null) {
-            ArticleTO existingArticleTO = articleService.getArticleForDetail(draftTO.draftSourceId(),
+        if (draftTO.getDraftSourceId() != null) {
+            ArticleTO existingArticleTO = articleService.getArticleForDetail(draftTO.getDraftSourceId(),
                     securityService.getCurrentUser().getId(), securityService.getCurrentUser().isAdmin());
             if (existingArticleTO == null) throw new GrassPageException(403);
-            articleEditorTO.setExistingArticleId(existingArticleTO.id());
+            articleEditorTO.setExistingArticleId(existingArticleTO.getId());
         }
 
         articleEditorTO.getDraftAttachments()
                 .addAll(articleService.findAttachments(articleEditorTO.getExistingArticleId()));
-        for (AttachmentTO attachmentTO : articleService.findAttachments(draftTO.id())) {
+        for (AttachmentTO attachmentTO : articleService.findAttachments(draftTO.getId())) {
             attachmentTO.setDraft(true);
             articleEditorTO.getDraftAttachments().add(attachmentTO);
         }

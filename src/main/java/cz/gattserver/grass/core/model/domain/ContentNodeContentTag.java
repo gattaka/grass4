@@ -3,7 +3,7 @@ package cz.gattserver.grass.core.model.domain;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 
-@Entity(name = "CONTENTNODE_CONTENT_TAG")
+@Entity(name = "CONTENT_NODE_CONTENT_TAG")
 public class ContentNodeContentTag {
 
     @EmbeddedId
@@ -12,8 +12,8 @@ public class ContentNodeContentTag {
     public ContentNodeContentTag() {
     }
 
-    public ContentNodeContentTag(Long medicalRecordId, Long medicamentId) {
-        this.id = new ContentNodeContentTagId(medicalRecordId, medicamentId);
+    public ContentNodeContentTag(Long contentNodeId, Long contentTagId) {
+        this.id = new ContentNodeContentTagId(contentNodeId, contentTagId);
     }
 
     public ContentNodeContentTag(ContentNodeContentTagId id) {

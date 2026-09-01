@@ -1,48 +1,50 @@
-package cz.gattserver.grass.fm.web;
+package cz.gattserver.common.ui;
 
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.binder.ValidationException;
-import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.EditWebDialog;
 import cz.gattserver.grass.fm.interfaces.FMCreateDirectoryTO;
+import lombok.*;
 
 import java.io.Serial;
 import java.util.function.Consumer;
 
-public class FileNameDialog extends EditWebDialog {
+public class NameDialog extends EditWebDialog {
 
     @Serial
     private static final long serialVersionUID = 3279714188741874491L;
 
-    public FileNameDialog(Consumer<FMCreateDirectoryTO> onSave) {
-        this(null, onSave);
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public class ValueTO {
+        private String value;
     }
 
-    public FileNameDialog(String existingName, Consumer<FMCreateDirectoryTO> onSave) {
-        super("Zadání názvu");
-        init(new FMCreateDirectoryTO(existingName), onSave);
-    }
+    public NameDialog(String caption, String placeholder, String existingValue, Consumer<ValueTO> onSave) {
+        super(caption);
 
-    private void init(FMCreateDirectoryTO existingTO, Consumer<FMCreateDirectoryTO> onSave) {
-        final Binder<FMCreateDirectoryTO> binder = new Binder<>();
-        binder.setBean(new FMCreateDirectoryTO());
+        final Binder<ValueTO> binder = new Binder<>();
+        binder.setBean(new ValueTO());
 
         ComponentFactory componentFactory = new ComponentFactory();
 
         final TextField textField = new TextField();
-        textField.setPlaceholder("Název souboru");
+        textField.setPlaceholder(placeholder);
         textField.setWidth(400, Unit.PIXELS);
         binder.forField(textField).asRequired(componentFactory.createRequiredLabel())
-                .bind(FMCreateDirectoryTO::getName, FMCreateDirectoryTO::setName);
+                .bind(ValueTO::getValue, ValueTO::setValue);
         addComponent(textField);
 
+        ValueTO existingTO = new ValueTO(existingValue);
         if (existingTO != null) binder.readBean(existingTO);
 
         getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(event -> {
             try {
-                FMCreateDirectoryTO to = new FMCreateDirectoryTO();
+                ValueTO to = new ValueTO();
                 binder.writeBean(to);
                 onSave.accept(to);
                 close();

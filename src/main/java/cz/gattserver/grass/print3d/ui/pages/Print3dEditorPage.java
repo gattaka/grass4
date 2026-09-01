@@ -25,7 +25,7 @@ import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.services.NodeService;
@@ -66,7 +66,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
     private final NodeService nodeService;
     private final EventBus eventBus;
 
-    private NodeOverviewTO node;
+    private NodeTO node;
     private Print3dTO project;
 
     private TokenField keywords;
@@ -137,7 +137,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
             editMode = false;
-            node = nodeService.getNodeByIdForOverview(identifier.id());
+            node = nodeService.getNodeById(identifier.id());
             nameField.setValue("");
             publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
@@ -146,14 +146,14 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
             if (project == null) throw new GrassPageException(404);
 
-            nameField.setValue(project.getContentNode().name());
-            for (ContentTagTO tagDTO : project.getContentNode().contentTags())
+            nameField.setValue(project.getContentNode().getName());
+            for (ContentTagTO tagDTO : project.getContentNode().getContentTags())
                 keywords.addToken(tagDTO.getName());
 
-            publicatedCheckBox.setValue(project.getContentNode().publicated());
+            publicatedCheckBox.setValue(project.getContentNode().isPublicated());
 
             // nemá oprávnění upravovat tento obsah
-            if (!project.getContentNode().getAuthor().getName().equals(securityService.getCurrentUser().getName()) &&
+            if (!project.getContentNode().getAuthorName().equals(securityService.getCurrentUser().getName()) &&
                     !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
             log.debug("Neznámá operace: '{}'", operationToken);
@@ -331,7 +331,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
      */
     private void returnToProject() {
         UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(Print3DViewerPage.class,
-                URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().name())));
+                URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
     }
 
     /**

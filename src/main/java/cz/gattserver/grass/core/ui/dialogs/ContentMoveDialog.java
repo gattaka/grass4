@@ -1,13 +1,14 @@
 package cz.gattserver.grass.core.ui.dialogs;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
-import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.ContentNodeBaseTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.ui.components.NodeTree;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -18,10 +19,10 @@ public abstract class ContentMoveDialog extends WebDialog {
     private Button moveBtn;
     private NodeTree tree;
 
-    public ContentMoveDialog(final ContentNodeTO2 contentNodeTO) {
+    public ContentMoveDialog(final ContentNodeBaseTO contentNodeTO) {
         super("Přesunout obsah");
 
-        setWidth("500px");
+        setWidth(500, Unit.PIXELS);
 
         tree = new NodeTree();
         tree.getGrid().addSelectionListener(event -> moveBtn.setEnabled(!event.getAllSelectedItems().isEmpty()));
@@ -29,9 +30,9 @@ public abstract class ContentMoveDialog extends WebDialog {
         layout.add(tree);
 
         moveBtn = componentFactory.createSubmitButton(event -> {
-            NodeOverviewTO nodeDTO = tree.getGrid().getSelectedItems().iterator().next();
+            NodeTO nodeDTO = tree.getGrid().getSelectedItems().iterator().next();
             SpringContextHelper.getBean(ContentNodeService.class)
-                    .moveContent(nodeDTO.getId(), contentNodeTO.contentNodeId());
+                    .moveContent(nodeDTO.getId(), contentNodeTO.getContentNodeId());
             close();
             onMove();
         });
@@ -47,7 +48,7 @@ public abstract class ContentMoveDialog extends WebDialog {
         layout.add(btnLayout);
         layout.setHorizontalComponentAlignment(Alignment.END, moveBtn);
 
-        tree.expandTo(contentNodeTO.parentId());
+        tree.expandTo(contentNodeTO.getParentId());
     }
 
     protected abstract void onMove();

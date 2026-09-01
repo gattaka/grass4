@@ -20,13 +20,13 @@ public class Print3d {
     /**
 	 * Meta-informace o obsahu
 	 */
-	@OneToOne
-	private ContentNode contentNode;
+    @Column(name = "CONTENT_NODE_ID")
+	private Long contentNodeId;
 
     /**
 	 * Relativní cesta (od kořene 3d projektů) k adresáři s 3d projektem
 	 */
-    @Column(name = "PROJECTPATH")
+    @Column(name = "PROJECT_PATH")
 	private String projectDir;
 
 }

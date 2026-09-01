@@ -1,64 +1,41 @@
 package cz.gattserver.grass.core.model.domain;
 
-import java.util.Set;
-
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 @Entity(name = "CONTENT_TAG")
 public class ContentTag {
 
-	/**
-	 * DB identifikátor
-	 */
-	@Id
+    /**
+     * DB identifikátor
+     */
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    private Long id;
 
-	/**
-	 * Název tagu
-	 */
-	private String name;
+    /**
+     * Aktuální počet obsahů, které jsou označeny tímto tagem
+     */
+    @Column(name = "CONTENT_NODES_COUNT")
+    private Integer contentNodeCount = 0;
 
-	/**
-	 * Obsahy tagu
-	 */
-	@ManyToMany(mappedBy = "contentTags")
-	private Set<ContentNode> contentNodes;
+    /**
+     * Název tagu
+     */
+    private String name;
 
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof ContentTag))
-			return false;
-		return ((ContentTag) obj).getName().equals(getName());
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof ContentTag)) return false;
+        return ((ContentTag) obj).getName().equals(getName());
+    }
 
-	@Override
-	public int hashCode() {
-		return getName() == null ? 0 : getName().hashCode();
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public Set<ContentNode> getContentNodes() {
-		return contentNodes;
-	}
-
-	public void setContentNodes(Set<ContentNode> contentNodes) {
-		this.contentNodes = contentNodes;
-	}
+    @Override
+    public int hashCode() {
+        return getName() == null ? 0 : getName().hashCode();
+    }
 
 }

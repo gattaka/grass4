@@ -4,27 +4,24 @@ import java.util.List;
 
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 
 import com.vaadin.flow.router.RouterLink;
 import cz.gattserver.common.vaadin.ImageIcon;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.common.server.URLIdentifierUtils;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.grass.core.ui.pages.NodePage;
-import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 
-public class NodesGrid extends Grid<NodeOverviewTO> {
+public class NodesGrid extends Grid<NodeTO> {
 
-    public NodesGrid() {
-        // inject nefunguje kvůli něčemu v předkovi
-        final PageFactory nodePageFactory = (PageFactory) SpringContextHelper.getBean("nodePageFactory");
-
+    public NodesGrid(boolean showPubLock) {
         UIUtils.applyGrassDefaultStyle(this);
 
         setHeight("200px");
@@ -40,12 +37,22 @@ public class NodesGrid extends Grid<NodeOverviewTO> {
         }, c -> "")).setFlexGrow(0).setWidth("31px").setHeader("").setTextAlign(ColumnTextAlign.CENTER)
                 .setKey(iconBind);
 
-        addColumn(new ComponentRenderer<>(node -> new RouterLink(node.getName(), NodePage.class,
-                URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())))).setHeader("Kategorie")
+        addColumn(new ComponentRenderer<>(node -> {
+            Div div = new Div();
+            div.add(new RouterLink(node.getName(), NodePage.class,
+                    URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
+
+            if (showPubLock && Boolean.TRUE != node.getPublicated()) {
+                Icon icon = VaadinIcon.LOCK.create();
+                icon.setColor("#7f7f7f");
+                div.add(icon);
+            }
+            return div;
+        })).setHeader("Název")
                 .setId(nameBind);
     }
 
-    public void populate(List<NodeOverviewTO> nodes) {
+    public void populate(List<NodeTO> nodes) {
         setItems(nodes);
         setHeight(GridUtils.processHeight(nodes.size()) + "px");
     }

@@ -4,8 +4,11 @@ import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.icon.Icon;
+import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -67,29 +70,24 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
                 .setKey(iconBind);
 
         addColumn(new ComponentRenderer<>(contentNode -> {
+            Div div = new Div();
             ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.contentReaderID());
             if (activeLinks) {
                 String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory) :
                         UIUtils.getPageURL(contentService.getContentViewerPageFactory(),
                                 URLIdentifierUtils.createURLIdentifier(contentNode.contentID(), contentNode.name()));
-                return new Anchor(url, contentNode.name());
+                div.add(new Anchor(url, contentNode.name()));
             } else {
-                return new Text(contentNode.name());
+                div.add(new Text(contentNode.name()));
             }
-        })).setFlexGrow(2).setHeader("Název").setId(nameBind);
 
-        if (showPubLock) {
-            addColumn(new IconRenderer<>(c -> {
-                if (c.publicated()) {
-                    return new Span();
-                } else {
-                    Image img = ImageIcon.SHIELD_16_ICON.createImage("locked");
-                    img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
-                    return img;
-                }
-            }, c -> "")).setFlexGrow(0).setTextAlign(ColumnTextAlign.CENTER).setWidth("31px").setHeader("")
-                    .setKey(lockIconBind);
-        }
+            if (showPubLock && Boolean.TRUE != contentNode.publicated()) {
+                Icon icon = VaadinIcon.LOCK.create();
+                icon.setColor("#7f7f7f");
+                div.add(icon);
+            }
+            return div;
+        })).setFlexGrow(2).setHeader("Název").setId(nameBind);
 
         addColumn(new ComponentRenderer<>(contentNode -> {
             if (activeLinks) {

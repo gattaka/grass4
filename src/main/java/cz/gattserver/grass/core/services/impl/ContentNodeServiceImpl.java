@@ -3,21 +3,20 @@ package cz.gattserver.grass.core.services.impl;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.Validate;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.querydsl.core.QueryResults;
 
 import cz.gattserver.grass.core.model.domain.ContentNode;
-import cz.gattserver.grass.core.model.domain.Node;
-import cz.gattserver.grass.core.model.domain.User;
 import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.ContentTagService;
@@ -29,204 +28,190 @@ import cz.gattserver.grass.core.services.UserService;
 @Service
 public class ContentNodeServiceImpl implements ContentNodeService {
 
-	@Autowired
-	private CoreMapperService mapper;
+    private final CoreMapperService mapper;
+    private final SecurityService securityService;
+    private final ContentTagService contentTagService;
+    private final UserService userService;
+    private final ContentNodeRepository contentNodeRepository;
 
-	@Autowired
-	private SecurityService securityService;
+    public ContentNodeServiceImpl(CoreMapperService mapper, SecurityService securityService,
+                                  ContentTagService contentTagService, UserService userService,
+                                  ContentNodeRepository contentNodeRepository) {
+        this.mapper = mapper;
+        this.securityService = securityService;
+        this.contentTagService = contentTagService;
+        this.userService = userService;
+        this.contentNodeRepository = contentNodeRepository;
+    }
 
-	@Autowired
-	private ContentTagService contentTagService;
+    @Override
+    public long save(String contentModuleId, long contentId, String name, Collection<String> tags, boolean publicated,
+                     long nodeId, long authorId, boolean draft, LocalDateTime date, Long draftSourceId) {
+        Validate.notNull(contentModuleId, "'contentModuleId' nesmí být null");
+        Validate.notNull(name, "'name' nesmí být null");
 
-	@Autowired
-	private UserService userService;
+        if (date == null) date = LocalDateTime.now();
 
-	@Autowired
-	private ContentNodeRepository contentNodeRepository;
+        ContentNode contentNode = new ContentNode();
+        contentNode.setContentId(contentId);
+        contentNode.setContentReaderId(contentModuleId);
+        contentNode.setCreationDate(date);
+        contentNode.setName(name);
+        contentNode.setDraft(draft);
+        contentNode.setDraftSourceId(draftSourceId);
+        contentNode.setPublicated(publicated);
+        contentNode.setParentId(nodeId);
+        contentNode.setAuthorId(authorId);
 
-	@Override
-	public long save(
-			String contentModuleId, long contentId, String name, Collection<String> tags, boolean publicated,
-			long nodeId, long authorId, boolean draft, LocalDateTime date, Long draftSourceId) {
-		Validate.notNull(contentModuleId, "'contentModuleId' nesmí být null");
-		Validate.notNull(name, "'name' nesmí být null");
+        contentNode = contentNodeRepository.save(contentNode);
 
-		if (date == null)
-			date = LocalDateTime.now();
+        // aktualizace tagů
+        contentTagService.saveTags(tags, contentNode.getId());
 
-		ContentNode contentNode = new ContentNode();
-		contentNode.setContentId(contentId);
-		contentNode.setContentReaderId(contentModuleId);
-		contentNode.setCreationDate(date);
-		contentNode.setName(name);
-		contentNode.setDraft(draft);
-		contentNode.setDraftSourceId(draftSourceId);
-		contentNode.setPublicated(publicated);
+        return contentNode.getId();
+    }
 
-		// Ulož contentNode
-		Node parent = new Node();
-		parent.setId(nodeId);
-		contentNode.setParent(parent);
+    @Override
+    public ContentNodeTO getById(long contentNodeId) {
+        return contentNodeRepository.findByIdForDetail(contentNodeId);
+    }
 
-		User user = new User();
-		user.setId(authorId);
-		contentNode.setAuthor(user);
+    @Override
+    public void modify(long contentNodeId, String name, boolean publicated) {
+        modify(contentNodeId, name, null, publicated);
+    }
 
-		contentNode = contentNodeRepository.save(contentNode);
+    @Override
+    public void modify(long contentNodeId, String name, Collection<String> tags, boolean publicated) {
+        modify(contentNodeId, name, tags, publicated, null);
+    }
 
-		// aktualizace tagů
-		contentTagService.saveTags(tags, contentNode);
+    @Override
+    public void modify(long contentNodeId, @NotNull String name, Collection<String> tags, boolean publicated,
+                       LocalDateTime creationDate) {
+        Objects.requireNonNull(name);
 
-		return contentNode.getId();
-	}
+        ContentNode contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
 
-	@Override
-	public ContentNodeTO getByID(long contentNodeId) {
-		ContentNode contentNode = contentNodeRepository.findById(contentNodeId).orElse(null);
-		return mapper.mapContentNodeForDetail(contentNode);
-	}
+        contentNode.setLastModificationDate(LocalDateTime.now());
+        contentNode.setName(name);
+        contentNode.setPublicated(publicated);
 
-	@Override
-	public void modify(long contentNodeId, String name, boolean publicated) {
-		modify(contentNodeId, name, null, publicated);
-	}
+        if (creationDate != null) contentNode.setCreationDate(creationDate);
 
-	@Override
-	public void modify(long contentNodeId, String name, Collection<String> tags, boolean publicated) {
-		modify(contentNodeId, name, tags, publicated, null);
-	}
+        // Ulož změny v contentNode
+        contentNodeRepository.save(contentNode);
+        // aktualizace tagů
+        contentTagService.saveTags(tags, contentNodeId);
+    }
 
-	@Override
-	public void modify(
-			long contentNodeId, String name, Collection<String> tags, boolean publicated,
-			LocalDateTime creationDate) {
-		Validate.notNull(name, "'name' nesmí být null");
-		ContentNode contentNode = contentNodeRepository.findById(contentNodeId).orElse(null);
+    @Override
+    public void deleteByContentNodeId(long contentNodeId) {
+        userService.removeContentFromAllUsersFavourites(contentNodeId);
 
-		contentNode.setLastModificationDate(LocalDateTime.now());
-		contentNode.setName(name);
-		contentNode.setPublicated(publicated);
+        // vymaž tagy
+        contentTagService.onContentNodeDelete(contentNodeId);
 
-		if (creationDate != null)
-			contentNode.setCreationDate(creationDate);
+        // vymaž content node
+        contentNodeRepository.findById(contentNodeId).ifPresent(contentNodeRepository::delete);
+    }
 
-		// Ulož změny v contentNode
-		contentNodeRepository.save(contentNode);
-		// aktualizace tagů
-		contentTagService.saveTags(tags, contentNodeId);
-	}
+    @Override
+    public void deleteByContentId(String contentModuleId, long contentId) {
+        Validate.notNull(contentModuleId, "'contentModuleId' nemůže být null");
+        Long contentNodeId = contentNodeRepository.findIdByContentModuleAndContentId(contentModuleId, contentId);
+        if (contentNodeId != null) deleteByContentNodeId(contentNodeId);
+        else throw new IllegalStateException("Dle ID koncového obsahu nebyl nalezen obecný uzel obsahu");
+    }
 
-	@Override
-	public void deleteByContentNodeId(long contentNodeId) {
-		userService.removeContentFromAllUsersFavourites(contentNodeId);
+    @Override
+    public void moveContent(long nodeId, long contentNodeId) {
+        contentNodeRepository.moveContent(nodeId, contentNodeId);
+    }
 
-		// vymaž tagy
-		contentTagService.saveTags(null, contentNodeId);
+    /**
+     * Nedávné obsahy
+     */
 
-		// vymaž content node
-		contentNodeRepository.findById(contentNodeId).ifPresent(contentNodeRepository::delete);
-	}
+    @Override
+    public int getCount() {
+        UserInfoTO user = securityService.getCurrentUser();
+        return (int) contentNodeRepository.countByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(),
+                user.isAdmin());
+    }
 
-	@Override
-	public void deleteByContentId(String contentModuleId, long contentId) {
-		Validate.notNull(contentModuleId, "'contentModuleId' nemůže být null");
-		Long contentNodeId = contentNodeRepository.findIdByContentModuleAndContentId(contentModuleId, contentId);
-		if (contentNodeId != null)
-			deleteByContentNodeId(contentNodeId);
-		else
-			throw new IllegalStateException("Dle ID koncového obsahu nebyl nalezen obecný uzel obsahu");
-	}
+    @Override
+    public List<ContentNodeOverviewTO> getRecentAdded(int offset, int limit) {
+        UserInfoTO user = securityService.getCurrentUser();
+        return contentNodeRepository.findByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(), user.isAdmin(),
+                offset, limit, "creationDate");
+    }
 
-	@Override
-	public void moveContent(long nodeId, long contentNodeId) {
-		contentNodeRepository.moveContent(nodeId, contentNodeId);
-	}
+    @Override
+    public List<ContentNodeOverviewTO> getRecentModified(int offset, int limit) {
+        UserInfoTO user = securityService.getCurrentUser();
+        return contentNodeRepository.findByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(), user.isAdmin(),
+                offset, limit, "lastModificationDate");
+    }
 
-	/**
-	 * Nedávné obsahy
-	 */
+    /**
+     * Dle tagu
+     */
 
-	@Override
-	public int getCount() {
-		UserInfoTO user = securityService.getCurrentUser();
-		return (int) contentNodeRepository.countByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(),
-				user.isAdmin());
-	}
+    private QueryResults<ContentNodeOverviewTO> innerByTagAndUserAccess(long tagId, int offset, int limit) {
+        UserInfoTO user = securityService.getCurrentUser();
+        return contentNodeRepository.findByTagAndUserAccess(tagId, user.getId(), user.isAdmin(), offset, limit);
+    }
 
-	@Override
-	public List<ContentNodeOverviewTO> getRecentAdded(int offset, int limit) {
-		UserInfoTO user = securityService.getCurrentUser();
-		return contentNodeRepository.findByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(), user.isAdmin(),
-				offset, limit, "creationDate");
-	}
+    @Override
+    public int getCountByTag(long tagId) {
+        return (int) innerByTagAndUserAccess(tagId, 1, 1).getTotal();
+    }
 
-	@Override
-	public List<ContentNodeOverviewTO> getRecentModified(int offset, int limit) {
-		UserInfoTO user = securityService.getCurrentUser();
-		return contentNodeRepository.findByFilterAndUserAccess(new ContentNodeFilterTO(), user.getId(), user.isAdmin(),
-				offset, limit, "lastModificationDate");
-	}
+    @Override
+    public List<ContentNodeOverviewTO> getByTag(long tagId, int offset, int limit) {
+        return innerByTagAndUserAccess(tagId, offset, limit).getResults();
+    }
 
-	/**
-	 * Dle tagu
-	 */
+    /**
+     * Dle oblíbených uživatele
+     */
 
-	private QueryResults<ContentNodeOverviewTO> innerByTagAndUserAccess(long tagId, int offset, int limit) {
-		UserInfoTO user = securityService.getCurrentUser();
-		return contentNodeRepository.findByTagAndUserAccess(tagId, user.getId(), user.isAdmin(), offset, limit);
-	}
+    private QueryResults<ContentNodeOverviewTO> innerByUserFavouritesAndUserAccess(long userId, int offset, int limit) {
+        UserInfoTO user = securityService.getCurrentUser();
+        return contentNodeRepository.findByUserFavouritesAndUserAccess(userId, user.getId(), user.isAdmin(), offset,
+                limit);
+    }
 
-	@Override
-	public int getCountByTag(long tagId) {
-		return (int) innerByTagAndUserAccess(tagId, 1, 1).getTotal();
-	}
+    @Override
+    public int getUserFavouriteCount(long userId) {
+        return (int) innerByUserFavouritesAndUserAccess(userId, 1, 1).getTotal();
+    }
 
-	@Override
-	public List<ContentNodeOverviewTO> getByTag(long tagId, int offset, int limit) {
-		return innerByTagAndUserAccess(tagId, offset, limit).getResults();
-	}
+    @Override
+    public List<ContentNodeOverviewTO> getUserFavourite(long userId, int offset, int limit) {
+        return innerByUserFavouritesAndUserAccess(userId, offset, limit).getResults();
+    }
 
-	/**
-	 * Dle oblíbených uživatele
-	 */
+    /**
+     * Dle filtru
+     */
 
-	private QueryResults<ContentNodeOverviewTO> innerByUserFavouritesAndUserAccess(
-			long userId, int offset,
-			int limit) {
-		UserInfoTO user = securityService.getCurrentUser();
-		return contentNodeRepository.findByUserFavouritesAndUserAccess(userId, user.getId(), user.isAdmin(), offset,
-				limit);
-	}
+    @Override
+    public int getCountByFilter(ContentNodeFilterTO filter) {
+        UserInfoTO user = securityService.getCurrentUser();
+        return (int) contentNodeRepository.countByFilterAndUserAccess(filter, user.getId(), user.isAdmin());
+    }
 
-	@Override
-	public int getUserFavouriteCount(long userId) {
-		return (int) innerByUserFavouritesAndUserAccess(userId, 1, 1).getTotal();
-	}
+    @Override
+    public List<ContentNodeOverviewTO> getByFilter(ContentNodeFilterTO filter, int offset, int limit) {
+        UserInfoTO user = securityService.getCurrentUser();
+        return contentNodeRepository.findByFilterAndUserAccess(filter, user.getId(), user.isAdmin(), offset, limit,
+                null);
+    }
 
-	@Override
-	public List<ContentNodeOverviewTO> getUserFavourite(long userId, int offset, int limit) {
-		return innerByUserFavouritesAndUserAccess(userId, offset, limit).getResults();
-	}
-
-	/**
-	 * Dle filtru
-	 */
-
-	@Override
-	public int getCountByFilter(ContentNodeFilterTO filter) {
-		UserInfoTO user = securityService.getCurrentUser();
-		return (int) contentNodeRepository.countByFilterAndUserAccess(filter, user.getId(), user.isAdmin());
-	}
-
-	@Override
-	public List<ContentNodeOverviewTO> getByFilter(ContentNodeFilterTO filter, int offset, int limit) {
-		UserInfoTO user = securityService.getCurrentUser();
-		return contentNodeRepository.findByFilterAndUserAccess(filter, user.getId(), user.isAdmin(), offset, limit,
-				null);
-	}
-
-	@Override
-	public List<String> getTagsByContentId(Long id) {
-		return contentNodeRepository.findTagsByContentId(id);
-	}
+    @Override
+    public List<String> getTagsByContentId(Long id) {
+        return contentNodeRepository.findTagsByContentId(id);
+    }
 }

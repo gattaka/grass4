@@ -5,6 +5,7 @@ import java.util.*;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
 import cz.gattserver.grass.core.model.domain.ContentNode;
+import jakarta.validation.constraints.NotNull;
 
 public interface ContentTagService {
 
@@ -42,20 +43,11 @@ public interface ContentTagService {
 	 * @param contentNodeId
 	 *            id obsahu, který je otagován těmito tagy
 	 */
-	void saveTags(Collection<String> tags, long contentNodeId);
+    void saveTags(@NotNull Collection<String> tags, @NotNull Long contentNodeId);
 
-	/**
-	 * Bere řetězec tagů, parsuje je a ukládá do nich (nebo vytvoří nové)
-	 * referenci na tento obsah - <b>mění {@link ContentNode} entitu v DB</b>
-	 * 
-	 * @param tags
-	 *            řetězec tagů oddělených mezerami
-	 * @param contentNode
-	 *            obsah, který je otagován těmito tagy
-	 */
-	void saveTags(Collection<String> tags, ContentNode contentNode);
+    void onContentNodeDelete(@NotNull Long contentNodeId);
 
-	/**
+    /**
 	 * Získá počet obsahů s daným tagem
 	 * 
 	 * @param tagId

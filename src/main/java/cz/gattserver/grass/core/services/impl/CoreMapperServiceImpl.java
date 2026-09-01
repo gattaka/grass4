@@ -12,15 +12,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
-import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.interfaces.QuoteTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
-import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.domain.ContentTag;
-import cz.gattserver.grass.core.model.domain.Node;
 import cz.gattserver.grass.core.model.domain.Quote;
 import cz.gattserver.grass.core.model.domain.User;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
@@ -29,154 +24,87 @@ import cz.gattserver.grass.core.security.Role;
 @Service
 public class CoreMapperServiceImpl implements CoreMapperService {
 
-	@Lazy
-	@Autowired
-	protected ModuleRegister moduleRegister;
+    @Lazy
+    @Autowired
+    protected ModuleRegister moduleRegister;
 
-	@Override
-	public UserInfoTO map(User e) {
-		if (e == null)
-			return null;
+    @Override
+    public UserInfoTO map(User e) {
+        if (e == null) return null;
 
-		UserInfoTO userInfoDTO = new UserInfoTO();
+        UserInfoTO userInfoTO = new UserInfoTO();
 
-		userInfoDTO.setConfirmed(e.isConfirmed());
-		userInfoDTO.setEmail(e.getEmail());
-		userInfoDTO.setId(e.getId());
-		userInfoDTO.setLastLoginDate(e.getLastLoginDate());
-		userInfoDTO.setName(e.getName());
-		userInfoDTO.setPassword(e.getPassword());
-		userInfoDTO.setRegistrationDate(e.getRegistrationDate());
+        userInfoTO.setConfirmed(e.isConfirmed());
+        userInfoTO.setEmail(e.getEmail());
+        userInfoTO.setId(e.getId());
+        userInfoTO.setLastLoginDate(e.getLastLoginDate());
+        userInfoTO.setName(e.getName());
+        userInfoTO.setPassword(e.getPassword());
+        userInfoTO.setRegistrationDate(e.getRegistrationDate());
 
-		Set<Role> set = new HashSet<>();
-		for (String s : e.getRoles()) {
-			Role role = moduleRegister.resolveRole(s);
-			if (role != null)
-				set.add(role);
-		}
-		userInfoDTO.setRoles(set);
+        Set<Role> set = new HashSet<>();
+        for (String s : e.getRoles()) {
+            Role role = moduleRegister.resolveRole(s);
+            if (role != null) set.add(role);
+        }
+        userInfoTO.setRoles(set);
 
-		return userInfoDTO;
-	}
+        return userInfoTO;
+    }
 
-	@Override
-	public QuoteTO map(Quote e) {
-		if (e == null)
-			return null;
+    @Override
+    public QuoteTO map(Quote e) {
+        if (e == null) return null;
 
-		QuoteTO quoteDTO = new QuoteTO();
+        QuoteTO quoteTO = new QuoteTO();
 
-		quoteDTO.setId(e.getId());
-		quoteDTO.setName(e.getName());
+        quoteTO.setId(e.getId());
+        quoteTO.setName(e.getName());
 
-		return quoteDTO;
-	}
+        return quoteTO;
+    }
 
-	@Override
-	public ContentNodeTO mapContentNodeForDetail(ContentNode e) {
-		if (e == null)
-			return null;
+    @Override
+    public ContentTagTO mapContentTagForOverview(ContentTag e) {
+        if (e == null) return null;
 
-		ContentNodeTO contentNodeDTO = new ContentNodeTO();
+        ContentTagTO contentTagTO = new ContentTagTO();
 
-		contentNodeDTO.setAuthor(map(e.getAuthor()));
-		contentNodeDTO.setContentID(e.getContentId());
-		contentNodeDTO.setContentReaderID(e.getContentReaderId());
-		contentNodeDTO.setCreationDate(e.getCreationDate());
-		contentNodeDTO.setId(e.getId());
-		contentNodeDTO.setLastModificationDate(e.getLastModificationDate());
-		contentNodeDTO.setName(e.getName());
-		contentNodeDTO.setPublicated(e.getPublicated());
-		contentNodeDTO.setDraft(e.getDraft());
-		contentNodeDTO.setDraftSourceId(e.getDraftSourceId());
-		contentNodeDTO.setContentTags(mapContentTagCollectionForOverview(e.getContentTags()));
-		contentNodeDTO.setParent(mapNodeForOverview(e.getParent()));
+        contentTagTO.setId(e.getId());
+        contentTagTO.setName(e.getName());
 
-		return contentNodeDTO;
-	}
+        return contentTagTO;
+    }
 
-	@Override
-	public ContentTagTO mapContentTagForOverview(ContentTag e) {
-		if (e == null)
-			return null;
+    @Override
+    public List<ContentTagTO> mapContentTagCollection(Collection<ContentTag> contentTags) {
+        if (contentTags == null) return new ArrayList<>();
 
-		ContentTagTO contentTagDTO = new ContentTagTO();
+        List<ContentTagTO> contentTagTOs = new ArrayList<>();
+        for (ContentTag contentTag : contentTags) {
+            contentTagTOs.add(mapContentTagForOverview(contentTag));
+        }
+        return contentTagTOs;
+    }
 
-		contentTagDTO.setId(e.getId());
-		contentTagDTO.setName(e.getName());
+    @Override
+    public Set<ContentTagTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags) {
+        if (contentTags == null) return new HashSet<>();
 
-		return contentTagDTO;
-	}
+        Set<ContentTagTO> contentTagTOs = new LinkedHashSet<>();
+        for (ContentTag contentTag : contentTags) {
+            contentTagTOs.add(mapContentTagForOverview(contentTag));
+        }
+        return contentTagTOs;
+    }
 
-	@Override
-	public List<ContentTagTO> mapContentTagCollection(Collection<ContentTag> contentTags) {
-		if (contentTags == null)
-			return new ArrayList<>();
-
-		List<ContentTagTO> contentTagDTOs = new ArrayList<>();
-		for (ContentTag contentTag : contentTags) {
-			contentTagDTOs.add(mapContentTagForOverview(contentTag));
-		}
-		return contentTagDTOs;
-	}
-
-	@Override
-	public Set<ContentTagTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags) {
-		if (contentTags == null)
-			return new HashSet<>();
-
-		Set<ContentTagTO> contentTagDTOs = new LinkedHashSet<>();
-		for (ContentTag contentTag : contentTags) {
-			contentTagDTOs.add(mapContentTagForOverview(contentTag));
-		}
-		return contentTagDTOs;
-	}
-
-	@Override
-	public NodeTO mapNodeForDetail(Node e) {
-		if (e == null)
-			return null;
-
-		NodeTO nodeDTO = new NodeTO();
-
-		nodeDTO.setId(e.getId());
-		nodeDTO.setName(e.getName());
-		if (e.getParent() != null) {
-			nodeDTO.setParentId(e.getParent().getId());
-			nodeDTO.setParentName(e.getParent().getName());
-			nodeDTO.setParent(mapNodeForDetail(e.getParent()));
-		}
-
-		return nodeDTO;
-	}
-
-	@Override
-	public NodeOverviewTO mapNodeForOverview(Node e) {
-		if (e == null)
-			return null;
-
-		NodeOverviewTO nodeDTO = new NodeOverviewTO();
-
-		nodeDTO.setId(e.getId());
-		nodeDTO.setName(e.getName());
-		if (e.getParent() != null) {
-			nodeDTO.setParentId(e.getParent().getId());
-			nodeDTO.setParentName(e.getParent().getName());
-		}
-
-		return nodeDTO;
-	}
-
-	@Override
-	public List<NodeOverviewTO> mapNodesForOverview(Collection<Node> nodes) {
-		if (nodes == null)
-			return new ArrayList<>();
-
-		List<NodeOverviewTO> nodeDTOs = new ArrayList<>();
-		for (Node node : nodes) {
-			nodeDTOs.add(mapNodeForOverview(node));
-		}
-		return nodeDTOs;
-	}
+    @Override
+    public ContentTag map(ContentTagTO contentTagTO) {
+        ContentTag contentTag = new ContentTag();
+        contentTag.setId(contentTagTO.getId());
+        contentTag.setName(contentTagTO.getName());
+        contentTag.setContentNodeCount(contentTagTO.getContentNodeCount());
+        return contentTag;
+    }
 
 }

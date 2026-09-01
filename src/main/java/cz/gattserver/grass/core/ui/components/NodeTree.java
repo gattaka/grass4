@@ -9,7 +9,7 @@ import java.util.Set;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.NodeService;
 import org.apache.commons.lang3.StringUtils;
 
@@ -37,13 +37,13 @@ public class NodeTree extends VerticalLayout {
     private transient NodeService nodeService;
 
     // Serializable HashMap
-    private HashMap<Long, NodeOverviewTO> cache;
+    private HashMap<Long, NodeTO> cache;
     private Set<Long> visited;
 
-    private TreeGrid<NodeOverviewTO> grid;
+    private TreeGrid<NodeTO> grid;
 
     // Serializable ArrayList
-    private List<NodeOverviewTO> draggedItems;
+    private List<NodeTO> draggedItems;
 
     public NodeTree() {
         this(false);
@@ -54,7 +54,7 @@ public class NodeTree extends VerticalLayout {
         return nodeService;
     }
 
-    public TreeGrid<NodeOverviewTO> getGrid() {
+    public TreeGrid<NodeTO> getGrid() {
         return grid;
     }
 
@@ -72,7 +72,7 @@ public class NodeTree extends VerticalLayout {
         add(grid);
         expand(grid);
 
-        grid.addHierarchyColumn(NodeOverviewTO::getName).setHeader("Název");
+        grid.addHierarchyColumn(NodeTO::getName).setHeader("Název");
         populate();
 
         if (enableEditFeatures) initEditFeatures();
@@ -87,7 +87,7 @@ public class NodeTree extends VerticalLayout {
         grid.addDragStartListener(e -> draggedItems = e.getDraggedItems());
 
         grid.addDropListener(e -> {
-            NodeOverviewTO dropNode = e.getDropTargetItem().get();
+            NodeTO dropNode = e.getDropTargetItem().get();
             switch (e.getDropLocation()) {
                 case ON_TOP:
                     // vkládám do dropNode
@@ -102,7 +102,7 @@ public class NodeTree extends VerticalLayout {
                     // výchozí je vkládání do root
                     dropNode = null;
             }
-            for (NodeOverviewTO n : draggedItems)
+            for (NodeTO n : draggedItems)
                 moveAction(n, dropNode);
             grid.getDataProvider().refreshAll();
         });
@@ -110,15 +110,15 @@ public class NodeTree extends VerticalLayout {
         /*
          * Context menu
          */
-        GridContextMenu<NodeOverviewTO> gridMenu = grid.addContextMenu();
+        GridContextMenu<NodeTO> gridMenu = grid.addContextMenu();
 
-        GridMenuItem<NodeOverviewTO> smazatMenu = gridMenu.addItem(SMAZAT_LABEL);
+        GridMenuItem<NodeTO> smazatMenu = gridMenu.addItem(SMAZAT_LABEL);
         smazatMenu.addMenuItemClickListener(e -> askAndDelete(e.getItem().get()));
 
-        GridMenuItem<NodeOverviewTO> prejmenovatMenu = gridMenu.addItem(PREJMENOVAT_LABEL);
+        GridMenuItem<NodeTO> prejmenovatMenu = gridMenu.addItem(PREJMENOVAT_LABEL);
         prejmenovatMenu.addMenuItemClickListener(e -> renameAction(e.getItem().get()));
 
-        GridMenuItem<NodeOverviewTO> vytvoritMenu = gridMenu.addItem(VYTVORIT_LABEL);
+        GridMenuItem<NodeTO> vytvoritMenu = gridMenu.addItem(VYTVORIT_LABEL);
         vytvoritMenu.addMenuItemClickListener(e -> createNodeAction(e.getItem()));
 
         gridMenu.addGridContextMenuOpenedListener(e -> {
@@ -146,33 +146,33 @@ public class NodeTree extends VerticalLayout {
     }
 
     public void populate() {
-        List<NodeOverviewTO> nodes = getNodeService().getNodesForTree();
-        TreeData<NodeOverviewTO> treeData = new TreeData<>();
+        List<NodeTO> nodes = getNodeService().getNodesForTree();
+        TreeData<NodeTO> treeData = new TreeData<>();
         nodes.forEach(n -> cache.put(n.getId(), n));
         nodes.forEach(n -> addTreeItem(treeData, n));
         grid.setDataProvider(new TreeDataProvider<>(treeData));
     }
 
-    private void addTreeItem(TreeData<NodeOverviewTO> treeData, NodeOverviewTO node) {
+    private void addTreeItem(TreeData<NodeTO> treeData, NodeTO node) {
         if (visited.contains(node.getId())) return;
-        NodeOverviewTO parent = cache.get(node.getParentId());
+        NodeTO parent = cache.get(node.getParentId());
         if (parent != null && !visited.contains(parent.getId())) addTreeItem(treeData, parent);
         treeData.addItem(parent, node);
         visited.add(node.getId());
     }
 
     public void expandTo(Long id) {
-        NodeOverviewTO to = cache.get(id);
+        NodeTO to = cache.get(id);
         Long parent = to.getParentId();
         while (parent != null) {
-            NodeOverviewTO n = cache.get(parent);
+            NodeTO n = cache.get(parent);
             grid.expand(n);
             parent = n.getParentId();
         }
         grid.select(cache.get(to.getId()));
     }
 
-    private void moveAction(NodeOverviewTO node, NodeOverviewTO newParent) {
+    private void moveAction(NodeTO node, NodeTO newParent) {
         if (node.equals(newParent) || node.getParentId() == null && newParent == null ||
                 node.getParentId() != null && newParent != null && node.getParentId().equals(newParent.getId()))
             return; // bez změn
@@ -191,7 +191,7 @@ public class NodeTree extends VerticalLayout {
         }).open();
     }
 
-    private void askAndDelete(NodeOverviewTO node) {
+    private void askAndDelete(NodeTO node) {
         if (!getNodeService().isNodeEmpty(node.getId())) {
             UIUtils.showWarning("Kategorie musí být prázdná");
         } else {
@@ -202,7 +202,7 @@ public class NodeTree extends VerticalLayout {
         }
     }
 
-    private void renameAction(NodeOverviewTO node) {
+    private void renameAction(NodeTO node) {
         final WebDialog dialog = new WebDialog(PREJMENOVAT_LABEL);
         dialog.open();
 
@@ -232,7 +232,7 @@ public class NodeTree extends VerticalLayout {
         btnLayout.add(closeBtn);
     }
 
-    public void createNodeAction(Optional<NodeOverviewTO> parentNode) {
+    public void createNodeAction(Optional<NodeTO> parentNode) {
         final WebDialog dialog = new WebDialog(
                 parentNode.isPresent() ? "Vytvořit novou kategorii do '" + parentNode.get().getName() + "'" :
                         "Vytvořit novou kořenovou kategorii");
@@ -250,7 +250,7 @@ public class NodeTree extends VerticalLayout {
                 String newNodeName = newNameField.getValue();
                 Long parentNodeId = parentNode.isPresent() ? parentNode.get().getId() : null;
                 Long newNodeId = getNodeService().createNewNode(parentNodeId, newNodeName);
-                NodeOverviewTO newNode = new NodeOverviewTO();
+                NodeTO newNode = new NodeTO();
                 newNode.setId(newNodeId);
                 newNode.setName(newNodeName);
                 newNode.setParentId(parentNodeId);

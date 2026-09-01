@@ -400,9 +400,9 @@ public class PGServiceImplTest extends DBCleanTest {
         eventBus.unsubscribe(eventsHandler);
 
         PhotogalleryTO to = pgService.findPhotogalleryForDetail(galleryId, userId1, true);
-        assertEquals("testGallery", to.photogalleryPath());
-        assertEquals("Test galerie", to.name());
-        assertTrue(to.publicated());
+        assertEquals("testGallery", to.getPhotogalleryPath());
+        assertEquals("Test galerie", to.getName());
+        assertTrue(to.isPublicated());
     }
 
     private long createMockGallery(Path root, Long userId, Long nodeId, int variant, boolean publicated)

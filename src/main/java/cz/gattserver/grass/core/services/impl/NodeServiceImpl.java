@@ -4,14 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
-import cz.gattserver.grass.core.services.CoreMapperService;
 import cz.gattserver.grass.core.services.NodeService;
+import cz.gattserver.grass.core.services.SecurityService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,128 +19,119 @@ import cz.gattserver.grass.core.model.repositories.NodeRepository;
 @Service
 public class NodeServiceImpl implements NodeService {
 
-	@Autowired
-	private CoreMapperService mapper;
+    private final NodeRepository nodeRepository;
+    private final SecurityService securityService;
 
-	@Autowired
-	private NodeRepository nodeRepository;
+    public NodeServiceImpl(NodeRepository nodeRepository, SecurityService securityService) {
+        this.nodeRepository = nodeRepository;
+        this.securityService = securityService;
+    }
 
-	@Override
-	public NodeOverviewTO getNodeByIdForOverview(long nodeId) {
-		Node node = nodeRepository.findById(nodeId).orElse(null);
-		return mapper.mapNodeForOverview(node);
-	}
+    @Override
+    public NodeTO getNodeById(long nodeId) {
+        return nodeRepository.findAndMapById(nodeId);
+    }
 
-	@Override
-	public NodeTO getNodeByIdForDetail(long nodeId) {
-		Node node = nodeRepository.findById(nodeId).orElse(null);
-		return mapper.mapNodeForDetail(node);
-	}
+    @Override
+    public List<NodeTO> getRootNodes() {
+        return nodeRepository.findAllRootNodes();
+    }
 
-	@Override
-	public List<NodeOverviewTO> getRootNodes() {
-		List<Node> rootNodes = nodeRepository.findByParentIsNull();
-		return mapper.mapNodesForOverview(rootNodes);
-	}
+    @Override
+    public int countRootNodes() {
+        return nodeRepository.countAllRootNodes();
+    }
 
-	@Override
-	public int countRootNodes() {
-		return nodeRepository.countByParentIsNull();
-	}
+    @Override
+    public List<NodeTO> getNodesForTree() {
+        return nodeRepository.findForTree();
+    }
 
-	@Override
-	public List<NodeOverviewTO> getNodesForTree() {
-		List<Node> nodes = nodeRepository.findAll(Sort.by("id"));
-		return mapper.mapNodesForOverview(nodes);
-	}
+    @Override
+    public List<NodeTO> getNodesByParentNode(long parentId) {
+        return nodeRepository.findAllByParentId(parentId);
+    }
 
-	@Override
-	public List<NodeOverviewTO> getNodesByParentNode(long parentId) {
-		List<Node> childrenNodes = nodeRepository.findByParentId(parentId);
-		return mapper.mapNodesForOverview(childrenNodes);
-	}
+    @Override
+    public int countNodesByParentNode(long parentId) {
+        return nodeRepository.countAllByParentId(parentId);
+    }
 
-	@Override
-	public int countNodesByParentNode(long parentId) {
-		return nodeRepository.countByParentId(parentId);
-	}
+    @Override
+    public long createNewNode(Long parentId, String name) {
+        Validate.notBlank(name, "název kategorie nemůže být prázdný");
+        Node node = new Node();
+        node.setName(name.trim());
+        node.setParentId(parentId);
+        node = nodeRepository.save(node);
+        return node.getId();
+    }
 
-	@Override
-	public long createNewNode(Long parentId, String name) {
-		Validate.notBlank(name, "'name' kategorie nemůže být prázdný");
-		Node node = new Node();
-		node.setName(name.trim());
+    @Override
+    public void moveNode(long nodeId, Long newParentId) {
+        Node nodeEntity = nodeRepository.findById(nodeId).orElse(null);
 
-		if (parentId != null) {
-			Node parentEntity = new Node();
-			parentEntity.setId(parentId);
-			node.setParent(parentEntity);
-		}
+        // beze změn
+        if (Objects.equals(nodeEntity.getParentId(), newParentId)) return;
 
-		node = nodeRepository.save(node);
-		return node.getId();
-	}
+        Node newParentEntity = newParentId == null ? null : nodeRepository.findById(newParentId).orElse(null);
 
-	@Override
-	public void moveNode(long nodeId, Long newParentId) {
-		Node newParentEntity = newParentId == null ? null : nodeRepository.findById(newParentId).orElse(null);
-		Node nodeEntity = nodeRepository.findById(nodeId).orElse(null);
+        // zamezí vkládání předků do potomků - projde postupně všechny předky
+        // cílové kategorie a pokud narazí na moje id, pak jsem předkem cílové
+        // kategorie, což je špatně
+        if (newParentEntity != null) {
+            Node cycleCheckParent = newParentEntity;
+            // začínám od předka newParent - tohle je schválně, umožní mi to se
+            // pak ptát na id newParent - pokud totiž narazím na newParent id,
+            // pak je v DB cykl
+            cycleCheckParent = nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
+            while (cycleCheckParent != null) {
+                if (cycleCheckParent.getId() == newParentId)
+                    throw new IllegalStateException("V grafu kategorií byl nalezen cykl");
+                if (cycleCheckParent.getId() == nodeId)
+                    throw new IllegalArgumentException("Nelze vkládat předka do potomka");
+                cycleCheckParent = nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
+            }
 
-		// beze změn
-		if (Objects.equals(nodeEntity.getParent(), newParentEntity))
-			return;
+            nodeEntity.setParentId(newParentId);
+        } else {
+            nodeEntity.setParentId(null);
+        }
 
-		// zamezí vkládání předků do potomků - projde postupně všechny předky
-		// cílové kategorie a pokud narazí na moje id, pak jsem předkem cílové
-		// kategorie, což je špatně
-		if (newParentEntity != null) {
-			Node cycleCheckParent = newParentEntity;
-			// začínám od předka newParent - tohle je schválně, umožní mi to se
-			// pak ptát na id newParent - pokud totiž narazím na newParent id,
-			// pak je v DB cykl
-			cycleCheckParent = cycleCheckParent.getParent();
-			while (cycleCheckParent != null) {
-				if (cycleCheckParent.getId() == newParentId)
-					throw new IllegalStateException("V grafu kategorií byl nalezen cykl");
-				if (cycleCheckParent.getId() == nodeId)
-					throw new IllegalArgumentException("Nelze vkládat předka do potomka");
-				cycleCheckParent = cycleCheckParent.getParent();
-			}
+        nodeRepository.save(nodeEntity);
+    }
 
-			nodeEntity.setParent(newParentEntity);
-		} else {
-			nodeEntity.setParent(null);
-		}
+    @Override
+    public void deleteNode(long nodeId) {
+        int countContents = nodeRepository.countContentNodes(nodeId);
+        int countSubNodes = nodeRepository.countSubNodes(nodeId);
+        if (countContents + countSubNodes > 0)
+            throw new IllegalStateException("Nelze mazat kategorii, ve které existují podkategorie nebo obsahy");
+        nodeRepository.deleteById(nodeId);
+    }
 
-		nodeRepository.save(nodeEntity);
-	}
+    @Override
+    public void rename(long nodeId, String newName) {
+        Validate.notBlank(newName, "název kategorie nemůže být prázdný");
+        nodeRepository.rename(nodeId, newName);
+    }
 
-	@Override
-	public void deleteNode(long nodeId) {
-		int countContents = nodeRepository.countContentNodes(nodeId);
-		int countSubNodes = nodeRepository.countSubNodes(nodeId);
-		if (countContents + countSubNodes > 0)
-			throw new IllegalStateException("Nelze mazat kategorii, ve které existují podkategorie nebo obsahy");
-		nodeRepository.deleteById(nodeId);
-	}
+    @Override
+    public boolean isNodeEmpty(long nodeId) {
+        int contentNodesCount = nodeRepository.countContentNodes(nodeId);
+        int subNodesCount = nodeRepository.countSubNodes(nodeId);
+        return contentNodesCount + subNodesCount == 0;
+    }
 
-	@Override
-	public void rename(long nodeId, String newName) {
-		Validate.notBlank(newName, "'newName' kategorie nemůže být prázdný");
-		nodeRepository.rename(nodeId, newName);
-	}
+    @Override
+    public List<NodeTO> getByFilter(String filter) {
+        if (StringUtils.isBlank(filter)) return new ArrayList<>();
 
-	@Override
-	public boolean isNodeEmpty(long nodeId) {
-		int contentNodesCount = nodeRepository.countContentNodes(nodeId);
-		int subNodesCount = nodeRepository.countSubNodes(nodeId);
-		return contentNodesCount + subNodesCount == 0;
-	}
-
-	@Override
-	public List<NodeOverviewTO> getByFilter(String filter) {
-		if (StringUtils.isBlank(filter)) return new ArrayList<>();
-		return mapper.mapNodesForOverview(nodeRepository.findByFilter("%" + filter.toLowerCase() + "%"));
-	}
+        if (securityService.getCurrentUser().isAdmin()) {
+            return nodeRepository.findAllByFilter("%" + filter.toLowerCase() + "%");
+        } else {
+            return nodeRepository.findPublicByFilter("%" + filter.toLowerCase() + "%");
+        }
+    }
 
 }

@@ -312,7 +312,7 @@ public class PGServiceImpl implements PGService {
         Validate.notNull(id, "Id galerie nesmí být null");
         PhotogalleryTO to = photogalleryRepository.findForDetailById(id, userId, isAdmin);
         if (to == null) return null;
-        to.contentTags().addAll(contentNodeContentTagRepository.findByContendNodeId(to.contentNodeId()));
+        to.getContentTags().addAll(contentNodeContentTagRepository.findByContendNodeIdAndMap(to.getContentNodeId()));
         return to;
     }
 

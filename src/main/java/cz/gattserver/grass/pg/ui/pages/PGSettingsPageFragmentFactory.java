@@ -2,8 +2,6 @@ package cz.gattserver.grass.pg.ui.pages;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.Text;
-import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -12,15 +10,11 @@ import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.data.binder.Binder;
-import com.vaadin.flow.data.binder.ValidationResult;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.TextRenderer;
-import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.router.RouteConfiguration;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
@@ -50,9 +44,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.file.FileSystem;
 import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
@@ -148,10 +140,10 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
 
                             eventBus.subscribe(PGSettingsPageFragmentFactory.this);
 
-                            PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(to.name(), to.photogalleryPath(),
-                                    to.contentTags().stream().map(ContentTagTO::getName).toList(), to.publicated(),
+                            PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(to.getName(), to.getPhotogalleryPath(),
+                                    to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isPublicated(),
                                     true);
-                            pgService.modifyPhotogallery(operationId, to.id(), payloadTO, LocalDateTime.now());
+                            pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
                         }).open());
                 button.setVisible(item.getOverviewTO() != null);
                 return button;

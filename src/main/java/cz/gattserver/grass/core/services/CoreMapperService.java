@@ -4,15 +4,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
-import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.interfaces.QuoteTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
-import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.domain.ContentTag;
-import cz.gattserver.grass.core.model.domain.Node;
 import cz.gattserver.grass.core.model.domain.Quote;
 import cz.gattserver.grass.core.model.domain.User;
 
@@ -42,7 +37,7 @@ public interface CoreMapperService {
 	 * @param e
 	 * @return
 	 */
-	public UserInfoTO map(User e);
+    UserInfoTO map(User e);
 
 	/**
 	 * Převede {@link Quote} na {@link QuoteTO}
@@ -50,16 +45,7 @@ public interface CoreMapperService {
 	 * @param e
 	 * @return
 	 */
-	public QuoteTO map(Quote e);
-
-	/**
-	 * Převede {@link ContentNode} na {@link ContentNodeTO}, používá se pro
-	 * detail obsahu, kde je potřeba rekurzivní mapování parentů do breadcrumb
-	 * 
-	 * @param e
-	 * @return
-	 */
-	public ContentNodeTO mapContentNodeForDetail(ContentNode e);
+    QuoteTO map(Quote e);
 
 	/**
 	 * Převede {@link ContentTag} na {@link ContentTagTO}
@@ -67,7 +53,7 @@ public interface CoreMapperService {
 	 * @param e
 	 * @return
 	 */
-	public ContentTagTO mapContentTagForOverview(ContentTag e);
+    ContentTagTO mapContentTagForOverview(ContentTag e);
 
 	/**
 	 * Převede list {@link ContentTag} na list {@link ContentTagTO}
@@ -75,7 +61,7 @@ public interface CoreMapperService {
 	 * @param contentTags
 	 * @return
 	 */
-	public List<ContentTagTO> mapContentTagCollection(Collection<ContentTag> contentTags);
+    List<ContentTagTO> mapContentTagCollection(Collection<ContentTag> contentTags);
 
 	/**
 	 * Převede list {@link ContentTag} na list {@link ContentTagTO}
@@ -83,27 +69,7 @@ public interface CoreMapperService {
 	 * @param contentTags
 	 * @return
 	 */
-	public Set<ContentTagTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags);
+    Set<ContentTagTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags);
 
-	/**
-	 * Převede {@link Node} na {@link NodeTO}
-	 * 
-	 * @param e
-	 * @return
-	 */
-	public NodeTO mapNodeForDetail(Node e);
-
-	/**
-	 * Pro overview je potřeba akorát id + název
-	 */
-	public NodeOverviewTO mapNodeForOverview(Node e);
-
-	/**
-	 * Převede list {@link Node} na list {@link NodeTO}
-	 * 
-	 * @param nodes
-	 * @return
-	 */
-	public List<NodeOverviewTO> mapNodesForOverview(Collection<Node> nodes);
-
+    ContentTag map(ContentTagTO contentTagTO);
 }

@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.ui.components;
 
+import java.io.Serial;
 import java.util.List;
 
 import com.vaadin.flow.component.grid.ColumnTextAlign;
@@ -18,6 +19,9 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
 
 public class NewContentNodeGrid extends Grid<ContentModule> {
+
+    @Serial
+    private static final long serialVersionUID = -9154080584798001377L;
 
     public NewContentNodeGrid(final NodeTO node) {
         // inject nefunguje kvůli něčemu v předkovi

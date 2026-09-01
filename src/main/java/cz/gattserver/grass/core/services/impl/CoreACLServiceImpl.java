@@ -1,6 +1,6 @@
 package cz.gattserver.grass.core.services.impl;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
+import cz.gattserver.grass.core.interfaces.ContentNodeBaseTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.UserService;
@@ -64,14 +64,14 @@ public final class CoreACLServiceImpl implements CoreACLService {
 	/**
 	 * Může uživatel upravit daný obsah ?
 	 */
-	public boolean canModifyContent(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO) {
+	public boolean canModifyContent(ContentNodeBaseTO contentNodeTO, UserInfoTO userInfoTO) {
 		if (isLoggedIn(userInfoTO)) {
 			// pokud je admin, může upravit kterýkoliv obsah
 			if (userInfoTO.isAdmin())
 				return true;
 
 			// pokud jsi autor, můžeš upravit svůj obsah
-			if (contentNodeTO.authorId().equals(userInfoTO.getId()))
+			if (contentNodeTO.getAuthorId().equals(userInfoTO.getId()))
 				return true;
 		}
 		return false;
@@ -80,7 +80,7 @@ public final class CoreACLServiceImpl implements CoreACLService {
 	/**
 	 * Může uživatel smazat daný obsah ?
 	 */
-	public boolean canDeleteContent(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO) {
+	public boolean canDeleteContent(ContentNodeBaseTO contentNodeTO, UserInfoTO userInfoTO) {
 		return canModifyContent(contentNodeTO, userInfoTO);
 	}
 
@@ -172,14 +172,14 @@ public final class CoreACLServiceImpl implements CoreACLService {
 	/**
 	 * Může přidat obsah do svých oblíbených ?
 	 */
-	public boolean canAddContentToFavourites(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO) {
-		return isLoggedIn(userInfoTO) && !userService.hasInFavourites(contentNodeTO.contentNodeId(), userInfoTO.getId());
+	public boolean canAddContentToFavourites(ContentNodeBaseTO contentNodeTO, UserInfoTO userInfoTO) {
+		return isLoggedIn(userInfoTO) && !userService.hasInFavourites(contentNodeTO.getContentNodeId(), userInfoTO.getId());
 	}
 
 	/**
 	 * Může odebrat obsah ze svých oblíbených ?
 	 */
-	public boolean canRemoveContentFromFavourites(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO) {
-		return isLoggedIn(userInfoTO) && userService.hasInFavourites(contentNodeTO.contentNodeId(), userInfoTO.getId());
+	public boolean canRemoveContentFromFavourites(ContentNodeBaseTO contentNodeTO, UserInfoTO userInfoTO) {
+		return isLoggedIn(userInfoTO) && userService.hasInFavourites(contentNodeTO.getContentNodeId(), userInfoTO.getId());
 	}
 }

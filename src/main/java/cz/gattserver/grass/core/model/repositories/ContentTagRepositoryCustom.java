@@ -11,4 +11,5 @@ public interface ContentTagRepositoryCustom {
 
 	Integer countByFilter(Optional<String> filter);
 
+    Iterable<Integer> findContentNodesCountsGroups();
 }

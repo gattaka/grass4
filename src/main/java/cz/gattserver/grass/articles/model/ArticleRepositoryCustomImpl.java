@@ -8,17 +8,16 @@ import cz.gattserver.grass.articles.editor.parser.interfaces.QArticleTO;
 import cz.gattserver.grass.core.model.domain.QContentNode;
 import cz.gattserver.grass.core.model.domain.QNode;
 import cz.gattserver.grass.core.model.domain.QUser;
-import cz.gattserver.grass.pg.interfaces.*;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
 
 public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport implements ArticleRepositoryCustom {
 
-    private final QArticle a = QArticle.article;
-    private final QContentNode c = QContentNode.contentNode;
-    private final QUser u = QUser.user;
-    private final QNode n = QNode.node;
+    private static final QArticle a = QArticle.article;
+    private static final QContentNode c = QContentNode.contentNode;
+    private static final QUser u = QUser.user;
+    private static final QNode n = QNode.node;
 
     public ArticleRepositoryCustomImpl() {
         super(Article.class);
@@ -30,7 +29,7 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport imple
             if (userId == null) {
                 query.where(c.publicated.isTrue());
             } else {
-                query.where(c.publicated.isTrue().or(c.author.id.eq(userId)));
+                query.where(c.publicated.isTrue().or(c.authorId.eq(userId)));
             }
         }
         return query;
@@ -41,12 +40,12 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport imple
     public ArticleTO findByForDetailId(Long id, Long userId, boolean isAdmin) {
         return createBaseQuery(userId, isAdmin)
                 // author
-                .join(u).on(c.author.id.eq(u.id))
+                .join(u).on(c.authorId.eq(u.id))
                 // node
-                .join(n).on(c.parent.id.eq(n.id)).where(a.id.eq(id))
+                .join(n).on(c.parentId.eq(n.id)).where(a.id.eq(id))
                 .select(new QArticleTO(a.id, c.id, c.name, n.id, n.name, c.creationDate, c.lastModificationDate, u.id,
-                        u.name, c.publicated, c.draft, c.draftSourceId, a.outputHTML, a.text, a.searchableOutput,
-                        a.attachmentsDirId)).fetchFirst();
+                        u.name, c.publicated, c.publicatedByParent, c.draft, c.draftSourceId, a.outputHTML, a.text,
+                        a.searchableOutput, a.attachmentsDirId)).fetchFirst();
     }
 
     @Override
@@ -55,9 +54,9 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport imple
                 // content node
                 .join(c).on(a.contentNodeId.eq(c.id))
                 // author
-                .join(u).on(c.author.id.eq(u.id))
+                .join(u).on(c.authorId.eq(u.id))
                 // node
-                .join(n).on(c.parent.id.eq(n.id)).where(c.author.id.eq(userId), c.draft.isTrue())
+                .join(n).on(c.authorId.eq(n.id)).where(c.authorId.eq(userId), c.draft.isTrue())
                 .select(new QArticleDraftOverviewTO(a.id, c.name, c.creationDate, c.lastModificationDate, a.text))
                 .fetch();
     }

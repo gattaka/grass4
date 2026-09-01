@@ -1,6 +1,6 @@
 package cz.gattserver.grass.core.services;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeTO2;
+import cz.gattserver.grass.core.interfaces.ContentNodeBaseTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.modules.SectionService;
 
@@ -55,7 +55,7 @@ public interface CoreACLService {
      * @param userInfoTO    uživatel
      * @return <code>true</code> pokud může
      */
-    boolean canModifyContent(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO);
+    boolean canModifyContent(ContentNodeBaseTO contentNodeTO, UserInfoTO userInfoTO);
 
     /**
      * Může uživatel smazat daný obsah ?
@@ -64,7 +64,7 @@ public interface CoreACLService {
      * @param userInfoTO    uživatel
      * @return <code>true</code> pokud může
      */
-    boolean canDeleteContent(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO);
+    boolean canDeleteContent(ContentNodeBaseTO contentNodeTO, UserInfoTO userInfoTO);
 
     /**
      * =======================================================================
@@ -158,7 +158,7 @@ public interface CoreACLService {
      * @param userInfoTO    přihlášený uživatel
      * @return <code>true</code> pokud může
      */
-    boolean canAddContentToFavourites(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO);
+    boolean canAddContentToFavourites(ContentNodeBaseTO contentNodeTO, UserInfoTO userInfoTO);
 
     /**
      * Může odebrat obsah ze svých oblíbených ?
@@ -167,6 +167,6 @@ public interface CoreACLService {
      * @param userInfoTO    přihlášený uživatel
      * @return <code>true</code> pokud může
      */
-    boolean canRemoveContentFromFavourites(ContentNodeTO2 contentNodeTO, UserInfoTO userInfoTO);
+    boolean canRemoveContentFromFavourites(ContentNodeBaseTO contentNodeTO, UserInfoTO userInfoTO);
 
 }

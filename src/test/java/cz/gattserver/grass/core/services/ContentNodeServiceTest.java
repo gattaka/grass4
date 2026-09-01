@@ -103,18 +103,18 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         contentNodeService.modify(contentNode1, "newNameAfterModify", tags, false,
                 LocalDateTime.of(1980, 2, 3, 10, 15));
-        ContentNodeTO contentNode = contentNodeService.getByID(contentNode1);
+        ContentNodeTO contentNode = contentNodeService.getById(contentNode1);
 
-        assertEquals("newNameAfterModify", contentNode.name());
-        for (ContentTagTO t : contentNode.contentTags())
+        assertEquals("newNameAfterModify", contentNode.getName());
+        for (ContentTagTO t : contentNode.getContentTags())
             tags.remove(t.getName());
         assertTrue(tags.isEmpty());
-        assertEquals(Long.valueOf(30L), contentNode.getContentID());
-        assertEquals(userId1, contentNode.getAuthor().getId());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 1, contentNode.getContentReaderID());
-        assertEquals(LocalDateTime.of(1980, 2, 3, 10, 15), contentNode.creationDate());
-        assertNotNull(contentNode.lastModificationDate());
-        assertFalse(contentNode.publicated());
+        assertEquals(Long.valueOf(30L), contentNode.getContentNodeId());
+        assertEquals(userId1, contentNode.getAuthorId());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 1, contentNode.getContentReaderId());
+        assertEquals(LocalDateTime.of(1980, 2, 3, 10, 15), contentNode.getCreationDate());
+        assertNotNull(contentNode.getLastModificationDate());
+        assertFalse(contentNode.isPublicated());
     }
 
     @Test
@@ -156,9 +156,9 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         assertEquals(2, contentNodeService.getCount());
 
-        assertNotNull(contentNodeService.getByID(contentNode1));
-        assertNull(contentNodeService.getByID(contentNode2));
-        assertNotNull(contentNodeService.getByID(contentNode3));
+        assertNotNull(contentNodeService.getById(contentNode1));
+        assertNull(contentNodeService.getById(contentNode2));
+        assertNotNull(contentNodeService.getById(contentNode3));
     }
 
     @Test
@@ -178,9 +178,9 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         assertEquals(2, contentNodeService.getCount());
 
-        assertNotNull(contentNodeService.getByID(contentNode1));
-        assertNull(contentNodeService.getByID(contentNode2));
-        assertNotNull(contentNodeService.getByID(contentNode3));
+        assertNotNull(contentNodeService.getById(contentNode1));
+        assertNull(contentNodeService.getById(contentNode2));
+        assertNotNull(contentNodeService.getById(contentNode3));
     }
 
     @Test
@@ -206,17 +206,17 @@ public class ContentNodeServiceTest extends DBCleanTest {
                 LocalDateTime.now(), null);
 
         assertEquals(1, contentNodeService.getCount());
-        ContentNodeTO contentNodeByID = contentNodeService.getByID(contentNodeId);
+        ContentNodeTO contentNodeByID = contentNodeService.getById(contentNodeId);
         assertNotNull(contentNodeByID);
-        assertEquals(moduleId, contentNodeByID.getContentReaderID());
-        assertEquals(contentId, contentNodeByID.getContentID());
-        for (ContentTagTO t : contentNodeByID.contentTags())
+        assertEquals(moduleId, contentNodeByID.getContentReaderId());
+        assertEquals(contentId, contentNodeByID.getContentNodeId());
+        for (ContentTagTO t : contentNodeByID.getContentTags())
             tags.remove(t.getName());
         assertTrue(tags.isEmpty());
-        assertEquals(name, contentNodeByID.name());
-        assertEquals(userId, contentNodeByID.getAuthor().getId());
-        assertEquals(nodeId, contentNodeByID.getParent().getId());
-        assertNotNull(contentNodeByID.creationDate());
+        assertEquals(name, contentNodeByID.getName());
+        assertEquals(userId, contentNodeByID.getAuthorId());
+        assertEquals(nodeId, contentNodeByID.getParentId());
+        assertNotNull(contentNodeByID.getCreationDate());
     }
 
     @Test
@@ -231,16 +231,16 @@ public class ContentNodeServiceTest extends DBCleanTest {
                 null);
 
         assertEquals(1, contentNodeService.getCount());
-        ContentNodeTO contentNode = contentNodeService.getByID(contentNodeId);
+        ContentNodeTO contentNode = contentNodeService.getById(contentNodeId);
         assertNotNull(contentNode);
-        assertNotNull(contentNode.contentTags());
-        assertTrue(contentNode.contentTags().isEmpty());
-        assertEquals(moduleId, contentNode.getContentReaderID());
-        assertEquals(contentId, contentNode.getContentID());
-        assertEquals(name, contentNode.name());
-        assertEquals(userId, contentNode.getAuthor().getId());
-        assertEquals(nodeId, contentNode.getParent().getId());
-        assertNotNull(contentNode.creationDate());
+        assertNotNull(contentNode.getContentTags());
+        assertTrue(contentNode.getContentTags().isEmpty());
+        assertEquals(moduleId, contentNode.getContentReaderId());
+        assertEquals(contentId, contentNode.getContentNodeId());
+        assertEquals(name, contentNode.getName());
+        assertEquals(userId, contentNode.getAuthorId());
+        assertEquals(nodeId, contentNode.getParentId());
+        assertNotNull(contentNode.getCreationDate());
     }
 
     @Test

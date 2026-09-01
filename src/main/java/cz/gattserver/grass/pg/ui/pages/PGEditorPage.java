@@ -28,7 +28,7 @@ import cz.gattserver.common.vaadin.dialogs.CopyTagsDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.NodeService;
@@ -77,7 +77,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
     private ProgressDialog progressDialog;
 
-    private NodeOverviewTO node;
+    private NodeTO node;
     private PhotogalleryTO existingPhotogalleryTO;
 
     private TokenField photogalleryKeywords;
@@ -155,7 +155,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
             editMode = false;
-            node = nodeService.getNodeByIdForOverview(identifier.id());
+            node = nodeService.getNodeById(identifier.id());
             photogalleryNameField.setValue("");
             publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
@@ -165,15 +165,15 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
             if (existingPhotogalleryTO == null) throw new GrassPageException(404);
 
-            photogalleryNameField.setValue(existingPhotogalleryTO.name());
-            for (String tag : existingPhotogalleryTO.contentTags().stream().map(ContentTagTO::getName).toList())
+            photogalleryNameField.setValue(existingPhotogalleryTO.getName());
+            for (String tag : existingPhotogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList())
                 photogalleryKeywords.addToken(tag);
 
-            publicatedCheckBox.setValue(existingPhotogalleryTO.publicated());
-            photogalleryDateField.setValue(existingPhotogalleryTO.creationDate().toLocalDate());
+            publicatedCheckBox.setValue(existingPhotogalleryTO.isPublicated());
+            photogalleryDateField.setValue(existingPhotogalleryTO.getCreationDate().toLocalDate());
 
             // nemá oprávnění upravovat tento obsah
-            if (!existingPhotogalleryTO.authorName().equals(securityService.getCurrentUser().getName()) &&
+            if (!existingPhotogalleryTO.getAuthorName().equals(securityService.getCurrentUser().getName()) &&
                     !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
             log.debug("Neznámá operace: '{}'", operationToken);
@@ -181,7 +181,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         }
 
         try {
-            galleryDir = editMode ? existingPhotogalleryTO.photogalleryPath() : pgService.createGalleryDir();
+            galleryDir = editMode ? existingPhotogalleryTO.getPhotogalleryPath() : pgService.createGalleryDir();
         } catch (IOException e) {
             throw new GrassPageException(500);
         }
@@ -332,7 +332,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         buttonLayout.add(componentFactory.createStornoButton(e -> {
             leaving = true;
-            if (editMode) returnToPhotogallery(existingPhotogalleryTO.id());
+            if (editMode) returnToPhotogallery(existingPhotogalleryTO.getId());
             else returnToNode();
         }, true));
     }
@@ -367,7 +367,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         LocalDateTime ldt =
                 photogalleryDateField.getValue() == null ? null : photogalleryDateField.getValue().atStartOfDay();
         if (editMode) {
-            pgService.modifyPhotogallery(UUID.randomUUID(), existingPhotogalleryTO.id(), payloadTO, ldt);
+            pgService.modifyPhotogallery(UUID.randomUUID(), existingPhotogalleryTO.getId(), payloadTO, ldt);
         } else {
             pgService.savePhotogallery(UUID.randomUUID(), payloadTO, node.getId(),
                     securityService.getCurrentUser().getId(), ldt);

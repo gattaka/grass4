@@ -80,7 +80,7 @@ public final class QuerydslUtil {
      * @param query  pro aplikaci stránkování
      * @return {@link PageRequest} objekt
      */
-    public static <T> JPAQuery<T> applyPagination(int offset, int limit, JPAQuery<T> query) {
+    public static <T> JPQLQuery<T> applyPagination(int offset, int limit, JPQLQuery<T> query) {
         query.offset(offset);
         query.limit(limit);
         return query;

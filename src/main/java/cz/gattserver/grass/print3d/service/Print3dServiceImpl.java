@@ -3,7 +3,6 @@ package cz.gattserver.grass.print3d.service;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.grass.core.events.EventBus;
-import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
 import cz.gattserver.grass.modules.Print3dModule;
@@ -110,13 +109,9 @@ public class Print3dServiceImpl implements Print3dService {
             Long contentNodeId =
                     contentNodeService.save(Print3dModule.ID, project.getId(), payloadTO.getName(), payloadTO.getTags(),
                             payloadTO.isPublicated(), nodeId, authorId, false, LocalDateTime.now(), null);
-
-            // ulož do článku referenci na jeho contentnode
-            ContentNode contentNode = new ContentNode();
-            contentNode.setId(contentNodeId);
-            project.setContentNode(contentNode);
+            project.setContentNodeId(contentNodeId);
         } else {
-            contentNodeService.modify(project.getContentNode().getId(), payloadTO.getName(), payloadTO.getTags(),
+            contentNodeService.modify(project.getContentNodeId(), payloadTO.getName(), payloadTO.getTags(),
                     payloadTO.isPublicated());
         }
 

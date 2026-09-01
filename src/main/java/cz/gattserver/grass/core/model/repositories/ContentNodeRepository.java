@@ -8,10 +8,10 @@ import cz.gattserver.grass.core.model.domain.ContentNode;
 
 public interface ContentNodeRepository extends JpaRepository<ContentNode, Long>, ContentNodeRepositoryCustom {
 
-	@Query("select c.id from CONTENTNODE c where c.contentReaderId = ?1 and c.contentId = ?2")
+	@Query("select c.id from CONTENT_NODE c where c.contentReaderId = ?1 and c.contentId = ?2")
 	Long findIdByContentModuleAndContentId(String contentModuleId, Long contentId);
 
 	@Modifying
-	@Query("update CONTENTNODE c set c.parent.id = ?1 where c.id = ?2")
+	@Query("update CONTENT_NODE c set c.parentId = ?1 where c.id = ?2")
 	void moveContent(Long nodeId, Long contentNodeId);
 }

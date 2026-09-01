@@ -2,7 +2,6 @@ package cz.gattserver.grass.core.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import cz.gattserver.grass.core.interfaces.NodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.model.domain.Node;
 import cz.gattserver.grass.core.model.repositories.NodeRepository;
@@ -28,10 +27,10 @@ public class NodeServiceTest extends DBCleanTest {
     @Test
     public void testCreateNewNode() {
         Long nodeId = nodeService.createNewNode(null, "testNode");
-        NodeTO node = nodeService.getNodeByIdForDetail(nodeId);
+        NodeTO node = nodeService.getNodeById(nodeId);
         assertNotNull(node);
         assertEquals(nodeId, node.getId());
-        assertNull(node.getParent());
+        assertNull(node.getParentId());
         assertEquals("testNode", node.getName());
     }
 
@@ -79,17 +78,17 @@ public class NodeServiceTest extends DBCleanTest {
     public void testGetNodeByIdForDetail() {
         Long nodeId0 = nodeService.createNewNode(null, "testParent");
         Long nodeId1 = nodeService.createNewNode(nodeId0, "testNode");
-        NodeTO node = nodeService.getNodeByIdForDetail(nodeId1);
+        NodeTO node = nodeService.getNodeById(nodeId1);
         assertEquals(nodeId1, node.getId());
         assertEquals("testNode", node.getName());
-        assertEquals("testParent", node.getParent().getName());
+        assertEquals("testParent", node.getParentName());
     }
 
     @Test
     public void testGetNodeByIdForOverview() {
         Long nodeId0 = nodeService.createNewNode(null, "testParent");
         Long nodeId1 = nodeService.createNewNode(nodeId0, "testNode");
-        NodeOverviewTO node = nodeService.getNodeByIdForOverview(nodeId1);
+        NodeTO node = nodeService.getNodeById(nodeId1);
         assertEquals(nodeId1, node.getId());
         assertEquals("testNode", node.getName());
         assertEquals(nodeId0, node.getParentId());
@@ -101,7 +100,7 @@ public class NodeServiceTest extends DBCleanTest {
         Long nodeId0 = nodeService.createNewNode(null, "testParent");
         nodeService.createNewNode(nodeId0, "testNode1");
         nodeService.createNewNode(nodeId0, "testNode2");
-        List<NodeOverviewTO> nodes = nodeService.getNodesByParentNode(nodeId0);
+        List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeId0);
         assertEquals(2, nodes.size());
         assertEquals("testNode1", nodes.get(0).getName());
         assertEquals("testNode2", nodes.get(1).getName());
@@ -113,7 +112,7 @@ public class NodeServiceTest extends DBCleanTest {
         nodeService.createNewNode(nodeId0, "testNode1");
         Long nodeId1 = nodeService.createNewNode(nodeId0, "testNode2");
         nodeService.createNewNode(nodeId1, "testChild");
-        List<NodeOverviewTO> nodes = nodeService.getNodesForTree();
+        List<NodeTO> nodes = nodeService.getNodesForTree();
         assertEquals(4, nodes.size());
         assertEquals("testParent", nodes.get(0).getName());
         assertEquals("testNode1", nodes.get(1).getName());
@@ -128,7 +127,7 @@ public class NodeServiceTest extends DBCleanTest {
         nodeService.createNewNode(nodeId0, "testNode1");
         Long nodeId1 = nodeService.createNewNode(nodeId0, "testNode2");
         nodeService.createNewNode(nodeId1, "testChild");
-        List<NodeOverviewTO> nodes = nodeService.getRootNodes();
+        List<NodeTO> nodes = nodeService.getRootNodes();
         assertEquals(2, nodes.size());
         assertEquals("testParent", nodes.get(0).getName());
         assertEquals("testParent2", nodes.get(1).getName());
@@ -151,17 +150,18 @@ public class NodeServiceTest extends DBCleanTest {
         Long nodeId1 = nodeService.createNewNode(null, "testNode1");
         Long nodeId2 = nodeService.createNewNode(nodeId1, "testNode3");
 
-        NodeTO nodeDTO = nodeService.getNodeByIdForDetail(nodeId2);
+        NodeTO nodeDTO = nodeService.getNodeById(nodeId2);
         assertEquals(nodeId1, nodeDTO.getParentId());
-        assertEquals(nodeId1, nodeDTO.getParent().getId());
-        assertNull(nodeDTO.getParent().getParentId());
-        assertNull(nodeDTO.getParent().getParent());
+        assertEquals(nodeId1, nodeDTO.getParentId());
+        assertNull(nodeDTO.getParentId());
+
+        nodeDTO = nodeService.getNodeById(nodeDTO.getParentId());
+        assertNull(nodeDTO.getParentId());
 
         nodeService.moveNode(nodeId2, null);
 
-        nodeDTO = nodeService.getNodeByIdForDetail(nodeId2);
+        nodeDTO = nodeService.getNodeById(nodeId2);
         assertNull(nodeDTO.getParentId());
-        assertNull(nodeDTO.getParent());
     }
 
     @Test
@@ -171,13 +171,13 @@ public class NodeServiceTest extends DBCleanTest {
         Long nodeId3 = nodeService.createNewNode(nodeId2, "testNode3");
 
         nodeService.moveNode(nodeId2, nodeId1);
-        assertEquals(nodeId1, nodeService.getNodeByIdForOverview(nodeId2).getParentId());
+        assertEquals(nodeId1, nodeService.getNodeById(nodeId2).getParentId());
 
-        NodeTO nodeDTO = nodeService.getNodeByIdForDetail(nodeId3);
+        NodeTO nodeDTO = nodeService.getNodeById(nodeId3);
         assertEquals(nodeId2, nodeDTO.getParentId());
-        assertEquals(nodeId2, nodeDTO.getParent().getId());
-        assertEquals(nodeId1, nodeDTO.getParent().getParentId());
-        assertEquals(nodeId1, nodeDTO.getParent().getParent().getId());
+
+        nodeDTO = nodeService.getNodeById(nodeId3);
+        assertEquals(nodeId1, nodeDTO.getParentId());
     }
 
     @Test
@@ -189,10 +189,11 @@ public class NodeServiceTest extends DBCleanTest {
         nodeService.moveNode(nodeId2, nodeId1);
         nodeService.moveNode(nodeId3, nodeId1);
 
-        NodeTO nodeDTO = nodeService.getNodeByIdForDetail(nodeId3);
+        NodeTO nodeDTO = nodeService.getNodeById(nodeId3);
         assertEquals(nodeId1, nodeDTO.getParentId());
-        assertEquals(nodeId1, nodeDTO.getParent().getId());
-        assertNull(nodeDTO.getParent().getParent());
+
+        nodeDTO = nodeService.getNodeById(nodeId3);
+        assertNull(nodeDTO.getParentId());
     }
 
     @Test
@@ -203,10 +204,14 @@ public class NodeServiceTest extends DBCleanTest {
 
         nodeService.moveNode(nodeId3, nodeId2);
 
-        NodeTO nodeDTO = nodeService.getNodeByIdForDetail(nodeId3);
+        NodeTO nodeDTO = nodeService.getNodeById(nodeId3);
         assertEquals(nodeId2, nodeDTO.getParentId());
-        assertEquals(nodeId1, nodeDTO.getParent().getParentId());
-        assertNull(nodeDTO.getParent().getParent().getParent());
+
+        nodeDTO = nodeService.getNodeById(nodeId3);
+        assertEquals(nodeId1, nodeDTO.getParentId());
+
+        nodeDTO = nodeService.getNodeById(nodeId3);
+        assertNull(nodeDTO.getParentId());
     }
 
     @Test
@@ -232,9 +237,7 @@ public class NodeServiceTest extends DBCleanTest {
         Long nodeId3 = nodeService.createNewNode(nodeId2, "testNode3");
 
         Node node = nodeRepository.findById(nodeId1).orElse(null);
-        Node node3 = new Node();
-        node3.setId(nodeId3);
-        node.setParent(node3);
+        node.setParentId(nodeId3);
         nodeRepository.save(node);
 
         Long nodeId4 = nodeService.createNewNode(null, "testNode4");
@@ -245,7 +248,7 @@ public class NodeServiceTest extends DBCleanTest {
     public void testRenameNode() {
         Long nodeId1 = nodeService.createNewNode(null, "testNode");
         nodeService.rename(nodeId1, "newTestNode");
-        assertEquals("newTestNode", nodeService.getNodeByIdForOverview(nodeId1).getName());
+        assertEquals("newTestNode", nodeService.getNodeById(nodeId1).getName());
     }
 
     @Test

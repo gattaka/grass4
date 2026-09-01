@@ -20,7 +20,7 @@ public class ContentTagRepositoryCustomImpl extends QuerydslRepositorySupport im
 
     @Override
     public int countContentTagContents(Long id) {
-        return from(c).select(c.contentNodes.size()).from(c).where(c.id.eq(id)).fetchOne();
+        return from(c).select(c.contentNodeCount).from(c).where(c.id.eq(id)).fetchOne();
     }
 
     private JPQLQuery<String> createQuery(Optional<String> filterOptional) {
@@ -37,5 +37,10 @@ public class ContentTagRepositoryCustomImpl extends QuerydslRepositorySupport im
     @Override
     public Integer countByFilter(Optional<String> filterOptional) {
         return Math.toIntExact(createQuery(filterOptional).fetchCount());
+    }
+
+    @Override
+    public Iterable<Integer> findContentNodesCountsGroups() {
+        return from(c).select(c.contentNodeCount).orderBy(c.contentNodeCount.asc()).fetch();
     }
 }

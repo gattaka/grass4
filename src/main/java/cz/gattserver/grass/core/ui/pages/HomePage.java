@@ -57,17 +57,17 @@ public class HomePage extends Div {
 
     private ContentTagService contentTagService;
     private ContentNodeService contentNodeService;
+    private NodeService nodeService;
 
     private UserInfoTO user;
 
     private TextField searchField;
-    @Autowired
-    private NodeService nodeService;
 
     public HomePage(SecurityService securityService, CoreACLService coreACLService, ContentTagService contentTagService,
-                    ContentNodeService contentNodeService) {
+                    ContentNodeService contentNodeService, NodeService nodeService) {
         this.contentNodeService = contentNodeService;
         this.contentTagService = contentTagService;
+        this.nodeService = nodeService;
 
         VaadinSession.getCurrent().setErrorHandler(new ApplicationErrorHandler());
 
@@ -131,7 +131,7 @@ public class HomePage extends Div {
         searchResultsContentsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(searchResultsContentsGrid);
 
-        final NodesGrid searchResultsNodesGrid = new NodesGrid();
+        final NodesGrid searchResultsNodesGrid = new NodesGrid(user.isAdmin());
         searchResultsNodesGrid.setWidthFull();
         searchResultsNodesGrid.setVisible(false);
         searchResultsNodesGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
