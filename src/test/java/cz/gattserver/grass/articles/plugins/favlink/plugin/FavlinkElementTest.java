@@ -15,7 +15,7 @@ public class FavlinkElementTest {
 		Context context = new ContextImpl();
 		element.apply(context);
 		assertEquals(
-				"<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website\" >"
+				"<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website\" router-ignore >"
 						+ "<img style=\"margin: 4px 5px -4px 2px;\" height=\"16\" width=\"16\" src=\"mock/imgs/favicon/fav.ico\" />http://mock.url.website</a>",
 				context.getOutput());
 	}
@@ -25,7 +25,7 @@ public class FavlinkElementTest {
 		FavlinkElement element = new FavlinkElement(null, null, "http://mock.url.website");
 		Context context = new ContextImpl();
 		element.apply(context);
-		assertEquals("<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website\" >http://mock.url.website</a>",
+		assertEquals("<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website\" router-ignore >http://mock.url.website</a>",
 				context.getOutput());
 	}
 
@@ -36,7 +36,7 @@ public class FavlinkElementTest {
 		Context context = new ContextImpl();
 		element.apply(context);
 		assertEquals(
-				"<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"https://cs.wikibooks.org/wiki/Praktick%C3%A1_elektronika/Spektrum_sign%C3%A1lu#Obd%C3%A9ln%C3%ADkov%C3%BD_sign%C3%A1l\" >"
+				"<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"https://cs.wikibooks.org/wiki/Praktick%C3%A1_elektronika/Spektrum_sign%C3%A1lu#Obd%C3%A9ln%C3%ADkov%C3%BD_sign%C3%A1l\" router-ignore >"
 						+ "<img style=\"margin: 4px 5px -4px 2px;\" height=\"16\" width=\"16\" src=\"mock/imgs/favicon/fav.ico\" />https://cs.wikibooks.org/wiki/Praktick%C3%A1_el...ign%C3%A1lu#Obd%C3%A9ln%C3%ADkov%C3%BD_sign%C3%A1l</a>",
 				context.getOutput());
 	}
@@ -47,7 +47,7 @@ public class FavlinkElementTest {
 		Context context = new ContextImpl();
 		element.apply(context);
 		assertEquals(
-				"popis <a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website\" title=\"popis\" >"
+				"popis <a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website\" router-ignore title=\"popis\" >"
 						+ "<img style=\"margin: 4px 5px -4px 2px;\" height=\"16\" width=\"16\" src=\"mock/imgs/favicon/fav.ico\" />http://mock.url.website</a>",
 				context.getOutput());
 	}
@@ -60,7 +60,7 @@ public class FavlinkElementTest {
 		Context context = new ContextImpl();
 		element.apply(context);
 		assertEquals(
-				"Ještě delší text, který se sem už vůbec nemá šanci vejít protože je moc dlouh... <a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website\" title=\"Ještě delší text, který se sem už vůbec nemá šanci vejít protože je moc dlouhej a tak ho systém bude muset zkrátit aby se sem vešel\" >"
+				"Ještě delší text, který se sem už vůbec nemá šanci vejít protože je moc dlouh... <a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website\" router-ignore title=\"Ještě delší text, který se sem už vůbec nemá šanci vejít protože je moc dlouhej a tak ho systém bude muset zkrátit aby se sem vešel\" >"
 						+ "<img style=\"margin: 4px 5px -4px 2px;\" height=\"16\" width=\"16\" src=\"mock/imgs/favicon/fav.ico\" />http://...rl.website</a>",
 				context.getOutput());
 	}
@@ -74,7 +74,7 @@ public class FavlinkElementTest {
 		element.apply(context);
 		assertEquals(
 				"Ještě delší text, který se sem už vůbec nemá šanci vejít protože je moc dlouh... "
-						+ "<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website/questions/3357477/is-asynctask-really-conceptually-flawed-or-am-i-just-missing-something/3359003#3359003\" title=\"Ještě delší text, který se sem už vůbec nemá šanci vejít protože je moc dlouhej a tak ho systém bude muset zkrátit aby se sem vešel\" >"
+						+ "<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://mock.url.website/questions/3357477/is-asynctask-really-conceptually-flawed-or-am-i-just-missing-something/3359003#3359003\" router-ignore title=\"Ještě delší text, který se sem už vůbec nemá šanci vejít protože je moc dlouhej a tak ho systém bude muset zkrátit aby se sem vešel\" >"
 						+ "<img style=\"margin: 4px 5px -4px 2px;\" height=\"16\" width=\"16\" src=\"mock/imgs/favicon/fav.ico\" />http://...03#3359003</a>",
 				context.getOutput());
 	}

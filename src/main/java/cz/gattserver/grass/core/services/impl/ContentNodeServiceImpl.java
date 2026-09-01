@@ -113,7 +113,7 @@ public class ContentNodeServiceImpl implements ContentNodeService {
         contentTagService.onContentNodeDelete(contentNodeId);
 
         // vymaž content node
-        contentNodeRepository.findById(contentNodeId).ifPresent(contentNodeRepository::delete);
+        contentNodeRepository.deleteById(contentNodeId);
     }
 
     @Override

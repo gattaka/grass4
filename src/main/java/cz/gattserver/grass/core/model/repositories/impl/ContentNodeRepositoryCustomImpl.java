@@ -84,7 +84,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
 
         return query.from(c)
                 // favourites join
-                .innerJoin(uf.favourites, c)
+                .join(uf).on(uf.favourites.contains(c))
                 // node join
                 .join(n).on(c.parentId.eq(n.id))
                 // user join
@@ -103,7 +103,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
      */
 
     private JPQLQuery<ContentNodeOverviewTO> queryByFilterAndUserAccess(ContentNodeFilterTO filter, Long userId,
-                                                                       boolean admin) {
+                                                                        boolean admin) {
         return from(c)
                 // node join
                 .join(n).on(c.parentId.eq(n.id))
@@ -147,16 +147,18 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
 
     @Override
     public ContentNodeTO findByIdForDetail(Long contentNodeId) {
-
         ContentNodeTO to = from(c)
                 // node join
                 .join(n).on(c.parentId.eq(n.id))
                 // user join
                 .join(u).on(c.authorId.eq(u.id))
+                // where
+                .where(c.id.eq(contentNodeId))
                 // select
                 .select(new QContentNodeTO(c.contentReaderId, c.id, c.contentId, c.name, c.parentId, n.name,
                         c.creationDate, c.lastModificationDate, c.publicated, c.publicatedByParent, c.authorId, u.name,
                         c.draft, c.draftSourceId)).fetchFirst();
+        if (to == null) return null;
 
         to.setContentTags(new LinkedHashSet<>(
                 from(ct).join(t).on(t.id.eq(ct.id.contentTagId)).where(ct.id.contentNodeId.eq(to.getId()))

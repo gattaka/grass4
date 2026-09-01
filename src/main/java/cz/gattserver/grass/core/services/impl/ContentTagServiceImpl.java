@@ -51,9 +51,8 @@ public class ContentTagServiceImpl implements ContentTagService {
     }
 
     @Override
-    public void saveTags(@NotNull Collection<String> tags, @NotNull Long contentNodeId) {
+    public void saveTags(Collection<String> tags, @NotNull Long contentNodeId) {
         Objects.requireNonNull(contentNodeId);
-        Objects.requireNonNull(tags);
 
         Set<ContentTag> set = contentNodeContentTagRepository.findByContendNodeId(contentNodeId);
         Map<String, ContentTag> nameToTO = set.stream().collect(Collectors.toMap(ContentTag::getName, to -> to));
@@ -63,23 +62,25 @@ public class ContentTagServiceImpl implements ContentTagService {
         List<ContentNodeContentTag> contentNodeContentTags = new ArrayList<>();
 
         // tagy, které které jsou použity/vytvořeny
-        for (String tag : tags) {
-            // existuje už takový tag ?
-            ContentTag contentTag = contentTagRepository.findByName(tag);
-            if (contentTag == null) {
-                contentTag = new ContentTag();
-                contentTag.setName(tag);
-            }
-            contentTag.setContentNodeCount(contentTag.getContentNodeCount() + 1);
-            // potřebuju jeho Id, takže není možné udělat batch save později
-            contentTag = contentTagRepository.save(contentTag);
+        if (tags != null) {
+            for (String tag : tags) {
+                // existuje už takový tag ?
+                ContentTag contentTag = contentTagRepository.findByName(tag);
+                if (contentTag == null) {
+                    contentTag = new ContentTag();
+                    contentTag.setName(tag);
+                }
+                contentTag.setContentNodeCount(contentTag.getContentNodeCount() + 1);
+                // potřebuju jeho Id, takže není možné udělat batch save později
+                contentTag = contentTagRepository.save(contentTag);
 
-            if (!nameToTO.containsKey(tag)) {
-                // obsah aktuálně u sebe nemá tento tag -- je potřeba vytvořit vazbu
-                contentNodeContentTags.add(new ContentNodeContentTag(contentNodeId, contentTag.getId()));
-            } else {
-                // tag je stále používán, odeber ho ze seznamu tagů ke zrušení vazby
-                toRemove.remove(tag);
+                if (!nameToTO.containsKey(tag)) {
+                    // obsah aktuálně u sebe nemá tento tag -- je potřeba vytvořit vazbu
+                    contentNodeContentTags.add(new ContentNodeContentTag(contentNodeId, contentTag.getId()));
+                } else {
+                    // tag je stále používán, odeber ho ze seznamu tagů ke zrušení vazby
+                    toRemove.remove(tag);
+                }
             }
         }
 

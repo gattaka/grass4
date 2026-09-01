@@ -3,6 +3,7 @@ package cz.gattserver.grass.core.model.repositories;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.model.domain.Node;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
@@ -31,4 +32,8 @@ public interface NodeRepositoryCustom {
     NodeTO findAndMapById(Long nodeId);
 
     List<NodeTO> findForTree();
+
+    int countSubNodes(Long nodeId);
+
+    int countContentNodes(Long nodeId);
 }

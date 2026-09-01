@@ -13,10 +13,4 @@ public interface NodeRepository extends JpaRepository<Node, Long>, NodeRepositor
     @Modifying
     @Query("update NODE n set n.name = ?2 where n.id = ?1")
     void rename(Long nodeId, String newName);
-
-    @Query("select count(c) from NODE n join CONTENT_NODE c on c.parent.id = n.id where n.id = ?1")
-    int countSubNodes(Long nodeId);
-
-    @Query("select count(s) from NODE n join NODE s on s.parent.id = n.id where n.id = ?1")
-    int countContentNodes(Long nodeId);
 }

@@ -33,7 +33,7 @@ public class FavlinkParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://test.mock.neco\" ><img style=\"margin: 4px 5px -4px 2px;\" height=\"16\" width=\"16\" src=\"http://mock.neco/favicon.png\" />http://test.mock.neco</a>",
+                "<a style=\"word-wrap: break-word; white-space: nowrap\" href=\"http://test.mock.neco\" router-ignore ><img style=\"margin: 4px 5px -4px 2px;\" height=\"16\" width=\"16\" src=\"http://mock.neco/favicon.png\" />http://test.mock.neco</a>",
                 ctx.getOutput());
     }
 

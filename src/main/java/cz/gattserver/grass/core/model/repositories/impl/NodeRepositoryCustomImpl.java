@@ -5,7 +5,6 @@ import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.interfaces.QNodeTO;
 import cz.gattserver.grass.core.model.domain.*;
 import cz.gattserver.grass.core.model.repositories.NodeRepositoryCustom;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
 
 import java.util.List;
@@ -14,6 +13,7 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
 
     private final QNode n = QNode.node;
     private final QNode nn = new QNode("parentnode");
+    private final QContentNode cn = QContentNode.contentNode;
 
     public NodeRepositoryCustomImpl() {
         super(Node.class);
@@ -86,4 +86,15 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
     public List<NodeTO> findForTree() {
         return createBaseQuery().orderBy(n.id.asc()).fetch();
     }
+
+    @Override
+    public int countSubNodes(Long nodeId) {
+        return Math.toIntExact(from(n).where(n.parentId.eq(nodeId)).stream().count());
+    }
+
+    @Override
+    public int countContentNodes(Long nodeId) {
+        return Math.toIntExact(from(cn).where(cn.parentId.eq(nodeId)).stream().count());
+    }
+
 }

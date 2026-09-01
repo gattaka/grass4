@@ -8,8 +8,12 @@ import jakarta.persistence.*;
 
 import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.security.Role;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity(name = "USER_ACCOUNTS")
+@Getter
+@Setter
 @Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "name" }) })
 public class User {
 
@@ -68,76 +72,12 @@ public class User {
 	 */
 	private Boolean confirmed = false;
 
-	public Long getId() {
-		return id;
-	}
-
-	public String getName() {
-		return name;
-	}
-
-	public void setName(String name) {
-		this.name = name;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public Set<String> getRoles() {
-		return roles;
-	}
-
-	public void setRoles(Set<String> roles) {
-		this.roles = roles;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public LocalDateTime getRegistrationDate() {
-		return registrationDate;
-	}
-
-	public void setRegistrationDate(LocalDateTime registrationDate) {
-		this.registrationDate = registrationDate;
-	}
-
-	public LocalDateTime getLastLoginDate() {
-		return lastLoginDate;
-	}
-
-	public void setLastLoginDate(LocalDateTime lastLoginDate) {
-		this.lastLoginDate = lastLoginDate;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
 	public boolean isConfirmed() {
 		return confirmed;
 	}
 
 	public void setConfirmed(boolean confirmed) {
 		this.confirmed = confirmed;
-	}
-
-	public Set<ContentNode> getFavourites() {
-		return favourites;
-	}
-
-	public void setFavourites(Set<ContentNode> favourites) {
-		this.favourites = favourites;
 	}
 
 	public boolean hasRole(Role role) {
