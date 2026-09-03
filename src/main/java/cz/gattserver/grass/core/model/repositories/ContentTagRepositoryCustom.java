@@ -1,5 +1,7 @@
 package cz.gattserver.grass.core.model.repositories;
 
+import cz.gattserver.grass.core.model.domain.ContentTag;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -11,5 +13,7 @@ public interface ContentTagRepositoryCustom {
 
 	Integer countByFilter(Optional<String> filter);
 
-    Iterable<Integer> findContentNodesCountsGroups();
+    List<Integer> findContentNodesCountsGroups();
+
+    List<ContentTag> findAllOrderByContentCountNode();
 }

@@ -40,7 +40,12 @@ public class ContentTagRepositoryCustomImpl extends QuerydslRepositorySupport im
     }
 
     @Override
-    public Iterable<Integer> findContentNodesCountsGroups() {
-        return from(c).select(c.contentNodeCount).orderBy(c.contentNodeCount.asc()).fetch();
+    public List<Integer> findContentNodesCountsGroups() {
+        return from(c).select(c.contentNodeCount).groupBy(c.contentNodeCount).orderBy(c.contentNodeCount.asc()).fetch();
+    }
+
+    @Override
+    public List<ContentTag> findAllOrderByContentCountNode() {
+        return from(c).select(c).orderBy(c.contentNodeCount.asc()).fetch();
     }
 }

@@ -12,6 +12,7 @@ import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.services.CoreMapperService;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.Validate;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -115,16 +116,14 @@ public class ContentTagServiceImpl implements ContentTagService {
     @Override
     public Map<Long, Integer> getTagsContentsCountsMap() {
         Map<Long, Integer> map = new LinkedHashMap<>();
-        for (Object[] to : contentTagRepository.countContentTagsContents())
-            map.put((Long) to[0], ((Long) to[1]).intValue());
+        for (ContentTag tag : contentTagRepository.findAllOrderByContentCountNode())
+            map.put(tag.getId(), tag.getContentNodeCount());
         return map;
     }
 
     @Override
     public List<Integer> getTagsContentsCountsGroups() {
-        List<Integer> list = new ArrayList<>();
-        contentTagRepository.findContentNodesCountsGroups().forEach(i -> list.add(i));
-        return list;
+        return contentTagRepository.findContentNodesCountsGroups();
     }
 
     @Override

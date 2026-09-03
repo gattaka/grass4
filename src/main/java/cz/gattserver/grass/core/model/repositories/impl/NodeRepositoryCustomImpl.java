@@ -21,8 +21,8 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
 
     private JPQLQuery<NodeTO> createBaseQuery() {
         return from(n)
-                // parent Node join
-                .join(nn).on(n.parentId.eq(nn.id))
+                // parent Node join (nemusí mít)
+                .leftJoin(nn).on(n.parentId.eq(nn.id))
                 // select
                 .select(new QNodeTO(n.id, n.name, nn.name, nn.id, n.publicated, n.publicatedByParent));
     }
