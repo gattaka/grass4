@@ -84,7 +84,8 @@ public class NodeServiceImpl implements NodeService {
             // začínám od předka newParent - tohle je schválně, umožní mi to se
             // pak ptát na id newParent - pokud totiž narazím na newParent id,
             // pak je v DB cykl
-            cycleCheckParent = nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
+            cycleCheckParent = cycleCheckParent.getParentId() == null ? null :
+                    nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
             while (cycleCheckParent != null) {
                 if (cycleCheckParent.getId() == newParentId)
                     throw new IllegalStateException("V grafu kategorií byl nalezen cykl");

@@ -152,8 +152,6 @@ public class NodeServiceTest extends DBCleanTest {
 
         NodeTO nodeDTO = nodeService.getNodeById(nodeId2);
         assertEquals(nodeId1, nodeDTO.getParentId());
-        assertEquals(nodeId1, nodeDTO.getParentId());
-        assertNull(nodeDTO.getParentId());
 
         nodeDTO = nodeService.getNodeById(nodeDTO.getParentId());
         assertNull(nodeDTO.getParentId());
@@ -176,7 +174,7 @@ public class NodeServiceTest extends DBCleanTest {
         NodeTO nodeDTO = nodeService.getNodeById(nodeId3);
         assertEquals(nodeId2, nodeDTO.getParentId());
 
-        nodeDTO = nodeService.getNodeById(nodeId3);
+        nodeDTO = nodeService.getNodeById(nodeDTO.getParentId());
         assertEquals(nodeId1, nodeDTO.getParentId());
     }
 
@@ -192,7 +190,7 @@ public class NodeServiceTest extends DBCleanTest {
         NodeTO nodeDTO = nodeService.getNodeById(nodeId3);
         assertEquals(nodeId1, nodeDTO.getParentId());
 
-        nodeDTO = nodeService.getNodeById(nodeId3);
+        nodeDTO = nodeService.getNodeById(nodeDTO.getParentId());
         assertNull(nodeDTO.getParentId());
     }
 
@@ -207,10 +205,10 @@ public class NodeServiceTest extends DBCleanTest {
         NodeTO nodeDTO = nodeService.getNodeById(nodeId3);
         assertEquals(nodeId2, nodeDTO.getParentId());
 
-        nodeDTO = nodeService.getNodeById(nodeId3);
+        nodeDTO = nodeService.getNodeById(nodeDTO.getParentId());
         assertEquals(nodeId1, nodeDTO.getParentId());
 
-        nodeDTO = nodeService.getNodeById(nodeId3);
+        nodeDTO = nodeService.getNodeById(nodeDTO.getParentId());
         assertNull(nodeDTO.getParentId());
     }
 
