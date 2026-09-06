@@ -207,7 +207,9 @@ public class HomePage extends Div {
 
         Button anchorButton = new Button(tagString);
         anchorButton.getStyle().set("min-width", "auto");
-        tagsMenu.add(new Anchor("#tag-" + tagString, anchorButton));
+        Anchor a = new Anchor("#tag-" + tagString, anchorButton);
+        a.getElement().setAttribute("router-ignore", "");
+        tagsMenu.add(a);
 
         Div tagLabels = new Div();
         tagLabels.addClassName("tag-labels");
