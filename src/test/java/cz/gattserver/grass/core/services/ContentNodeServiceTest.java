@@ -202,7 +202,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
         String moduleId = "mockModule";
         Long contentId = 2L;
         String name = "Test obsah";
-        Long contentNodeId = contentNodeService.save(moduleId, contentId, name, tags, true, nodeId, userId, false,
+        Long contentNodeId = contentNodeService.save(moduleId, contentId, name, tags, false, nodeId, userId, false,
                 LocalDateTime.now(), null);
 
         assertEquals(1, contentNodeService.getCount());
@@ -227,7 +227,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
         String moduleId = "mockModule";
         Long contentId = 2L;
         String name = "Test obsah";
-        Long contentNodeId = contentNodeService.save(moduleId, contentId, name, null, true, nodeId, userId, false, null,
+        Long contentNodeId = contentNodeService.save(moduleId, contentId, name, null, false, nodeId, userId, false, null,
                 null);
 
         assertEquals(1, contentNodeService.getCount());
@@ -247,14 +247,14 @@ public class ContentNodeServiceTest extends DBCleanTest {
     public void testSave_withoutContentModuleId() {
         Long userId = coreMockService.createMockUser(1);
         Long nodeId = coreMockService.createMockRootNode(2);
-        assertThrows(NullPointerException.class, () -> contentNodeService.save(null, 2L, "Test obsah", null, true, nodeId, userId, false, null, null));
+        assertThrows(NullPointerException.class, () -> contentNodeService.save(null, 2L, "Test obsah", null, false, nodeId, userId, false, null, null));
     }
 
     @Test
     public void testSave_withoutName() {
         Long userId = coreMockService.createMockUser(1);
         Long nodeId = coreMockService.createMockRootNode(2);
-        assertThrows(NullPointerException.class, () -> contentNodeService.save("testModule", 2L, null, null, true, nodeId, userId, false, null, null));
+        assertThrows(NullPointerException.class, () -> contentNodeService.save("testModule", 2L, null, null, false, nodeId, userId, false, null, null));
     }
 
     @Test
