@@ -24,6 +24,10 @@ html {
     --vaadin-tabs-border-radius: 5px;
 }
 
+table {
+    border: 1px solid #ccc;
+}
+
 .tab-text-area {
     font-family: monospace;
     tab-size: 4;
