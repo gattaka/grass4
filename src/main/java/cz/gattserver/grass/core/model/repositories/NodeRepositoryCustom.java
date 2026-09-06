@@ -2,12 +2,12 @@ package cz.gattserver.grass.core.model.repositories;
 
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.model.domain.Node;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
 public interface NodeRepositoryCustom {
+
+    // All
 
     List<NodeTO> findAllRootNodes();
 
@@ -17,17 +17,7 @@ public interface NodeRepositoryCustom {
 
     int countAllByParentId(Long id);
 
-    List<Node> findPublicRootNodes();
-
-    int countPublicRootNodes();
-
-    List<Node> findPublicByParentId(Long id);
-
-    int countPublicByParentId(Long id);
-
     List<NodeTO> findAllByFilter(String filter);
-
-    List<NodeTO> findPublicByFilter(String filter);
 
     NodeTO findAndMapById(Long nodeId);
 
@@ -36,4 +26,18 @@ public interface NodeRepositoryCustom {
     int countSubNodes(Long nodeId);
 
     int countContentNodes(Long nodeId);
+
+    // Public
+
+    List<NodeTO> findPublicRootNodes();
+
+    int countPublicRootNodes();
+
+    List<NodeTO> findPublicByParentId(Long id);
+
+    int countPublicByParentId(Long id);
+
+    List<NodeTO> findPublicByFilter(String filter);
+
+    NodeTO findPublicAndMapById(Long nodeId);
 }

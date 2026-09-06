@@ -238,6 +238,9 @@ public class NodeTree extends VerticalLayout {
                         "Vytvořit novou kořenovou kategorii");
         dialog.open();
 
+        // TODO publicated
+        boolean publicated = true;
+
         final TextField newNameField = new TextField("Nový název:");
         dialog.addComponent(newNameField);
 
@@ -249,7 +252,7 @@ public class NodeTree extends VerticalLayout {
             try {
                 String newNodeName = newNameField.getValue();
                 Long parentNodeId = parentNode.isPresent() ? parentNode.get().getId() : null;
-                Long newNodeId = getNodeService().createNewNode(parentNodeId, newNodeName);
+                Long newNodeId = getNodeService().createNewNode(parentNodeId, publicated, newNodeName);
                 NodeTO newNode = new NodeTO();
                 newNode.setId(newNodeId);
                 newNode.setName(newNodeName);

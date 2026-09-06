@@ -101,7 +101,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         ComponentFactory componentFactory = new ComponentFactory();
         dialog.getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(event -> {
             if (binder.validate().isOk()) {
-                Long newNodeId = nodeService.createNewNode(parentNode.getId(), to.getName());
+                Long newNodeId = nodeService.createNewNode(parentNode.getId(), true, to.getName());
                 UI.getCurrent()
                         .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(newNodeId, to.getName()));
                 dialog.close();

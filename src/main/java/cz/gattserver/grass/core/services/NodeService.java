@@ -39,16 +39,17 @@ public interface NodeService {
 	 */
 	int countNodesByParentNode(long parentId);
 
-	/**
-	 * Založí novou kategorii
-	 *
-	 * @param parentId pakliže je kategorii vkládána do jiné kategorie, je vyplněn id
-	 *                 předka. Pokud je kategorie vkládána přímo do kořene sekce, je
-	 *                 tento argument <code>null</code>
-	 * @param name     jméno nové kategorie
-	 * @return id kategorie pokud se přidání zdařilo, jinak <code>null</code>
-	 */
-	long createNewNode(Long parentId, String name);
+    /**
+     * Založí novou kategorii
+     *
+     * @param parentId pakliže je kategorii vkládána do jiné kategorie, je vyplněn id
+     *                 předka. Pokud je kategorie vkládána přímo do kořene sekce, je
+     *                 tento argument <code>null</code>
+     * @param publicated příznak, zda je katergorie zveřejněná
+     * @param name     jméno nové kategorie
+     * @return id kategorie pokud se přidání zdařilo, jinak <code>null</code>
+     */
+    long createNewNode(Long parentId, boolean publicated, String name);
 
 	/**
 	 * Přesune kategorii

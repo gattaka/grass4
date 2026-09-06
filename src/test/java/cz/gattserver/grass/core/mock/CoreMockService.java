@@ -30,7 +30,7 @@ public class CoreMockService {
 	}
 
 	public long createMockRootNode(int variant) {
-		long id = nodeService.createNewNode(null, MockUtils.MOCK_NODE_NAME + variant);
+		long id = nodeService.createNewNode(null, true, MockUtils.MOCK_NODE_NAME + variant);
 		return id;
 	}
 

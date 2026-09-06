@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-
 public class NodeServiceTest extends DBCleanTest {
 
     @Autowired
@@ -26,7 +25,7 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testCreateNewNode() {
-        Long nodeId = nodeService.createNewNode(null, "testNode");
+        Long nodeId = nodeService.createNewNode(null, true, "testNode");
         NodeTO node = nodeService.getNodeById(nodeId);
         assertNotNull(node);
         assertEquals(nodeId, node.getId());
@@ -36,24 +35,24 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testCreateNewNode_fail() {
-        assertThrows(NullPointerException.class, () -> nodeService.createNewNode(null, null));
+        assertThrows(NullPointerException.class, () -> nodeService.createNewNode(null, true, null));
     }
 
     @Test
     public void testCreateNewNode_fail2() {
-        assertThrows(IllegalArgumentException.class, () -> nodeService.createNewNode(null, ""));
+        assertThrows(IllegalArgumentException.class, () -> nodeService.createNewNode(null, true, ""));
     }
 
     @Test
     public void testCreateNewNode_fail3() {
-        assertThrows(IllegalArgumentException.class, () -> nodeService.createNewNode(null, " "));
+        assertThrows(IllegalArgumentException.class, () -> nodeService.createNewNode(null, true, " "));
     }
 
     @Test
     public void testDeleteNode() {
         assertEquals(0, nodeService.getNodesForTree().size());
-        Long nodeId1 = nodeService.createNewNode(null, "testNode");
-        nodeService.createNewNode(null, "testNode2");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode");
+        nodeService.createNewNode(null, true, "testNode2");
         assertEquals(2, nodeService.getNodesForTree().size());
         nodeService.deleteNode(nodeId1);
         assertEquals(1, nodeService.getNodesForTree().size());
@@ -61,23 +60,23 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testDeleteNode_notEmpty() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode");
-        nodeService.createNewNode(nodeId1, "testNode");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode");
+        nodeService.createNewNode(nodeId1, true, "testNode");
         assertThrows(IllegalStateException.class, () -> nodeService.deleteNode(nodeId1));
     }
 
     @Test
     public void testDeleteNode_notEmpty2() {
         Long userId = coreMockService.createMockUser(1);
-        Long nodeId = nodeService.createNewNode(null, "testNode");
+        Long nodeId = nodeService.createNewNode(null, true, "testNode");
         coreMockService.createMockContentNode(3L, null, nodeId, userId, 1);
         assertThrows(IllegalStateException.class, () -> nodeService.deleteNode(nodeId));
     }
 
     @Test
     public void testGetNodeByIdForDetail() {
-        Long nodeId0 = nodeService.createNewNode(null, "testParent");
-        Long nodeId1 = nodeService.createNewNode(nodeId0, "testNode");
+        Long nodeId0 = nodeService.createNewNode(null, true, "testParent");
+        Long nodeId1 = nodeService.createNewNode(nodeId0, true, "testNode");
         NodeTO node = nodeService.getNodeById(nodeId1);
         assertEquals(nodeId1, node.getId());
         assertEquals("testNode", node.getName());
@@ -86,8 +85,8 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testGetNodeByIdForOverview() {
-        Long nodeId0 = nodeService.createNewNode(null, "testParent");
-        Long nodeId1 = nodeService.createNewNode(nodeId0, "testNode");
+        Long nodeId0 = nodeService.createNewNode(null, true, "testParent");
+        Long nodeId1 = nodeService.createNewNode(nodeId0, true, "testNode");
         NodeTO node = nodeService.getNodeById(nodeId1);
         assertEquals(nodeId1, node.getId());
         assertEquals("testNode", node.getName());
@@ -97,9 +96,9 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testGetNodesByParentNode() {
-        Long nodeId0 = nodeService.createNewNode(null, "testParent");
-        nodeService.createNewNode(nodeId0, "testNode1");
-        nodeService.createNewNode(nodeId0, "testNode2");
+        Long nodeId0 = nodeService.createNewNode(null, true, "testParent");
+        nodeService.createNewNode(nodeId0, true, "testNode1");
+        nodeService.createNewNode(nodeId0, true, "testNode2");
         List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeId0);
         assertEquals(2, nodes.size());
         assertEquals("testNode1", nodes.get(0).getName());
@@ -108,10 +107,10 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testGetNodesForTree() {
-        Long nodeId0 = nodeService.createNewNode(null, "testParent");
-        nodeService.createNewNode(nodeId0, "testNode1");
-        Long nodeId1 = nodeService.createNewNode(nodeId0, "testNode2");
-        nodeService.createNewNode(nodeId1, "testChild");
+        Long nodeId0 = nodeService.createNewNode(null, true, "testParent");
+        nodeService.createNewNode(nodeId0, true, "testNode1");
+        Long nodeId1 = nodeService.createNewNode(nodeId0, true, "testNode2");
+        nodeService.createNewNode(nodeId1, true, "testChild");
         List<NodeTO> nodes = nodeService.getNodesForTree();
         assertEquals(4, nodes.size());
         assertEquals("testParent", nodes.get(0).getName());
@@ -122,11 +121,11 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testGetRootNodes() {
-        Long nodeId0 = nodeService.createNewNode(null, "testParent");
-        nodeService.createNewNode(null, "testParent2");
-        nodeService.createNewNode(nodeId0, "testNode1");
-        Long nodeId1 = nodeService.createNewNode(nodeId0, "testNode2");
-        nodeService.createNewNode(nodeId1, "testChild");
+        Long nodeId0 = nodeService.createNewNode(null, true, "testParent");
+        nodeService.createNewNode(null, true, "testParent2");
+        nodeService.createNewNode(nodeId0, true, "testNode1");
+        Long nodeId1 = nodeService.createNewNode(nodeId0, true, "testNode2");
+        nodeService.createNewNode(nodeId1, true, "testChild");
         List<NodeTO> nodes = nodeService.getRootNodes();
         assertEquals(2, nodes.size());
         assertEquals("testParent", nodes.get(0).getName());
@@ -135,9 +134,9 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testIsNodeEmpty() {
-        Long nodeId1 = nodeService.createNewNode(null, "nodeWithContentNode");
-        Long nodeId2 = nodeService.createNewNode(null, "nodeWithSubNode");
-        Long nodeId3 = nodeService.createNewNode(nodeId2, "emptyNode");
+        Long nodeId1 = nodeService.createNewNode(null, true, "nodeWithContentNode");
+        Long nodeId2 = nodeService.createNewNode(null, true, "nodeWithSubNode");
+        Long nodeId3 = nodeService.createNewNode(nodeId2, true, "emptyNode");
         Long userId1 = coreMockService.createMockUser(1);
         coreMockService.createMockContentNode(30L, null, nodeId1, userId1, 1);
         assertFalse(nodeService.isNodeEmpty(nodeId1));
@@ -147,8 +146,8 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testMoveNode_newRoot() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode1");
-        Long nodeId2 = nodeService.createNewNode(nodeId1, "testNode3");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode1");
+        Long nodeId2 = nodeService.createNewNode(nodeId1, true, "testNode3");
 
         NodeTO nodeDTO = nodeService.getNodeById(nodeId2);
         assertEquals(nodeId1, nodeDTO.getParentId());
@@ -164,9 +163,9 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testMoveNode_ok1() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode1");
-        Long nodeId2 = nodeService.createNewNode(null, "testNode2");
-        Long nodeId3 = nodeService.createNewNode(nodeId2, "testNode3");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode1");
+        Long nodeId2 = nodeService.createNewNode(null, true, "testNode2");
+        Long nodeId3 = nodeService.createNewNode(nodeId2, true, "testNode3");
 
         nodeService.moveNode(nodeId2, nodeId1);
         assertEquals(nodeId1, nodeService.getNodeById(nodeId2).getParentId());
@@ -180,9 +179,9 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testMoveNode_ok2() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode1");
-        Long nodeId2 = nodeService.createNewNode(null, "testNode2");
-        Long nodeId3 = nodeService.createNewNode(nodeId2, "testNode3");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode1");
+        Long nodeId2 = nodeService.createNewNode(null, true, "testNode2");
+        Long nodeId3 = nodeService.createNewNode(nodeId2, true, "testNode3");
 
         nodeService.moveNode(nodeId2, nodeId1);
         nodeService.moveNode(nodeId3, nodeId1);
@@ -196,9 +195,9 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testMoveNode_noChange() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode1");
-        Long nodeId2 = nodeService.createNewNode(nodeId1, "testNode2");
-        Long nodeId3 = nodeService.createNewNode(nodeId2, "testNode3");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode1");
+        Long nodeId2 = nodeService.createNewNode(nodeId1, true, "testNode2");
+        Long nodeId3 = nodeService.createNewNode(nodeId2, true, "testNode3");
 
         nodeService.moveNode(nodeId3, nodeId2);
 
@@ -214,37 +213,37 @@ public class NodeServiceTest extends DBCleanTest {
 
     @Test
     public void testMoveNode_fail1() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode1");
-        Long nodeId2 = nodeService.createNewNode(nodeId1, "testNode2");
-        Long nodeId3 = nodeService.createNewNode(nodeId2, "testNode3");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode1");
+        Long nodeId2 = nodeService.createNewNode(nodeId1, true, "testNode2");
+        Long nodeId3 = nodeService.createNewNode(nodeId2, true, "testNode3");
         assertThrows(IllegalArgumentException.class, () -> nodeService.moveNode(nodeId1, nodeId3));
     }
 
     @Test
     public void testMoveNode_fail2() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode1");
-        Long nodeId2 = nodeService.createNewNode(nodeId1, "testNode2");
-        Long nodeId3 = nodeService.createNewNode(nodeId2, "testNode3");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode1");
+        Long nodeId2 = nodeService.createNewNode(nodeId1, true, "testNode2");
+        Long nodeId3 = nodeService.createNewNode(nodeId2, true, "testNode3");
         assertThrows(IllegalArgumentException.class, () -> nodeService.moveNode(nodeId2, nodeId3));
     }
 
     @Test
     public void testMoveNode_dbCycle() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode1");
-        Long nodeId2 = nodeService.createNewNode(nodeId1, "testNode2");
-        Long nodeId3 = nodeService.createNewNode(nodeId2, "testNode3");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode1");
+        Long nodeId2 = nodeService.createNewNode(nodeId1, true, "testNode2");
+        Long nodeId3 = nodeService.createNewNode(nodeId2, true, "testNode3");
 
         Node node = nodeRepository.findById(nodeId1).orElse(null);
         node.setParentId(nodeId3);
         nodeRepository.save(node);
 
-        Long nodeId4 = nodeService.createNewNode(null, "testNode4");
+        Long nodeId4 = nodeService.createNewNode(null, true, "testNode4");
         assertThrows(IllegalStateException.class, () -> nodeService.moveNode(nodeId4, nodeId3));
     }
 
     @Test
     public void testRenameNode() {
-        Long nodeId1 = nodeService.createNewNode(null, "testNode");
+        Long nodeId1 = nodeService.createNewNode(null, true, "testNode");
         nodeService.rename(nodeId1, "newTestNode");
         assertEquals("newTestNode", nodeService.getNodeById(nodeId1).getName());
     }

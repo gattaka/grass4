@@ -19,7 +19,7 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
         super(Node.class);
     }
 
-    private JPQLQuery<NodeTO> createBaseQuery() {
+    private JPQLQuery<NodeTO> createBaseMapQuery() {
         return from(n)
                 // parent Node join (nemusí mít)
                 .leftJoin(nn).on(n.parentId.eq(nn.id))
@@ -27,9 +27,11 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
                 .select(new QNodeTO(n.id, n.name, nn.name, nn.id, n.publicated, n.publicatedByParent));
     }
 
+    // All
+
     @Override
     public List<NodeTO> findAllRootNodes() {
-        return createBaseQuery().where(n.parentId.isNull()).fetch();
+        return createBaseMapQuery().where(n.parentId.isNull()).fetch();
     }
 
     @Override
@@ -39,7 +41,7 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
 
     @Override
     public List<NodeTO> findAllByParentId(Long id) {
-        return createBaseQuery().where(n.parentId.eq(id)).fetch();
+        return createBaseMapQuery().where(n.parentId.eq(id)).fetch();
     }
 
     @Override
@@ -48,43 +50,18 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
     }
 
     @Override
-    public List<Node> findPublicRootNodes() {
-        return from(n).where(n.parentId.isNull(), n.publicatedByParent.isTrue()).fetch();
-    }
-
-    @Override
-    public int countPublicRootNodes() {
-        return Math.toIntExact(from(n).where(n.parentId.isNull(), n.publicatedByParent.isTrue()).stream().count());
-    }
-
-    @Override
-    public List<Node> findPublicByParentId(Long id) {
-        return from(n).where(n.parentId.eq(id), n.publicatedByParent.isTrue()).fetch();
-    }
-
-    @Override
-    public int countPublicByParentId(Long id) {
-        return Math.toIntExact(from(n).where(n.parentId.eq(id), n.publicatedByParent.isTrue()).stream().count());
-    }
-
-    @Override
     public List<NodeTO> findAllByFilter(String filter) {
-        return createBaseQuery().where(n.name.like(filter)).fetch();
-    }
-
-    @Override
-    public List<NodeTO> findPublicByFilter(String filter) {
-        return createBaseQuery().where(n.name.like(filter), n.publicatedByParent.isTrue()).fetch();
+        return createBaseMapQuery().where(n.name.like(filter)).fetch();
     }
 
     @Override
     public NodeTO findAndMapById(Long nodeId) {
-        return createBaseQuery().where(n.id.eq(nodeId)).fetchFirst();
+        return createBaseMapQuery().where(n.id.eq(nodeId)).fetchFirst();
     }
 
     @Override
     public List<NodeTO> findForTree() {
-        return createBaseQuery().orderBy(n.id.asc()).fetch();
+        return createBaseMapQuery().orderBy(n.id.asc()).fetch();
     }
 
     @Override
@@ -95,6 +72,42 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
     @Override
     public int countContentNodes(Long nodeId) {
         return Math.toIntExact(from(cn).where(cn.parentId.eq(nodeId)).stream().count());
+    }
+
+    // Public
+
+    private JPQLQuery<NodeTO> createBasePublicMapQuery() {
+        return createBaseMapQuery().where(n.publicatedByParent.isTrue(), n.publicated.isTrue());
+    }
+
+    @Override
+    public List<NodeTO> findPublicRootNodes() {
+        return createBasePublicMapQuery().where(n.parentId.isNull()).fetch();
+    }
+
+    @Override
+    public int countPublicRootNodes() {
+        return Math.toIntExact(createBasePublicMapQuery().where(n.parentId.isNull()).stream().count());
+    }
+
+    @Override
+    public List<NodeTO> findPublicByParentId(Long id) {
+        return createBasePublicMapQuery().where(n.parentId.eq(id)).fetch();
+    }
+
+    @Override
+    public int countPublicByParentId(Long id) {
+        return Math.toIntExact(createBasePublicMapQuery().where(n.parentId.eq(id)).stream().count());
+    }
+
+    @Override
+    public List<NodeTO> findPublicByFilter(String filter) {
+        return createBasePublicMapQuery().where(n.name.like(filter)).fetch();
+    }
+
+    @Override
+    public NodeTO findPublicAndMapById(Long nodeId) {
+        return createBasePublicMapQuery().where(n.id.eq(nodeId)).fetchOne();
     }
 
 }

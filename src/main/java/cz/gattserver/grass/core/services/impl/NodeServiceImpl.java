@@ -29,7 +29,11 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public NodeTO getNodeById(long nodeId) {
-        return nodeRepository.findAndMapById(nodeId);
+        if (securityService.getCurrentUser().isAdmin()) {
+            return nodeRepository.findAndMapById(nodeId);
+        } else {
+            return nodeRepository.findPublicAndMapById(nodeId);
+        }
     }
 
     @Override
@@ -58,11 +62,12 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public long createNewNode(Long parentId, String name) {
+    public long createNewNode(Long parentId, boolean publicated, String name) {
         Validate.notBlank(name, "název kategorie nemůže být prázdný");
         Node node = new Node();
         node.setName(name.trim());
         node.setParentId(parentId);
+        node.setPublicated(publicated);
         node = nodeRepository.save(node);
         return node.getId();
     }
