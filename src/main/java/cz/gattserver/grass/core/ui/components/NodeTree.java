@@ -1,16 +1,20 @@
 package cz.gattserver.grass.core.ui.components;
 
+import java.io.Serial;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import com.vaadin.flow.component.icon.VaadinIcon;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.NodeService;
+import jakarta.annotation.Nullable;
+import lombok.Getter;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.button.Button;
@@ -30,6 +34,9 @@ import cz.gattserver.common.spring.SpringContextHelper;
 
 public class NodeTree extends VerticalLayout {
 
+    @Serial
+    private static final long serialVersionUID = -1586601854214664708L;
+
     private static final String SMAZAT_LABEL = "Smazat";
     private static final String PREJMENOVAT_LABEL = "Přejmenovat";
     private static final String VYTVORIT_LABEL = "Vytvořit";
@@ -37,10 +44,11 @@ public class NodeTree extends VerticalLayout {
     private transient NodeService nodeService;
 
     // Serializable HashMap
-    private HashMap<Long, NodeTO> cache;
-    private Set<Long> visited;
+    private final HashMap<Long, NodeTO> cache;
+    private final Set<Long> visited;
 
-    private TreeGrid<NodeTO> grid;
+    @Getter
+    private final TreeGrid<NodeTO> grid;
 
     // Serializable ArrayList
     private List<NodeTO> draggedItems;
@@ -54,12 +62,7 @@ public class NodeTree extends VerticalLayout {
         return nodeService;
     }
 
-    public TreeGrid<NodeTO> getGrid() {
-        return grid;
-    }
-
     public NodeTree(boolean enableEditFeatures) {
-
         setSpacing(true);
         setPadding(false);
 
@@ -72,14 +75,14 @@ public class NodeTree extends VerticalLayout {
         add(grid);
         expand(grid);
 
-        grid.addHierarchyColumn(NodeTO::getName).setHeader("Název");
+        grid.addHierarchyColumn(to -> to.getName() + " " + (!to.getPublicatedByParent() ? VaadinIcon.LOCK : ""))
+                .setHeader("Název");
         populate();
 
         if (enableEditFeatures) initEditFeatures();
     }
 
     private void initEditFeatures() {
-
         grid.setRowsDraggable(true);
         grid.setDropMode(GridDropMode.ON_TOP_OR_BETWEEN);
 
@@ -87,7 +90,9 @@ public class NodeTree extends VerticalLayout {
         grid.addDragStartListener(e -> draggedItems = e.getDraggedItems());
 
         grid.addDropListener(e -> {
-            NodeTO dropNode = e.getDropTargetItem().get();
+            Optional<NodeTO> target = e.getDropTargetItem();
+            if (target.isEmpty()) return;
+            NodeTO dropNode = target.get();
             switch (e.getDropLocation()) {
                 case ON_TOP:
                     // vkládám do dropNode
@@ -113,13 +118,13 @@ public class NodeTree extends VerticalLayout {
         GridContextMenu<NodeTO> gridMenu = grid.addContextMenu();
 
         GridMenuItem<NodeTO> smazatMenu = gridMenu.addItem(SMAZAT_LABEL);
-        smazatMenu.addMenuItemClickListener(e -> askAndDelete(e.getItem().get()));
+        smazatMenu.addMenuItemClickListener(e -> askAndDelete(e.getItem().orElseThrow()));
 
         GridMenuItem<NodeTO> prejmenovatMenu = gridMenu.addItem(PREJMENOVAT_LABEL);
-        prejmenovatMenu.addMenuItemClickListener(e -> renameAction(e.getItem().get()));
+        prejmenovatMenu.addMenuItemClickListener(e -> renameAction(e.getItem().orElseThrow()));
 
         GridMenuItem<NodeTO> vytvoritMenu = gridMenu.addItem(VYTVORIT_LABEL);
-        vytvoritMenu.addMenuItemClickListener(e -> createNodeAction(e.getItem()));
+        vytvoritMenu.addMenuItemClickListener(e -> createNodeAction(e.getItem().orElse(null)));
 
         gridMenu.addGridContextMenuOpenedListener(e -> {
             smazatMenu.setEnabled(e.getItem().isPresent());
@@ -135,14 +140,12 @@ public class NodeTree extends VerticalLayout {
 
         ComponentFactory componentFactory = new ComponentFactory();
         btnLayout.add(componentFactory.createCreateButton(e -> createNodeAction(
-                grid.getSelectedItems().isEmpty() ? Optional.empty() :
-                        Optional.of(grid.getSelectedItems().iterator().next()))));
+                grid.getSelectedItems().isEmpty() ? null : grid.getSelectedItems().iterator().next())));
 
         btnLayout.add(componentFactory.createEditGridButton(this::renameAction, grid));
 
         // mazání chci po jednom
-        btnLayout.add(componentFactory.createDeleteGridButton(node -> askAndDelete(node), grid));
-
+        btnLayout.add(componentFactory.createDeleteGridButton(this::askAndDelete, grid));
     }
 
     public void populate() {
@@ -217,7 +220,7 @@ public class NodeTree extends VerticalLayout {
             if (StringUtils.isBlank(newNameField.getValue())) UIUtils.showError("Název kategorie nesmí být prázdný");
             try {
                 getNodeService().rename(node.getId(), newNameField.getValue());
-                node.setName((String) newNameField.getValue());
+                node.setName(newNameField.getValue());
                 grid.getDataProvider().refreshItem(node);
                 expandTo(node.getId());
             } catch (Exception e) {
@@ -232,9 +235,9 @@ public class NodeTree extends VerticalLayout {
         btnLayout.add(closeBtn);
     }
 
-    public void createNodeAction(Optional<NodeTO> parentNode) {
+    private void createNodeAction(@Nullable NodeTO parentNode) {
         final WebDialog dialog = new WebDialog(
-                parentNode.isPresent() ? "Vytvořit novou kategorii do '" + parentNode.get().getName() + "'" :
+                parentNode != null ? "Vytvořit novou kategorii do '" + parentNode.getName() + "'" :
                         "Vytvořit novou kořenovou kategorii");
         dialog.open();
 
@@ -251,14 +254,14 @@ public class NodeTree extends VerticalLayout {
             if (StringUtils.isBlank(newNameField.getValue())) UIUtils.showError("Název kategorie nesmí být prázdný");
             try {
                 String newNodeName = newNameField.getValue();
-                Long parentNodeId = parentNode.isPresent() ? parentNode.get().getId() : null;
+                Long parentNodeId = parentNode == null ? null : parentNode.getId();
                 Long newNodeId = getNodeService().createNewNode(parentNodeId, publicated, newNodeName);
                 NodeTO newNode = new NodeTO();
                 newNode.setId(newNodeId);
                 newNode.setName(newNodeName);
                 newNode.setParentId(parentNodeId);
                 cache.put(newNode.getId(), newNode);
-                grid.getTreeData().addItem(parentNode.orElse(null), newNode);
+                grid.getTreeData().addItem(parentNode, newNode);
                 grid.getDataProvider().refreshAll();
                 expandTo(newNodeId);
             } catch (Exception ex) {
