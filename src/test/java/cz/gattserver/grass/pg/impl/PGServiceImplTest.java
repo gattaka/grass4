@@ -402,7 +402,7 @@ public class PGServiceImplTest extends DBCleanTest {
         PhotogalleryTO to = pgService.findPhotogalleryForDetail(galleryId, userId1, true);
         assertEquals("testGallery", to.getPhotogalleryPath());
         assertEquals("Test galerie", to.getName());
-        assertTrue(to.isPublicated());
+        assertTrue(to.isHidden());
     }
 
     private long createMockGallery(Path root, Long userId, Long nodeId, int variant, boolean publicated)

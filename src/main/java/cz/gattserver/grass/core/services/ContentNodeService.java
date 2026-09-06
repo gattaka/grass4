@@ -25,7 +25,7 @@ public interface ContentNodeService {
 	 *            jméno obsahu
 	 * @param tags
 	 *            řetězec tagů, který se má společně s obsahem uložit
-	 * @param publicated
+	 * @param hidden
 	 *            <code>true</code>, pokud je obsah publikován
 	 * @param nodeId
 	 *            id kategorie do které se vkládá
@@ -41,7 +41,7 @@ public interface ContentNodeService {
 	 *            obsahů), od kterého je draft nebo <code>null</code>
 	 * @return id {@link ContentNode} záznamu, který byl k obsahu vytvořen
 	 */
-	long save(String contentModuleId, long contentId, String name, Collection<String> tags, boolean publicated,
+	long save(String contentModuleId, long contentId, String name, Collection<String> tags, boolean hidden,
 			long nodeId, long author, boolean draft, LocalDateTime date, Long draftSourceId);
 
 	/**
@@ -60,10 +60,10 @@ public interface ContentNodeService {
 	 *            uzel obsahu, který patří k tomuto obsahu
 	 * @param name
 	 *            název obsahu
-	 * @param publicated
+	 * @param hidden
 	 *            je obsah publikovaný
 	 */
-	void modify(long contentNodeId, String name, boolean publicated);
+	void modify(long contentNodeId, String name, boolean hidden);
 
 	/**
 	 * Upraví obsah a uloží ho do DB
@@ -74,10 +74,10 @@ public interface ContentNodeService {
 	 *            název obsahu
 	 * @param tags
 	 *            řetězec tagů, který se má společně s obsahem uložit
-	 * @param publicated
+	 * @param hidden
 	 *            <code>true</code>, pokud je obsah publikován
 	 */
-	void modify(long contentNodeId, String name, Collection<String> tags, boolean publicated);
+	void modify(long contentNodeId, String name, Collection<String> tags, boolean hidden);
 
 	/**
 	 * Upraví obsah a uloží ho do DB - verze s možností editace data vytvoření
@@ -89,13 +89,13 @@ public interface ContentNodeService {
 	 *            název obsahu
 	 * @param tags
 	 *            řetězec tagů, který se má společně s obsahem uložit
-	 * @param publicated
+	 * @param hidden
 	 *            <code>true</code>, pokud je obsah publikován
 	 * @param creationDate
 	 *            vnucené datum vytvoření obsahu, které přepíše původní
 	 *            automatické datum
 	 */
-	void modify(long contentNodeId, String name, Collection<String> tags, boolean publicated,
+	void modify(long contentNodeId, String name, Collection<String> tags, boolean hidden,
 			LocalDateTime creationDate);
 
 	/**

@@ -71,7 +71,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
     private TokenField keywords;
     private TextField nameField;
-    private Checkbox publicatedCheckBox;
+    private Checkbox hiddenCheckBox;
 
     private String projectDir;
     private boolean editMode;
@@ -121,9 +121,9 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         }
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagService.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
+                q -> contentTagService.findByFilter(q.getFilter().orElse(null), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagService.countByFilter(q.getFilter());
+                q -> contentTagService.countByFilter(q.getFilter().orElse(null));
         keywords = new TokenField(null, fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
@@ -132,14 +132,13 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
         nameField = new TextField();
         nameField.setValueChangeMode(ValueChangeMode.EAGER);
-        publicatedCheckBox = new Checkbox();
+        hiddenCheckBox = new Checkbox();
 
         // operace ?
         if (operationToken.equals(DefaultContentOperations.NEW.toString())) {
             editMode = false;
             node = nodeService.getNodeById(identifier.id());
             nameField.setValue("");
-            publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             editMode = true;
             project = print3dService.getProjectForDetail(identifier.id());
@@ -150,7 +149,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
             for (ContentTagTO tagDTO : project.getContentNode().getContentTags())
                 keywords.addToken(tagDTO.getName());
 
-            publicatedCheckBox.setValue(project.getContentNode().isPublicated());
+            hiddenCheckBox.setValue(project.getContentNode().isHidden());
 
             // nemá oprávnění upravovat tento obsah
             if (!project.getContentNode().getAuthorName().equals(securityService.getCurrentUser().getName()) &&
@@ -195,16 +194,16 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         grid.setWidthFull();
         grid.setHeight("400px");
 
-        grid.addColumn(new TextRenderer<>(Print3dViewItemTO::getName)).setHeader("Název")
-                .setFlexGrow(100);
+        grid.addColumn(new TextRenderer<>(Print3dViewItemTO::getName)).setHeader("Název").setFlexGrow(100);
 
         grid.addColumn(new TextRenderer<>(Print3dViewItemTO::size)).setHeader("Velikost").setWidth("80px")
                 .setTextAlign(ColumnTextAlign.END).setFlexGrow(0);
 
         grid.addColumn(new ComponentRenderer<>(itemTO -> componentFactory.createInlineButton("Zobrazit", e -> {
             // TODO funguje aktuálně pouze pro již nahrané
-            String url = UIUtils.getContextPath() + "/" + Print3dRequestHandlerConfig.PRINT3D_PATH + "/" + projectDir + "/" +
-                    itemTO.path().getFileName();
+            String url =
+                    UIUtils.getContextPath() + "/" + Print3dRequestHandlerConfig.PRINT3D_PATH + "/" + projectDir + "/" +
+                            itemTO.path().getFileName();
             WebDialog previewDialog = new WebDialog("Náhled");
             STLViewer stlViewer = new STLViewer(instance -> instance.show(url));
             stlViewer.setWidth(500, Unit.PIXELS);
@@ -236,8 +235,8 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
         chekboxLayout.setPadding(false);
         editorLayout.add(chekboxLayout);
 
-        publicatedCheckBox.setLabel("Publikovat projekt");
-        chekboxLayout.add(publicatedCheckBox);
+        hiddenCheckBox.setLabel("Skrýt projekt");
+        chekboxLayout.add(hiddenCheckBox);
 
         Div buttonsLayout = componentFactory.createButtonLayout();
         buttonsLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -313,8 +312,8 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
             }
         }
 
-        Print3dCreateTO payloadTO = new Print3dCreateTO(nameField.getValue(), projectDir, keywords.getValue(),
-                publicatedCheckBox.getValue());
+        Print3dCreateTO payloadTO =
+                new Print3dCreateTO(nameField.getValue(), projectDir, keywords.getValue(), hiddenCheckBox.getValue());
 
         eventBus.subscribe(Print3dEditorPage.this);
 

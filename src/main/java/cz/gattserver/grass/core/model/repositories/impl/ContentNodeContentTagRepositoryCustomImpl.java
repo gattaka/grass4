@@ -23,13 +23,13 @@ public class ContentNodeContentTagRepositoryCustomImpl extends QuerydslRepositor
     public Set<ContentTagTO> findByContendNodeIdAndMap(Long contentNodeId) {
         return new LinkedHashSet<>(
                 from(ct).join(t).on(ct.id.contentTagId.eq(t.id)).where(ct.id.contentNodeId.eq(contentNodeId))
-                        .select(new QContentTagTO(t.id, t.name)).fetch());
+                        .select(new QContentTagTO(t.id, t.name, t.contentNodeCount)).fetch());
     }
 
     @Override
     public Set<ContentTag> findByContendNodeId(Long contentNodeId) {
         return new LinkedHashSet<>(
-                from(ct).join(t).on(ct.id.contentTagId.eq(t.id)).where(ct.id.contentNodeId.eq(contentNodeId))
-                        .select(t).fetch());
+                from(ct).join(t).on(ct.id.contentTagId.eq(t.id)).where(ct.id.contentNodeId.eq(contentNodeId)).select(t)
+                        .fetch());
     }
 }

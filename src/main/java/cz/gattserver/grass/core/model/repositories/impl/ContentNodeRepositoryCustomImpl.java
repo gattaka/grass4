@@ -18,7 +18,6 @@ import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
-import com.querydsl.jpa.impl.JPAQuery;
 
 import cz.gattserver.grass.core.model.util.QuerydslUtil;
 
@@ -39,13 +38,18 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(ExpressionUtils.anyOf(c.draft.isFalse(), c.draft.isNull()));
         if (!admin) {
-            if (userId != null) builder.and(ExpressionUtils.anyOf(c.publicated.isTrue(), u.id.eq(userId)));
-            else builder.and(c.publicated.isTrue());
+            if (userId != null) {
+                builder.and(ExpressionUtils.anyOf(c.hidden.isFalse().and(c.hiddenByParent.isFalse()), u.id.eq(userId)));
+            } else {
+                builder.and(c.hidden.isFalse().and(c.hiddenByParent.isFalse()));
+            }
         }
         if (filter.getParentNodeId() != null) builder.and(n.id.eq(filter.getParentNodeId()));
         if (StringUtils.isNotBlank(filter.getName())) {
             String filterName = QuerydslUtil.transformSimpleLikeFilter(filter.getName()).toLowerCase();
-            builder.andAnyOf(c.name.toLowerCase().like(filterName), t.name.toLowerCase().like(filterName));
+            JPQLQuery<ContentTag> query = from(t).join(ct).on(ct.id.contentTagId.eq(t.id), ct.id.contentNodeId.eq(c.id))
+                    .where(t.name.toLowerCase().like(filterName));
+            builder.andAnyOf(c.name.toLowerCase().like(filterName), query.exists());
         }
         if (StringUtils.isNotBlank(filter.getContentReaderID()))
             builder.and(c.contentReaderId.eq(filter.getContentReaderID()));
@@ -68,7 +72,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
                 .join(u).on(c.authorId.eq(u.id))
                 // select
                 .select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
-                        c.lastModificationDate, c.publicated, u.name, u.id, c.id))
+                        c.lastModificationDate, c.hidden, u.name, u.id, c.id))
                 // where
                 .where(createBasicNodePredicate(new ContentNodeFilterTO(), userId, admin))
                 // order by
@@ -91,7 +95,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
                 .join(u).on(c.authorId.eq(u.id))
                 // select
                 .select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
-                        c.lastModificationDate, c.publicated, u.name, u.id, c.id))
+                        c.lastModificationDate, c.hidden, u.name, u.id, c.id))
                 // where
                 .where(createBasicNodePredicate(new ContentNodeFilterTO(), userId, admin), uf.id.eq(favouritesUserId))
                 // order by
@@ -111,7 +115,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
                 .join(u).on(c.authorId.eq(u.id))
                 // select
                 .select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
-                        c.lastModificationDate, c.publicated, u.name, u.id, c.id))
+                        c.lastModificationDate, c.hidden, u.name, u.id, c.id))
                 // where
                 .where(createBasicNodePredicate(filter, userId, admin));
     }
@@ -134,9 +138,9 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
         }
         return query.select(
                         new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
-                                c.lastModificationDate, c.publicated, u.name, u.id, c.id))
+                                c.lastModificationDate, c.hidden, u.name, u.id, c.id))
                 .groupBy(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate, c.lastModificationDate,
-                        c.publicated, u.name, u.id, c.id).fetch();
+                        c.hidden, u.name, u.id, c.id).fetch();
     }
 
     @Override
@@ -156,13 +160,13 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
                 .where(c.id.eq(contentNodeId))
                 // select
                 .select(new QContentNodeTO(c.contentReaderId, c.id, c.contentId, c.name, c.parentId, n.name,
-                        c.creationDate, c.lastModificationDate, c.publicated, c.publicatedByParent, c.authorId, u.name,
-                        c.draft, c.draftSourceId)).fetchFirst();
+                        c.creationDate, c.lastModificationDate, c.hidden, c.hiddenByParent, c.authorId, u.name, c.draft,
+                        c.draftSourceId)).fetchFirst();
         if (to == null) return null;
 
         to.setContentTags(new LinkedHashSet<>(
                 from(ct).join(t).on(t.id.eq(ct.id.contentTagId)).where(ct.id.contentNodeId.eq(to.getId()))
-                        .select(new QContentTagTO(t.id, t.name)).fetch()));
+                        .select(new QContentTagTO(t.id, t.name, t.contentNodeCount)).fetch()));
 
         return to;
     }

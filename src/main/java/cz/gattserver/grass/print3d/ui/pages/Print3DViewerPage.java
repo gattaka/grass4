@@ -29,7 +29,6 @@ import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
-import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
@@ -114,7 +113,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         print3dTO = print3dService.getProjectForDetail(identifier.id());
         if (print3dTO == null) throw new GrassPageException(404);
 
-        if (!"MAG1CK".equals(magickToken) && !print3dTO.getContentNode().isPublicated() && !isAdminOrAuthor())
+        if (!"MAG1CK".equals(magickToken) && !print3dTO.getContentNode().isHidden() && !isAdminOrAuthor())
             throw new GrassPageException(403);
 
         projectDir = print3dTO.getProjectDir();
@@ -301,7 +300,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
                 }
             }
             Print3dCreateTO payloadTO = new Print3dCreateTO(print3dTO.getContentNode().getName(), projectDir,
-                    print3dTO.getContentNode().getContentTagsAsStrings(), print3dTO.getContentNode().isPublicated());
+                    print3dTO.getContentNode().getContentTagsAsStrings(), print3dTO.getContentNode().isHidden());
             print3dService.modifyProject(print3dTO.getId(), payloadTO);
             UI.getCurrent().getPage().reload();
         }, () -> print3dService.getItems(projectDir).stream().map(Print3dViewItemTO::getName)

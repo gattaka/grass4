@@ -26,7 +26,7 @@ public class ArticleEditorTO {
     private String draftName;
     private Set<String> draftTags = new HashSet<>();
     private String draftText;
-    private boolean draftPublicated;
+    private boolean draftHidden;
     // mix souborů z adresáře existujícího článku a z draft adresáře
     private Set<AttachmentTO> draftAttachments = new HashSet<>();
 

@@ -8,7 +8,6 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Getter
@@ -24,8 +23,8 @@ public final class ArticleTO implements ContentNodeBaseTO {
     private final LocalDateTime lastModificationDate;
     private final Long authorId;
     private final String authorName;
-    private final boolean publicated;
-    private final boolean publicatedByParent;
+    private final boolean hidden;
+    private final boolean hiddenByParent;
     private final boolean draft;
     private final Long draftSourceId;
     private final Set<ContentTagTO> contentTags;
@@ -40,10 +39,10 @@ public final class ArticleTO implements ContentNodeBaseTO {
     @QueryProjection
     public ArticleTO(Long id, Long contentNodeId, String name, Long parentId, String parentName,
                      LocalDateTime creationDate, LocalDateTime lastModificationDate, Long authorId, String authorName,
-                     boolean publicated, boolean publicatedByParent, boolean draft, Long draftSourceId,
+                     boolean hidden, boolean hiddenByParent, boolean draft, Long draftSourceId,
                      String outputHTML, String text, String searchableOutput, String attachmentsDirId) {
         this(id, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate, authorId, authorName,
-                publicated, publicatedByParent, draft, draftSourceId, new LinkedHashSet<>(), outputHTML, text,
+                hidden, hiddenByParent, draft, draftSourceId, new LinkedHashSet<>(), outputHTML, text,
                 searchableOutput, attachmentsDirId, new LinkedHashSet<>(), new LinkedHashSet<>(),
                 new LinkedHashSet<>());
     }

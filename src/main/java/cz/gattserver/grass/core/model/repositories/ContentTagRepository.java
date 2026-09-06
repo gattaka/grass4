@@ -16,7 +16,4 @@ public interface ContentTagRepository extends JpaRepository<ContentTag, Long>, C
 	@Query("delete CONTENT_TAG c where c.contentNodeCount = 0")
 	void deleteUnusedTags();
 
-	@Query("select t from CONTENT_TAG t order by UPPER(t.name)")
-	List<ContentTag> findAllOrderByNameCaseInsensitive();
-
 }

@@ -1,7 +1,6 @@
 package cz.gattserver.grass.core.model.domain;
 
 import java.time.LocalDateTime;
-import java.util.Set;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -55,16 +54,16 @@ public class ContentNode {
     private LocalDateTime lastModificationDate;
 
     /**
-     * Je obsah veřejný nebo soukromý?
+     * Je obsah skrytý?
      */
     @Column(nullable = false)
-    private Boolean publicated = true;
+    private Boolean hidden = true;
 
     /**
-     * Je obsah veřejný nebo soukromý dle jeho předka?
+     * Je obsah skrytý dle jeho předka?
      */
-    @Column(nullable = false, name = "PUBLICATED_BY_PARENT")
-    private Boolean publicatedByParent = true;
+    @Column(nullable = false, name = "HIDDEN_BY_PARENT")
+    private Boolean hiddenByParent = true;
 
     /**
      * Jde o plnohodnotný obsah, nebo jde o rozpracovaný obsah?

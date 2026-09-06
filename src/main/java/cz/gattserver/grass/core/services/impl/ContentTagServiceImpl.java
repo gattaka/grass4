@@ -10,6 +10,8 @@ import cz.gattserver.grass.core.model.domain.ContentNodeContentTag;
 import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
 import cz.gattserver.grass.core.services.ContentTagService;
 import cz.gattserver.grass.core.services.CoreMapperService;
+import cz.gattserver.grass.core.services.SecurityService;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.Validate;
 import org.springframework.data.domain.Sort;
@@ -26,29 +28,32 @@ public class ContentTagServiceImpl implements ContentTagService {
     private final CoreMapperService mapper;
     private final ContentTagRepository contentTagRepository;
     private final ContentNodeContentTagRepository contentNodeContentTagRepository;
+    private final SecurityService securityService;
 
     public ContentTagServiceImpl(CoreMapperService mapper, ContentTagRepository contentTagRepository,
-                                 ContentNodeContentTagRepository contentNodeContentTagRepository) {
+                                 ContentNodeContentTagRepository contentNodeContentTagRepository,
+                                 SecurityService securityService) {
         this.mapper = mapper;
         this.contentTagRepository = contentTagRepository;
         this.contentNodeContentTagRepository = contentNodeContentTagRepository;
+        this.securityService = securityService;
     }
 
     @Override
     public Set<ContentTagTO> getTagsForOverviewOrderedByName() {
-        List<ContentTag> contentTags = contentTagRepository.findAllOrderByNameCaseInsensitive();
-        return mapper.mapContentTagCollectionForOverview(contentTags);
+        return new LinkedHashSet<>(
+                contentTagRepository.findAllOrderByNameCaseInsensitive(securityService.getCurrentUser().isAdmin()));
     }
 
     @Override
     public ContentTagTO getTagById(long id) {
-        return mapper.mapContentTagForOverview(contentTagRepository.findById(id).orElse(null));
+        return contentTagRepository.findAndMapById(id, securityService.getCurrentUser().isAdmin());
     }
 
     @Override
     public ContentTagTO getTagByName(String name) {
         Validate.notBlank(name, "Název hledaného tagu nemůže být prázdný");
-        return mapper.mapContentTagForOverview(contentTagRepository.findByName(name));
+        return contentTagRepository.findAndMapByName(name, securityService.getCurrentUser().isAdmin());
     }
 
     @Override
@@ -87,8 +92,8 @@ public class ContentTagServiceImpl implements ContentTagService {
 
         if (!contentNodeContentTags.isEmpty()) contentNodeContentTagRepository.saveAll(contentNodeContentTags);
 
-        removeTagRelation(contentNodeId, nameToTO.values().stream().filter(e->toRemove.contains(e.getName())).collect(
-                Collectors.toSet()));
+        removeTagRelation(contentNodeId,
+                nameToTO.values().stream().filter(e -> toRemove.contains(e.getName())).collect(Collectors.toSet()));
     }
 
     @Override
@@ -110,20 +115,21 @@ public class ContentTagServiceImpl implements ContentTagService {
 
     @Override
     public int getTagContentsCount(long tagId) {
-        return contentTagRepository.countContentTagContents(tagId);
+        return contentTagRepository.countContentTagContents(tagId, securityService.getCurrentUser().isAdmin());
     }
 
     @Override
     public Map<Long, Integer> getTagsContentsCountsMap() {
         Map<Long, Integer> map = new LinkedHashMap<>();
-        for (ContentTag tag : contentTagRepository.findAllOrderByContentCountNode())
+        for (ContentTagTO tag : contentTagRepository.findAllOrderByContentCountNode(
+                securityService.getCurrentUser().isAdmin()))
             map.put(tag.getId(), tag.getContentNodeCount());
         return map;
     }
 
     @Override
     public List<Integer> getTagsContentsCountsGroups() {
-        return contentTagRepository.findContentNodesCountsGroups();
+        return contentTagRepository.findContentNodesCountsGroups(securityService.getCurrentUser().isAdmin());
     }
 
     @Override
@@ -184,13 +190,13 @@ public class ContentTagServiceImpl implements ContentTagService {
     }
 
     @Override
-    public List<String> findByFilter(Optional<String> filter, int offset, int limit) {
-        return contentTagRepository.findByFilter(filter, offset, limit);
+    public List<String> findByFilter(@Nullable String filter, int offset, int limit) {
+        return contentTagRepository.findByFilter(filter, securityService.getCurrentUser().isAdmin(), offset, limit);
     }
 
     @Override
-    public Integer countByFilter(Optional<String> filter) {
-        return contentTagRepository.countByFilter(filter);
+    public Integer countByFilter(@Nullable String filter) {
+        return contentTagRepository.countByFilter(filter, securityService.getCurrentUser().isAdmin());
     }
 
 }

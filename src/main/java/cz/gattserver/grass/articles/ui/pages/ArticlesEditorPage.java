@@ -77,7 +77,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     private TextArea articleTextArea;
     private TokenField articleKeywords;
     private TextField articleNameField;
-    private Checkbox publicatedCheckBox;
+    private Checkbox hiddenCheckBox;
     private Grid<AttachmentTO> attachmentsGrid;
 
     private Span autosaveLabel;
@@ -164,7 +164,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setNodeName(node.getName());
             articleEditorTO.setDraftName("");
             articleEditorTO.setDraftText("");
-            articleEditorTO.setDraftPublicated(true);
+            articleEditorTO.setDraftHidden(false);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             ArticleTO existingArticleTO =
                     articleService.getArticleForDetail(identifier.id(), securityService.getCurrentUser().getId(),
@@ -177,7 +177,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setExistingArticleId(existingArticleTO.getId());
             articleEditorTO.setDraftName(existingArticleTO.getName());
             articleEditorTO.setDraftText(existingArticleTO.getText());
-            articleEditorTO.setDraftPublicated(existingArticleTO.isPublicated());
+            articleEditorTO.setDraftHidden(existingArticleTO.isHidden());
             for (ContentTagTO tagDTO : existingArticleTO.getContentTags())
                 articleEditorTO.getDraftTags().add(tagDTO.getName());
             articleEditorTO.getDraftAttachments().addAll(articleService.findAttachments(existingArticleTO.getId()));
@@ -202,7 +202,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         articleEditorTO.setContentNodeName(draftTO.getName());
         articleEditorTO.setDraftName(draftTO.getName());
         articleEditorTO.setDraftText(draftTO.getText());
-        articleEditorTO.setDraftPublicated(draftTO.isPublicated());
+        articleEditorTO.setDraftHidden(draftTO.isHidden());
         for (ContentTagTO tagDTO : draftTO.getContentTags())
             articleEditorTO.getDraftTags().add(tagDTO.getName());
 
@@ -289,9 +289,9 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         articleNameField.setValueChangeMode(ValueChangeMode.EAGER);
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagService.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
+                q -> contentTagService.findByFilter(q.getFilter().orElse(null), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagService.countByFilter(q.getFilter());
+                q -> contentTagService.countByFilter(q.getFilter().orElse(null));
         articleKeywords = new TokenField(null, fetchItemsCallback, serializableFunction);
         articleKeywords.isEnabled();
         articleKeywords.setPlaceholder("klíčové slovo");
@@ -300,7 +300,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         articleTextArea.setHeight("30em");
         articleTextArea.setWidthFull();
         articleTextArea.setValueChangeMode(ValueChangeMode.EAGER);
-        publicatedCheckBox = new Checkbox();
+        hiddenCheckBox = new Checkbox();
 
         // zavádění listener pro JS listener akcí jako je vepsání tabulátoru
         articleTextAreaFocusRegistration = articleTextArea.addFocusListener(event -> {
@@ -340,8 +340,8 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         createAttachmentsGrid(layout);
 
         layout.add(new H3("Nastavení článku"));
-        publicatedCheckBox.setLabel("Publikovat článek");
-        layout.add(publicatedCheckBox);
+        hiddenCheckBox.setLabel("Skrýt článek");
+        layout.add(hiddenCheckBox);
 
         Div buttonLayout = componentFactory.createButtonLayout();
         layout.add(buttonLayout);
@@ -468,7 +468,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     private void populateFields() {
         articleNameField.setValue(articleEditorTO.getDraftName());
         articleTextArea.setValue(articleEditorTO.getDraftText());
-        publicatedCheckBox.setValue(articleEditorTO.isDraftPublicated());
+        hiddenCheckBox.setValue(articleEditorTO.isDraftHidden());
         articleKeywords.addTokens(articleEditorTO.getDraftTags());
         populateGrid();
     }
@@ -485,7 +485,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
         articleEditorTO.setDraftName(articleNameField.getValue());
         articleEditorTO.setDraftText(articleTextArea.getValue());
         articleEditorTO.setDraftTags(articleKeywords.getValue());
-        articleEditorTO.setDraftPublicated(publicatedCheckBox.getValue());
+        articleEditorTO.setDraftHidden(hiddenCheckBox.getValue());
     }
 
     private void saveDraft(boolean asPreview) {

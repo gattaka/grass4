@@ -141,7 +141,7 @@ public class PGSettingsPageFragmentFactory extends AbstractPageFragmentFactory {
                             eventBus.subscribe(PGSettingsPageFragmentFactory.this);
 
                             PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(to.getName(), to.getPhotogalleryPath(),
-                                    to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isPublicated(),
+                                    to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isHidden(),
                                     true);
                             pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
                         }).open());

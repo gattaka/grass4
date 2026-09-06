@@ -13,4 +13,12 @@ public interface NodeRepository extends JpaRepository<Node, Long>, NodeRepositor
     @Modifying
     @Query("update NODE n set n.name = ?2 where n.id = ?1")
     void rename(Long nodeId, String newName);
+
+    @Modifying
+    @Query("update NODE n set n.hidden = ?2 where n.id = ?1")
+    void updateHidden(Long id, boolean b);
+
+    @Modifying
+    @Query("update NODE n set n.hiddenByParent = ?2 where n.id = ?1")
+    void updateHiddenByParent(Long id, boolean b);
 }

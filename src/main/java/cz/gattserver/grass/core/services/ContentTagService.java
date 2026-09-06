@@ -5,6 +5,7 @@ import java.util.*;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.interfaces.ContentTagsCloudItemTO;
 import cz.gattserver.grass.core.model.domain.ContentNode;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotNull;
 
 public interface ContentTagService {
@@ -98,18 +99,18 @@ public interface ContentTagService {
 	/**
 	 * Získá seznam tagů dle filtru
 	 * 
-	 * @param filter
-	 * @param offset
-	 * @param limit
+	 * @param filter filtr (může být null)
+	 * @param offset offset
+	 * @param limit limit
 	 * @return stránkovaný filtrovaný seznam tagů
 	 */
-	List<String> findByFilter(Optional<String> filter, int offset, int limit);
+	List<String> findByFilter(@Nullable String filter, int offset, int limit);
 
 	/**
 	 * Získá počet tagů dle filtru
 	 * 
-	 * @param filter
+	 * @param filter filtr (může být null)
 	 * @return filtrovaný počet tagů
 	 */
-	Integer countByFilter(Optional<String> filter);
+	Integer countByFilter(@Nullable String filter);
 }

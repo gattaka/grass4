@@ -49,14 +49,14 @@ public class ContentNodeTO implements ContentNodeBaseTO {
     private LocalDateTime lastModificationDate;
 
     /**
-     * Je obsah veřejný nebo soukromý?
+     * Je obsah skrytý?
      */
-    private boolean publicated = true;
+    private boolean hidden;
 
     /**
      * Je obsah veřejný nebo soukromý dle jeho předka?
      */
-    private boolean publicatedByParent = true;
+    private boolean hiddenByParent;
 
     /**
      * Kdo ho vytvořil
@@ -82,8 +82,8 @@ public class ContentNodeTO implements ContentNodeBaseTO {
     @QueryProjection
     public ContentNodeTO(String contentReaderId, Long id, Long contentNodeId, String name, Long parentId,
                          String parentName, LocalDateTime creationDate, LocalDateTime lastModificationDate,
-                         boolean publicated, boolean publicatedByParent, Long authorId, String authorName,
-                         boolean draft, Long draftSourceId) {
+                         boolean hidden, boolean hiddenByParent, Long authorId, String authorName, boolean draft,
+                         Long draftSourceId) {
         this.contentReaderId = contentReaderId;
         this.id = id;
         this.contentNodeId = contentNodeId;
@@ -92,8 +92,8 @@ public class ContentNodeTO implements ContentNodeBaseTO {
         this.parentName = parentName;
         this.creationDate = creationDate;
         this.lastModificationDate = lastModificationDate;
-        this.publicated = publicated;
-        this.publicatedByParent = publicatedByParent;
+        this.hidden = hidden;
+        this.hiddenByParent = hiddenByParent;
         this.authorId = authorId;
         this.authorName = authorName;
         this.draft = draft;

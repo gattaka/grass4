@@ -271,12 +271,12 @@ public class ArticleServiceImpl implements ArticleService {
         if (existingArticleId == null) {
             Long contentNodeId =
                     contentNodeService.save(ArticlesContentModule.ID, article.getId(), payload.getDraftName(),
-                            payload.getDraftTags(), payload.isDraftPublicated(), payload.getNodeId(),
+                            payload.getDraftTags(), payload.isDraftHidden(), payload.getNodeId(),
                             securityService.getCurrentUser().getId(), draft, null, payload.getExistingArticleId());
             articleRepository.updateContentNodeId(article.getId(), contentNodeId);
         } else {
             contentNodeService.modify(article.getContentNodeId(), payload.getDraftName(), payload.getDraftTags(),
-                    payload.isDraftPublicated());
+                    payload.isDraftHidden());
         }
 
         return article;

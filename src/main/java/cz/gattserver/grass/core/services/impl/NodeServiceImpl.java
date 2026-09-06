@@ -7,6 +7,7 @@ import java.util.Objects;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
+import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Service;
@@ -28,53 +29,48 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public NodeTO getNodeById(long nodeId) {
-        if (securityService.getCurrentUser().isAdmin()) {
-            return nodeRepository.findAndMapById(nodeId);
-        } else {
-            return nodeRepository.findPublicAndMapById(nodeId);
-        }
+    public NodeTO getNodeById(Long nodeId) {
+        return nodeRepository.findAndMapById(nodeId, securityService.getCurrentUser().isAdmin());
     }
 
     @Override
     public List<NodeTO> getRootNodes() {
-        return nodeRepository.findAllRootNodes();
+        return nodeRepository.findRootNodes(securityService.getCurrentUser().isAdmin());
     }
 
     @Override
     public int countRootNodes() {
-        return nodeRepository.countAllRootNodes();
+        return nodeRepository.countRootNodes(securityService.getCurrentUser().isAdmin());
     }
 
     @Override
     public List<NodeTO> getNodesForTree() {
-        return nodeRepository.findForTree();
+        return nodeRepository.findForTree(securityService.getCurrentUser().isAdmin());
     }
 
     @Override
-    public List<NodeTO> getNodesByParentNode(long parentId) {
-        return nodeRepository.findAllByParentId(parentId);
+    public List<NodeTO> getNodesByParentNode(Long parentId) {
+        return nodeRepository.findByParentId(parentId, securityService.getCurrentUser().isAdmin());
     }
 
     @Override
-    public int countNodesByParentNode(long parentId) {
-        return nodeRepository.countAllByParentId(parentId);
-    }
-
-    @Override
-    public long createNewNode(Long parentId, boolean publicated, String name) {
+    public Long createNewNode(Long parentId, boolean hidden, String name) {
         Validate.notBlank(name, "název kategorie nemůže být prázdný");
         Node node = new Node();
         node.setName(name.trim());
         node.setParentId(parentId);
-        node.setPublicated(publicated);
-        node = nodeRepository.save(node);
+        node.setHidden(hidden);
+
+        if (parentId != null) nodeRepository.findById(parentId)
+                .ifPresent(parentNode -> node.setHiddenByParent(node.getHiddenByParent() || node.getHidden()));
+
+        node.setId(nodeRepository.save(node).getId());
         return node.getId();
     }
 
     @Override
-    public void moveNode(long nodeId, Long newParentId) {
-        Node nodeEntity = nodeRepository.findById(nodeId).orElse(null);
+    public void moveNode(@NotNull Long nodeId, @NotNull Long newParentId) {
+        Node nodeEntity = nodeRepository.findById(nodeId).orElseThrow();
 
         // beze změn
         if (Objects.equals(nodeEntity.getParentId(), newParentId)) return;
@@ -92,9 +88,9 @@ public class NodeServiceImpl implements NodeService {
             cycleCheckParent = cycleCheckParent.getParentId() == null ? null :
                     nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
             while (cycleCheckParent != null) {
-                if (cycleCheckParent.getId() == newParentId)
+                if (Objects.equals(cycleCheckParent.getId(), newParentId))
                     throw new IllegalStateException("V grafu kategorií byl nalezen cykl");
-                if (cycleCheckParent.getId() == nodeId)
+                if (Objects.equals(cycleCheckParent.getId(), nodeId))
                     throw new IllegalArgumentException("Nelze vkládat předka do potomka");
                 cycleCheckParent = nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
             }
@@ -108,7 +104,7 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public void deleteNode(long nodeId) {
+    public void deleteNode(Long nodeId) {
         int countContents = nodeRepository.countContentNodes(nodeId);
         int countSubNodes = nodeRepository.countSubNodes(nodeId);
         if (countContents + countSubNodes > 0)
@@ -117,13 +113,13 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public void rename(long nodeId, String newName) {
+    public void rename(Long nodeId, String newName) {
         Validate.notBlank(newName, "název kategorie nemůže být prázdný");
         nodeRepository.rename(nodeId, newName);
     }
 
     @Override
-    public boolean isNodeEmpty(long nodeId) {
+    public boolean isNodeEmpty(Long nodeId) {
         int contentNodesCount = nodeRepository.countContentNodes(nodeId);
         int subNodesCount = nodeRepository.countSubNodes(nodeId);
         return contentNodesCount + subNodesCount == 0;
@@ -132,12 +128,38 @@ public class NodeServiceImpl implements NodeService {
     @Override
     public List<NodeTO> getByFilter(String filter) {
         if (StringUtils.isBlank(filter)) return new ArrayList<>();
-
-        if (securityService.getCurrentUser().isAdmin()) {
-            return nodeRepository.findAllByFilter("%" + filter.toLowerCase() + "%");
-        } else {
-            return nodeRepository.findPublicByFilter("%" + filter.toLowerCase() + "%");
-        }
+        return nodeRepository.findByFilter("%" + filter.toLowerCase() + "%",
+                securityService.getCurrentUser().isAdmin());
     }
 
+    @Override
+    public void hide(Long id) {
+        Objects.requireNonNull(id);
+
+        Node node = nodeRepository.findById(id).orElse(null);
+        if (node == null) throw new IllegalStateException();
+
+        nodeRepository.updateHidden(id, false);
+
+        // Skrytí podkategorií a obsahů má smysl řešit, pokud tato kategorie byla
+        // doposud dle svého předka viditelná, jinak se nic nebude měnit
+        if (!node.getHiddenByParent()) return;
+
+        // TODO
+    }
+
+    @Override
+    public void show(Long id) {
+        Objects.requireNonNull(id);
+        Node node = nodeRepository.findById(id).orElse(null);
+        if (node == null) throw new IllegalStateException();
+
+        nodeRepository.updateHidden(id, false);
+
+        // Zvěřejnění podkategorií a obsahů má smysl řešit, pokud tato kategorie byla
+        // doposud dle svého předka viditelná, jinak se nic nebude měnit
+        if (!node.getHiddenByParent()) return;
+
+        // TODO
+    }
 }

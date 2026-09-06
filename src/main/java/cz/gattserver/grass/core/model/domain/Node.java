@@ -28,16 +28,16 @@ public class Node {
     private Long parentId;
 
     /**
-     * Je uzel veřejný nebo soukromý?
+     * Je uzel skrytý?
      */
     @Column(nullable = false)
-    private Boolean publicated = true;
+    private Boolean hidden = false;
 
     /**
-     * Je uzel veřejný nebo soukromý dle jeho předka?
+     * Je uzel skrytý dle jeho předka?
      */
-    @Column(nullable = false, name = "PUBLICATED_BY_PARENT")
-    private Boolean publicatedByParent = true;
+    @Column(nullable = false, name = "HIDDEN_BY_PARENT")
+    private Boolean hiddenByParent = false;
 
     @Override
     public boolean equals(Object obj) {

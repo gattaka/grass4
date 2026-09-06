@@ -13,13 +13,14 @@ import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.ui.components.NodeTree;
 import cz.gattserver.common.spring.SpringContextHelper;
 
-// TODO abstract -> callback
-public abstract class ContentMoveDialog extends WebDialog {
+import java.util.function.Consumer;
+
+public class MoveIntoNodeDialog extends WebDialog {
 
     private Button moveBtn;
     private NodeTree tree;
 
-    public ContentMoveDialog(final ContentNodeBaseTO contentNodeTO) {
+    public MoveIntoNodeDialog(Long preselectNodeId, Consumer<NodeTO> onSelect) {
         super("Přesunout obsah");
 
         setWidth(500, Unit.PIXELS);
@@ -30,11 +31,9 @@ public abstract class ContentMoveDialog extends WebDialog {
         layout.add(tree);
 
         moveBtn = componentFactory.createSubmitButton(event -> {
-            NodeTO nodeDTO = tree.getGrid().getSelectedItems().iterator().next();
-            SpringContextHelper.getBean(ContentNodeService.class)
-                    .moveContent(nodeDTO.getId(), contentNodeTO.getContentNodeId());
+            NodeTO nodeTO = tree.getGrid().getSelectedItems().iterator().next();
+            onSelect.accept(nodeTO);
             close();
-            onMove();
         });
         moveBtn.setEnabled(false);
 
@@ -48,9 +47,6 @@ public abstract class ContentMoveDialog extends WebDialog {
         layout.add(btnLayout);
         layout.setHorizontalComponentAlignment(Alignment.END, moveBtn);
 
-        tree.expandTo(contentNodeTO.getParentId());
+        tree.expandTo(preselectNodeId);
     }
-
-    protected abstract void onMove();
-
 }

@@ -11,9 +11,9 @@ public interface ContentNodeBaseTO {
 
     String getParentName();
 
-    boolean isPublicated();
+    boolean isHidden();
 
-    boolean isPublicatedByParent();
+    boolean isHiddenByParent();
 
     Long getAuthorId();
 

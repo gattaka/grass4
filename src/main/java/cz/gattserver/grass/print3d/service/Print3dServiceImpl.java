@@ -108,11 +108,11 @@ public class Print3dServiceImpl implements Print3dService {
             // vytvoř odpovídající content node
             Long contentNodeId =
                     contentNodeService.save(Print3dModule.ID, project.getId(), payloadTO.getName(), payloadTO.getTags(),
-                            payloadTO.isPublicated(), nodeId, authorId, false, LocalDateTime.now(), null);
+                            payloadTO.isHidden(), nodeId, authorId, false, LocalDateTime.now(), null);
             project.setContentNodeId(contentNodeId);
         } else {
             contentNodeService.modify(project.getContentNodeId(), payloadTO.getName(), payloadTO.getTags(),
-                    payloadTO.isPublicated());
+                    payloadTO.isHidden());
         }
 
         return project;

@@ -121,7 +121,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
                 pgService.findPhotogalleryForDetail(identifier.id(), userInfoTO.getId(), userInfoTO.isAdmin());
         if (photogalleryTO == null) throw new GrassPageException(404);
 
-        if (!MAGICK_WORD.equals(pageToken) && !MAGICK_WORD.equals(extraToken) && !photogalleryTO.isPublicated() &&
+        if (!MAGICK_WORD.equals(pageToken) && !MAGICK_WORD.equals(extraToken) && !photogalleryTO.isHidden() &&
                 !isAdminOrAuthor()) throw new GrassPageException(403);
 
         galleryDir = photogalleryTO.getPhotogalleryPath();
@@ -388,7 +388,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         progressDialog = new ProgressDialog();
         PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(photogalleryTO.getName(), galleryDir,
                 photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
-                photogalleryTO.isPublicated(), false);
+                photogalleryTO.isHidden(), false);
         pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.getId(), payloadTO,
                 photogalleryTO.getCreationDate());
     }

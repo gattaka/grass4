@@ -65,40 +65,6 @@ public class CoreMapperServiceImpl implements CoreMapperService {
     }
 
     @Override
-    public ContentTagTO mapContentTagForOverview(ContentTag e) {
-        if (e == null) return null;
-
-        ContentTagTO contentTagTO = new ContentTagTO();
-
-        contentTagTO.setId(e.getId());
-        contentTagTO.setName(e.getName());
-
-        return contentTagTO;
-    }
-
-    @Override
-    public List<ContentTagTO> mapContentTagCollection(Collection<ContentTag> contentTags) {
-        if (contentTags == null) return new ArrayList<>();
-
-        List<ContentTagTO> contentTagTOs = new ArrayList<>();
-        for (ContentTag contentTag : contentTags) {
-            contentTagTOs.add(mapContentTagForOverview(contentTag));
-        }
-        return contentTagTOs;
-    }
-
-    @Override
-    public Set<ContentTagTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags) {
-        if (contentTags == null) return new HashSet<>();
-
-        Set<ContentTagTO> contentTagTOs = new LinkedHashSet<>();
-        for (ContentTag contentTag : contentTags) {
-            contentTagTOs.add(mapContentTagForOverview(contentTag));
-        }
-        return contentTagTOs;
-    }
-
-    @Override
     public ContentTag map(ContentTagTO contentTagTO) {
         ContentTag contentTag = new ContentTag();
         contentTag.setId(contentTagTO.getId());

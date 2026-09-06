@@ -255,7 +255,7 @@ public class PGServiceImpl implements PGService {
             // vytvoř odpovídající content node
             Long contentNodeId =
                     contentNodeService.save(PGModule.ID, photogallery.getId(), payloadTO.getName(), payloadTO.getTags(),
-                            payloadTO.isPublicated(), nodeId, authorId, false, date, null);
+                            payloadTO.isHidden(), nodeId, authorId, false, date, null);
 
             // ulož do článku referenci na jeho contentnode
             ContentNode contentNode = new ContentNode();
@@ -264,7 +264,7 @@ public class PGServiceImpl implements PGService {
             photogalleryRepository.save(photogallery);
         } else {
             contentNodeService.modify(photogallery.getContentNodeId(), payloadTO.getName(), payloadTO.getTags(),
-                    payloadTO.isPublicated(), date);
+                    payloadTO.isHidden(), date);
         }
 
         eventBus.publish(new PGProcessProgressEvent("Uložení obsahu galerie"));

@@ -13,32 +13,31 @@ import java.util.Set;
 @Service
 public class CoreMockService {
 
-	@Autowired
-	private UserService userService;
+    @Autowired
+    private UserService userService;
 
-	@Autowired
-	private ContentNodeService contentNodeService;
+    @Autowired
+    private ContentNodeService contentNodeService;
 
-	@Autowired
-	private NodeService nodeService;
+    @Autowired
+    private NodeService nodeService;
 
-	public long createMockUser(int variant) {
-		long userId = userService.registrateNewUser(MockUtils.MOCK_USER_EMAIL + variant,
-				MockUtils.MOCK_USER_NAME + variant, MockUtils.MOCK_USER_PASSWORD + variant);
-		userService.activateUser(userId);
-		return userId;
-	}
+    public Long createMockUser(int variant) {
+        Long userId =
+                userService.registrateNewUser(MockUtils.MOCK_USER_EMAIL + variant, MockUtils.MOCK_USER_NAME + variant,
+                        MockUtils.MOCK_USER_PASSWORD + variant);
+        userService.activateUser(userId);
+        return userId;
+    }
 
-	public long createMockRootNode(int variant) {
-		long id = nodeService.createNewNode(null, true, MockUtils.MOCK_NODE_NAME + variant);
-		return id;
-	}
+    public Long createMockRootNode(int variant) {
+        return nodeService.createNewNode(null, false, MockUtils.MOCK_NODE_NAME + variant);
+    }
 
-	public long createMockContentNode(Long contentId, Set<String> tags, long nodeId, long userId, int variant) {
-		long contentNodeId = contentNodeService.save(MockUtils.MOCK_CONTENTNODE_MODULE + variant, contentId,
-				MockUtils.MOCK_CONTENTNODE_NAME + variant, tags, true, nodeId, userId, false, LocalDateTime.now(),
-				null);
-		return contentNodeId;
-	}
+    public Long createMockContentNode(Long contentId, Set<String> tags, long nodeId, long userId, int variant) {
+        return contentNodeService.save(MockUtils.MOCK_CONTENTNODE_MODULE + variant, contentId,
+                MockUtils.MOCK_CONTENTNODE_NAME + variant, tags, false, nodeId, userId, false, LocalDateTime.now(),
+                null);
+    }
 
 }

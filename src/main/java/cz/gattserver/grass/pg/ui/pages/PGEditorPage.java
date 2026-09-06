@@ -83,7 +83,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
     private TokenField photogalleryKeywords;
     private TextField photogalleryNameField;
     private DatePicker photogalleryDateField;
-    private Checkbox publicatedCheckBox;
+    private Checkbox hiddenCheckBox;
     private Checkbox reprocessSlideshowAndMiniCheckBox;
 
     private String galleryDir;
@@ -134,9 +134,9 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         add(editorLayout);
 
         CallbackDataProvider.FetchCallback<String, String> fetchItemsCallback =
-                q -> contentTagService.findByFilter(q.getFilter(), q.getOffset(), q.getLimit()).stream();
+                q -> contentTagService.findByFilter(q.getFilter().orElse(null), q.getOffset(), q.getLimit()).stream();
         CallbackDataProvider.CountCallback<String, String> serializableFunction =
-                q -> contentTagService.countByFilter(q.getFilter());
+                q -> contentTagService.countByFilter(q.getFilter().orElse(null));
         photogalleryKeywords = new TokenField(null, fetchItemsCallback, serializableFunction);
 
         Button copyFromContentButton = componentFactory.createCopyFromContentButton(
@@ -149,7 +149,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         photogalleryDateField = componentFactory.createDatePicker("Přepsat datum vytvoření galerie");
         photogalleryDateField.setWidth("250px");
         photogalleryDateField.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        publicatedCheckBox = new Checkbox();
+        hiddenCheckBox = new Checkbox();
         reprocessSlideshowAndMiniCheckBox = new Checkbox();
 
         // operace ?
@@ -157,7 +157,6 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             editMode = false;
             node = nodeService.getNodeById(identifier.id());
             photogalleryNameField.setValue("");
-            publicatedCheckBox.setValue(true);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             editMode = true;
             existingPhotogalleryTO = pgService.findPhotogalleryForDetail(identifier.id(), currentUserInfoTO.getId(),
@@ -169,7 +168,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             for (String tag : existingPhotogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList())
                 photogalleryKeywords.addToken(tag);
 
-            publicatedCheckBox.setValue(existingPhotogalleryTO.isPublicated());
+            hiddenCheckBox.setValue(existingPhotogalleryTO.isHidden());
             photogalleryDateField.setValue(existingPhotogalleryTO.getCreationDate().toLocalDate());
 
             // nemá oprávnění upravovat tento obsah
@@ -271,8 +270,8 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
         chekboxLayout.setPadding(false);
         editorLayout.add(chekboxLayout);
 
-        publicatedCheckBox.setLabel("Publikovat galerii");
-        chekboxLayout.add(publicatedCheckBox);
+        hiddenCheckBox.setLabel("Skrýt galerii");
+        chekboxLayout.add(hiddenCheckBox);
         reprocessSlideshowAndMiniCheckBox.setLabel("Přegenerovat slideshow a miniatury");
         chekboxLayout.add(reprocessSlideshowAndMiniCheckBox);
 
@@ -359,7 +358,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
 
         PhotogalleryCreateTO payloadTO =
                 new PhotogalleryCreateTO(photogalleryNameField.getValue(), galleryDir, photogalleryKeywords.getValue(),
-                        publicatedCheckBox.getValue(), reprocessSlideshowAndMiniCheckBox.getValue());
+                        hiddenCheckBox.getValue(), reprocessSlideshowAndMiniCheckBox.getValue());
 
         eventBus.subscribe(PGEditorPage.this);
         progressDialog = new ProgressDialog();

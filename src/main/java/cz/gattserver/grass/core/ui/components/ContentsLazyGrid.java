@@ -6,7 +6,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
@@ -22,16 +21,27 @@ import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
+import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.spring.SpringContextHelper;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.io.Serial;
 
 public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
+    @Serial
+    private static final long serialVersionUID = -3307437175337095155L;
+
+    @Setter
+    @Getter
     private boolean dynamicHeight = true;
+
     private boolean activeLinks;
 
     public ContentsLazyGrid() {
@@ -44,10 +54,9 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
         this.activeLinks = activeLinks;
     }
 
-    public void populate(boolean showPubLock, FetchCallback<ContentNodeOverviewTO, Void> fetchCallback,
+    public void populate(FetchCallback<ContentNodeOverviewTO, Void> fetchCallback,
                          CountCallback<ContentNodeOverviewTO, Void> countCallback) {
 
-        PageFactory nodePageFactory = ((PageFactory) SpringContextHelper.getBean("nodePageFactory"));
         PageFactory noServicePageFactory = (PageFactory) SpringContextHelper.getBean("noServicePageFactory");
         ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);
 
@@ -55,7 +64,6 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
         String iconBind = "customIcon";
         String nameBind = "customName";
-        String lockIconBind = "lockIcon";
         String nodeBind = "customNode";
         String creationDateBind = "customCreationDate";
         String lastModificationDateBind = "customLastModificationDate";
@@ -81,9 +89,10 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
                 div.add(new Text(contentNode.name()));
             }
 
-            if (showPubLock && Boolean.TRUE != contentNode.publicated()) {
-                Icon icon = VaadinIcon.LOCK.create();
+            if (SpringContextHelper.getBean(SecurityService.class).getCurrentUser().isAdmin() && contentNode.hidden()) {
+                Icon icon = VaadinIcon.EYE_SLASH.create();
                 icon.setColor("#7f7f7f");
+                div.add(" ");
                 div.add(icon);
             }
             return div;
@@ -109,13 +118,5 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
         }
 
         if (dynamicHeight) setHeight(GridUtils.processHeight(countCallback.count(new Query<>())) + "px");
-    }
-
-    public boolean isDynamicHeight() {
-        return dynamicHeight;
-    }
-
-    public void setDynamicHeight(boolean dynamicHeight) {
-        this.dynamicHeight = dynamicHeight;
     }
 }

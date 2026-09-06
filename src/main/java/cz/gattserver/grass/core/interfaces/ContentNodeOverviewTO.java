@@ -12,13 +12,13 @@ import com.querydsl.core.annotations.QueryProjection;
  */
 public record ContentNodeOverviewTO(Long id, String contentReaderID, Long contentID, String name, String parentNodeName,
                                     Long parentNodeId, LocalDateTime creationDate, LocalDateTime lastModificationDate,
-                                    boolean publicated, String authorName, Long authorId) {
+                                    boolean hidden, String authorName, Long authorId) {
 
     @QueryProjection
     public ContentNodeOverviewTO(String contentReaderID, Long contentID, String name, String parentNodeName,
-                                 Long parentNodeId, LocalDateTime creationDate, LocalDateTime lastModificationDate, Boolean publicated,
+                                 Long parentNodeId, LocalDateTime creationDate, LocalDateTime lastModificationDate, Boolean hidden,
                                  String authorName, Long authorId, Long id) {
         this(id, contentReaderID, contentID, name, parentNodeName, parentNodeId, creationDate, lastModificationDate,
-                publicated, authorName, authorId);
+                hidden, authorName, authorId);
     }
 }

@@ -30,9 +30,10 @@ public class ContentTagTO {
     private Integer contentNodeCount = 0;
 
     @QueryProjection
-    public ContentTagTO(Long id, String name) {
+    public ContentTagTO(Long id, String name, Integer contentNodeCount) {
         this.id = id;
         this.name = name;
+        this.contentNodeCount = contentNodeCount;
     }
 
     public ContentTagTO() {

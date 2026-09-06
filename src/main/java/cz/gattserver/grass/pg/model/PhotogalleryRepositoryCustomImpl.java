@@ -28,9 +28,9 @@ public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport
         JPQLQuery<Photogallery> query = from(p).join(c).on(p.contentNodeId.eq(c.id));
         if (!isAdmin) {
             if (userId == null) {
-                query.where(c.publicated.isTrue());
+                query.where(c.hidden.isTrue());
             } else {
-                query.where(c.publicated.isTrue().or(c.authorId.eq(userId)));
+                query.where(c.hidden.isTrue().or(c.authorId.eq(userId)));
             }
         }
         return query;
@@ -82,7 +82,7 @@ public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport
     public PhotogalleryTO findForDetailById(Long id, Long userId, boolean isAdmin) {
         return createDetailQuery(userId, isAdmin).where(p.id.eq(id))
                 .select(new QPhotogalleryTO(p.id, p.contentNodeId, c.name, n.id, n.name, c.creationDate,
-                        c.lastModificationDate, u.id, u.name, p.photogalleryDir, c.publicated, c.publicatedByParent,
+                        c.lastModificationDate, u.id, u.name, p.photogalleryDir, c.hidden, c.hiddenByParent,
                         c.draft, c.draftSourceId)).fetchFirst();
     }
 }

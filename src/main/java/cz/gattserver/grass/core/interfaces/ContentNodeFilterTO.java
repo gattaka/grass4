@@ -24,9 +24,9 @@ public class ContentNodeFilterTO {
 	private Long parentNodeId;
 
 	/**
-	 * Je obsah ve fázi příprav, nebo už má být publikován ?
+	 * Je obsah skrytý?
 	 */
-	private boolean publicated = true;
+	private boolean hidden = false;
 
 	/**
 	 * Kdo ho vytvořil
@@ -65,12 +65,12 @@ public class ContentNodeFilterTO {
 		return this;
 	}
 
-	public boolean isPublicated() {
-		return publicated;
+	public boolean isHidden() {
+		return hidden;
 	}
 
-	public ContentNodeFilterTO setPublicated(boolean publicated) {
-		this.publicated = publicated;
+	public ContentNodeFilterTO setHidden(boolean hidden) {
+		this.hidden = hidden;
 		return this;
 	}
 

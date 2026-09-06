@@ -27,9 +27,9 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport imple
         JPQLQuery<Article> query = from(a).join(c).on(a.contentNodeId.eq(c.id));
         if (!isAdmin) {
             if (userId == null) {
-                query.where(c.publicated.isTrue());
+                query.where(c.hidden.isTrue());
             } else {
-                query.where(c.publicated.isTrue().or(c.authorId.eq(userId)));
+                query.where(c.hidden.isTrue().or(c.authorId.eq(userId)));
             }
         }
         return query;
@@ -44,7 +44,7 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport imple
                 // node
                 .join(n).on(c.parentId.eq(n.id)).where(a.id.eq(id))
                 .select(new QArticleTO(a.id, c.id, c.name, n.id, n.name, c.creationDate, c.lastModificationDate, u.id,
-                        u.name, c.publicated, c.publicatedByParent, c.draft, c.draftSourceId, a.outputHTML, a.text,
+                        u.name, c.hidden, c.hiddenByParent, c.draft, c.draftSourceId, a.outputHTML, a.text,
                         a.searchableOutput, a.attachmentsDirId)).fetchFirst();
     }
 

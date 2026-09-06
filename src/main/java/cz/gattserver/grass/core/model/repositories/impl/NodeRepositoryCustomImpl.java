@@ -19,49 +19,46 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
         super(Node.class);
     }
 
-    private JPQLQuery<NodeTO> createBaseMapQuery() {
-        return from(n)
+    private JPQLQuery<NodeTO> createBaseMapQuery(boolean admin) {
+        JPQLQuery<NodeTO> query = from(n)
                 // parent Node join (nemusí mít)
                 .leftJoin(nn).on(n.parentId.eq(nn.id))
                 // select
-                .select(new QNodeTO(n.id, n.name, nn.name, nn.id, n.publicated, n.publicatedByParent));
+                .select(new QNodeTO(n.id, n.name, nn.name, nn.id, n.hidden, n.hiddenByParent));
+        if (!admin) query.where(n.hiddenByParent.isFalse(), n.hidden.isFalse());
+        return query;
     }
 
     // All
 
     @Override
-    public List<NodeTO> findAllRootNodes() {
-        return createBaseMapQuery().where(n.parentId.isNull()).fetch();
+    public List<NodeTO> findRootNodes(boolean admin) {
+        return createBaseMapQuery(admin).where(n.parentId.isNull()).fetch();
     }
 
     @Override
-    public int countAllRootNodes() {
-        return Math.toIntExact(from(n).where(n.parentId.isNull()).stream().count());
+    public int countRootNodes(boolean admin) {
+        return Math.toIntExact(createBaseMapQuery(admin).where(n.parentId.isNull()).stream().count());
     }
 
     @Override
-    public List<NodeTO> findAllByParentId(Long id) {
-        return createBaseMapQuery().where(n.parentId.eq(id)).fetch();
+    public List<NodeTO> findByParentId(Long id, boolean admin) {
+        return createBaseMapQuery(admin).where(n.parentId.eq(id)).fetch();
     }
 
     @Override
-    public int countAllByParentId(Long id) {
-        return Math.toIntExact(from(n).where(n.parentId.eq(id)).stream().count());
+    public List<NodeTO> findByFilter(String filter, boolean admin) {
+        return createBaseMapQuery(admin).where(n.name.like(filter)).fetch();
     }
 
     @Override
-    public List<NodeTO> findAllByFilter(String filter) {
-        return createBaseMapQuery().where(n.name.like(filter)).fetch();
+    public NodeTO findAndMapById(Long nodeId, boolean admin) {
+        return createBaseMapQuery(admin).where(n.id.eq(nodeId)).fetchFirst();
     }
 
     @Override
-    public NodeTO findAndMapById(Long nodeId) {
-        return createBaseMapQuery().where(n.id.eq(nodeId)).fetchFirst();
-    }
-
-    @Override
-    public List<NodeTO> findForTree() {
-        return createBaseMapQuery().orderBy(n.id.asc()).fetch();
+    public List<NodeTO> findForTree(boolean admin) {
+        return createBaseMapQuery(admin).orderBy(n.id.asc()).fetch();
     }
 
     @Override
@@ -73,41 +70,4 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
     public int countContentNodes(Long nodeId) {
         return Math.toIntExact(from(cn).where(cn.parentId.eq(nodeId)).stream().count());
     }
-
-    // Public
-
-    private JPQLQuery<NodeTO> createBasePublicMapQuery() {
-        return createBaseMapQuery().where(n.publicatedByParent.isTrue(), n.publicated.isTrue());
-    }
-
-    @Override
-    public List<NodeTO> findPublicRootNodes() {
-        return createBasePublicMapQuery().where(n.parentId.isNull()).fetch();
-    }
-
-    @Override
-    public int countPublicRootNodes() {
-        return Math.toIntExact(createBasePublicMapQuery().where(n.parentId.isNull()).stream().count());
-    }
-
-    @Override
-    public List<NodeTO> findPublicByParentId(Long id) {
-        return createBasePublicMapQuery().where(n.parentId.eq(id)).fetch();
-    }
-
-    @Override
-    public int countPublicByParentId(Long id) {
-        return Math.toIntExact(createBasePublicMapQuery().where(n.parentId.eq(id)).stream().count());
-    }
-
-    @Override
-    public List<NodeTO> findPublicByFilter(String filter) {
-        return createBasePublicMapQuery().where(n.name.like(filter)).fetch();
-    }
-
-    @Override
-    public NodeTO findPublicAndMapById(Long nodeId) {
-        return createBasePublicMapQuery().where(n.id.eq(nodeId)).fetchOne();
-    }
-
 }

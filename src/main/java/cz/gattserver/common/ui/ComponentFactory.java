@@ -164,6 +164,26 @@ public class ComponentFactory {
         return createGridSingleButton(this::createEditButton, clickListener, grid);
     }
 
+    public Button createHideButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Skrýt", clickListener);
+        btn.setIcon(VaadinIcon.EYE_SLASH.create());
+        return btn;
+    }
+
+    public <T> Button createHideGridButton(Consumer<T> clickListener, Grid<T> grid) {
+        return createGridSingleButton(this::createHideButton, clickListener, grid);
+    }
+
+    public Button createShowButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Odkrýt", clickListener);
+        btn.setIcon(VaadinIcon.EYE.create());
+        return btn;
+    }
+
+    public <T> Button createShowGridButton(Consumer<T> clickListener, Grid<T> grid) {
+        return createGridSingleButton(this::createShowButton, clickListener, grid);
+    }
+
     public Button createCreateDirButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button btn = new Button("Vytvořit adresář", clickListener);
         btn.setIcon(VaadinIcon.FOLDER_ADD.create());

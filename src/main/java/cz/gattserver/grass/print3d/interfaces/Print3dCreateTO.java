@@ -18,7 +18,7 @@ public class Print3dCreateTO {
 	private String name;
 	private String projectDir;
 	private Collection<String> tags;
-	private boolean publicated;
+	private boolean hidden;
 
 	/**
 	 * @param name
@@ -27,14 +27,14 @@ public class Print3dCreateTO {
 	 *            adresář se soubory
 	 * @param tags
 	 *            klíčová slova
-	 * @param publicated
+	 * @param hidden
 	 *            <code>true</code>, pokud má být obsah zveřejněn
 	 */
-	public Print3dCreateTO(String name, String projectDir, Collection<String> tags, boolean publicated) {
+	public Print3dCreateTO(String name, String projectDir, Collection<String> tags, boolean hidden) {
 		this.name = name;
 		this.projectDir = projectDir;
 		this.tags = tags;
-		this.publicated = publicated;
+		this.hidden = hidden;
 	}
 
 }

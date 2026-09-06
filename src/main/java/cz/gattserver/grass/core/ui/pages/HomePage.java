@@ -80,7 +80,7 @@ public class HomePage extends Div {
         if (coreACLService.isLoggedIn(user)) {
             layout.add(new H2("Oblíbené obsahy"));
             ContentsLazyGrid favouritesContentsGrid = new ContentsLazyGrid();
-            favouritesContentsGrid.populate(user.getId() != null,
+            favouritesContentsGrid.populate(
                     q -> contentNodeService.getUserFavourite(user.getId(), q.getOffset(), q.getLimit()).stream(),
                     q -> contentNodeService.getUserFavouriteCount(user.getId()));
             layout.add(favouritesContentsGrid);
@@ -141,7 +141,7 @@ public class HomePage extends Div {
             String value = searchField.getValue();
             if (StringUtils.isNotBlank(value) && !searchResultsContentsGrid.isVisible()) {
                 searchResultsContentsGrid.setVisible(true);
-                searchResultsContentsGrid.populate(user.getId() != null,
+                searchResultsContentsGrid.populate(
                         q -> contentNodeService.getByFilter(createFilterTO(), q.getOffset(), q.getLimit()).stream(),
                         q -> contentNodeService.getCountByFilter(createFilterTO()));
                 searchResultsContentsGrid.setHeight("200px");
@@ -221,8 +221,7 @@ public class HomePage extends Div {
         layout.add(new H2("Nedávno přidané obsahy"));
 
         ContentsLazyGrid recentAddedContentsGrid = new ContentsLazyGrid();
-        recentAddedContentsGrid.populate(user.getId() != null,
-                q -> contentNodeService.getRecentAdded(q.getOffset(), q.getLimit()).stream(),
+        recentAddedContentsGrid.populate(q -> contentNodeService.getRecentAdded(q.getOffset(), q.getLimit()).stream(),
                 q -> contentNodeService.getCount());
         recentAddedContentsGrid.setWidthFull();
         recentAddedContentsGrid.setHeight("200px");
@@ -233,7 +232,7 @@ public class HomePage extends Div {
         layout.add(new H2("Nedávno upravené obsahy"));
 
         ContentsLazyGrid recentModifiedContentsGrid = new ContentsLazyGrid();
-        recentModifiedContentsGrid.populate(user.getId() != null,
+        recentModifiedContentsGrid.populate(
                 q -> contentNodeService.getRecentModified(q.getOffset(), q.getLimit()).stream(),
                 q -> contentNodeService.getCount());
         recentModifiedContentsGrid.setWidthFull();

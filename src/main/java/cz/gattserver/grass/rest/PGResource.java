@@ -201,7 +201,7 @@ public class PGResource {
             PhotogalleryTO to =
                     pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
             PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(to.getName(), to.getPhotogalleryPath(),
-                    to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isPublicated(), true);
+                    to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isHidden(), true);
             pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());
 
             eventsHandler = future.get();

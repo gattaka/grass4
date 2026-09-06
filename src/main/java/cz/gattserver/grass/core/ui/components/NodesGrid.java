@@ -2,6 +2,7 @@ package cz.gattserver.grass.core.ui.components;
 
 import java.util.List;
 
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
@@ -21,10 +22,10 @@ import cz.gattserver.grass.core.ui.util.UIUtils;
 
 public class NodesGrid extends Grid<NodeTO> {
 
-    public NodesGrid(boolean showPubLock) {
+    public NodesGrid(boolean showHidden) {
         UIUtils.applyGrassDefaultStyle(this);
 
-        setHeight("200px");
+        setHeight(200, Unit.PIXELS);
         setSelectionMode(SelectionMode.NONE);
 
         String iconBind = "customIcon";
@@ -42,14 +43,14 @@ public class NodesGrid extends Grid<NodeTO> {
             div.add(new RouterLink(node.getName(), NodePage.class,
                     URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
 
-            if (showPubLock && Boolean.TRUE != node.getPublicated()) {
-                Icon icon = VaadinIcon.LOCK.create();
+            if (showHidden && node.getHidden()) {
+                Icon icon = VaadinIcon.EYE_SLASH.create();
                 icon.setColor("#7f7f7f");
+                div.add(" ");
                 div.add(icon);
             }
             return div;
-        })).setHeader("Název")
-                .setId(nameBind);
+        })).setHeader("Název").setId(nameBind);
     }
 
     public void populate(List<NodeTO> nodes) {

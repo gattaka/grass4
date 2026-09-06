@@ -57,7 +57,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
         Long contentNodeId1 = coreMockService.createMockContentNode(30L, null, nodeId1, userId1, 1);
         Long contentNodeId2 = coreMockService.createMockContentNode(31L, null, nodeId1, userId1, 2);
 
-        contentNodeService.modify(contentNodeId1, "newName", true);
+        contentNodeService.modify(contentNodeId1, "newName", false);
 
         List<ContentNodeOverviewTO> added = contentNodeService.getRecentModified(0, 10);
         assertEquals(2, added.size());
@@ -114,7 +114,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 1, contentNode.getContentReaderId());
         assertEquals(LocalDateTime.of(1980, 2, 3, 10, 15), contentNode.getCreationDate());
         assertNotNull(contentNode.getLastModificationDate());
-        assertFalse(contentNode.isPublicated());
+        assertFalse(contentNode.isHidden());
     }
 
     @Test

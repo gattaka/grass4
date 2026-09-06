@@ -55,7 +55,7 @@ public class CopyTagsDialog extends WebDialog {
         searchField.addValueChangeListener(e -> {
             String value = searchField.getValue();
             if (StringUtils.isNotBlank(value) && !contentTagsDiv.isVisible()) {
-                searchResultsContentsGrid.populate(true,
+                searchResultsContentsGrid.populate(
                         q -> contentNodeService.getByFilter(createFilterTO(searchField), q.getOffset(), q.getLimit())
                                 .stream(), q -> contentNodeService.getCountByFilter(createFilterTO(searchField)));
                 contentTagsDiv.setVisible(true);

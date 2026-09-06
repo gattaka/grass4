@@ -47,29 +47,5 @@ public interface CoreMapperService {
 	 */
     QuoteTO map(Quote e);
 
-	/**
-	 * Převede {@link ContentTag} na {@link ContentTagTO}
-	 * 
-	 * @param e
-	 * @return
-	 */
-    ContentTagTO mapContentTagForOverview(ContentTag e);
-
-	/**
-	 * Převede list {@link ContentTag} na list {@link ContentTagTO}
-	 * 
-	 * @param contentTags
-	 * @return
-	 */
-    List<ContentTagTO> mapContentTagCollection(Collection<ContentTag> contentTags);
-
-	/**
-	 * Převede list {@link ContentTag} na list {@link ContentTagTO}
-	 * 
-	 * @param contentTags
-	 * @return
-	 */
-    Set<ContentTagTO> mapContentTagCollectionForOverview(Collection<ContentTag> contentTags);
-
     ContentTag map(ContentTagTO contentTagTO);
 }

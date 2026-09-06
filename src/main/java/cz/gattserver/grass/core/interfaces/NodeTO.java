@@ -34,24 +34,24 @@ public class NodeTO implements Serializable {
 	private Long parentId;
 
     /**
-     * Je uzel veřejný nebo soukromý?
+     * Je uzel skrytý?
      */
-    private Boolean publicated = true;
+    private Boolean hidden = false;
 
     /**
-     * Je uzel veřejný nebo soukromý dle jeho předka?
+     * Je uzel skrytý dle jeho předka?
      */
-    private Boolean publicatedByParent = true;
+    private Boolean hiddenByParent = false;
 
     @QueryProjection
-    public NodeTO(Long id, String name, String parentName, Long parentId, Boolean publicated,
-                  Boolean publicatedByParent) {
+    public NodeTO(Long id, String name, String parentName, Long parentId, Boolean hidden,
+                  Boolean hiddenByParent) {
         this.id = id;
         this.name = name;
         this.parentName = parentName;
         this.parentId = parentId;
-        this.publicated = publicated;
-        this.publicatedByParent = publicatedByParent;
+        this.hidden = hidden;
+        this.hiddenByParent = hiddenByParent;
     }
 
     @Override

@@ -15,18 +15,15 @@ import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.ContentNodeBaseTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
-import cz.gattserver.grass.core.services.CoreACLService;
-import cz.gattserver.grass.core.services.NodeService;
-import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.services.*;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.TagPage;
 
 import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.services.UserService;
 import cz.gattserver.grass.core.ui.components.Breadcrumb;
-import cz.gattserver.grass.core.ui.dialogs.ContentMoveDialog;
+import cz.gattserver.grass.core.ui.dialogs.MoveIntoNodeDialog;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.html.Div;
@@ -148,7 +145,8 @@ public class ContentViewer extends Div {
         addToFavouritesButton = componentFactory.createMarkFavouriteButton(event -> {
             // zdařilo se? Pokud ano, otevři info okno
             try {
-                userService.addContentToFavourites(contentNodeTO.getContentNodeId(), securityService.getCurrentUser().getId());
+                userService.addContentToFavourites(contentNodeTO.getContentNodeId(),
+                        securityService.getCurrentUser().getId());
                 addToFavouritesButton.setVisible(false);
                 removeFromFavouritesButton.setVisible(true);
             } catch (Exception e) {
@@ -162,16 +160,12 @@ public class ContentViewer extends Div {
 
         // Změna kategorie
         if (coreACLService.canModifyContent(contentNodeTO, securityService.getCurrentUser())) {
-            Button moveBtn = componentFactory.createMoveButton(event -> new ContentMoveDialog(contentNodeTO) {
-
-                @Serial
-                private static final long serialVersionUID = 8356571950616390549L;
-
-                @Override
-                protected void onMove() {
-                    UI.getCurrent().getPage().reload();
-                }
-            }.open());
+            Button moveBtn = componentFactory.createMoveButton(
+                    event -> new MoveIntoNodeDialog(contentNodeTO.getParentId(), nodeTO -> {
+                        SpringContextHelper.getBean(ContentNodeService.class)
+                                .moveContent(nodeTO.getId(), contentNodeTO.getContentNodeId());
+                        UI.getCurrent().getPage().reload();
+                    }).open());
             operationsListLayout.add(moveBtn);
         }
 
@@ -215,9 +209,9 @@ public class ContentViewer extends Div {
         modifiedPart.add(new Breakline());
         modifiedPart.add(contentLastModificationDateLabel);
 
-        if (!contentNodeTO.isPublicated()) {
+        if (!contentNodeTO.isHidden()) {
             Div publicatedLayout = new Div();
-            publicatedLayout.addClassName("not-publicated-info");
+            publicatedLayout.addClassName("not-hidden-info");
             publicatedLayout.add(ImageIcon.INFO_16_ICON.createImage("Info"));
             publicatedLayout.add("Nepublikováno");
             info.add(publicatedLayout);

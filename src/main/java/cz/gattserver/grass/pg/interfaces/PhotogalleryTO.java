@@ -24,8 +24,8 @@ public final class PhotogalleryTO implements ContentNodeBaseTO {
     private final Long authorId;
     private final String authorName;
     private final String photogalleryPath;
-    private final boolean publicated;
-    private final boolean publicatedByParent;
+    private final boolean hidden;
+    private final boolean hiddenByParent;
     private final boolean draft;
     private final Long draftSourceId;
     private final Set<ContentTagTO> contentTags;
@@ -33,9 +33,9 @@ public final class PhotogalleryTO implements ContentNodeBaseTO {
     @QueryProjection
     public PhotogalleryTO(Long id, Long contentNodeId, String name, Long parentId, String parentName,
                           LocalDateTime creationDate, LocalDateTime lastModificationDate, Long authorId,
-                          String authorName, String photogalleryPath, boolean publicated, boolean publicatedByParent,
+                          String authorName, String photogalleryPath, boolean hidden, boolean hiddenByParent,
                           boolean draft, Long draftSourceId) {
         this(id, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate, authorId, authorName,
-                photogalleryPath, publicated, publicatedByParent, draft, draftSourceId, new HashSet<>());
+                photogalleryPath, hidden, hiddenByParent, draft, draftSourceId, new HashSet<>());
     }
 }

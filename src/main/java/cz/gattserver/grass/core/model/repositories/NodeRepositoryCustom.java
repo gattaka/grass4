@@ -1,43 +1,24 @@
 package cz.gattserver.grass.core.model.repositories;
 
 import cz.gattserver.grass.core.interfaces.NodeTO;
-import cz.gattserver.grass.core.model.domain.Node;
 
 import java.util.List;
 
 public interface NodeRepositoryCustom {
 
-    // All
+    List<NodeTO> findRootNodes(boolean admin);
 
-    List<NodeTO> findAllRootNodes();
+    int countRootNodes(boolean admin);
 
-    int countAllRootNodes();
+    List<NodeTO> findByParentId(Long id, boolean admin);
 
-    List<NodeTO> findAllByParentId(Long id);
+    List<NodeTO> findByFilter(String filter, boolean admin);
 
-    int countAllByParentId(Long id);
+    NodeTO findAndMapById(Long nodeId, boolean admin);
 
-    List<NodeTO> findAllByFilter(String filter);
-
-    NodeTO findAndMapById(Long nodeId);
-
-    List<NodeTO> findForTree();
+    List<NodeTO> findForTree(boolean admin);
 
     int countSubNodes(Long nodeId);
 
     int countContentNodes(Long nodeId);
-
-    // Public
-
-    List<NodeTO> findPublicRootNodes();
-
-    int countPublicRootNodes();
-
-    List<NodeTO> findPublicByParentId(Long id);
-
-    int countPublicByParentId(Long id);
-
-    List<NodeTO> findPublicByFilter(String filter);
-
-    NodeTO findPublicAndMapById(Long nodeId);
 }

@@ -55,7 +55,7 @@ public class ArticlesResource {
         payload.setDraftName(
                 "GrassAndroid Import " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("d.M.yyyy")));
         payload.setDraftText(text);
-        payload.setDraftPublicated(false);
+        payload.setDraftHidden(true);
         payload.setNodeId(nodeService.getRootNodes().getFirst().getId());
 
         long articleId = articleService.saveArticle(payload);

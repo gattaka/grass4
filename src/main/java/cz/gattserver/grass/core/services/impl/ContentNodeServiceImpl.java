@@ -9,6 +9,9 @@ import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
+import cz.gattserver.grass.core.model.domain.Node;
+import cz.gattserver.grass.core.model.repositories.NodeRepository;
+import cz.gattserver.grass.core.services.*;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.Validate;
 import org.springframework.stereotype.Service;
@@ -18,11 +21,6 @@ import com.querydsl.core.QueryResults;
 
 import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
-import cz.gattserver.grass.core.services.ContentNodeService;
-import cz.gattserver.grass.core.services.ContentTagService;
-import cz.gattserver.grass.core.services.CoreMapperService;
-import cz.gattserver.grass.core.services.SecurityService;
-import cz.gattserver.grass.core.services.UserService;
 
 @Transactional
 @Service
@@ -33,19 +31,21 @@ public class ContentNodeServiceImpl implements ContentNodeService {
     private final ContentTagService contentTagService;
     private final UserService userService;
     private final ContentNodeRepository contentNodeRepository;
+    private final NodeRepository nodeRepository;
 
     public ContentNodeServiceImpl(CoreMapperService mapper, SecurityService securityService,
                                   ContentTagService contentTagService, UserService userService,
-                                  ContentNodeRepository contentNodeRepository) {
+                                  ContentNodeRepository contentNodeRepository, NodeRepository nodeRepository) {
         this.mapper = mapper;
         this.securityService = securityService;
         this.contentTagService = contentTagService;
         this.userService = userService;
         this.contentNodeRepository = contentNodeRepository;
+        this.nodeRepository = nodeRepository;
     }
 
     @Override
-    public long save(String contentModuleId, long contentId, String name, Collection<String> tags, boolean publicated,
+    public long save(String contentModuleId, long contentId, String name, Collection<String> tags, boolean hidden,
                      long nodeId, long authorId, boolean draft, LocalDateTime date, Long draftSourceId) {
         Validate.notNull(contentModuleId, "'contentModuleId' nesmí být null");
         Validate.notNull(name, "'name' nesmí být null");
@@ -59,11 +59,14 @@ public class ContentNodeServiceImpl implements ContentNodeService {
         contentNode.setName(name);
         contentNode.setDraft(draft);
         contentNode.setDraftSourceId(draftSourceId);
-        contentNode.setPublicated(publicated);
+        contentNode.setHidden(hidden);
         contentNode.setParentId(nodeId);
         contentNode.setAuthorId(authorId);
 
-        contentNode = contentNodeRepository.save(contentNode);
+        nodeRepository.findById(nodeId)
+                .ifPresent(node -> contentNode.setHiddenByParent(node.getHiddenByParent() || node.getHidden()));
+
+        contentNode.setId(contentNodeRepository.save(contentNode).getId());
 
         // aktualizace tagů
         contentTagService.saveTags(tags, contentNode.getId());
@@ -77,17 +80,17 @@ public class ContentNodeServiceImpl implements ContentNodeService {
     }
 
     @Override
-    public void modify(long contentNodeId, String name, boolean publicated) {
-        modify(contentNodeId, name, null, publicated);
+    public void modify(long contentNodeId, String name, boolean hidden) {
+        modify(contentNodeId, name, null, hidden);
     }
 
     @Override
-    public void modify(long contentNodeId, String name, Collection<String> tags, boolean publicated) {
-        modify(contentNodeId, name, tags, publicated, null);
+    public void modify(long contentNodeId, String name, Collection<String> tags, boolean hidden) {
+        modify(contentNodeId, name, tags, hidden, null);
     }
 
     @Override
-    public void modify(long contentNodeId, @NotNull String name, Collection<String> tags, boolean publicated,
+    public void modify(long contentNodeId, @NotNull String name, Collection<String> tags, boolean hidden,
                        LocalDateTime creationDate) {
         Objects.requireNonNull(name);
 
@@ -95,7 +98,7 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 
         contentNode.setLastModificationDate(LocalDateTime.now());
         contentNode.setName(name);
-        contentNode.setPublicated(publicated);
+        contentNode.setHidden(hidden);
 
         if (creationDate != null) contentNode.setCreationDate(creationDate);
 

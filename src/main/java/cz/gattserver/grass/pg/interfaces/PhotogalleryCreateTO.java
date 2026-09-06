@@ -20,7 +20,7 @@ public class PhotogalleryCreateTO {
     private String name;
     private String galleryDir;
     private Collection<String> tags;
-    private boolean publicated;
+    private boolean hidden;
     private boolean reprocess;
 
 }
