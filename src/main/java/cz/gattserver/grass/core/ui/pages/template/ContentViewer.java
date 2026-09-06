@@ -209,9 +209,9 @@ public class ContentViewer extends Div {
         modifiedPart.add(new Breakline());
         modifiedPart.add(contentLastModificationDateLabel);
 
-        if (!contentNodeTO.isHidden()) {
+        if (contentNodeTO.isHidden()) {
             Div publicatedLayout = new Div();
-            publicatedLayout.addClassName("not-hidden-info");
+            publicatedLayout.addClassName("hidden-info");
             publicatedLayout.add(ImageIcon.INFO_16_ICON.createImage("Info"));
             publicatedLayout.add("Nepublikováno");
             info.add(publicatedLayout);

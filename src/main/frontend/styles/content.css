@@ -35,7 +35,7 @@
     text-decoration: underline;
 }
 
-.not-publicated-info {
+.hidden-info {
     border: 1px #70afe9 solid;
     padding: 6px 5px 0 5px;
     height: 27px;
@@ -47,7 +47,7 @@
     display: block !important;
 }
 
-.not-publicated-info img {
+.hidden-info img {
     margin-right: 10px;
     margin-bottom: -3px;
 }

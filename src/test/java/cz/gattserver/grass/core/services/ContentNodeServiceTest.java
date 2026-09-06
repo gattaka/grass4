@@ -84,7 +84,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         List<ContentNodeOverviewTO> favourites = contentNodeService.getUserFavourite(userId1, 0, 10);
         assertEquals(1, favourites.size());
-        assertEquals(contentNode1, favourites.get(0).id());
+        assertEquals(contentNode1, favourites.getFirst().id());
     }
 
     @Test
@@ -202,7 +202,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
         String moduleId = "mockModule";
         Long contentId = 2L;
         String name = "Test obsah";
-        Long contentNodeId = contentNodeService.save(moduleId, contentId, name, tags, false, nodeId, userId, false,
+        long contentNodeId = contentNodeService.save(moduleId, contentId, name, tags, false, nodeId, userId, false,
                 LocalDateTime.now(), null);
 
         assertEquals(1, contentNodeService.getCount());
@@ -227,7 +227,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
         String moduleId = "mockModule";
         Long contentId = 2L;
         String name = "Test obsah";
-        Long contentNodeId = contentNodeService.save(moduleId, contentId, name, null, false, nodeId, userId, false, null,
+        long contentNodeId = contentNodeService.save(moduleId, contentId, name, null, false, nodeId, userId, false, null,
                 null);
 
         assertEquals(1, contentNodeService.getCount());
@@ -279,7 +279,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
                 .getByFilter(new ContentNodeFilterTO().setParentNodeId(nodeId2), 0, 10);
         assertEquals(2, contentNodesByNode.size());
 
-        ContentNodeOverviewTO contentNodeByNode = contentNodesByNode.get(0);
+        ContentNodeOverviewTO contentNodeByNode = contentNodesByNode.getFirst();
         assertEquals(contentNode3, contentNodeByNode.id());
         assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByNode.contentReaderID());
         assertEquals(Long.valueOf(25), contentNodeByNode.contentID());
@@ -326,7 +326,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         List<ContentNodeOverviewTO> contentNodesByTag = contentNodeService.getByTag(tag.getId(), 0, 10);
         assertEquals(1, contentNodesByTag.size());
-        ContentNodeOverviewTO contentNodeByTag = contentNodesByTag.get(0);
+        ContentNodeOverviewTO contentNodeByTag = contentNodesByTag.getFirst();
         assertEquals(contentNode3, contentNodeByTag.id());
         assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByTag.contentReaderID());
         assertEquals(Long.valueOf(25L), contentNodeByTag.contentID());

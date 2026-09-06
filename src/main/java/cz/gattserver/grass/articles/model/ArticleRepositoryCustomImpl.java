@@ -27,9 +27,9 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport imple
         JPQLQuery<Article> query = from(a).join(c).on(a.contentNodeId.eq(c.id));
         if (!isAdmin) {
             if (userId == null) {
-                query.where(c.hidden.isTrue());
+                query.where(c.hidden.isFalse());
             } else {
-                query.where(c.hidden.isTrue().or(c.authorId.eq(userId)));
+                query.where(c.hidden.isFalse(), c.hiddenByParent.isFalse());
             }
         }
         return query;
