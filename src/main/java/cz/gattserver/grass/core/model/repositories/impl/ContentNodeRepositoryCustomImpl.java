@@ -72,7 +72,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
                 .join(u).on(c.authorId.eq(u.id))
                 // select
                 .select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
-                        c.lastModificationDate, c.hidden, u.name, u.id, c.id))
+                        c.lastModificationDate, c.hidden, c.hiddenByParent, u.name, u.id, c.id))
                 // where
                 .where(createBasicNodePredicate(new ContentNodeFilterTO(), userId, admin))
                 // order by
@@ -95,7 +95,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
                 .join(u).on(c.authorId.eq(u.id))
                 // select
                 .select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
-                        c.lastModificationDate, c.hidden, u.name, u.id, c.id))
+                        c.lastModificationDate, c.hidden, c.hiddenByParent, u.name, u.id, c.id))
                 // where
                 .where(createBasicNodePredicate(new ContentNodeFilterTO(), userId, admin), uf.id.eq(favouritesUserId))
                 // order by
@@ -115,7 +115,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
                 .join(u).on(c.authorId.eq(u.id))
                 // select
                 .select(new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
-                        c.lastModificationDate, c.hidden, u.name, u.id, c.id))
+                        c.lastModificationDate, c.hidden, c.hiddenByParent, u.name, u.id, c.id))
                 // where
                 .where(createBasicNodePredicate(filter, userId, admin));
     }
@@ -138,7 +138,7 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
         }
         return query.select(
                         new QContentNodeOverviewTO(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate,
-                                c.lastModificationDate, c.hidden, u.name, u.id, c.id))
+                                c.lastModificationDate, c.hidden, c.hiddenByParent, u.name, u.id, c.id))
                 .groupBy(c.contentReaderId, c.contentId, c.name, n.name, n.id, c.creationDate, c.lastModificationDate,
                         c.hidden, u.name, u.id, c.id).fetch();
     }

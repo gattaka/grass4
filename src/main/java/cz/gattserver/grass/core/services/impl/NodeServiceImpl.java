@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import cz.gattserver.grass.core.interfaces.NodeTO;
+import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
 import jakarta.validation.constraints.NotNull;
@@ -22,10 +23,13 @@ public class NodeServiceImpl implements NodeService {
 
     private final NodeRepository nodeRepository;
     private final SecurityService securityService;
+    private final ContentNodeRepository contentNodeRepository;
 
-    public NodeServiceImpl(NodeRepository nodeRepository, SecurityService securityService) {
+    public NodeServiceImpl(NodeRepository nodeRepository, SecurityService securityService,
+                           ContentNodeRepository contentNodeRepository) {
         this.nodeRepository = nodeRepository;
         this.securityService = securityService;
+        this.contentNodeRepository = contentNodeRepository;
     }
 
     @Override
@@ -54,21 +58,6 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public Long createNewNode(Long parentId, boolean hidden, String name) {
-        Validate.notBlank(name, "název kategorie nemůže být prázdný");
-        Node node = new Node();
-        node.setName(name.trim());
-        node.setParentId(parentId);
-        node.setHidden(hidden);
-
-        if (parentId != null) nodeRepository.findById(parentId)
-                .ifPresent(parentNode -> node.setHiddenByParent(node.getHiddenByParent() || node.getHidden()));
-
-        node.setId(nodeRepository.save(node).getId());
-        return node.getId();
-    }
-
-    @Override
     public void moveNode(@NotNull Long nodeId, @NotNull Long newParentId) {
         Node nodeEntity = nodeRepository.findById(nodeId).orElseThrow();
 
@@ -92,7 +81,8 @@ public class NodeServiceImpl implements NodeService {
                     throw new IllegalStateException("V grafu kategorií byl nalezen cykl");
                 if (Objects.equals(cycleCheckParent.getId(), nodeId))
                     throw new IllegalArgumentException("Nelze vkládat předka do potomka");
-                cycleCheckParent = nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
+                cycleCheckParent = cycleCheckParent.getParentId() == null ? null :
+                        nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
             }
 
             nodeEntity.setParentId(newParentId);
@@ -133,33 +123,32 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public void hide(Long id) {
-        Objects.requireNonNull(id);
+    public Long save(NodeTO to) {
+        Objects.requireNonNull(to);
+        Node node = new Node();
+        node.setId(to.getId());
+        node.setName(to.getName());
+        node.setParentId(to.getParentId());
+        node.setHidden(to.getHidden());
+        node.setHiddenByParent(to.getHiddenByParent());
 
-        Node node = nodeRepository.findById(id).orElse(null);
-        if (node == null) throw new IllegalStateException();
+        if (node.getParentId() != null) nodeRepository.findById(node.getParentId()).ifPresent(
+                parentNode -> node.setHiddenByParent(parentNode.getHiddenByParent() || parentNode.getHidden()));
 
-        nodeRepository.updateHidden(id, false);
+        node.setId(nodeRepository.save(node).getId());
 
-        // Skrytí podkategorií a obsahů má smysl řešit, pokud tato kategorie byla
-        // doposud dle svého předka viditelná, jinak se nic nebude měnit
-        if (!node.getHiddenByParent()) return;
+        boolean hiddenByParent = node.getHidden() || node.getHiddenByParent();
+        contentNodeRepository.updateHiddenByParentByNode(node.getId(), hiddenByParent);
+        recursiveNodeSetHiddenByParent(node.getId(), hiddenByParent);
 
-        // TODO
+        return node.getId();
     }
 
-    @Override
-    public void show(Long id) {
-        Objects.requireNonNull(id);
-        Node node = nodeRepository.findById(id).orElse(null);
-        if (node == null) throw new IllegalStateException();
-
-        nodeRepository.updateHidden(id, false);
-
-        // Zvěřejnění podkategorií a obsahů má smysl řešit, pokud tato kategorie byla
-        // doposud dle svého předka viditelná, jinak se nic nebude měnit
-        if (!node.getHiddenByParent()) return;
-
-        // TODO
+    private void recursiveNodeSetHiddenByParent(Long nodeId, boolean hiddenByParent) {
+        List<NodeTO> children = nodeRepository.findByParentId(nodeId, true);
+        for (NodeTO child : children) {
+            nodeRepository.updateHiddenByParent(child.getId(), hiddenByParent);
+            recursiveNodeSetHiddenByParent(child.getId(), hiddenByParent);
+        }
     }
 }

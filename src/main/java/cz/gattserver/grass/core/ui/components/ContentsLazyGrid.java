@@ -6,8 +6,6 @@ import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.icon.Icon;
-import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.data.provider.CallbackDataProvider.CountCallback;
 import com.vaadin.flow.data.provider.CallbackDataProvider.FetchCallback;
 import com.vaadin.flow.data.provider.DataProvider;
@@ -17,6 +15,7 @@ import com.vaadin.flow.data.renderer.IconRenderer;
 import com.vaadin.flow.data.renderer.LocalDateTimeRenderer;
 
 import com.vaadin.flow.router.RouterLink;
+import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.modules.ContentModule;
@@ -42,7 +41,7 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
     @Getter
     private boolean dynamicHeight = true;
 
-    private boolean activeLinks;
+    private final boolean activeLinks;
 
     public ContentsLazyGrid() {
         this(true);
@@ -89,12 +88,8 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
                 div.add(new Text(contentNode.name()));
             }
 
-            if (SpringContextHelper.getBean(SecurityService.class).getCurrentUser().isAdmin() && contentNode.hidden()) {
-                Icon icon = VaadinIcon.EYE_SLASH.create();
-                icon.setColor("#7f7f7f");
-                div.add(" ");
-                div.add(icon);
-            }
+            if (SpringContextHelper.getBean(SecurityService.class).getCurrentUser().isAdmin())
+                new ComponentFactory().createHiddenSymbols(div, contentNode.hidden(), contentNode.hiddenByParent());
             return div;
         })).setFlexGrow(2).setHeader("Název").setId(nameBind);
 

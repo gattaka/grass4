@@ -1,5 +1,6 @@
 package cz.gattserver.grass.core.mock;
 
+import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.UserService;
@@ -31,7 +32,8 @@ public class CoreMockService {
     }
 
     public Long createMockRootNode(int variant) {
-        return nodeService.createNewNode(null, false, MockUtils.MOCK_NODE_NAME + variant);
+        NodeTO nodeTO = new NodeTO(null, MockUtils.MOCK_NODE_NAME + variant, null, null, false, false);
+        return nodeService.save(nodeTO);
     }
 
     public Long createMockContentNode(Long contentId, Set<String> tags, long nodeId, long userId, int variant) {

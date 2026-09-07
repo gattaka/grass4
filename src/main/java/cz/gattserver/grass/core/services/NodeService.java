@@ -36,18 +36,6 @@ public interface NodeService {
     List<NodeTO> getNodesByParentNode(Long nodeId);
 
     /**
-     * Založí novou kategorii
-     *
-     * @param parentId   pakliže je kategorii vkládána do jiné kategorie, je vyplněn id
-     *                   předka. Pokud je kategorie vkládána přímo do kořene sekce, je
-     *                   tento argument <code>null</code>
-     * @param hidden příznak, zda je katergorie zveřejněná
-     * @param name       jméno nové kategorie
-     * @return id kategorie pokud se přidání zdařilo, jinak <code>null</code>
-     */
-    Long createNewNode(Long parentId, boolean hidden, String name);
-
-    /**
      * Přesune kategorii
      *
      * @param nodeId      id kategorie k přesunu
@@ -64,8 +52,6 @@ public interface NodeService {
      * Smaže kategorii, pokud je prázdná
      *
      * @param nodeId id kategorie ke smazání
-     * @return <code>true</code> pokud se přidání zdařilo, jinak
-     * <code>false</code>
      */
     void deleteNode(Long nodeId);
 
@@ -81,7 +67,7 @@ public interface NodeService {
      * Je kategorie prázdná?
      *
      * @param nodeId id kategorie
-     * @return
+     * @return zda je kategorie prázdná
      */
     boolean isNodeEmpty(Long nodeId);
 
@@ -94,16 +80,9 @@ public interface NodeService {
     List<NodeTO> getByFilter(String filter);
 
     /**
-     * Skryje kategorii
+     * Uloží kategorii
      *
-     * @param id id kategorie
+     * @param to kategorie
      */
-    void hide(Long id);
-
-    /**
-     * Zveřejní kategorii
-     *
-     * @param id id kategorie
-     */
-    void show(Long id);
+    Long save(NodeTO to);
 }

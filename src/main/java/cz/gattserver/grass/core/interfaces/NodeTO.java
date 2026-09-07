@@ -64,4 +64,8 @@ public class NodeTO implements Serializable {
     public int hashCode() {
         return Objects.hashCode(id);
     }
+
+    public NodeTO copy() {
+        return new NodeTO(id, name, parentName, parentId, hidden, hiddenByParent);
+    }
 }

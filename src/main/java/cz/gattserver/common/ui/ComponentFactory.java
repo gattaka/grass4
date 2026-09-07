@@ -9,6 +9,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Anchor;
 import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -518,6 +519,7 @@ public class ComponentFactory {
     /*
      * Hlášení, texty
      */
+
     public String createRequiredLabel() {
         return "Toto pole je povinné";
     }
@@ -525,7 +527,6 @@ public class ComponentFactory {
     /*
      * Binding helpers
      */
-
 
     public <B, T extends Identifiable<I>, I> void bind(Binder.BindingBuilder<B, T> bindingBuilder, Collection<T> items,
                                                        ValueProvider<B, I> getter, Setter<B, I> setter) {
@@ -547,5 +548,25 @@ public class ComponentFactory {
 
     public Locale createLocale() {
         return Locale.forLanguageTag("cs-CZ");
+    }
+
+    public void createHiddenSymbols(Div div, boolean hidden, boolean hiddenByParent) {
+        if (hidden) {
+            div.add(" (");
+            Icon icon = VaadinIcon.EYE_SLASH.create();
+            icon.setColor("#7f7f7f");
+            div.add(icon);
+            div.add(")");
+        }
+        if (hiddenByParent) {
+            div.add(" (");
+            Icon icon = VaadinIcon.ANGLE_DOUBLE_DOWN.create();
+            icon.setColor("#7f7f7f");
+            div.add(icon);
+            icon = VaadinIcon.EYE_SLASH.create();
+            icon.setColor("#7f7f7f");
+            div.add(icon);
+            div.add(")");
+        }
     }
 }

@@ -9,8 +9,6 @@ import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
-import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
@@ -23,6 +21,7 @@ import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.dialogs.MoveIntoNodeDialog;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
 import com.vaadin.flow.component.button.Button;
@@ -77,55 +76,23 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         nodeTO = nodeService.getNodeById(identifier.id());
 
         // Navigační breadcrumb
-        createBreadcrumb(layout, nodeTO);
+        createBreadcrumb(layout);
 
         // Podkategorie
-        createSubnodesPart(layout, nodeTO);
+        createSubnodesPart(layout);
 
         // Obsahy
-        createContentsPart(layout, nodeTO);
+        createContentsPart(layout);
     }
 
-    public void createNodeAction(NodeTO parentNode) {
-        final WebDialog dialog = new WebDialog("Vytvořit kategorii");
-        dialog.setWidth(350, Unit.PIXELS);
-
-        final TextField newNameField = new TextField();
-        newNameField.setPlaceholder("Nová kategorie do " + parentNode.getName());
-        newNameField.setWidthFull();
-        dialog.addComponent(newNameField);
-
-        final Checkbox hiddenCheckbox = new Checkbox("Skrytá kategorie");
-        dialog.addComponent(hiddenCheckbox);
-
-        NodeTO to = new NodeTO();
-        Binder<NodeTO> binder = new Binder<>(NodeTO.class);
-        binder.forField(newNameField).withValidator(StringUtils::isNotBlank, "Název kategorie nesmí být prázdný")
-                .bind(NodeTO::getName, NodeTO::setName);
-        binder.forField(hiddenCheckbox).bind(NodeTO::getHidden, NodeTO::setHidden);
-        binder.setBean(to);
-
-        ComponentFactory componentFactory = new ComponentFactory();
-        dialog.getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(event -> {
-            if (binder.validate().isOk()) {
-                Long newNodeId = nodeService.createNewNode(parentNode.getId(), to.getHidden(), to.getName());
-                UI.getCurrent()
-                        .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(newNodeId, to.getName()));
-                dialog.close();
-            }
-        }, event -> dialog.close()));
-
-        dialog.open();
-    }
-
-    private void createBreadcrumb(Div layout, NodeTO node) {
+    private void createBreadcrumb(Div layout) {
         Breadcrumb breadcrumb = new Breadcrumb();
         layout.add(breadcrumb);
 
         // pokud zjistím, že cesta neodpovídá, vyhodím 302 (přesměrování) na
         // aktuální polohu cílové kategorie
         List<Breadcrumb.BreadcrumbElement> breadcrumbElements = new ArrayList<>();
-        NodeTO parent = node;
+        NodeTO parent = nodeTO;
         while (true) {
 
             // nejprve zkus zjistit, zda předek existuje
@@ -143,18 +110,18 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         breadcrumb.resetBreadcrumb(breadcrumbElements);
     }
 
-    private void populateSubNodes(NodesGrid nodesGrid, Long parentNodeId) {
-        List<NodeTO> nodes = nodeService.getNodesByParentNode(parentNodeId);
+    private void populateSubNodes(NodesGrid nodesGrid) {
+        List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeTO.getId());
         if (nodes == null) throw new GrassPageException(500);
         nodesGrid.populate(nodes);
     }
 
-    private void createSubnodesPart(Div layout, NodeTO node) {
+    private void createSubnodesPart(Div layout) {
         layout.add(new H2("Podkategorie"));
 
         boolean admin = securityService.getCurrentUser().isAdmin();
         NodesGrid nodesGrid = new NodesGrid(admin);
-        populateSubNodes(nodesGrid, node.getId());
+        populateSubNodes(nodesGrid);
 
         layout.add(nodesGrid);
         nodesGrid.setWidthFull();
@@ -168,12 +135,13 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
             buttonLayout.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
             layout.add(buttonLayout);
 
-            Button createButton = componentFactory.createCreateButton(e -> createNodeAction(nodeTO));
+            Button createButton = componentFactory.createCreateButton(e -> onCreateNode(nodesGrid, nodeTO));
             buttonLayout.add(createButton);
 
-            Button renameButton =
-                    componentFactory.createEditGridButton(toRenameTO -> onRenameNode(nodesGrid, toRenameTO), nodesGrid);
-            buttonLayout.add(renameButton);
+            Button editButton =
+                    componentFactory.createEditGridButton(toRenameTO -> onEditNode(nodesGrid, nodeTO, toRenameTO),
+                            nodesGrid);
+            buttonLayout.add(editButton);
 
             Button moveBtn = componentFactory.createMoveGridButton(set -> {
                 NodeTO toMoveTO = set.iterator().next();
@@ -182,26 +150,56 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
             }, nodesGrid);
             buttonLayout.add(moveBtn);
 
-            Button hideButton =
-                    componentFactory.createHideGridButton(toHideTO -> onHideNode(nodesGrid, toHideTO.getId()),
-                            nodesGrid);
-            buttonLayout.add(hideButton);
-
-            Button showButton =
-                    componentFactory.createShowGridButton(toShowTO -> onShowNode(nodesGrid, toShowTO.getId()),
-                            nodesGrid);
-            buttonLayout.add(showButton);
-
-            nodesGrid.addSelectionListener(e -> e.getFirstSelectedItem().ifPresent(selectedTO -> {
-                boolean hidden = selectedTO.getHidden() || selectedTO.getHiddenByParent();
-                hideButton.setEnabled(!hidden);
-                showButton.setEnabled(hidden);
-            }));
-
             buttonLayout.add(
                     componentFactory.createDeleteGridButton(toDeleteTO -> onDeleteNode(nodesGrid, toDeleteTO.getId()),
                             nodesGrid));
         }
+    }
+
+    public void onCreateNode(NodesGrid nodesGrid, NodeTO parentNodeTO) {
+        createNodeDialog(nodesGrid, parentNodeTO, null);
+    }
+
+    public void onEditNode(NodesGrid nodesGrid, NodeTO parentNodeTO, NodeTO currentNodeTO) {
+        createNodeDialog(nodesGrid, parentNodeTO, currentNodeTO);
+    }
+
+    private void createNodeDialog(NodesGrid nodesGrid, NodeTO parentNodeTO, @Nullable NodeTO currentNodeTO) {
+        final WebDialog dialog = new WebDialog(currentNodeTO == null ? "Vytvořit kategorii" : "Upravit kategorii");
+        dialog.setWidth(350, Unit.PIXELS);
+
+        final TextField newNameField = new TextField();
+        newNameField.setPlaceholder("Název kategorie");
+        newNameField.setWidthFull();
+        dialog.addComponent(newNameField);
+
+        final Checkbox hiddenCheckbox = new Checkbox("Skrytá kategorie");
+        dialog.addComponent(hiddenCheckbox);
+
+        NodeTO to = currentNodeTO == null ? new NodeTO() : currentNodeTO.copy();
+        to.setParentId(parentNodeTO.getId());
+
+        Binder<NodeTO> binder = new Binder<>(NodeTO.class);
+        binder.forField(newNameField).withValidator(StringUtils::isNotBlank, "Název kategorie nesmí být prázdný")
+                .bind(NodeTO::getName, NodeTO::setName);
+        binder.forField(hiddenCheckbox).bind(NodeTO::getHidden, NodeTO::setHidden);
+        binder.setBean(to);
+
+        ComponentFactory componentFactory = new ComponentFactory();
+        dialog.getFooter().add(componentFactory.createDialogSubmitOrStornoLayout(event -> {
+            if (binder.validate().isOk()) {
+                Long newNodeId = nodeService.save(to);
+                if (currentNodeTO == null) {
+                    UI.getCurrent()
+                            .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(newNodeId, to.getName()));
+                } else {
+                    populateSubNodes(nodesGrid);
+                    dialog.close();
+                }
+            }
+        }, event -> dialog.close()));
+
+        dialog.open();
     }
 
     private void onMoveAction(NodesGrid nodesGrid, NodeTO toMoveTO, NodeTO newParentTO) {
@@ -214,21 +212,11 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
             try {
                 nodeService.moveNode(toMoveTO.getId(), newParentTO == null ? null : newParentTO.getId());
                 toMoveTO.setParentId(newParentTO == null ? null : newParentTO.getId());
-                populateSubNodes(nodesGrid, toMoveTO.getId());
+                populateSubNodes(nodesGrid);
             } catch (IllegalArgumentException ex) {
                 UIUtils.showWarning("Nelze přesunou předka do potomka");
             }
         }).open();
-    }
-
-    private void onHideNode(NodesGrid nodesGrid, Long nodeId) {
-        nodeService.hide(nodeId);
-        populateSubNodes(nodesGrid, nodeId);
-    }
-
-    private void onShowNode(NodesGrid nodesGrid, Long nodeId) {
-        nodeService.show(nodeId);
-        populateSubNodes(nodesGrid, nodeId);
     }
 
     private void onDeleteNode(NodesGrid nodesGrid, Long nodeId) {
@@ -236,40 +224,11 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
             UIUtils.showWarning("Kategorie musí být prázdná");
         } else {
             nodeService.deleteNode(nodeId);
-            populateSubNodes(nodesGrid, nodeId);
+            populateSubNodes(nodesGrid);
         }
     }
 
-    private void onRenameNode(NodesGrid nodesGrid, NodeTO toRenameTO) {
-        final WebDialog dialog = new WebDialog("Přejmenovat kategorii");
-        dialog.open();
-
-        final TextField newNameField = new TextField("Nový název:");
-        newNameField.setValue(toRenameTO.getName());
-        dialog.add(newNameField);
-
-        HorizontalLayout btnLayout = new HorizontalLayout();
-        dialog.addComponent(btnLayout);
-
-        Button confirmBtn = new Button("Potvrdit", event -> {
-            if (StringUtils.isBlank(newNameField.getValue())) UIUtils.showError("Název kategorie nesmí být prázdný");
-            try {
-                nodeService.rename(toRenameTO.getId(), newNameField.getValue());
-                toRenameTO.setName(newNameField.getValue());
-                populateSubNodes(nodesGrid, nodeTO.getId());
-            } catch (Exception e) {
-                UIUtils.showWarning("Přejmenování se nezdařilo.");
-            }
-
-            dialog.close();
-        });
-        btnLayout.add(confirmBtn);
-
-        Button closeBtn = new Button("Storno", event -> dialog.close());
-        btnLayout.add(closeBtn);
-    }
-
-    private void createContentsPart(Div layout, NodeTO nodeTO) {
+    private void createContentsPart(Div layout) {
         layout.add(new H2("Obsahy"));
 
         TextField searchField = new TextField();
@@ -307,5 +266,4 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
     public String getPageTitle() {
         return nodeTO.getName();
     }
-
 }
