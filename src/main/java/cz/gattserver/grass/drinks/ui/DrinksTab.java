@@ -139,7 +139,7 @@ public abstract class DrinksTab<T extends DrinkTO, O extends DrinkOverviewTO> ex
             rs.setReadOnly(true);
             rs.setSize("15px");
             return rs;
-        })).setHeader("Hodnocení").setWidth("90px").setFlexGrow(0).setSortProperty("rating");
+        })).setHeader("Hodn.").setWidth("90px").setFlexGrow(0).setSortProperty("rating");
     }
 
     public void selectDrink(Long id) {

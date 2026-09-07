@@ -39,19 +39,19 @@ public class BeersTab extends DrinksTab<BeerTO, BeerOverviewTO> {
                 grid.addColumn(BeerOverviewTO::getCategory).setHeader("Kategorie").setWidth("100px").setFlexGrow(0)
                         .setSortProperty("category");
         Column<BeerOverviewTO> degreesColumn = grid.addColumn(new NumberRenderer<>(BeerOverviewTO::getDegrees,
-                        NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")))).setHeader("Stupně (°)")
-                .setWidth("100px").setFlexGrow(0).setSortProperty("degrees");
+                        NumberFormat.getNumberInstance(Locale.forLanguageTag("cs-CZ")))).setHeader("°")
+                .setWidth("50px").setFlexGrow(0).setSortProperty("degrees");
 
         addAlcoholColumn(grid);
 
         Column<BeerOverviewTO> ibuColumn =
-                grid.addColumn(BeerOverviewTO::getIbu).setHeader("IBU").setWidth("50px").setFlexGrow(0)
+                grid.addColumn(BeerOverviewTO::getIbu).setHeader("IBU").setWidth("60px").setFlexGrow(0)
                         .setSortProperty("ibu");
         Column<BeerOverviewTO> maltsColumn =
-                grid.addColumn(new TextRenderer<>(BeerOverviewTO::getMalts)).setHeader("Slad").setWidth("60px")
+                grid.addColumn(new TextRenderer<>(BeerOverviewTO::getMalts)).setHeader("Slad").setWidth("80px")
                         .setFlexGrow(0).setSortProperty("malts");
         Column<BeerOverviewTO> hopsColumn =
-                grid.addColumn(new TextRenderer<>(BeerOverviewTO::getHops)).setHeader("Chmel").setWidth("80px")
+                grid.addColumn(new TextRenderer<>(BeerOverviewTO::getHops)).setHeader("Chmel").setWidth("150px")
                         .setFlexGrow(0).setSortProperty("hops");
 
         addRatingStarsColumn(grid);
