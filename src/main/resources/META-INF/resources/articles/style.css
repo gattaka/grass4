@@ -51,3 +51,7 @@ a.articles-h-id {
 .level4 {
 	margin-left: 10px;
 }
+
+.article-content table {
+    border: 1px solid #ccc;
+}
