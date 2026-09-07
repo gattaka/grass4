@@ -29,7 +29,7 @@ public class TableElement implements Element {
 
 		int row = 0;
 		ctx.print(
-				"<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">");
+				"<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">");
 		if (withHead) {
 			ctx.print("<thead>");
 			Iterator<List<Element>> it = rows.get(row).iterator();
