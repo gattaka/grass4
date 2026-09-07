@@ -130,37 +130,41 @@ public class ContentViewer extends Div {
         }
 
         // Oblíbené
-        removeFromFavouritesButton = componentFactory.createUnmarkFavouriteButton(event -> {
-            // zdařilo se ? Pokud ano, otevři info okno
-            try {
-                userService.removeContentFromFavourites(contentNodeTO.getContentNodeId(),
-                        securityService.getCurrentUser().getId());
-                removeFromFavouritesButton.setVisible(false);
-                addToFavouritesButton.setVisible(true);
-            } catch (Exception e) {
-                // Pokud ne, otevři warn okno
-                new WarnDialog("Odebrání z oblíbených se nezdařilo.").open();
-            }
-        });
-        operationsListLayout.add(removeFromFavouritesButton);
-        removeFromFavouritesButton.setVisible(
-                coreACLService.canRemoveContentFromFavourites(contentNodeTO, securityService.getCurrentUser()));
+        if (coreACLService.canRemoveContentFromFavourites(contentNodeTO, securityService.getCurrentUser())) {
+            removeFromFavouritesButton = componentFactory.createUnmarkFavouriteButton(event -> {
+                // zdařilo se ? Pokud ano, otevři info okno
+                try {
+                    userService.removeContentFromFavourites(contentNodeTO.getContentNodeId(),
+                            securityService.getCurrentUser().getId());
+                    removeFromFavouritesButton.setVisible(false);
+                    addToFavouritesButton.setVisible(true);
+                } catch (Exception e) {
+                    // Pokud ne, otevři warn okno
+                    new WarnDialog("Odebrání z oblíbených se nezdařilo.").open();
+                }
+            });
+            operationsListLayout.add(removeFromFavouritesButton);
+            removeFromFavouritesButton.setVisible(
+                    coreACLService.canRemoveContentFromFavourites(contentNodeTO, securityService.getCurrentUser()));
+        }
 
-        addToFavouritesButton = componentFactory.createMarkFavouriteButton(event -> {
-            // zdařilo se? Pokud ano, otevři info okno
-            try {
-                userService.addContentToFavourites(contentNodeTO.getContentNodeId(),
-                        securityService.getCurrentUser().getId());
-                addToFavouritesButton.setVisible(false);
-                removeFromFavouritesButton.setVisible(true);
-            } catch (Exception e) {
-                // Pokud ne, otevři warn okno
-                new WarnDialog("Vložení do oblíbených se nezdařilo.").open();
-            }
-        });
-        operationsListLayout.add(addToFavouritesButton);
-        addToFavouritesButton.setVisible(
-                coreACLService.canAddContentToFavourites(contentNodeTO, securityService.getCurrentUser()));
+        if (coreACLService.canAddContentToFavourites(contentNodeTO, securityService.getCurrentUser())) {
+            addToFavouritesButton = componentFactory.createMarkFavouriteButton(event -> {
+                // zdařilo se? Pokud ano, otevři info okno
+                try {
+                    userService.addContentToFavourites(contentNodeTO.getContentNodeId(),
+                            securityService.getCurrentUser().getId());
+                    addToFavouritesButton.setVisible(false);
+                    removeFromFavouritesButton.setVisible(true);
+                } catch (Exception e) {
+                    // Pokud ne, otevři warn okno
+                    new WarnDialog("Vložení do oblíbených se nezdařilo.").open();
+                }
+            });
+            operationsListLayout.add(addToFavouritesButton);
+            addToFavouritesButton.setVisible(
+                    coreACLService.canAddContentToFavourites(contentNodeTO, securityService.getCurrentUser()));
+        }
 
         // Změna kategorie
         if (coreACLService.canModifyContent(contentNodeTO, securityService.getCurrentUser())) {
@@ -226,12 +230,13 @@ public class ContentViewer extends Div {
         layout.add(tagsListLayout);
 
         // nástrojová lišta
-        Div operationsDiv = new Div();
-        layout.add(operationsDiv);
-        H3 operationsHeader = new H3("Operace s obsahem");
-        operationsDiv.add(operationsHeader);
-        operationsDiv.add(operationsListLayout);
-        operationsDiv.setVisible(operationsListLayout.getChildren().findAny().isPresent());
+        if (operationsListLayout.getChildren().findAny().isPresent()) {
+            Div operationsDiv = new Div();
+            layout.add(operationsDiv);
+            H3 operationsHeader = new H3("Operace s obsahem");
+            operationsDiv.add(operationsHeader);
+            operationsDiv.add(operationsListLayout);
+        }
     }
 
     private void createRightColumnContent(Div rightContentLayout, Component contentComponent) {
