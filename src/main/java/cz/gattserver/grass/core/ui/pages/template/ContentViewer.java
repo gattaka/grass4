@@ -86,10 +86,14 @@ public class ContentViewer extends Div {
 
         tagsListLayout = new Div();
         tagsListLayout.setId("content-info-tags");
-        for (ContentTagTO contentTag : this.contentNodeTO.getContentTags()) {
-            RouterLink tagLink = new RouterLink(contentTag.getName(), TagPage.class,
-                    URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()));
-            tagsListLayout.add(new Div(tagLink));
+        if (this.contentNodeTO.getContentTags().isEmpty()) {
+            tagsListLayout.add(new HtmlSpan("<em>-žádné tagy-</em>"));
+        } else {
+            for (ContentTagTO contentTag : this.contentNodeTO.getContentTags()) {
+                RouterLink tagLink = new RouterLink(contentTag.getName(), TagPage.class,
+                        URLIdentifierUtils.createURLIdentifier(contentTag.getId(), contentTag.getName()));
+                tagsListLayout.add(new Div(tagLink));
+            }
         }
 
         operationsListLayout = componentFactory.createButtonLayout();
@@ -213,7 +217,7 @@ public class ContentViewer extends Div {
             Div publicatedLayout = new Div();
             publicatedLayout.addClassName("hidden-info");
             publicatedLayout.add(ImageIcon.INFO_16_ICON.createImage("Info"));
-            publicatedLayout.add("Nepublikováno");
+            publicatedLayout.add("Skrytý");
             info.add(publicatedLayout);
         }
 

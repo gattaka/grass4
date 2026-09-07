@@ -66,8 +66,6 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
     private static final int MAX_PAGE_RADIUS = 2;
     private static final int PAGE_SIZE = 12;
 
-    private static final String MAGICK_WORD = "MAG1CK";
-
     private final PGService pgService;
     private final EventBus eventBus;
     private final SecurityService securityService;
@@ -120,9 +118,6 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         photogalleryTO =
                 pgService.findPhotogalleryForDetail(identifier.id(), userInfoTO.getId(), userInfoTO.isAdmin());
         if (photogalleryTO == null) throw new GrassPageException(404);
-
-        if (!MAGICK_WORD.equals(pageToken) && !MAGICK_WORD.equals(extraToken) && !photogalleryTO.isHidden() &&
-                !isAdminOrAuthor()) throw new GrassPageException(403);
 
         galleryDir = photogalleryTO.getPhotogalleryPath();
 

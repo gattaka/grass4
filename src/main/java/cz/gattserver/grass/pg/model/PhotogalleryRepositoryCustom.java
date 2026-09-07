@@ -16,9 +16,9 @@ public interface PhotogalleryRepositoryCustom {
 
     String findPhotogalleryPathById(Long photogalleryId);
 
-    PhotogalleryRESTOverviewTO findForRestByDirectory(String directory,Long userId, boolean isAdmin);
+    PhotogalleryRESTOverviewTO findForRestByDirectory(String directory, Long userId, boolean isAdmin);
 
     PhotogalleryRESTTO findForRestById(Long id, Long userId, boolean isAdmin);
 
-    PhotogalleryTO findForDetailById(Long id,Long userId, boolean isAdmin);
+    PhotogalleryTO findForDetailById(Long id, Long userId, boolean isAdmin);
 }
