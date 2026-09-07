@@ -1,14 +1,24 @@
 package cz.gattserver.grass.core.services;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.grass.core.model.domain.Node;
 import cz.gattserver.grass.core.model.repositories.NodeRepository;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.core.mock.CoreMockService;
+import cz.gattserver.grass.core.util.MockUtils;
+import jakarta.annotation.Resource;
+import jakarta.servlet.Filter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.util.List;
 
@@ -23,6 +33,30 @@ public class NodeServiceTest extends DBCleanTest {
     @Autowired
     private CoreMockService coreMockService;
 
+    @Resource
+    @Qualifier("securityServiceImpl")
+    private SecurityService securityService;
+
+    @Autowired
+    private WebApplicationContext context;
+
+    @Autowired
+    private Filter springSecurityFilterChain;
+
+    private MockMvc mvc;
+
+    @BeforeEach
+    public void setup() {
+        mvc = MockMvcBuilders.webAppContextSetup(context).addFilters(springSecurityFilterChain).build();
+    }
+
+    public void createAndLoginAdmin() throws Exception {
+        MvcResult mvcResult = mvc.perform(get("/")).andReturn();
+        coreMockService.createMockUser(1, true);
+        securityService.login(MockUtils.MOCK_USER_NAME + 1, MockUtils.MOCK_USER_PASSWORD + 1, false,
+                mvcResult.getRequest(), mvcResult.getResponse());
+    }
+
     private Long createNewNode(Long parentId, boolean hidden, String name) {
         NodeTO to = new NodeTO(null, name, null, parentId, hidden, false);
         return nodeService.save(to);
@@ -35,7 +69,22 @@ public class NodeServiceTest extends DBCleanTest {
         assertNotNull(node);
         assertEquals(nodeId, node.getId());
         assertNull(node.getParentId());
+        assertFalse(node.getHidden());
+        assertFalse(node.getHiddenByParent());
         assertEquals("testNode", node.getName());
+    }
+
+    @Test
+    public void testCreateNewHiddenNode() {
+        NodeTO to = new NodeTO(null, "testHiddenNode", null, null, true, true);
+        long nodeId = nodeService.save(to);
+        Node node = nodeRepository.findById(nodeId).orElseThrow();
+        assertNotNull(node);
+        assertEquals(nodeId, node.getId());
+        assertNull(node.getParentId());
+        assertTrue(node.getHidden());
+        assertTrue(node.getHiddenByParent());
+        assertEquals("testHiddenNode", node.getName());
     }
 
     @Test
@@ -268,4 +317,14 @@ public class NodeServiceTest extends DBCleanTest {
         assertThrows(IllegalArgumentException.class, () -> nodeService.rename(1L, " "));
     }
 
+    @Test
+    public void testGetByFilter() {
+        createNewNode(null, false, "testNode");
+        createNewNode(null, false, "testNode2");
+        createNewNode(null, false, "test3");
+        List<NodeTO> results = nodeService.getByFilter("node");
+        assertEquals(2, results.size());
+        assertEquals("testNode", results.getFirst().getName());
+        assertEquals("testNode2", results.getLast().getName());
+    }
 }

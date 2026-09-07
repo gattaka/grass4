@@ -405,14 +405,14 @@ public class PGServiceImplTest extends DBCleanTest {
         assertTrue(to.isHidden());
     }
 
-    private long createMockGallery(Path root, Long userId, Long nodeId, int variant, boolean publicated)
+    private long createMockGallery(Path root, Long userId, Long nodeId, int variant, boolean hidden)
             throws IOException, InterruptedException, ExecutionException {
         Path galleryDir = root.resolve("testGallery" + variant);
         Files.createDirectories(galleryDir);
 
         PhotogalleryCreateTO payloadTO =
                 new PhotogalleryCreateTO("Test galerie" + variant, galleryDir.getFileName().toString(), null,
-                        publicated, false);
+                        hidden, false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -444,10 +444,10 @@ public class PGServiceImplTest extends DBCleanTest {
         Long nodeId1 = coreMockService.createMockRootNode(1);
         Long nodeId2 = coreMockService.createMockRootNode(2);
 
-        Long id1 = createMockGallery(root, userId1, nodeId1, 1, true);
-        Long id2 = createMockGallery(root, userId1, nodeId2, 2, false);
-        Long id3 = createMockGallery(root, userId2, nodeId1, 3, true);
-        Long id4 = createMockGallery(root, userId2, nodeId2, 4, false);
+        Long id1 = createMockGallery(root, userId1, nodeId1, 1, false );
+        Long id2 = createMockGallery(root, userId1, nodeId2, 2, true);
+        Long id3 = createMockGallery(root, userId2, nodeId1, 3, false);
+        Long id4 = createMockGallery(root, userId2, nodeId2, 4, true);
 
         int count = pgService.countAllPhotogalleriesForREST(null, userId1, true);
         assertEquals(4, count);
@@ -571,7 +571,7 @@ public class PGServiceImplTest extends DBCleanTest {
         Long userId1 = coreMockService.createMockUser(1);
         Long userId2 = coreMockService.createMockUser(2);
         Long nodeId1 = coreMockService.createMockRootNode(1);
-        Long id1 = createMockGallery(root, userId1, nodeId1, 1, false);
+        Long id1 = createMockGallery(root, userId1, nodeId1, 1, true);
 
         assertThrows(UnauthorizedAccessException.class, () -> pgService.findPhotogalleryForREST(id1, null, false));
         assertThrows(UnauthorizedAccessException.class, () -> pgService.findPhotogalleryForREST(id1, userId2, false));
@@ -597,7 +597,7 @@ public class PGServiceImplTest extends DBCleanTest {
         Long userId3 = coreMockService.createMockUser(3);
         Long nodeId1 = coreMockService.createMockRootNode(1);
         PhotogalleryCreateTO payloadTO =
-                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
+                new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, false, false);
 
         UUID operationId = UUID.randomUUID();
 

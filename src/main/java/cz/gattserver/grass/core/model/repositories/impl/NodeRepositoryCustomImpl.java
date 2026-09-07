@@ -37,18 +37,13 @@ public class NodeRepositoryCustomImpl extends QuerydslRepositorySupport implemen
     }
 
     @Override
-    public int countRootNodes(boolean admin) {
-        return Math.toIntExact(createBaseMapQuery(admin).where(n.parentId.isNull()).stream().count());
-    }
-
-    @Override
     public List<NodeTO> findByParentId(Long id, boolean admin) {
         return createBaseMapQuery(admin).where(n.parentId.eq(id)).fetch();
     }
 
     @Override
     public List<NodeTO> findByFilter(String filter, boolean admin) {
-        return createBaseMapQuery(admin).where(n.name.like(filter)).fetch();
+        return createBaseMapQuery(admin).where(n.name.toLowerCase().like(filter)).fetch();
     }
 
     @Override

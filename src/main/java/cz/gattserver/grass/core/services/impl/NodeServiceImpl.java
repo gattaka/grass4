@@ -43,11 +43,6 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public int countRootNodes() {
-        return nodeRepository.countRootNodes(securityService.getCurrentUser().isAdmin());
-    }
-
-    @Override
     public List<NodeTO> getNodesForTree() {
         return nodeRepository.findForTree(securityService.getCurrentUser().isAdmin());
     }
@@ -125,6 +120,8 @@ public class NodeServiceImpl implements NodeService {
     @Override
     public Long save(NodeTO to) {
         Objects.requireNonNull(to);
+        Validate.notBlank(to.getName());
+
         Node node = new Node();
         node.setId(to.getId());
         node.setName(to.getName());

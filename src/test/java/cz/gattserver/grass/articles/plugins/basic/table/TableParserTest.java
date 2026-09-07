@@ -45,7 +45,7 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         + "<tr><td></td></tr>" + "</table>",
                 ctx.getOutput());
     }
@@ -68,7 +68,7 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         + "<tr><td>[/STH]</td></tr>" + "</table>",
                 ctx.getOutput());
     }
@@ -81,7 +81,7 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         + "<tr><td>ab c</td><td>de</td></tr>" + "<tr><td>fg</td><td></td></tr>" + "</table>",
                 ctx.getOutput());
     }
@@ -94,7 +94,7 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         + "<tr><td>ab c</td><td>de</td></tr>" + "<tr><td>fg</td><td></td></tr>" + "</table>",
                 ctx.getOutput());
     }
@@ -107,7 +107,7 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         + "<tr><td>ab c</td><td>de</td></tr>" + "<tr><td>fg</td><td>ee</td></tr>" + "</table>",
                 ctx.getOutput());
     }
@@ -121,7 +121,7 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         + "<tr><td>ab c</td><td>de</td><td></td><td></td></tr>"
                         + "<tr><td>fg</td><td>ee</td><td>T</td><td></td></tr>"
                         + "<tr><td>er</td><td>dd</td><td>dffs</td><td>fop</td></tr>" + "</table>",
@@ -137,7 +137,7 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         + "<tr><td>ab c</td><td>de</td><td>fg</td><td></td></tr>"
                         + "<tr><td>ee</td><td>T</td><td></td><td></td></tr>"
                         + "<tr><td>er</td><td>dd</td><td>dffs</td><td>fop</td></tr>" + "</table>",
@@ -153,7 +153,7 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         /*	*/ + "<tr>"
                         /*		*/ + "<td>ab c</td>"
                         /*		*/ + "<td>de</td>"
@@ -161,7 +161,7 @@ public class TableParserTest {
                         /*	*/ + "<tr>"
                         /*		*/ + "<td>fg </td>"
                         /*		*/ + "<td>"
-                        /*			*/ + "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                        /*			*/ + "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         /*				*/ + "<tr><td>X</td></tr>"
                         /*			*/ + "</table>"
                         /*		*/ + "</td>"
@@ -178,14 +178,14 @@ public class TableParserTest {
         Context ctx = new ContextImpl();
         element.apply(ctx);
         assertEquals(
-                "<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                "<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         /*	*/ + "<tr>"
                         /*		*/ + "<td>ab c</td>"
                         /*		*/ + "<td>de</td>"
                         /*	*/ + "</tr>"
                         /*	*/ + "<tr>"
                         /*		*/ + "<td>"
-                        /*			*/ + "fg<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+                        /*			*/ + "fg<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
                         /*				*/ + "<tr><td>X</td></tr>"
                         /*			*/ + "</table>"
                         /*		*/ + "</td>"

@@ -21,11 +21,6 @@ public interface NodeService {
     List<NodeTO> getRootNodes();
 
     /**
-     * Získá všechny kořenové kategorie
-     */
-    int countRootNodes();
-
-    /**
      * Získá všechny kategorie pro zobrazení ve stromu
      */
     List<NodeTO> getNodesForTree();

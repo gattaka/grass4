@@ -38,10 +38,10 @@ public class ContentNodeRepositoryCustomImpl extends QuerydslRepositorySupport i
         BooleanBuilder builder = new BooleanBuilder();
         builder.and(ExpressionUtils.anyOf(c.draft.isFalse(), c.draft.isNull()));
         if (!admin) {
-            if (userId != null) {
-                builder.and(ExpressionUtils.anyOf(c.hidden.isFalse().and(c.hiddenByParent.isFalse()), u.id.eq(userId)));
-            } else {
+            if (userId == null) {
                 builder.and(c.hidden.isFalse().and(c.hiddenByParent.isFalse()));
+            } else {
+                builder.andAnyOf(c.authorId.eq(userId), c.hidden.isFalse().and(c.hiddenByParent.isFalse()));
             }
         }
         if (filter.getParentNodeId() != null) builder.and(n.id.eq(filter.getParentNodeId()));

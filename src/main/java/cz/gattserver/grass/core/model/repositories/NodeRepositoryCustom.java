@@ -8,8 +8,6 @@ public interface NodeRepositoryCustom {
 
     List<NodeTO> findRootNodes(boolean admin);
 
-    int countRootNodes(boolean admin);
-
     List<NodeTO> findByParentId(Long id, boolean admin);
 
     List<NodeTO> findByFilter(String filter, boolean admin);

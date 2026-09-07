@@ -1,6 +1,7 @@
 package cz.gattserver.grass.core.mock;
 
 import cz.gattserver.grass.core.interfaces.NodeTO;
+import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.UserService;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Service
@@ -24,10 +26,21 @@ public class CoreMockService {
     private NodeService nodeService;
 
     public Long createMockUser(int variant) {
+        return createMockUser(variant, false);
+    }
+
+    public Long createMockUser(int variant, boolean admin) {
         Long userId =
                 userService.registrateNewUser(MockUtils.MOCK_USER_EMAIL + variant, MockUtils.MOCK_USER_NAME + variant,
                         MockUtils.MOCK_USER_PASSWORD + variant);
         userService.activateUser(userId);
+
+        if (admin) {
+            Set<CoreRole> roles = new HashSet<>();
+            roles.add(CoreRole.ADMIN);
+            userService.changeUserRoles(userId, roles);
+        }
+
         return userId;
     }
 

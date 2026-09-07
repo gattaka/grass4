@@ -43,7 +43,7 @@ public class TableElementTest {
 		e.apply(ctx);
 		String out = ctx.getOutput();
 		assertEquals(
-				"<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+				"<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
 						+ "<tr><td>a1a2</td><td>b</td><td></td></tr>" + "<tr><td>c</td><td>d</td><td>e</td></tr>"
 						+ "</table>",
 				out);
@@ -80,10 +80,9 @@ public class TableElementTest {
 		e.apply(ctx);
 		String out = ctx.getOutput();
 		assertEquals(
-				"<table bordercolor=\"#888\" cellpadding=\"5px\" rules=\"all\" border=\"0\" style=\"margin-left: auto; margin-right: auto;\">"
+				"<table bordercolor=\"#ccc\" cellpadding=\"5px\" rules=\"all\" border=\"1\" style=\"margin-left: auto; margin-right: auto;\">"
 						+ "<thead><th>a1a2</th><th>b</th><th></th></thead>" + "<tr><td>c</td><td>d</td><td>e</td></tr>"
 						+ "</table>",
 				out);
 	}
-
 }
