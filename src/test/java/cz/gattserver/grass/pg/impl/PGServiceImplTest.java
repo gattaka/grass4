@@ -624,7 +624,6 @@ public class PGServiceImplTest extends DBCleanTest {
         assertEquals(galleryDir.resolve(miniaturesDir).resolve("02.jpg"), photoPath);
         photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.MINI, null, false);
         assertEquals(galleryDir.resolve(miniaturesDir).resolve("03.jpg"), photoPath);
-
     }
 
     @Test

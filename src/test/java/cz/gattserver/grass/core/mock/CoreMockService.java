@@ -44,8 +44,6 @@ public class CoreMockService {
         return userId;
     }
 
-
-
     public Long createMockRootNode(int variant) {
         return createMockRootNode(variant, false);
     }

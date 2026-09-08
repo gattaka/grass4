@@ -1,6 +1,7 @@
 package cz.gattserver.grass.core.services;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
@@ -11,16 +12,24 @@ import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.domain.Node;
 import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
 import cz.gattserver.grass.core.model.repositories.NodeRepository;
+import cz.gattserver.grass.core.security.CoreRole;
+import cz.gattserver.grass.core.services.impl.LoginResult;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.core.util.MockUtils;
+import cz.gattserver.grass.test.MockSecurityService;
+import jakarta.annotation.Resource;
+import jakarta.servlet.Filter;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ContentNodeServiceTest extends DBCleanTest {
 
@@ -42,6 +51,14 @@ public class ContentNodeServiceTest extends DBCleanTest {
     @Autowired
     private CoreMockService coreMockService;
 
+    @Autowired
+    private MockSecurityService mockSecurityService;
+
+    @BeforeEach
+    public void setup() {
+        mockSecurityService.reset();
+    }
+
     @Test
     public void testGetRecentAdded() {
         Long userId1 = coreMockService.createMockUser(1);
@@ -58,6 +75,19 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         ContentNodeOverviewTO added1 = added.get(1);
         assertEquals(contentNodeId1, added1.id());
+
+        // hidden by parent varianta
+
+        Long nodeId2 = coreMockService.createMockRootNode(3, true);
+        nodeService.moveNode(nodeId1, nodeId2);
+
+        added = contentNodeService.getRecentAdded(0, 10);
+        assertEquals(0, added.size());
+
+        mockSecurityService.setRoles(new HashSet<>(List.of(CoreRole.ADMIN)));
+
+        added = contentNodeService.getRecentAdded(0, 10);
+        assertEquals(2, added.size());
     }
 
     @Test
@@ -78,6 +108,19 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         ContentNodeOverviewTO added2 = added.get(1);
         assertEquals(contentNodeId2, added2.id());
+
+        // hidden by parent varianta
+
+        Long nodeId2 = coreMockService.createMockRootNode(3, true);
+        nodeService.moveNode(nodeId1, nodeId2);
+
+        added = contentNodeService.getRecentModified(0, 10);
+        assertEquals(0, added.size());
+
+        mockSecurityService.setRoles(new HashSet<>(List.of(CoreRole.ADMIN)));
+
+        added = contentNodeService.getRecentModified(0, 10);
+        assertEquals(2, added.size());
     }
 
     @Test
@@ -311,6 +354,30 @@ public class ContentNodeServiceTest extends DBCleanTest {
     }
 
     @Test
+    public void testGetTagsByContentId() {
+        Long userId = coreMockService.createMockUser(1);
+        Long nodeId = coreMockService.createMockRootNode(2);
+
+        Set<String> tags = new HashSet<>();
+        tags.add("novinky");
+        tags.add("pokusy");
+        tags.add("testy");
+        tags.add("ŘěŇšb test diakritiky");
+
+        String moduleId = "mockModule";
+        Long contentId = 2L;
+        String name = "Test obsah";
+        long contentNodeId = contentNodeService.save(moduleId, contentId, name, tags, false, nodeId, userId, false,
+                LocalDateTime.now(), null);
+
+        List<String> list = contentNodeService.getTagsByContentId(contentNodeId);
+        assertEquals("pokusy", list.get(0));
+        assertEquals("testy", list.get(1));
+        assertEquals("novinky", list.get(2));
+        assertEquals("ŘěŇšb test diakritiky", list.get(3));
+    }
+
+    @Test
     public void testSave_GetByID_withoutTags() {
         Long userId = coreMockService.createMockUser(1);
         Long nodeId = coreMockService.createMockRootNode(2);
@@ -351,7 +418,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
     }
 
     @Test
-    public void testGetByNode() {
+    public void testGetByNode() throws Exception {
         assertEquals(0, contentNodeService.getCount());
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -389,6 +456,19 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertEquals(nodeId2, contentNodeByNode.parentNodeId());
 
         assertEquals(3, contentNodeService.getCount());
+
+        // hidden by parent varianta
+
+        Long nodeId3 = coreMockService.createMockRootNode(3, true);
+        nodeService.moveNode(nodeId2, nodeId3);
+
+        contentNodesByNode = contentNodeService.getByFilter(new ContentNodeFilterTO().setParentNodeId(nodeId2), 0, 10);
+        assertEquals(0, contentNodesByNode.size());
+
+        mockSecurityService.setRoles(new HashSet<>(List.of(CoreRole.ADMIN)));
+
+        contentNodesByNode = contentNodeService.getByFilter(new ContentNodeFilterTO().setParentNodeId(nodeId2), 0, 10);
+        assertEquals(2, contentNodesByNode.size());
     }
 
     @Test
