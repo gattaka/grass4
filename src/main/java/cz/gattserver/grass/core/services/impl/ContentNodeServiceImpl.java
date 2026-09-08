@@ -26,17 +26,15 @@ import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
 @Service
 public class ContentNodeServiceImpl implements ContentNodeService {
 
-    private final CoreMapperService mapper;
     private final SecurityService securityService;
     private final ContentTagService contentTagService;
     private final UserService userService;
     private final ContentNodeRepository contentNodeRepository;
     private final NodeRepository nodeRepository;
 
-    public ContentNodeServiceImpl(CoreMapperService mapper, SecurityService securityService,
-                                  ContentTagService contentTagService, UserService userService,
-                                  ContentNodeRepository contentNodeRepository, NodeRepository nodeRepository) {
-        this.mapper = mapper;
+    public ContentNodeServiceImpl(SecurityService securityService, ContentTagService contentTagService,
+                                  UserService userService, ContentNodeRepository contentNodeRepository,
+                                  NodeRepository nodeRepository) {
         this.securityService = securityService;
         this.contentTagService = contentTagService;
         this.userService = userService;
@@ -72,6 +70,15 @@ public class ContentNodeServiceImpl implements ContentNodeService {
         contentTagService.saveTags(tags, contentNode.getId());
 
         return contentNode.getId();
+    }
+
+    private String createExplicitAccessValue(Long nodeId) {
+        return "CONTENT_NODE" + nodeId;
+    }
+
+    @Override
+    public String createExplicitAccessHash(Long nodeId) {
+        return securityService.computeAccessHash(createExplicitAccessValue(nodeId));
     }
 
     @Override
@@ -204,15 +211,27 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 
     @Override
     public int getCountByFilter(ContentNodeFilterTO filter) {
+        return getCountByFilter(filter, false);
+    }
+
+    @Override
+    public int getCountByFilter(ContentNodeFilterTO filter, boolean explicitAccess) {
         UserInfoTO user = securityService.getCurrentUser();
-        return (int) contentNodeRepository.countByFilterAndUserAccess(filter, user.getId(), user.isAdmin());
+        return (int) contentNodeRepository.countByFilterAndUserAccess(filter, user.getId(),
+                explicitAccess || user.isAdmin());
     }
 
     @Override
     public List<ContentNodeOverviewTO> getByFilter(ContentNodeFilterTO filter, int offset, int limit) {
+        return getByFilter(filter, false, offset, limit);
+    }
+
+    @Override
+    public List<ContentNodeOverviewTO> getByFilter(ContentNodeFilterTO filter, boolean explicitAccess, int offset,
+                                                   int limit) {
         UserInfoTO user = securityService.getCurrentUser();
-        return contentNodeRepository.findByFilterAndUserAccess(filter, user.getId(), user.isAdmin(), offset, limit,
-                null);
+        return contentNodeRepository.findByFilterAndUserAccess(filter, user.getId(), explicitAccess || user.isAdmin(),
+                offset, limit, null);
     }
 
     @Override

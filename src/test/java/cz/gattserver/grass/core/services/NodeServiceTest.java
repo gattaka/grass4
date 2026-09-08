@@ -154,7 +154,7 @@ public class NodeServiceTest extends DBCleanTest {
         Long nodeId0 = createNewNode(null, false, "testParent");
         createNewNode(nodeId0, false, "testNode1");
         createNewNode(nodeId0, false, "testNode2");
-        List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeId0);
+        List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeId0,false);
         assertEquals(2, nodes.size());
         assertEquals("testNode1", nodes.get(0).getName());
         assertEquals("testNode2", nodes.get(1).getName());

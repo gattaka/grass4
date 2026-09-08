@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 
 public interface NodeService {
 
+    String createExplicitAccessHash(Long nodeId);
+
     /**
      * Získá kategorii dle id
      *
@@ -14,6 +16,15 @@ public interface NodeService {
      * @return kategori dle id
      */
     NodeTO getNodeById(Long nodeId);
+
+    /**
+     * Získá kategorii dle id
+     *
+     * @param nodeId             id kategorie
+     * @param explicitAccessHash hash pro explicitní přístup
+     * @return kategori dle id
+     */
+    NodeTO getNodeById(Long nodeId, String explicitAccessHash);
 
     /**
      * Získá všechny kořenové kategorie
@@ -28,7 +39,7 @@ public interface NodeService {
     /**
      * Získá kategorie, které jsou jako potomci dané kategorie
      */
-    List<NodeTO> getNodesByParentNode(Long nodeId);
+    List<NodeTO> getNodesByParentNode(Long nodeId, boolean explicitAccess);
 
     /**
      * Přesune kategorii

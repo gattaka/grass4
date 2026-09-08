@@ -32,9 +32,31 @@ public class NodeServiceImpl implements NodeService {
         this.contentNodeRepository = contentNodeRepository;
     }
 
+    private String createExplicitAccessValue(Long nodeId) {
+        return "NODE" + nodeId;
+    }
+
+    @Override
+    public String createExplicitAccessHash(Long nodeId) {
+        return securityService.computeAccessHash(createExplicitAccessValue(nodeId));
+    }
+
     @Override
     public NodeTO getNodeById(Long nodeId) {
-        return nodeRepository.findAndMapById(nodeId, securityService.getCurrentUser().isAdmin());
+        return innerGetNodeById(nodeId, null);
+    }
+
+    @Override
+    public NodeTO getNodeById(Long nodeId, String explicitAccessHash) {
+        return innerGetNodeById(nodeId, explicitAccessHash);
+    }
+
+    private NodeTO innerGetNodeById(Long nodeId, String explicitAccessHash) {
+        if (createExplicitAccessHash(nodeId).equals(explicitAccessHash)) {
+            return nodeRepository.findAndMapById(nodeId, true);
+        } else {
+            return nodeRepository.findAndMapById(nodeId, securityService.getCurrentUser().isAdmin());
+        }
     }
 
     @Override
@@ -48,8 +70,8 @@ public class NodeServiceImpl implements NodeService {
     }
 
     @Override
-    public List<NodeTO> getNodesByParentNode(Long parentId) {
-        return nodeRepository.findByParentId(parentId, securityService.getCurrentUser().isAdmin());
+    public List<NodeTO> getNodesByParentNode(Long parentId, boolean explicitAccess) {
+        return nodeRepository.findByParentId(parentId, explicitAccess || securityService.getCurrentUser().isAdmin());
     }
 
     @Override

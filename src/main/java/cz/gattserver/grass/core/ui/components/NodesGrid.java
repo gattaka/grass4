@@ -12,10 +12,12 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.IconRenderer;
 
 import com.vaadin.flow.router.RouterLink;
+import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.NodeTO;
 import cz.gattserver.common.server.URLIdentifierUtils;
+import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.util.GridUtils;
 import cz.gattserver.grass.core.ui.util.UIUtils;
@@ -25,7 +27,7 @@ public class NodesGrid extends Grid<NodeTO> {
     @Serial
     private static final long serialVersionUID = -4425495493485107174L;
 
-    public NodesGrid(boolean showHidden) {
+    public NodesGrid(boolean showHidden, boolean explicitAccess) {
         UIUtils.applyGrassDefaultStyle(this);
 
         setHeight(200, Unit.PIXELS);
@@ -33,6 +35,8 @@ public class NodesGrid extends Grid<NodeTO> {
 
         String iconBind = "customIcon";
         String nameBind = "customName";
+
+        NodeService nodeService = SpringContextHelper.getBean(NodeService.class);
 
         addColumn(new IconRenderer<>(c -> {
             Image img = ImageIcon.BRIEFCASE_16_ICON.createImage("");
@@ -43,8 +47,9 @@ public class NodesGrid extends Grid<NodeTO> {
 
         addColumn(new ComponentRenderer<>(node -> {
             Div div = new Div();
+            String explicitAccessHash = explicitAccess ? nodeService.createExplicitAccessHash(node.getId()) : null;
             div.add(new RouterLink(node.getName(), NodePage.class,
-                    URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName())));
+                    URLIdentifierUtils.createURLIdentifier(node.getId(), node.getName(), explicitAccessHash)));
             if (showHidden) new ComponentFactory().createHiddenSymbols(div, node.getHidden(), node.getHiddenByParent());
             return div;
         })).setHeader("Název").setId(nameBind);

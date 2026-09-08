@@ -131,7 +131,7 @@ public class HomePage extends Div {
         searchResultsContentsGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(searchResultsContentsGrid);
 
-        final NodesGrid searchResultsNodesGrid = new NodesGrid(user.isAdmin());
+        final NodesGrid searchResultsNodesGrid = new NodesGrid(user.isAdmin(), false);
         searchResultsNodesGrid.setWidthFull();
         searchResultsNodesGrid.setVisible(false);
         searchResultsNodesGrid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);

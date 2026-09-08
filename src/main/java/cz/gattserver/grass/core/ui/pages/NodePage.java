@@ -53,6 +53,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
     private final SecurityService securityService;
 
     private NodeTO nodeTO;
+    private boolean explicitAccess;
 
     public NodePage(ContentNodeService contentNodeService, NodeService nodeService, CoreACLService coreACLService,
                     SecurityService securityService) {
@@ -73,7 +74,9 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        nodeTO = nodeService.getNodeById(identifier.id());
+        explicitAccess = identifier.hash() != null;
+
+        nodeTO = nodeService.getNodeById(identifier.id(), identifier.hash());
 
         // Navigační breadcrumb
         createBreadcrumb(layout);
@@ -86,6 +89,8 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
     }
 
     private void createBreadcrumb(Div layout) {
+        if (explicitAccess) return;
+
         Breadcrumb breadcrumb = new Breadcrumb();
         layout.add(breadcrumb);
 
@@ -111,7 +116,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
     }
 
     private void populateSubNodes(NodesGrid nodesGrid) {
-        List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeTO.getId());
+        List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeTO.getId(), explicitAccess);
         if (nodes == null) throw new GrassPageException(500);
         nodesGrid.populate(nodes);
     }
@@ -120,7 +125,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         layout.add(new H2("Podkategorie"));
 
         boolean admin = securityService.getCurrentUser().isAdmin();
-        NodesGrid nodesGrid = new NodesGrid(admin);
+        NodesGrid nodesGrid = new NodesGrid(admin, explicitAccess);
         populateSubNodes(nodesGrid);
 
         layout.add(nodesGrid);
@@ -194,8 +199,8 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
                             .navigate(NodePage.class, URLIdentifierUtils.createURLIdentifier(newNodeId, to.getName()));
                 } else {
                     populateSubNodes(nodesGrid);
-                    dialog.close();
                 }
+                dialog.close();
             }
         }, event -> dialog.close()));
 
@@ -237,7 +242,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         searchField.setValueChangeMode(ValueChangeMode.EAGER);
         layout.add(searchField);
 
-        ContentsLazyGrid searchResultsTable = new ContentsLazyGrid();
+        ContentsLazyGrid searchResultsTable = new ContentsLazyGrid(true, explicitAccess);
         searchResultsTable.setWidthFull();
         searchResultsTable.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
         layout.add(searchResultsTable);
@@ -246,8 +251,8 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
                 () -> new ContentNodeFilterTO().setParentNodeId(nodeTO.getId()).setName(searchField.getValue());
 
         searchResultsTable.populate(
-                q -> contentNodeService.getByFilter(filterSupplier.get(), q.getOffset(), q.getLimit()).stream(),
-                q -> contentNodeService.getCountByFilter(filterSupplier.get()));
+                q -> contentNodeService.getByFilter(filterSupplier.get(), explicitAccess, q.getOffset(), q.getLimit())
+                        .stream(), q -> contentNodeService.getCountByFilter(filterSupplier.get(), explicitAccess));
 
         searchField.addValueChangeListener(e -> searchResultsTable.getDataProvider().refreshAll());
 

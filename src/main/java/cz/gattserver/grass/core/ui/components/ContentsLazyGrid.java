@@ -20,6 +20,7 @@ import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.modules.register.ModuleRegister;
+import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
@@ -42,15 +43,17 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
     private boolean dynamicHeight = true;
 
     private final boolean activeLinks;
+    private final boolean explicitAccess;
 
     public ContentsLazyGrid() {
-        this(true);
+        this(true, false);
     }
 
-    public ContentsLazyGrid(boolean activeLinks) {
+    public ContentsLazyGrid(boolean activeLinks, boolean explicitAccess) {
         UIUtils.applyGrassDefaultStyle(this);
         setSelectionMode(SelectionMode.NONE);
         this.activeLinks = activeLinks;
+        this.explicitAccess = explicitAccess;
     }
 
     public void populate(FetchCallback<ContentNodeOverviewTO, Void> fetchCallback,
@@ -67,6 +70,8 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
         String creationDateBind = "customCreationDate";
         String lastModificationDateBind = "customLastModificationDate";
 
+        ContentNodeService contentNodeService = SpringContextHelper.getBean(ContentNodeService.class);
+
         addColumn(new IconRenderer<>(c -> {
             ContentModule contentService = serviceHolder.getContentModulesByName(c.contentReaderID());
             Image img =
@@ -80,9 +85,12 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
             Div div = new Div();
             ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.contentReaderID());
             if (activeLinks) {
+                String explicitAccessHash =
+                        explicitAccess ? contentNodeService.createExplicitAccessHash(contentNode.id()) : null;
+                String link = URLIdentifierUtils.createURLIdentifier(contentNode.contentID(), contentNode.name(),
+                        explicitAccessHash);
                 String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory) :
-                        UIUtils.getPageURL(contentService.getContentViewerPageFactory(),
-                                URLIdentifierUtils.createURLIdentifier(contentNode.contentID(), contentNode.name()));
+                        UIUtils.getPageURL(contentService.getContentViewerPageFactory(), link);
                 div.add(new Anchor(url, contentNode.name()));
             } else {
                 div.add(new Text(contentNode.name()));

@@ -37,7 +37,7 @@ public class CopyTagsDialog extends WebDialog {
         searchField.setWidthFull();
         layout.add(searchField);
 
-        final ContentsLazyGrid searchResultsContentsGrid = new ContentsLazyGrid(false);
+        final ContentsLazyGrid searchResultsContentsGrid = new ContentsLazyGrid(false, false);
         searchResultsContentsGrid.setWidthFull();
         searchResultsContentsGrid.setDynamicHeight(false);
         searchResultsContentsGrid.setHeightFull();
