@@ -12,8 +12,8 @@ public interface ContentNodeRepository extends JpaRepository<ContentNode, Long>,
 	Long findIdByContentModuleAndContentId(String contentModuleId, Long contentId);
 
 	@Modifying
-	@Query("update CONTENT_NODE c set c.parentId = ?1 where c.id = ?2")
-	void moveContent(Long nodeId, Long contentNodeId);
+	@Query("update CONTENT_NODE c set c.parentId = ?2, c.hiddenByParent = ?3 where c.id = ?1")
+	void moveContent(Long contentNodeId, Long nodeId , boolean hiddenByParent);
 
     @Modifying
     @Query("update CONTENT_NODE c set c.hiddenByParent = ?2 where c.parentId = ?1")

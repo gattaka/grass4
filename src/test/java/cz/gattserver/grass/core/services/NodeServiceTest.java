@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import cz.gattserver.grass.core.interfaces.NodeTO;
+import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.domain.Node;
 import cz.gattserver.grass.core.model.repositories.NodeRepository;
 import cz.gattserver.grass.core.util.DBCleanTest;
@@ -83,7 +84,7 @@ public class NodeServiceTest extends DBCleanTest {
         assertEquals(nodeId, node.getId());
         assertNull(node.getParentId());
         assertTrue(node.getHidden());
-        assertTrue(node.getHiddenByParent());
+        assertFalse(node.getHiddenByParent());
         assertEquals("testHiddenNode", node.getName());
     }
 
@@ -326,5 +327,53 @@ public class NodeServiceTest extends DBCleanTest {
         assertEquals(2, results.size());
         assertEquals("testNode", results.getFirst().getName());
         assertEquals("testNode2", results.getLast().getName());
+    }
+
+    @Test
+    public void testHiddenByParent() {
+        Long nodeId1 = coreMockService.createMockRootNode(1, true);
+        Long nodeId2 = coreMockService.createMockRootNode(2, false);
+
+        Node node = nodeRepository.findById(nodeId1).orElseThrow();
+        assertTrue(node.getHidden());
+        assertFalse(node.getHiddenByParent());
+
+        node = nodeRepository.findById(nodeId2).orElseThrow();
+        assertFalse(node.getHidden());
+        assertFalse(node.getHiddenByParent());
+
+        Long nodeId3 = coreMockService.createMockNode(nodeId1, 3, false);
+        Long nodeId4 = coreMockService.createMockNode(nodeId2, 4, false);
+
+        node = nodeRepository.findById(nodeId3).orElseThrow();
+        assertFalse(node.getHidden());
+        assertTrue(node.getHiddenByParent());
+
+        node = nodeRepository.findById(nodeId4).orElseThrow();
+        assertFalse(node.getHidden());
+        assertFalse(node.getHiddenByParent());
+    }
+
+    @Test
+    public void testHiddenByMoveToParent() {
+        Long nodeId1 = coreMockService.createMockRootNode(1, true);
+        Long nodeId2 = coreMockService.createMockRootNode(2, false);
+        Long nodeId3 = coreMockService.createMockNode(nodeId2, 3, false);
+
+        Node node = nodeRepository.findById(nodeId3).orElseThrow();
+        assertFalse(node.getHidden());
+        assertFalse(node.getHiddenByParent());
+
+        nodeService.moveNode(nodeId3, nodeId1);
+
+        node = nodeRepository.findById(nodeId3).orElseThrow();
+        assertFalse(node.getHidden());
+        assertTrue(node.getHiddenByParent());
+
+        nodeService.moveNode(nodeId3, nodeId2);
+
+        node = nodeRepository.findById(nodeId3).orElseThrow();
+        assertFalse(node.getHidden());
+        assertFalse(node.getHiddenByParent());
     }
 }

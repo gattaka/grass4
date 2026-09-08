@@ -129,7 +129,9 @@ public class ContentNodeServiceImpl implements ContentNodeService {
 
     @Override
     public void moveContent(long nodeId, long contentNodeId) {
-        contentNodeRepository.moveContent(nodeId, contentNodeId);
+        Node node = nodeRepository.findById(nodeId).orElse(null);
+        contentNodeRepository.moveContent(contentNodeId, nodeId,
+                node != null && (node.getHidden() || node.getHiddenByParent()));
     }
 
     /**

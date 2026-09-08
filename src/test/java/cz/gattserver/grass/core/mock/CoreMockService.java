@@ -44,8 +44,22 @@ public class CoreMockService {
         return userId;
     }
 
+
+
     public Long createMockRootNode(int variant) {
-        NodeTO nodeTO = new NodeTO(null, MockUtils.MOCK_NODE_NAME + variant, null, null, false, false);
+        return createMockRootNode(variant, false);
+    }
+
+    public Long createMockRootNode(int variant, boolean hidden) {
+        return createMockNode(null, variant, hidden);
+    }
+
+    public Long createMockNode(long parentId, int variant) {
+        return createMockNode(parentId, variant, false);
+    }
+
+    public Long createMockNode(Long parentId, int variant, boolean hidden) {
+        NodeTO nodeTO = new NodeTO(null, MockUtils.MOCK_NODE_NAME + variant, null, parentId, hidden, false);
         return nodeService.save(nodeTO);
     }
 

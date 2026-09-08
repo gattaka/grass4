@@ -54,10 +54,10 @@ public class NodeServiceImpl implements NodeService {
 
     @Override
     public void moveNode(@NotNull Long nodeId, @NotNull Long newParentId) {
-        Node nodeEntity = nodeRepository.findById(nodeId).orElseThrow();
+        Node node = nodeRepository.findById(nodeId).orElseThrow();
 
         // beze změn
-        if (Objects.equals(nodeEntity.getParentId(), newParentId)) return;
+        if (Objects.equals(node.getParentId(), newParentId)) return;
 
         Node newParentEntity = newParentId == null ? null : nodeRepository.findById(newParentId).orElse(null);
 
@@ -80,12 +80,17 @@ public class NodeServiceImpl implements NodeService {
                         nodeRepository.findById(cycleCheckParent.getParentId()).orElse(null);
             }
 
-            nodeEntity.setParentId(newParentId);
+            node.setParentId(newParentId);
         } else {
-            nodeEntity.setParentId(null);
+            node.setParentId(null);
         }
 
-        nodeRepository.save(nodeEntity);
+        if (node.getParentId() != null) nodeRepository.findById(node.getParentId()).ifPresent(
+                parentNode -> node.setHiddenByParent(parentNode.getHiddenByParent() || parentNode.getHidden()));
+
+        updateHiddenByParent(node.getId(), node.getHidden(), node.getHiddenByParent());
+
+        nodeRepository.save(node);
     }
 
     @Override
@@ -127,18 +132,22 @@ public class NodeServiceImpl implements NodeService {
         node.setName(to.getName());
         node.setParentId(to.getParentId());
         node.setHidden(to.getHidden());
-        node.setHiddenByParent(to.getHiddenByParent());
+        node.setHiddenByParent(false);
 
         if (node.getParentId() != null) nodeRepository.findById(node.getParentId()).ifPresent(
                 parentNode -> node.setHiddenByParent(parentNode.getHiddenByParent() || parentNode.getHidden()));
 
         node.setId(nodeRepository.save(node).getId());
 
-        boolean hiddenByParent = node.getHidden() || node.getHiddenByParent();
-        contentNodeRepository.updateHiddenByParentByNode(node.getId(), hiddenByParent);
-        recursiveNodeSetHiddenByParent(node.getId(), hiddenByParent);
+        updateHiddenByParent(node.getId(), node.getHidden(), node.getHiddenByParent());
 
         return node.getId();
+    }
+
+    private void updateHiddenByParent(Long nodeId, boolean hidden, boolean hiddenByParent) {
+        boolean effectiveHiddenByParent = hidden || hiddenByParent;
+        contentNodeRepository.updateHiddenByParentByNode(nodeId, effectiveHiddenByParent);
+        recursiveNodeSetHiddenByParent(nodeId, hiddenByParent);
     }
 
     private void recursiveNodeSetHiddenByParent(Long nodeId, boolean hiddenByParent) {

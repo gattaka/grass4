@@ -7,12 +7,17 @@ import cz.gattserver.grass.core.interfaces.ContentNodeOverviewTO;
 import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.mock.CoreMockService;
+import cz.gattserver.grass.core.model.domain.ContentNode;
+import cz.gattserver.grass.core.model.domain.Node;
+import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
+import cz.gattserver.grass.core.model.repositories.NodeRepository;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.core.util.MockUtils;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +26,12 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
     @Autowired
     private ContentNodeService contentNodeService;
+
+    @Autowired
+    private ContentNodeRepository contentNodeRepository;
+
+    @Autowired
+    private NodeService nodeService;
 
     @Autowired
     private ContentTagService contentTagService;
@@ -118,8 +129,88 @@ public class ContentNodeServiceTest extends DBCleanTest {
     }
 
     @Test
+    public void testHiddenByParent() {
+        Long userId1 = coreMockService.createMockUser(1);
+        Long nodeId1 = coreMockService.createMockRootNode(1, true);
+        Long nodeId2 = coreMockService.createMockRootNode(2, false);
+
+        Long contentNodeId = coreMockService.createMockContentNode(30L, null, nodeId1, userId1, 1);
+        assertNotNull(contentNodeId);
+        ContentNode contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertTrue(contentNode.getHiddenByParent());
+
+        contentNodeId = coreMockService.createMockContentNode(31L, null, nodeId2, userId1, 2);
+        assertNotNull(contentNodeId);
+        contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertFalse(contentNode.getHiddenByParent());
+
+        Long nodeId3 = coreMockService.createMockNode(nodeId1, 3, false);
+        Long nodeId4 = coreMockService.createMockNode(nodeId2, 4, false);
+
+        contentNodeId = coreMockService.createMockContentNode(32L, null, nodeId3, userId1, 3);
+        assertNotNull(contentNodeId);
+        contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertTrue(contentNode.getHiddenByParent());
+
+        contentNodeId = coreMockService.createMockContentNode(33L, null, nodeId4, userId1, 4);
+        assertNotNull(contentNodeId);
+        contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertFalse(contentNode.getHiddenByParent());
+    }
+
+    @Test
+    public void testHiddenByMoveToParent() {
+        Long userId1 = coreMockService.createMockUser(1);
+        Long nodeId1 = coreMockService.createMockRootNode(1, true);
+        Long nodeId2 = coreMockService.createMockRootNode(2, false);
+        Long nodeId3 = coreMockService.createMockNode(nodeId1, 3, false);
+        Long nodeId4 = coreMockService.createMockNode(nodeId2, 3, false);
+
+        Long contentNodeId = coreMockService.createMockContentNode(30L, null, nodeId1, userId1, 1);
+        assertNotNull(contentNodeId);
+        ContentNode contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertTrue(contentNode.getHiddenByParent());
+
+        contentNodeService.moveContent(nodeId2, contentNodeId);
+
+        contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertFalse(contentNode.getHiddenByParent());
+
+        contentNodeService.moveContent(nodeId3, contentNodeId);
+
+        contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertTrue(contentNode.getHiddenByParent());
+
+        contentNodeService.moveContent(nodeId4, contentNodeId);
+
+        contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertFalse(contentNode.getHiddenByParent());
+
+        nodeService.moveNode(nodeId4, nodeId1);
+
+        contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertTrue(contentNode.getHiddenByParent());
+
+        nodeService.moveNode(nodeId4, nodeId2);
+
+        contentNode = contentNodeRepository.findById(contentNodeId).orElseThrow();
+        assertFalse(contentNode.getHidden());
+        assertFalse(contentNode.getHiddenByParent());
+    }
+
+    @Test
     public void testModify_fail() {
-        assertThrows(NullPointerException.class, () -> contentNodeService.modify(4, null, new HashSet<>(), false, LocalDateTime.of(1980, 2, 3, 10, 15)));
+        assertThrows(NullPointerException.class,
+                () -> contentNodeService.modify(4, null, new HashSet<>(), false, LocalDateTime.of(1980, 2, 3, 10, 15)));
     }
 
     @Test
@@ -227,8 +318,8 @@ public class ContentNodeServiceTest extends DBCleanTest {
         String moduleId = "mockModule";
         Long contentId = 2L;
         String name = "Test obsah";
-        long contentNodeId = contentNodeService.save(moduleId, contentId, name, null, false, nodeId, userId, false, null,
-                null);
+        long contentNodeId =
+                contentNodeService.save(moduleId, contentId, name, null, false, nodeId, userId, false, null, null);
 
         assertEquals(1, contentNodeService.getCount());
         ContentNodeTO contentNode = contentNodeService.getById(contentNodeId);
@@ -247,14 +338,16 @@ public class ContentNodeServiceTest extends DBCleanTest {
     public void testSave_withoutContentModuleId() {
         Long userId = coreMockService.createMockUser(1);
         Long nodeId = coreMockService.createMockRootNode(2);
-        assertThrows(NullPointerException.class, () -> contentNodeService.save(null, 2L, "Test obsah", null, false, nodeId, userId, false, null, null));
+        assertThrows(NullPointerException.class,
+                () -> contentNodeService.save(null, 2L, "Test obsah", null, false, nodeId, userId, false, null, null));
     }
 
     @Test
     public void testSave_withoutName() {
         Long userId = coreMockService.createMockUser(1);
         Long nodeId = coreMockService.createMockRootNode(2);
-        assertThrows(NullPointerException.class, () -> contentNodeService.save("testModule", 2L, null, null, false, nodeId, userId, false, null, null));
+        assertThrows(NullPointerException.class,
+                () -> contentNodeService.save("testModule", 2L, null, null, false, nodeId, userId, false, null, null));
     }
 
     @Test
@@ -275,8 +368,8 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertEquals(1, contentNodeService.getCountByFilter(new ContentNodeFilterTO().setParentNodeId(nodeId1)));
         assertEquals(2, contentNodeService.getCountByFilter(new ContentNodeFilterTO().setParentNodeId(nodeId2)));
 
-        List<ContentNodeOverviewTO> contentNodesByNode = contentNodeService
-                .getByFilter(new ContentNodeFilterTO().setParentNodeId(nodeId2), 0, 10);
+        List<ContentNodeOverviewTO> contentNodesByNode =
+                contentNodeService.getByFilter(new ContentNodeFilterTO().setParentNodeId(nodeId2), 0, 10);
         assertEquals(2, contentNodesByNode.size());
 
         ContentNodeOverviewTO contentNodeByNode = contentNodesByNode.getFirst();
