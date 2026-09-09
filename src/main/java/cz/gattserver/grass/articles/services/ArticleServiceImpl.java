@@ -18,12 +18,16 @@ import cz.gattserver.grass.articles.events.ArticlesProcessResultEvent;
 import cz.gattserver.grass.articles.events.ArticlesProcessStartEvent;
 import cz.gattserver.grass.articles.model.*;
 import cz.gattserver.grass.articles.plugins.register.PluginRegisterService;
+import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
 import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.modules.ArticlesContentModule;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.Resource;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
@@ -50,6 +54,9 @@ public class ArticleServiceImpl implements ArticleService {
     private static final String ATTACHMENT_DIR_PREFIX = "attachments-";
 
     private static final Logger logger = LoggerFactory.getLogger(ArticleServiceImpl.class);
+
+    @Resource(name = "articlesViewerPageFactory")
+    private PageFactory articlesViewerPageFactory;
 
     @Value("${articles.root.path}")
     private String articlesRootPath;
@@ -309,9 +316,29 @@ public class ArticleServiceImpl implements ArticleService {
         articleJSCodeRepository.saveAll(createJSCodesSet(articleId, jsCodesSet));
     }
 
+    private String getViewerPageName() {
+        return articlesViewerPageFactory.getPageName();
+    }
+
     @Override
-    public ArticleTO getArticleForDetail(Long id, Long userId, boolean isAdmin) {
-        ArticleTO to = articleRepository.findByForDetailId(id, userId, isAdmin);
+    public ArticleTO getArticleForDetail(Long id) {
+        return getArticleForDetail(id, null);
+    }
+
+    @Override
+    public ArticleTO getArticleForDetail(Long id, @Nullable String explicitAccessHash) {
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        boolean explicitAccess =
+                contentNodeService.createExplicitAccessHash(getViewerPageName(), id).equals(explicitAccessHash) ||
+                        userInfoTO.isAdmin();
+        return innerGetArticleForDetail(id, explicitAccess);
+    }
+
+    private ArticleTO innerGetArticleForDetail(Long id, boolean explicitAccess) {
+        Objects.requireNonNull(id);
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+
+        ArticleTO to = articleRepository.findByForDetailId(id, userInfoTO.getId(), explicitAccess);
         if (to == null) return null;
         to.getPluginCSSResources().addAll(articleCSSResourceRepository.findByArticleId(id));
         to.getPluginJSResources().addAll(articleJSResourceRepository.findByArticleId(id));
@@ -328,12 +355,13 @@ public class ArticleServiceImpl implements ArticleService {
         List<Long> ids = articleRepository.findAllIds();
         int current = 0;
         for (Long id : ids) {
-            ArticleTO articleTO = getArticleForDetail(id, null, true);
+            ArticleTO articleTO = innerGetArticleForDetail(id, true);
             Context context = processArticle(articleTO.getText(), contextRoot);
             articleRepository.updateOutputs(articleTO.getId(), context.getOutput(),
                     HTMLTagsFilter.trim(context.getOutput()));
             processJSAndCSS(id, id, context);
-            eventBus.publish(new ArticlesProcessProgressEvent("(" + current + "/" + total + ") " + articleTO.getName()));
+            eventBus.publish(
+                    new ArticlesProcessProgressEvent("(" + current + "/" + total + ") " + articleTO.getName()));
             current++;
         }
 

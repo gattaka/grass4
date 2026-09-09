@@ -89,11 +89,9 @@ public class ArticlesResource {
     @RequestMapping(value = "/article", method = RequestMethod.GET)
     public ResponseEntity<ArticleTO> show(@RequestParam(value = "id") Long id) {
         log.info("articles /article volán");
-        UserInfoTO user = securityService.getCurrentUser();
         ArticleTO articleRESTTO;
-        articleRESTTO = articleService.getArticleForDetail(id, user.getId(), user.isAdmin());
+        articleRESTTO = articleService.getArticleForDetail(id);
         if (articleRESTTO == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         return new ResponseEntity<>(articleRESTTO, HttpStatus.OK);
     }
-
 }

@@ -166,9 +166,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
             articleEditorTO.setDraftText("");
             articleEditorTO.setDraftHidden(false);
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
-            ArticleTO existingArticleTO =
-                    articleService.getArticleForDetail(identifier.id(), securityService.getCurrentUser().getId(),
-                            securityService.getCurrentUser().isAdmin());
+            ArticleTO existingArticleTO = articleService.getArticleForDetail(identifier.id());
             if (existingArticleTO == null) throw new GrassPageException(403);
             articleEditorTO.setNodeId(existingArticleTO.getParentId());
             articleEditorTO.setNodeName(existingArticleTO.getParentName());
@@ -193,8 +191,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
     }
 
     private void populateByExistingDraft(Long draftId) {
-        ArticleTO draftTO = articleService.getArticleForDetail(draftId, securityService.getCurrentUser().getId(),
-                securityService.getCurrentUser().isAdmin());
+        ArticleTO draftTO = articleService.getArticleForDetail(draftId);
         articleEditorTO.setDraftId(draftTO.getId());
         articleEditorTO.setNodeId(draftTO.getParentId());
         articleEditorTO.setNodeName(draftTO.getParentName());
@@ -208,8 +205,7 @@ public class ArticlesEditorPage extends Div implements HasUrlParameter<String>, 
 
         // jedná se o draft již existujícího obsahu?
         if (draftTO.getDraftSourceId() != null) {
-            ArticleTO existingArticleTO = articleService.getArticleForDetail(draftTO.getDraftSourceId(),
-                    securityService.getCurrentUser().getId(), securityService.getCurrentUser().isAdmin());
+            ArticleTO existingArticleTO = articleService.getArticleForDetail(draftTO.getDraftSourceId());
             if (existingArticleTO == null) throw new GrassPageException(403);
             articleEditorTO.setExistingArticleId(existingArticleTO.getId());
         }

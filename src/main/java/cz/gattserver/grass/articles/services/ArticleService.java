@@ -2,6 +2,7 @@ package cz.gattserver.grass.articles.services;
 
 import cz.gattserver.grass.articles.AttachmentsOperationResult;
 import cz.gattserver.grass.articles.editor.parser.interfaces.*;
+import jakarta.annotation.Nullable;
 
 import java.io.InputStream;
 import java.nio.file.Path;
@@ -25,9 +26,12 @@ public interface ArticleService {
      * Získá článek dle jeho identifikátoru
      *
      * @param id identifikátor
-     * @return DTO článku
+     * @param explicitAccessHash hash pro explicitní přístup
+     * @return TO článku
      */
-    ArticleTO getArticleForDetail(Long id, Long userId, boolean isAdmin);
+    ArticleTO getArticleForDetail(Long id, @Nullable String explicitAccessHash);
+
+    ArticleTO getArticleForDetail(Long id);
 
     /**
      * Spustí přegenerování všech článků

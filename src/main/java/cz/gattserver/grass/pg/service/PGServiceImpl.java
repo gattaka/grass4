@@ -321,7 +321,7 @@ public class PGServiceImpl implements PGService {
         return findPhotogalleryForDetail(id, null);
     }
 
-    private String getPGModuleName() {
+    private String getViewerPageName() {
         return pgViewerPageFactory.getPageName();
     }
 
@@ -330,7 +330,7 @@ public class PGServiceImpl implements PGService {
         Objects.requireNonNull(id);
         UserInfoTO userInfoTO = securityService.getCurrentUser();
         boolean explicitAccess =
-                contentNodeService.createExplicitAccessHash(getPGModuleName(), id).equals(explicitAccessHash) ||
+                contentNodeService.createExplicitAccessHash(getViewerPageName(), id).equals(explicitAccessHash) ||
                         userInfoTO.isAdmin();
         PhotogalleryTO to = photogalleryRepository.findForDetailById(id, userInfoTO.getId(), explicitAccess);
         if (to == null) return null;
