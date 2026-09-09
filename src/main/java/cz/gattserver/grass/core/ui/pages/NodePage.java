@@ -10,17 +10,20 @@ import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.grid.Grid;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.ui.CopyTextDialog;
 import cz.gattserver.common.vaadin.dialogs.ConfirmDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
+import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.NodeService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.dialogs.MoveIntoNodeDialog;
+import cz.gattserver.grass.core.ui.pages.factories.NodePageFactory;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 
@@ -52,15 +55,18 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
     private final CoreACLService coreACLService;
     private final SecurityService securityService;
 
+    private final NodePageFactory nodePageFactory;
+
     private NodeTO nodeTO;
     private boolean explicitAccess;
 
     public NodePage(ContentNodeService contentNodeService, NodeService nodeService, CoreACLService coreACLService,
-                    SecurityService securityService) {
+                    SecurityService securityService, NodePageFactory nodePageFactory) {
         this.contentNodeService = contentNodeService;
         this.nodeService = nodeService;
         this.coreACLService = coreACLService;
         this.securityService = securityService;
+        this.nodePageFactory = nodePageFactory;
     }
 
     @Override
@@ -155,6 +161,15 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
                         newParentTO -> onMoveAction(nodesGrid, toMoveTO, newParentTO)).open();
             }, nodesGrid);
             buttonLayout.add(moveBtn);
+
+            Button linkBtn = componentFactory.createExplicitLinkGridButton(toLinkTO -> {
+                String explicitAccessHash = nodeService.createExplicitAccessHash(toLinkTO.getId());
+                String link = URLIdentifierUtils.createURLIdentifier(toLinkTO.getId(), toLinkTO.getName(),
+                        explicitAccessHash);
+                String url = UIUtils.getPageURL(nodePageFactory, link);
+                new CopyTextDialog(UIUtils.getURLBase() + url).open();
+            }, nodesGrid);
+            buttonLayout.add(linkBtn);
 
             buttonLayout.add(
                     componentFactory.createDeleteGridButton(toDeleteTO -> onDeleteNode(nodesGrid, toDeleteTO.getId()),

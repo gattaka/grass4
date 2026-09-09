@@ -171,6 +171,10 @@ public class ComponentFactory {
         return btn;
     }
 
+    public <T> Button createExplicitLinkGridButton(Consumer<T> clickListener, Grid<T> grid) {
+        return createGridSingleButton(this::createExplicitLinkButton, clickListener, grid);
+    }
+
     public Button createHideButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button btn = new Button("Skrýt", clickListener);
         btn.setIcon(VaadinIcon.EYE_SLASH.create());
