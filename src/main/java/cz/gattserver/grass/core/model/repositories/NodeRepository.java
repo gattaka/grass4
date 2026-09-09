@@ -19,6 +19,6 @@ public interface NodeRepository extends JpaRepository<Node, Long>, NodeRepositor
     void updateHidden(Long id, boolean hidden);
 
     @Modifying
-    @Query("update NODE n set n.hiddenByParent = ?2 where n.id = ?1")
-    void updateHiddenByParent(Long id, boolean hiddenByParent);
+    @Query("update NODE n set n.hiddenByParent = ?2 where n.parentId = ?1")
+    void updateHiddenByParent(Long parentId, boolean hiddenByParent);
 }

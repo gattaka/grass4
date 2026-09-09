@@ -4,12 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import cz.gattserver.grass.core.interfaces.NodeTO;
-import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.domain.Node;
 import cz.gattserver.grass.core.model.repositories.NodeRepository;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.core.mock.CoreMockService;
 import cz.gattserver.grass.core.util.MockUtils;
+import cz.gattserver.grass.test.MockSecurityService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,6 +45,8 @@ public class NodeServiceTest extends DBCleanTest {
     private Filter springSecurityFilterChain;
 
     private MockMvc mvc;
+    @Autowired
+    private MockSecurityService mockSecurityService;
 
     @BeforeEach
     public void setup() {
@@ -86,6 +88,28 @@ public class NodeServiceTest extends DBCleanTest {
         assertTrue(node.getHidden());
         assertFalse(node.getHiddenByParent());
         assertEquals("testHiddenNode", node.getName());
+    }
+
+    @Test
+    public void testCreateNewHiddenNode2() {
+        Long node1Id = coreMockService.createMockRootNode(1, false);
+        Long node2Id = coreMockService.createMockNode(node1Id, 2, false);
+
+        Node node2 = nodeRepository.findById(node2Id).orElseThrow();
+        assertFalse(node2.getHidden());
+        assertFalse(node2.getHiddenByParent());
+
+        NodeTO to = nodeService.getNodeById(node1Id);
+        to.setHidden(true);
+        nodeService.save(to);
+
+        Node node1 = nodeRepository.findById(node1Id).orElseThrow();
+        assertTrue(node1.getHidden());
+        assertFalse(node2.getHiddenByParent());
+
+        node2 = nodeRepository.findById(node2Id).orElseThrow();
+        assertFalse(node2.getHidden());
+        assertTrue(node2.getHiddenByParent());
     }
 
     @Test
@@ -154,7 +178,7 @@ public class NodeServiceTest extends DBCleanTest {
         Long nodeId0 = createNewNode(null, false, "testParent");
         createNewNode(nodeId0, false, "testNode1");
         createNewNode(nodeId0, false, "testNode2");
-        List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeId0,false);
+        List<NodeTO> nodes = nodeService.getNodesByParentNode(nodeId0, false);
         assertEquals(2, nodes.size());
         assertEquals("testNode1", nodes.get(0).getName());
         assertEquals("testNode2", nodes.get(1).getName());
