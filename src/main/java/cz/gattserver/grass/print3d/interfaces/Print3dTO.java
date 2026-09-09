@@ -1,26 +1,41 @@
 package cz.gattserver.grass.print3d.interfaces;
 
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
+import com.querydsl.core.annotations.QueryProjection;
+import cz.gattserver.grass.core.interfaces.ContentNodeBaseTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
-@Setter
+import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 @Getter
-public class Print3dTO {
+@AllArgsConstructor
+public class Print3dTO implements ContentNodeBaseTO {
 
-	/**
-	 * Meta-informace o obsahu
-	 */
-	private ContentNodeTO contentNode;
+    private final Long id;
+    private final Long contentNodeId;
+    private final String name;
+    private final Long parentId;
+    private final String parentName;
+    private final LocalDateTime creationDate;
+    private final LocalDateTime lastModificationDate;
+    private final Long authorId;
+    private final String authorName;
+    private final boolean hidden;
+    private final boolean hiddenByParent;
+    private final boolean draft;
+    private final Long draftSourceId;
+    private final Set<ContentTagTO> contentTags;
 
-	/**
-	 * Relativní cesta (od kořene projektu) k adresáři s 3D projektem
-	 */
-	private String projectDir;
+    private final String projectDir;
 
-	/**
-	 * DB identifikátor
-	 */
-	private Long id;
-
+    @QueryProjection
+    public Print3dTO(Long id, Long contentNodeId, String name, Long parentId, String parentName,
+                     LocalDateTime creationDate, LocalDateTime lastModificationDate, Long authorId, String authorName,
+                     boolean hidden, boolean hiddenByParent, boolean draft, Long draftSourceId, String projectDir) {
+        this(id, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate, authorId, authorName,
+                hidden, hiddenByParent, draft, draftSourceId, new LinkedHashSet<>(), projectDir);
+    }
 }

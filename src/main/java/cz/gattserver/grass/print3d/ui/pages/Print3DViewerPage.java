@@ -28,7 +28,7 @@ import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
-import cz.gattserver.grass.core.interfaces.ContentNodeTO;
+import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
@@ -80,7 +80,6 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
     private String projectDir;
 
     private String identifierToken;
-    private String magickToken;
 
     private List<Print3dViewItemTO> items;
     private Grid<Print3dViewItemTO> grid;
@@ -98,19 +97,18 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
     @Override
     public String getPageTitle() {
-        return print3dTO.getContentNode().getName();
+        return print3dTO.getName();
     }
 
     @Override
     public void setParameter(BeforeEvent beforeEvent, @WildcardParameter String parameter) {
         String[] chunks = parameter.split("/");
         if (chunks.length > 0) identifierToken = chunks[0];
-        if (chunks.length > 1) magickToken = chunks[1];
 
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) throw new GrassPageException(404);
 
-        print3dTO = print3dService.getProjectForDetail(identifier.id());
+        print3dTO = print3dService.getProjectForDetail(identifier.id(), identifier.hash());
         if (print3dTO == null) throw new GrassPageException(404);
 
         projectDir = print3dTO.getProjectDir();
@@ -118,11 +116,10 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         boolean explicitAccess = identifier.hash() != null;
 
         removeAll();
-        ContentNodeTO contentNodeTO = print3dTO.getContentNode();
-        ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
+        ContentViewer contentViewer = new ContentViewer(createContent(), print3dTO, e -> onDeleteOperation(),
                 e -> UI.getCurrent()
                         .navigate(Print3dEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(contentNodeTO.getName(), Print3DViewerPage.class, parameter), explicitAccess);
+                new RouterLink(print3dTO.getName(), Print3DViewerPage.class, parameter), explicitAccess);
 
         add(contentViewer);
         contentViewer.getOperationsListLayout().add(componentFactory.createZipButton(
@@ -138,7 +135,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
     private boolean isAdminOrAuthor() {
         return securityService.getCurrentUser().isAdmin() ||
-                print3dTO.getContentNode().getAuthorId().equals(securityService.getCurrentUser().getId());
+                print3dTO.getAuthorId().equals(securityService.getCurrentUser().getId());
     }
 
     protected Div createContent() {
@@ -245,7 +242,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
             return link;
         })).setHeader("Stáhnout").setTextAlign(ColumnTextAlign.CENTER).setAutoWidth(true);
 
-        if (coreACLService.canModifyContent(print3dTO.getContentNode(), securityService.getCurrentUser())) {
+        if (coreACLService.canModifyContent(print3dTO, securityService.getCurrentUser())) {
             grid.addColumn(new ComponentRenderer<>(item -> componentFactory.createDeleteInlineButton(e -> {
                 print3dService.deleteFile(item, projectDir);
                 UI.getCurrent().getPage().reload();
@@ -272,7 +269,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         });
 
         Upload upload = getUpload();
-        if (coreACLService.canModifyContent(print3dTO.getContentNode(), securityService.getCurrentUser()))
+        if (coreACLService.canModifyContent(print3dTO, securityService.getCurrentUser()))
             layout.add(upload);
 
         Div statusRow = new Div();
@@ -298,8 +295,8 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
                     throw new RuntimeException(e);
                 }
             }
-            Print3dCreateTO payloadTO = new Print3dCreateTO(print3dTO.getContentNode().getName(), projectDir,
-                    print3dTO.getContentNode().getContentTagsAsStrings(), print3dTO.getContentNode().isHidden());
+            Print3dCreateTO payloadTO = new Print3dCreateTO(print3dTO.getName(), projectDir,
+                    print3dTO.getContentTags().stream().map(ContentTagTO::getName).toList(), print3dTO.isHidden());
             print3dService.modifyProject(print3dTO.getId(), payloadTO);
             UI.getCurrent().getPage().reload();
         }, () -> print3dService.getItems(projectDir).stream().map(Print3dViewItemTO::getName)
@@ -365,10 +362,8 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
 
     protected void onDeleteOperation() {
         ConfirmDialog confirmSubwindow = new ConfirmDialog("Opravdu si přejete smazat tento projekt ?", ev -> {
-            ContentNodeTO contentNodeTO = print3dTO.getContentNode();
-
             String urlIdentifier =
-                    URLIdentifierUtils.createURLIdentifier(contentNodeTO.getParentId(), contentNodeTO.getParentName());
+                    URLIdentifierUtils.createURLIdentifier(print3dTO.getParentId(), print3dTO.getParentName());
 
             // zdařilo se ? Pokud ano, otevři info okno a při
             // potvrzení jdi na kategorii

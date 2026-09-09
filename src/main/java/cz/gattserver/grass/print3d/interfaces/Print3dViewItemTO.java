@@ -1,5 +1,7 @@
 package cz.gattserver.grass.print3d.interfaces;
 
+import com.querydsl.core.annotations.QueryProjection;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.nio.file.Path;
@@ -9,6 +11,10 @@ public record Print3dViewItemTO(Path path, String onlyName, String extension, St
 
     @Serial
     private static final long serialVersionUID = 300196469450761540L;
+
+    @QueryProjection
+    public Print3dViewItemTO {
+    }
 
     public String getName() {
         if (onlyName == null) return null;

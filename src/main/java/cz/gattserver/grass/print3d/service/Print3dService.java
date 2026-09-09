@@ -3,6 +3,7 @@ package cz.gattserver.grass.print3d.service;
 import cz.gattserver.grass.print3d.interfaces.Print3dCreateTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
+import jakarta.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -41,9 +42,12 @@ public interface Print3dService {
     /**
      * Získá projekt dle jeho identifikátoru
      *
-     * @param id identifikátor
+     * @param id                 identifikátor
+     * @param explicitAccessHash hash pro explicitní přístup
      * @return TO projektu
      */
+    Print3dTO getProjectForDetail(Long id, @Nullable String explicitAccessHash);
+
     Print3dTO getProjectForDetail(Long id);
 
     /**

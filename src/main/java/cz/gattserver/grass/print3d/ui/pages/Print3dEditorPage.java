@@ -145,14 +145,14 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
 
             if (project == null) throw new GrassPageException(404);
 
-            nameField.setValue(project.getContentNode().getName());
-            for (ContentTagTO tagDTO : project.getContentNode().getContentTags())
+            nameField.setValue(project.getName());
+            for (ContentTagTO tagDTO : project.getContentTags())
                 keywords.addToken(tagDTO.getName());
 
-            hiddenCheckBox.setValue(project.getContentNode().isHidden());
+            hiddenCheckBox.setValue(project.isHidden());
 
             // nemá oprávnění upravovat tento obsah
-            if (!project.getContentNode().getAuthorName().equals(securityService.getCurrentUser().getName()) &&
+            if (!project.getAuthorName().equals(securityService.getCurrentUser().getName()) &&
                     !securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
         } else {
             log.debug("Neznámá operace: '{}'", operationToken);
@@ -330,7 +330,7 @@ public class Print3dEditorPage extends Div implements HasUrlParameter<String>, B
      */
     private void returnToProject() {
         UIUtils.removeOnbeforeunloadWarning().then(e -> UI.getCurrent().navigate(Print3DViewerPage.class,
-                URLIdentifierUtils.createURLIdentifier(project.getId(), project.getContentNode().getName())));
+                URLIdentifierUtils.createURLIdentifier(project.getId(), project.getName())));
     }
 
     /**

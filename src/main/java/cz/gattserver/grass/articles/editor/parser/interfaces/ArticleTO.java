@@ -28,6 +28,7 @@ public final class ArticleTO implements ContentNodeBaseTO {
     private final boolean draft;
     private final Long draftSourceId;
     private final Set<ContentTagTO> contentTags;
+
     private final String outputHTML;
     private final String text;
     private final String searchableOutput;

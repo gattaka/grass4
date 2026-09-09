@@ -3,8 +3,11 @@ package cz.gattserver.grass.print3d.service;
 import cz.gattserver.common.util.HumanBytesSizeFormatter;
 import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.grass.core.events.EventBus;
+import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.modules.Print3dModule;
 import cz.gattserver.grass.print3d.events.Print3dZipProcessProgressEvent;
 import cz.gattserver.grass.print3d.events.Print3dZipProcessResultEvent;
@@ -15,7 +18,8 @@ import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.Print3dViewItemTO;
 import cz.gattserver.grass.print3d.model.Print3d;
 import cz.gattserver.grass.print3d.model.Print3dRepository;
-import cz.gattserver.grass.print3d.util.Print3dMapper;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,21 +40,24 @@ import java.util.stream.Stream;
 public class Print3dServiceImpl implements Print3dService {
 
     private final ContentNodeService contentNodeService;
-    private final Print3dMapper projectMapper;
     private final Print3dRepository print3dRepository;
     private final FileSystemService fileSystemService;
+    private final SecurityService securityService;
     private final EventBus eventBus;
+
+    @Resource(name = "print3dViewerPageFactory")
+    private PageFactory print3dViewerPageFactory;
 
     @Value("${print3d.root.path}")
     private String rootPathName;
 
-    public Print3dServiceImpl(ContentNodeService contentNodeService, Print3dMapper projectMapper,
+    public Print3dServiceImpl(ContentNodeService contentNodeService,
                               Print3dRepository print3dRepository, FileSystemService fileSystemService,
-                              EventBus eventBus) {
+                              SecurityService securityService, EventBus eventBus) {
         this.contentNodeService = contentNodeService;
-        this.projectMapper = projectMapper;
         this.print3dRepository = print3dRepository;
         this.fileSystemService = fileSystemService;
+        this.securityService = securityService;
         this.eventBus = eventBus;
     }
 
@@ -96,7 +103,7 @@ public class Print3dServiceImpl implements Print3dService {
     private Print3d saveProject(String projectDir, Print3dCreateTO payloadTO, Long existingId, Long nodeId,
                                 Long authorId) {
 
-        Print3d project = existingId == null ? new Print3d() : print3dRepository.findById(existingId).orElse(null);
+        Print3d project = existingId == null ? new Print3d() : print3dRepository.findById(existingId).orElseThrow();
 
         // nasetuj do ní vše potřebné
         project.setProjectDir(projectDir);
@@ -133,12 +140,25 @@ public class Print3dServiceImpl implements Print3dService {
         return tmpDirFile.getFileName().toString();
     }
 
+    private String getViewerPageName() {
+        return print3dViewerPageFactory.getPageName();
+    }
+
+    @Override
+    public Print3dTO getProjectForDetail(Long id, @Nullable String explicitAccessHash) {
+        Validate.notNull(id, "Id nesmí být null");
+
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        boolean explicitAccess =
+                contentNodeService.createExplicitAccessHash(getViewerPageName(), id).equals(explicitAccessHash) ||
+                        userInfoTO.isAdmin();
+
+        return print3dRepository.findByForDetailId(id, userInfoTO.getId(), userInfoTO.isAdmin() || explicitAccess);
+    }
+
     @Override
     public Print3dTO getProjectForDetail(Long id) {
-        Validate.notNull(id, "Id nesmí být null");
-        Print3d project = print3dRepository.findById(id).orElse(null);
-        if (project == null) return null;
-        return projectMapper.mapProjectForDetail(project);
+        return getProjectForDetail(id, null);
     }
 
     /**
