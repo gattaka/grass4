@@ -45,9 +45,8 @@
     height: 27px;
     text-align: center;
     background-color: #d5ebff;
-    text-align: center;
     margin-bottom: 15px;
-    margin-left: 0px !important;
+    margin-left: 0 !important;
     display: block !important;
 }
 
