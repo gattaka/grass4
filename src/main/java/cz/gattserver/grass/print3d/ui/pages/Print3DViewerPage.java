@@ -113,17 +113,16 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         print3dTO = print3dService.getProjectForDetail(identifier.id());
         if (print3dTO == null) throw new GrassPageException(404);
 
-        if (!"MAG1CK".equals(magickToken) && !print3dTO.getContentNode().isHidden() && !isAdminOrAuthor())
-            throw new GrassPageException(403);
-
         projectDir = print3dTO.getProjectDir();
+
+        boolean explicitAccess = identifier.hash() != null;
 
         removeAll();
         ContentNodeTO contentNodeTO = print3dTO.getContentNode();
         ContentViewer contentViewer = new ContentViewer(createContent(), contentNodeTO, e -> onDeleteOperation(),
                 e -> UI.getCurrent()
                         .navigate(Print3dEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(contentNodeTO.getName(), Print3DViewerPage.class, parameter));
+                new RouterLink(contentNodeTO.getName(), Print3DViewerPage.class, parameter), explicitAccess);
 
         add(contentViewer);
         contentViewer.getOperationsListLayout().add(componentFactory.createZipButton(
@@ -360,15 +359,16 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
     }
 
     private String getItemURL(String file) {
-        return UIUtils.getContextPath() + "/" + Print3dRequestHandlerConfig.PRINT3D_PATH + "/" + print3dTO.getProjectDir() +
-                "/" + file;
+        return UIUtils.getContextPath() + "/" + Print3dRequestHandlerConfig.PRINT3D_PATH + "/" +
+                print3dTO.getProjectDir() + "/" + file;
     }
 
     protected void onDeleteOperation() {
         ConfirmDialog confirmSubwindow = new ConfirmDialog("Opravdu si přejete smazat tento projekt ?", ev -> {
             ContentNodeTO contentNodeTO = print3dTO.getContentNode();
 
-            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(contentNodeTO.getParentId(), contentNodeTO.getParentName());
+            String urlIdentifier =
+                    URLIdentifierUtils.createURLIdentifier(contentNodeTO.getParentId(), contentNodeTO.getParentName());
 
             // zdařilo se ? Pokud ano, otevři info okno a při
             // potvrzení jdi na kategorii

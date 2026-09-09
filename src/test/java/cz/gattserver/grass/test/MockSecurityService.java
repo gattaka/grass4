@@ -1,13 +1,14 @@
 package cz.gattserver.grass.test;
 
 import cz.gattserver.grass.core.interfaces.UserInfoTO;
+import cz.gattserver.grass.core.security.CoreRole;
 import cz.gattserver.grass.core.security.Role;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.services.impl.LoginResult;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -16,7 +17,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.HashSet;
 
@@ -27,17 +27,32 @@ public class MockSecurityService implements SecurityService {
     @Value("${explicit.access.salt}")
     private String explicitAccessSalt;
 
+    @Setter
+    @Getter
     private UserInfoTO infoTO;
 
     public MockSecurityService() {
-        reset();
+        resetAsMock();
     }
 
-    public void reset() {
+    public void resetAsMock() {
         infoTO = new UserInfoTO();
         infoTO.setName("mockUser");
         infoTO.setRoles(new HashSet<>());
         infoTO.setId(33333L);
+    }
+
+    public void resetAsEmpty() {
+        infoTO = new UserInfoTO();
+    }
+
+    public void resetAs(Long userId1, boolean admin) {
+        infoTO.setId(userId1);
+        if (admin) {
+            infoTO.getRoles().add(CoreRole.ADMIN);
+        } else {
+            infoTO.getRoles().remove(CoreRole.ADMIN);
+        }
     }
 
     @Override
@@ -52,7 +67,7 @@ public class MockSecurityService implements SecurityService {
     }
 
     @Override
-    public String computeAccessHash(String value)  {
+    public String computeAccessHash(String value) {
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-256");
@@ -62,14 +77,6 @@ public class MockSecurityService implements SecurityService {
         md.update(explicitAccessSalt.getBytes(StandardCharsets.UTF_8));
         byte[] hash = md.digest(value.getBytes());
         return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
-    }
-
-    public UserInfoTO getInfoTO() {
-        return infoTO;
-    }
-
-    public void setInfoTO(UserInfoTO infoTO) {
-        this.infoTO = infoTO;
     }
 
     public void setRoles(HashSet<Role> hashSet) {

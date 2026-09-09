@@ -190,5 +190,5 @@ public interface ContentNodeService {
      */
     List<String> getTagsByContentId(Long id);
 
-    String createExplicitAccessHash(Long id);
+    String createExplicitAccessHash(String pageName, Long id);
 }

@@ -49,25 +49,23 @@ public class PGResource {
     // http://localhost:8180/web/ws/pg/count
     @RequestMapping("/count")
     public ResponseEntity<Integer> count(@RequestParam(value = "filter", required = false) String filter) {
-        UserInfoTO currentUser = securityService.getCurrentUser();
         return new ResponseEntity<>(
-                pgService.countAllPhotogalleriesForREST(filter, currentUser.getId(), currentUser.isAdmin()),
+                pgService.countAllPhotogalleriesForREST(filter),
                 HttpStatus.OK);
     }
 
     // http://localhost:8180/web/ws/pg/list?page=1&pageSize=10
     @RequestMapping("/list")
-    public ResponseEntity<List<PhotogalleryRESTOverviewTO>> list(
-            @RequestParam(value = "page") int page,
-            @RequestParam(value = "pageSize") int pageSize,
-            @RequestParam(value = "filter", required = false) String filter) {
-        UserInfoTO currentUser = securityService.getCurrentUser();
-        int count = pgService.countAllPhotogalleriesForREST(filter, currentUser.getId(), currentUser.isAdmin());
+    public ResponseEntity<List<PhotogalleryRESTOverviewTO>> list(@RequestParam(value = "page") int page,
+                                                                 @RequestParam(value = "pageSize") int pageSize,
+                                                                 @RequestParam(value = "filter", required = false)
+                                                                 String filter) {
+        int count = pgService.countAllPhotogalleriesForREST(filter);
         // startIndex nesmí být víc než je počet, endIndex může být s tím si JPA
         // poradí a sníží ho
         if (page * pageSize > count) return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         return new ResponseEntity<>(
-                pgService.findAllPhotogalleriesForREST(filter, currentUser.getId(), currentUser.isAdmin(),
+                pgService.findAllPhotogalleriesForREST(filter,
                         PageRequest.of(page, pageSize)), HttpStatus.OK);
     }
 
@@ -76,8 +74,7 @@ public class PGResource {
     public ResponseEntity<PhotogalleryRESTTO> gallery(@RequestParam(value = "id") Long id) {
         PhotogalleryRESTTO gallery;
         try {
-            UserInfoTO currentUser = securityService.getCurrentUser();
-            gallery = pgService.findPhotogalleryForREST(id, currentUser.getId(), currentUser.isAdmin());
+            gallery = pgService.findPhotogalleryForREST(id);
         } catch (UnauthorizedAccessException e) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
@@ -88,8 +85,7 @@ public class PGResource {
     private void innerPhoto(Long id, String fileName, PhotoVersion photoVersion, HttpServletResponse response) {
         Path file;
         try {
-            UserInfoTO currentUser = securityService.getCurrentUser();
-            file = pgService.findPhotoForREST(id, fileName, photoVersion, currentUser.getId(), currentUser.isAdmin());
+            file = pgService.findPhotoForREST(id, fileName, photoVersion);
         } catch (UnauthorizedAccessException e) {
             response.setStatus(HttpStatus.FORBIDDEN.value());
             return;
@@ -112,22 +108,19 @@ public class PGResource {
 
     // http://localhost:8180/web/ws/pg/photo?id=364&fileName=shocked_kittens_cr.jpg
     @RequestMapping("/photo")
-    public void photo(@RequestParam(value = "id") Long id, String fileName,
-                      HttpServletResponse response) {
+    public void photo(@RequestParam(value = "id") Long id, String fileName, HttpServletResponse response) {
         innerPhoto(id, fileName, PhotoVersion.FULL, response);
     }
 
     // http://localhost:8180/web/ws/pg/slideshow?id=364&fileName=shocked_kittens_cr.jpg
     @RequestMapping("/slideshow")
-    public void slideshow(@RequestParam(value = "id") Long id, String fileName,
-                          HttpServletResponse response) {
+    public void slideshow(@RequestParam(value = "id") Long id, String fileName, HttpServletResponse response) {
         innerPhoto(id, fileName, PhotoVersion.SLIDESHOW, response);
     }
 
     // http://localhost:8180/web/ws/pg/mini?id=364&fileName=shocked_kittens_cr.jpg
     @RequestMapping("/mini")
-    public void mini(@RequestParam(value = "id") Long id, String fileName,
-                     HttpServletResponse response) {
+    public void mini(@RequestParam(value = "id") Long id, String fileName, HttpServletResponse response) {
         innerPhoto(id, fileName, PhotoVersion.MINI, response);
     }
 
@@ -168,12 +161,13 @@ public class PGResource {
     public ResponseEntity<String> upload(@RequestParam(value = "galleryId") Long galleryId,
                                          @RequestParam(value = "files") MultipartFile[] uploadedFile)
             throws IllegalStateException, IOException {
-        UserInfoTO userInfoTO = securityService.getCurrentUser();
-        if (userInfoTO.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         log.info("/upload volán");
+
+        PhotogalleryTO to = pgService.findPhotogalleryForDetail(galleryId);
+        if (to == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
         try {
-            PhotogalleryTO to =
-                    pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
+
             for (MultipartFile file : uploadedFile)
                 pgService.uploadFile(file.getInputStream(), file.getOriginalFilename(), to.getPhotogalleryPath());
 
@@ -188,18 +182,19 @@ public class PGResource {
     @RequestMapping(value = "/process", method = RequestMethod.POST)
     public ResponseEntity<String> process(@RequestParam(value = "galleryId") Long galleryId)
             throws IllegalStateException, IOException {
-        UserInfoTO userInfoTO = securityService.getCurrentUser();
-        if (userInfoTO.getId() == null) return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         log.info("/process volán");
+
+        PhotogalleryTO to = pgService.findPhotogalleryForDetail(galleryId);
+        if (to == null) return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+
         try {
+
             UUID operationId = UUID.randomUUID();
 
             PGEventsHandler eventsHandler = new PGEventsHandler();
             eventBus.subscribe(eventsHandler);
             CompletableFuture<PGEventsHandler> future = eventsHandler.expectEvent(operationId);
 
-            PhotogalleryTO to =
-                    pgService.findPhotogalleryForDetail(galleryId, userInfoTO.getId(), userInfoTO.isAdmin());
             PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(to.getName(), to.getPhotogalleryPath(),
                     to.getContentTags().stream().map(ContentTagTO::getName).toList(), to.isHidden(), true);
             pgService.modifyPhotogallery(operationId, to.getId(), payloadTO, LocalDateTime.now());

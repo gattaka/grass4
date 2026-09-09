@@ -105,19 +105,16 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         String[] chunks = parameter.split("/");
         String identifierToken = null;
         String pageToken = null;
-        String extraToken = null;
         if (chunks.length > 0) identifierToken = chunks[0];
         if (chunks.length > 1) pageToken = chunks[1];
-        if (chunks.length > 2) extraToken = chunks[2];
 
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
         if (identifier == null) throw new GrassPageException(404);
 
-        UserInfoTO userInfoTO = securityService.getCurrentUser();
-
-        photogalleryTO =
-                pgService.findPhotogalleryForDetail(identifier.id(), userInfoTO.getId(), userInfoTO.isAdmin());
+        photogalleryTO = pgService.findPhotogalleryForDetail(identifier.id(), identifier.hash());
         if (photogalleryTO == null) throw new GrassPageException(404);
+
+        boolean explicitAccess = identifier.hash() != null;
 
         galleryDir = photogalleryTO.getPhotogalleryPath();
 
@@ -133,7 +130,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         ContentViewer contentViewer = new ContentViewer(createContent(), photogalleryTO, e -> onDeleteOperation(),
                 e -> UI.getCurrent()
                         .navigate(PGEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(photogalleryTO.getName(), PGViewerPage.class, parameter));
+                new RouterLink(photogalleryTO.getName(), PGViewerPage.class, parameter), explicitAccess);
         add(contentViewer);
 
         Button downloadZip =
@@ -148,12 +145,10 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         UIUtils.turnOffRouterAnchors();
     }
 
-
     @Override
     public String getPageTitle() {
         return photogalleryTO.getName();
     }
-
 
     private boolean isAdminOrAuthor() {
         return securityService.getCurrentUser().isAdmin() ||
@@ -382,8 +377,8 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         eventBus.subscribe(PGViewerPage.this);
         progressDialog = new ProgressDialog();
         PhotogalleryCreateTO payloadTO = new PhotogalleryCreateTO(photogalleryTO.getName(), galleryDir,
-                photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(),
-                photogalleryTO.isHidden(), false);
+                photogalleryTO.getContentTags().stream().map(ContentTagTO::getName).toList(), photogalleryTO.isHidden(),
+                false);
         pgService.modifyPhotogallery(UUID.randomUUID(), photogalleryTO.getId(), payloadTO,
                 photogalleryTO.getCreationDate());
     }

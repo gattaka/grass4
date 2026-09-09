@@ -9,24 +9,14 @@ import cz.gattserver.grass.core.interfaces.ContentNodeTO;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
 import cz.gattserver.grass.core.mock.CoreMockService;
 import cz.gattserver.grass.core.model.domain.ContentNode;
-import cz.gattserver.grass.core.model.domain.Node;
 import cz.gattserver.grass.core.model.repositories.ContentNodeRepository;
-import cz.gattserver.grass.core.model.repositories.NodeRepository;
 import cz.gattserver.grass.core.security.CoreRole;
-import cz.gattserver.grass.core.services.impl.LoginResult;
 import cz.gattserver.grass.core.util.DBCleanTest;
 import cz.gattserver.grass.core.util.MockUtils;
 import cz.gattserver.grass.test.MockSecurityService;
-import jakarta.annotation.Resource;
-import jakarta.servlet.Filter;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -56,7 +46,7 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
     @BeforeEach
     public void setup() {
-        mockSecurityService.reset();
+        mockSecurityService.resetAsMock();
     }
 
     @Test
@@ -441,16 +431,16 @@ public class ContentNodeServiceTest extends DBCleanTest {
 
         ContentNodeOverviewTO contentNodeByNode = contentNodesByNode.getFirst();
         assertEquals(contentNode3, contentNodeByNode.id());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByNode.contentReaderID());
-        assertEquals(Long.valueOf(25), contentNodeByNode.contentID());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByNode.contentReaderId());
+        assertEquals(Long.valueOf(25), contentNodeByNode.contentId());
         assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 3, contentNodeByNode.name());
         assertEquals(userId2, contentNodeByNode.authorId());
         assertEquals(nodeId2, contentNodeByNode.parentNodeId());
 
         contentNodeByNode = contentNodesByNode.get(1);
         assertEquals(contentNode2, contentNodeByNode.id());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 2, contentNodeByNode.contentReaderID());
-        assertEquals(Long.valueOf(30L), contentNodeByNode.contentID());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 2, contentNodeByNode.contentReaderId());
+        assertEquals(Long.valueOf(30L), contentNodeByNode.contentId());
         assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 2, contentNodeByNode.name());
         assertEquals(userId1, contentNodeByNode.authorId());
         assertEquals(nodeId2, contentNodeByNode.parentNodeId());
@@ -501,8 +491,8 @@ public class ContentNodeServiceTest extends DBCleanTest {
         assertEquals(1, contentNodesByTag.size());
         ContentNodeOverviewTO contentNodeByTag = contentNodesByTag.getFirst();
         assertEquals(contentNode3, contentNodeByTag.id());
-        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByTag.contentReaderID());
-        assertEquals(Long.valueOf(25L), contentNodeByTag.contentID());
+        assertEquals(MockUtils.MOCK_CONTENTNODE_MODULE + 3, contentNodeByTag.contentReaderId());
+        assertEquals(Long.valueOf(25L), contentNodeByTag.contentId());
         assertEquals(MockUtils.MOCK_CONTENTNODE_NAME + 3, contentNodeByTag.name());
         assertEquals(userId2, contentNodeByTag.authorId());
         assertEquals(nodeId2, contentNodeByTag.parentNodeId());

@@ -74,9 +74,10 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
 
-        explicitAccess = identifier.hash() != null;
-
         nodeTO = nodeService.getNodeById(identifier.id(), identifier.hash());
+        if (nodeTO == null) throw new GrassPageException(404);
+
+        explicitAccess = identifier.hash() != null;
 
         // Navigační breadcrumb
         createBreadcrumb(layout);

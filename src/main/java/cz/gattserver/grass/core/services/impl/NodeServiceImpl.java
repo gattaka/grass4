@@ -52,11 +52,9 @@ public class NodeServiceImpl implements NodeService {
     }
 
     private NodeTO innerGetNodeById(Long nodeId, String explicitAccessHash) {
-        if (createExplicitAccessHash(nodeId).equals(explicitAccessHash)) {
-            return nodeRepository.findAndMapById(nodeId, true);
-        } else {
-            return nodeRepository.findAndMapById(nodeId, securityService.getCurrentUser().isAdmin());
-        }
+        boolean access = createExplicitAccessHash(nodeId).equals(explicitAccessHash) ||
+                securityService.getCurrentUser().isAdmin();
+        return nodeRepository.findAndMapById(nodeId, access);
     }
 
     @Override

@@ -5,6 +5,7 @@ import cz.gattserver.grass.pg.events.PGProcessProgressEvent;
 import cz.gattserver.grass.pg.events.PGProcessResultEvent;
 import cz.gattserver.grass.pg.events.PGProcessStartEvent;
 import cz.gattserver.grass.pg.interfaces.*;
+import jakarta.annotation.Nullable;
 import org.springframework.data.domain.Pageable;
 
 import java.io.IOException;
@@ -55,10 +56,13 @@ public interface PGService {
     /**
      * Získá galerii dle jeho identifikátoru
      *
-     * @param id identifikátor
+     * @param id                 identifikátor
+     * @param explicitAccessHash hash pro explicitní přístup
      * @return TO galerie
      */
-    PhotogalleryTO findPhotogalleryForDetail(Long id, Long userId, boolean isAdmin);
+    PhotogalleryTO findPhotogalleryForDetail(Long id, @Nullable String explicitAccessHash);
+
+    PhotogalleryTO findPhotogalleryForDetail(Long id);
 
     /**
      * Vytvoří nový adresář pro fotogalerii
@@ -70,19 +74,17 @@ public interface PGService {
     /**
      * Získá počet galerií pro použití REST
      *
-     * @param userId id přihlášeného uživatele, může být i <code>null</code>
      * @param filter název galerie (s *)
      */
-    int countAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin);
+    int countAllPhotogalleriesForREST(String filter);
 
     /**
      * Získá všechny galerie a namapuje je pro použití REST
      *
-     * @param userId   id přihlášeného uživatele, může být i <code>null</code>
      * @param filter   název galerie (s *)
      * @param pageable stránkování
      */
-    List<PhotogalleryRESTOverviewTO> findAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin,
+    List<PhotogalleryRESTOverviewTO> findAllPhotogalleriesForREST(String filter,
                                                                   Pageable pageable);
 
     /**
@@ -91,7 +93,7 @@ public interface PGService {
      * @param id idetifikátor galerie
      * @return {@link UnauthorizedAccessException}
      */
-    PhotogalleryRESTTO findPhotogalleryForREST(Long id, Long userId, boolean isAdmin)
+    PhotogalleryRESTTO findPhotogalleryForREST(Long id)
             throws UnauthorizedAccessException;
 
     /**
@@ -102,7 +104,7 @@ public interface PGService {
      * @param version  o jakou velikost fotky jde
      * @return {@link UnauthorizedAccessException}
      */
-    Path findPhotoForREST(Long id, String fileName, PhotoVersion version, Long userId, boolean isAdmin)
+    Path findPhotoForREST(Long id, String fileName, PhotoVersion version)
             throws UnauthorizedAccessException;
 
     /**
@@ -236,6 +238,6 @@ public interface PGService {
      * @param galleryDir adresář galerie
      * @return overview objekt galerie
      */
-    PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String galleryDir, Long userId, boolean isAdmin);
+    PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String galleryDir);
 
 }

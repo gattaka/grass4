@@ -73,7 +73,7 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
         ContentNodeService contentNodeService = SpringContextHelper.getBean(ContentNodeService.class);
 
         addColumn(new IconRenderer<>(c -> {
-            ContentModule contentService = serviceHolder.getContentModulesByName(c.contentReaderID());
+            ContentModule contentService = serviceHolder.getContentModulesByName(c.contentReaderId());
             Image img =
                     contentService == null ? ImageIcon.WARNING_16_ICON.createImage() : contentService.getContentIcon();
             img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
@@ -83,14 +83,15 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
         addColumn(new ComponentRenderer<>(contentNode -> {
             Div div = new Div();
-            ContentModule contentService = serviceHolder.getContentModulesByName(contentNode.contentReaderID());
+            ContentModule contentModule = serviceHolder.getContentModulesByName(contentNode.contentReaderId());
             if (activeLinks) {
-                String explicitAccessHash =
-                        explicitAccess ? contentNodeService.createExplicitAccessHash(contentNode.id()) : null;
-                String link = URLIdentifierUtils.createURLIdentifier(contentNode.contentID(), contentNode.name(),
+                String explicitAccessHash = explicitAccess ? contentNodeService.createExplicitAccessHash(
+                        contentModule.getContentViewerPageFactory().getPageName(), contentNode.contentId()) : null;
+                // ano, předává se contentId (id v rámci služby obsahu) ne obecné id, protože součástí linku je id služby
+                String link = URLIdentifierUtils.createURLIdentifier(contentNode.contentId(), contentNode.name(),
                         explicitAccessHash);
-                String url = contentService == null ? UIUtils.getPageURL(noServicePageFactory) :
-                        UIUtils.getPageURL(contentService.getContentViewerPageFactory(), link);
+                String url = contentModule == null ? UIUtils.getPageURL(noServicePageFactory) :
+                        UIUtils.getPageURL(contentModule.getContentViewerPageFactory(), link);
                 div.add(new Anchor(url, contentNode.name()));
             } else {
                 div.add(new Text(contentNode.name()));

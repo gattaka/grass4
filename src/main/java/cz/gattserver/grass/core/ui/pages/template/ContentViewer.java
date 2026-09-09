@@ -54,25 +54,27 @@ public class ContentViewer extends Div {
     private Button removeFromFavouritesButton;
     private Button addToFavouritesButton;
 
-    private final Breadcrumb breadcrumb;
+    private Breadcrumb breadcrumb;
 
     private final RouterLink contentLink;
 
     public ContentViewer(Component contentComponent, ContentNodeBaseTO contentNodeTO,
                          Consumer<ClickEvent<Button>> deleteAction, Consumer<ClickEvent<Button>> editAction,
-                         RouterLink contentLink) {
+                         RouterLink contentLink, boolean explicitAccess) {
         this.securityService = SpringContextHelper.getBean(SecurityService.class);
         this.userService = SpringContextHelper.getBean(UserService.class);
         this.coreACLService = SpringContextHelper.getBean(CoreACLService.class);
         this.nodeService = SpringContextHelper.getBean(NodeService.class);
 
         this.contentLink = contentLink;
+        this.contentNodeTO = contentNodeTO;
 
         ComponentFactory componentFactory = new ComponentFactory();
 
-        breadcrumb = new Breadcrumb();
-        this.contentNodeTO = contentNodeTO;
-        updateBreadcrumb(this.contentNodeTO);
+        if (!explicitAccess) {
+            breadcrumb = new Breadcrumb();
+            updateBreadcrumb(this.contentNodeTO);
+        }
 
         DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("d.M.yyyy HH:mm:ss");
 
@@ -240,7 +242,8 @@ public class ContentViewer extends Div {
     }
 
     private void createRightColumnContent(Div rightContentLayout, Component contentComponent) {
-        rightContentLayout.add(breadcrumb);
+        if (breadcrumb != null) rightContentLayout.add(breadcrumb);
+
         rightContentLayout.add(contentNameLabel);
 
         // samotný obsah

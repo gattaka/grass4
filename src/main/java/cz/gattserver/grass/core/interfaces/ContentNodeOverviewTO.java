@@ -10,15 +10,15 @@ import com.querydsl.core.annotations.QueryProjection;
  * @author gatt
  *
  */
-public record ContentNodeOverviewTO(Long id, String contentReaderID, Long contentID, String name, String parentNodeName,
+public record ContentNodeOverviewTO(Long id, String contentReaderId, Long contentId, String name, String parentNodeName,
                                     Long parentNodeId, LocalDateTime creationDate, LocalDateTime lastModificationDate,
                                     Boolean hidden, Boolean hiddenByParent, String authorName, Long authorId) {
 
     @QueryProjection
-    public ContentNodeOverviewTO(String contentReaderID, Long contentID, String name, String parentNodeName,
+    public ContentNodeOverviewTO(String contentReaderId, Long contentId, String name, String parentNodeName,
                                  Long parentNodeId, LocalDateTime creationDate, LocalDateTime lastModificationDate,
                                  Boolean hidden, Boolean hiddenByParent, String authorName, Long authorId, Long id) {
-        this(id, contentReaderID, contentID, name, parentNodeName, parentNodeId, creationDate, lastModificationDate,
+        this(id, contentReaderId, contentId, name, parentNodeName, parentNodeId, creationDate, lastModificationDate,
                 hidden, hiddenByParent, authorName, authorId);
     }
 }

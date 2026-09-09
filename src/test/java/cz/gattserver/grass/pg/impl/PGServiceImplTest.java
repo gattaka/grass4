@@ -29,6 +29,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,9 +66,6 @@ public class PGServiceImplTest extends DBCleanTest {
 
     @Autowired
     private EventBus eventBus;
-
-    @Value("${pg.root.path}")
-    private String rootPathName;
 
     @Value("${pg.miniatures.dir}")
     private String miniaturesDir;
@@ -142,27 +140,27 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path animatedSmallFile = galleryDir.resolve("01.gif");
-        Files.copy(this.getClass().getResourceAsStream("animatedSmall.gif"), animatedSmallFile);
+        Files.copy(getResource("animatedSmall.gif"), animatedSmallFile);
         assertTrue(Files.exists(animatedSmallFile));
 
         Path animatedSmallFlawedFile = galleryDir.resolve("01b.gif");
-        Files.copy(this.getClass().getResourceAsStream("animatedSmallFlawed.gif"), animatedSmallFlawedFile);
+        Files.copy(getResource("animatedSmallFlawed.gif"), animatedSmallFlawedFile);
         assertTrue(Files.exists(animatedSmallFlawedFile));
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Path orientedLargeFile = galleryDir.resolve("04.jpg");
-        Files.copy(this.getClass().getResourceAsStream("orientedLarge.jpg"), orientedLargeFile);
+        Files.copy(getResource("orientedLarge.jpg"), orientedLargeFile);
         assertTrue(Files.exists(orientedLargeFile));
 
         Path x264MP4File = galleryDir.resolve("05.mp4");
-        Files.copy(this.getClass().getResourceAsStream("x264.mp4"), x264MP4File);
+        Files.copy(getResource("x264.mp4"), x264MP4File);
         assertTrue(Files.exists(x264MP4File));
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -252,7 +250,7 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path animatedSmallFile = galleryDir.resolve("01.gif");
-        Files.copy(this.getClass().getResourceAsStream("animatedSmall.gif"), animatedSmallFile);
+        Files.copy(getResource("animatedSmall.gif"), animatedSmallFile);
         assertTrue(Files.exists(animatedSmallFile));
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -278,19 +276,19 @@ public class PGServiceImplTest extends DBCleanTest {
         eventBus.unsubscribe(eventsHandler);
 
         Path animatedSmallFlawedFile = galleryDir.resolve("01b.gif");
-        Files.copy(this.getClass().getResourceAsStream("animatedSmallFlawed.gif"), animatedSmallFlawedFile);
+        Files.copy(getResource("animatedSmallFlawed.gif"), animatedSmallFlawedFile);
         assertTrue(Files.exists(animatedSmallFlawedFile));
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Path orientedLargeFile = galleryDir.resolve("04.jpg");
-        Files.copy(this.getClass().getResourceAsStream("orientedLarge.jpg"), orientedLargeFile);
+        Files.copy(getResource("orientedLarge.jpg"), orientedLargeFile);
         assertTrue(Files.exists(orientedLargeFile));
 
         operationId = UUID.randomUUID();
@@ -399,7 +397,10 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PhotogalleryTO to = pgService.findPhotogalleryForDetail(galleryId, userId1, true);
+        mockSecurityService.getCurrentUser().setId(userId1);
+        mockSecurityService.getCurrentUser().getRoles().add(CoreRole.ADMIN);
+
+        PhotogalleryTO to = pgService.findPhotogalleryForDetail(galleryId, null);
         assertEquals("testGallery", to.getPhotogalleryPath());
         assertEquals("Test galerie", to.getName());
         assertTrue(to.isHidden());
@@ -411,8 +412,8 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         PhotogalleryCreateTO payloadTO =
-                new PhotogalleryCreateTO("Test galerie" + variant, galleryDir.getFileName().toString(), null,
-                        hidden, false);
+                new PhotogalleryCreateTO("Test galerie" + variant, galleryDir.getFileName().toString(), null, hidden,
+                        false);
 
         UUID operationId = UUID.randomUUID();
 
@@ -439,46 +440,51 @@ public class PGServiceImplTest extends DBCleanTest {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
         // Admin
-        Long userId1 = coreMockService.createMockUser(1);
+        Long userId1 = coreMockService.createMockUser(1, true);
         Long userId2 = coreMockService.createMockUser(2);
+
         Long nodeId1 = coreMockService.createMockRootNode(1);
         Long nodeId2 = coreMockService.createMockRootNode(2);
 
-        Long id1 = createMockGallery(root, userId1, nodeId1, 1, false );
+        Long id1 = createMockGallery(root, userId1, nodeId1, 1, false);
         Long id2 = createMockGallery(root, userId1, nodeId2, 2, true);
         Long id3 = createMockGallery(root, userId2, nodeId1, 3, false);
         Long id4 = createMockGallery(root, userId2, nodeId2, 4, true);
 
-        int count = pgService.countAllPhotogalleriesForREST(null, userId1, true);
+        mockSecurityService.resetAs(userId1,true);
+        int count = pgService.countAllPhotogalleriesForREST(null);
         assertEquals(4, count);
 
-        count = pgService.countAllPhotogalleriesForREST(null, userId2, false);
+        mockSecurityService.resetAs(userId2,false);
+        count = pgService.countAllPhotogalleriesForREST(null);
         assertEquals(3, count);
 
-        count = pgService.countAllPhotogalleriesForREST(null, null, false);
+        mockSecurityService.resetAsEmpty();
+        count = pgService.countAllPhotogalleriesForREST(null);
         assertEquals(2, count);
 
-        List<PhotogalleryRESTOverviewTO> list =
-                pgService.findAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(0, 2));
+        mockSecurityService.resetAs(userId1, true);
+        List<PhotogalleryRESTOverviewTO> list = pgService.findAllPhotogalleriesForREST(null, PageRequest.of(0, 2));
         assertEquals(2, list.size());
         assertEquals("Test galerie4", list.get(0).name());
         assertEquals(id4, list.get(0).id());
         assertEquals("Test galerie3", list.get(1).name());
         assertEquals(id3, list.get(1).id());
 
-        list = pgService.findAllPhotogalleriesForREST(null, userId1, true, PageRequest.of(1, 2));
+        list = pgService.findAllPhotogalleriesForREST(null, PageRequest.of(1, 2));
         assertEquals(2, list.size());
         assertEquals("Test galerie2", list.getFirst().name());
         assertEquals(id2, list.getFirst().id());
 
-        list = pgService.findAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(0, 2));
+        mockSecurityService.resetAs(userId2, false);
+        list = pgService.findAllPhotogalleriesForREST(null, PageRequest.of(0, 2));
         assertEquals(2, list.size());
         assertEquals("Test galerie4", list.get(0).name());
         assertEquals(id4, list.get(0).id());
         assertEquals("Test galerie3", list.get(1).name());
         assertEquals(id3, list.get(1).id());
 
-        list = pgService.findAllPhotogalleriesForREST(null, userId2, false, PageRequest.of(1, 2));
+        list = pgService.findAllPhotogalleriesForREST(null, PageRequest.of(1, 2));
         assertEquals(1, list.size());
         assertEquals("Test galerie1", list.getFirst().name());
         assertEquals(id1, list.getFirst().id());
@@ -496,10 +502,10 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path animatedSmallFile = galleryDir.resolve("01.gif");
-        Files.copy(this.getClass().getResourceAsStream("animatedSmall.gif"), animatedSmallFile);
+        Files.copy(getResource("animatedSmall.gif"), animatedSmallFile);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
 
         PhotogalleryCreateTO payloadTO =
                 new PhotogalleryCreateTO("Test galerie", galleryDir.getFileName().toString(), null, true, false);
@@ -521,7 +527,8 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        PhotogalleryRESTTO to = pgService.findPhotogalleryForREST(galleryId, userId, false);
+        mockSecurityService.resetAs(userId, false);
+        PhotogalleryRESTTO to = pgService.findPhotogalleryForREST(galleryId);
 
         assertEquals(MockUtils.MOCK_USER_NAME + 1, to.author());
         assertEquals(2, to.files().size());
@@ -544,7 +551,8 @@ public class PGServiceImplTest extends DBCleanTest {
         UserInfoTO user = mockSecurityService.getCurrentUser();
         user.setId(userId1);
 
-        pgService.findPhotogalleryForREST(id1, userId1, false);
+        mockSecurityService.resetAs(userId1, false);
+        pgService.findPhotogalleryForREST(id1);
     }
 
     @Test
@@ -560,12 +568,12 @@ public class PGServiceImplTest extends DBCleanTest {
         UserInfoTO user = mockSecurityService.getCurrentUser();
         user.getRoles().add(CoreRole.ADMIN);
 
-        pgService.findPhotogalleryForREST(id1, userId2, true);
+        mockSecurityService.resetAs(userId2, true);
+        pgService.findPhotogalleryForREST(id1);
     }
 
     @Test
-    public void testFindPhotogalleryForREST_exception()
-            throws IOException, InterruptedException, ExecutionException {
+    public void testFindPhotogalleryForREST_exception() throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -573,8 +581,11 @@ public class PGServiceImplTest extends DBCleanTest {
         Long nodeId1 = coreMockService.createMockRootNode(1);
         Long id1 = createMockGallery(root, userId1, nodeId1, 1, true);
 
-        assertThrows(UnauthorizedAccessException.class, () -> pgService.findPhotogalleryForREST(id1, null, false));
-        assertThrows(UnauthorizedAccessException.class, () -> pgService.findPhotogalleryForREST(id1, userId2, false));
+        mockSecurityService.resetAsEmpty();
+        assertThrows(UnauthorizedAccessException.class, () -> pgService.findPhotogalleryForREST(id1));
+
+        mockSecurityService.resetAs(userId2, false);
+        assertThrows(UnauthorizedAccessException.class, () -> pgService.findPhotogalleryForREST(id1));
     }
 
     @Test
@@ -585,11 +596,11 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -616,29 +627,35 @@ public class PGServiceImplTest extends DBCleanTest {
 
         eventBus.unsubscribe(eventsHandler);
 
-        Path photoPath = pgService.findPhotoForREST(galleryId, "02.jpg", PhotoVersion.SLIDESHOW, userId1, false);
+        mockSecurityService.resetAs(userId1, false);
+        Path photoPath = pgService.findPhotoForREST(galleryId, "02.jpg", PhotoVersion.SLIDESHOW);
         assertEquals(galleryDir.resolve(slideshowDir).resolve("02.jpg"), photoPath);
-        photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.SLIDESHOW, userId2, true);
+
+        mockSecurityService.resetAs(userId2, true);
+        photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.SLIDESHOW);
         assertEquals(galleryDir.resolve("03.jpg"), photoPath);
-        photoPath = pgService.findPhotoForREST(galleryId, "02.jpg", PhotoVersion.MINI, userId3, false);
+
+        mockSecurityService.resetAs(userId3, false);
+        photoPath = pgService.findPhotoForREST(galleryId, "02.jpg", PhotoVersion.MINI);
         assertEquals(galleryDir.resolve(miniaturesDir).resolve("02.jpg"), photoPath);
-        photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.MINI, null, false);
+
+        mockSecurityService.resetAsEmpty();
+        photoPath = pgService.findPhotoForREST(galleryId, "03.jpg", PhotoVersion.MINI);
         assertEquals(galleryDir.resolve(miniaturesDir).resolve("03.jpg"), photoPath);
     }
 
     @Test
-    public void testZipGallery()
-            throws IOException, InterruptedException, ExecutionException {
+    public void testZipGallery() throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -707,18 +724,17 @@ public class PGServiceImplTest extends DBCleanTest {
     }
 
     @Test
-    public void testDeleteFiles()
-            throws IOException, InterruptedException, ExecutionException {
+    public void testDeleteFiles() throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -785,7 +801,7 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path file = pgService.getFullImage("testGallery", "02.jpg");
@@ -799,7 +815,7 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         assertThrows(IllegalArgumentException.class, () -> pgService.getFullImage("../../testGallery", "02.jpg"));
@@ -812,7 +828,7 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         assertThrows(IllegalArgumentException.class, () -> pgService.getFullImage("testGallery", "../../../02.jpg"));
@@ -832,18 +848,17 @@ public class PGServiceImplTest extends DBCleanTest {
     }
 
     @Test
-    public void testGetItems()
-            throws IOException {
+    public void testGetItems() throws IOException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         List<PhotogalleryViewItemTO> items = pgService.getItems("testGallery");
@@ -857,18 +872,17 @@ public class PGServiceImplTest extends DBCleanTest {
     }
 
     @Test
-    public void testGetViewItemsCount()
-            throws IOException {
+    public void testGetViewItemsCount() throws IOException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         assertEquals(2, pgService.getViewItemsCount("testGallery"));
@@ -881,15 +895,15 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Path x264MP4File = galleryDir.resolve("05.mp4");
-        Files.copy(this.getClass().getResourceAsStream("x264.mp4"), x264MP4File);
+        Files.copy(getResource("x264.mp4"), x264MP4File);
         assertTrue(Files.exists(x264MP4File));
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -946,11 +960,11 @@ public class PGServiceImplTest extends DBCleanTest {
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -978,14 +992,13 @@ public class PGServiceImplTest extends DBCleanTest {
     }
 
     @Test
-    public void testCheckGallery2()
-            throws IOException, InterruptedException, ExecutionException {
+    public void testCheckGallery2() throws IOException, InterruptedException, ExecutionException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
 
         Path x264MP4File = galleryDir.resolve("05.mp4");
-        Files.copy(this.getClass().getResourceAsStream("x264.mp4"), x264MP4File);
+        Files.copy(getResource("x264.mp4"), x264MP4File);
         assertTrue(Files.exists(x264MP4File));
 
         Long userId1 = coreMockService.createMockUser(1);
@@ -1013,44 +1026,42 @@ public class PGServiceImplTest extends DBCleanTest {
     }
 
     @Test
-    public void testCheckGallery_failed()
-            throws IOException {
+    public void testCheckGallery_failed() throws IOException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Path x264MP4File = galleryDir.resolve("05.mp4");
-        Files.copy(this.getClass().getResourceAsStream("x264.mp4"), x264MP4File);
+        Files.copy(getResource("x264.mp4"), x264MP4File);
         assertTrue(Files.exists(x264MP4File));
 
         assertFalse(pgService.checkGallery("testGallery"));
     }
 
     @Test
-    public void testDeleteDraftGallery()
-            throws IOException {
+    public void testDeleteDraftGallery() throws IOException {
         Path root = prepareFS(fileSystemService.getFileSystem());
         Path galleryDir = root.resolve("testGallery");
         Files.createDirectories(galleryDir);
 
         Path largeFile = galleryDir.resolve("02.jpg");
-        Files.copy(this.getClass().getResourceAsStream("large.jpg"), largeFile);
+        Files.copy(getResource("large.jpg"), largeFile);
         assertTrue(Files.exists(largeFile));
 
         Path smallFile = galleryDir.resolve("03.jpg");
-        Files.copy(this.getClass().getResourceAsStream("small.jpg"), smallFile);
+        Files.copy(getResource("small.jpg"), smallFile);
         assertTrue(Files.exists(smallFile));
 
         Path x264MP4File = galleryDir.resolve("05.mp4");
-        Files.copy(this.getClass().getResourceAsStream("x264.mp4"), x264MP4File);
+        Files.copy(getResource("x264.mp4"), x264MP4File);
         assertTrue(Files.exists(x264MP4File));
 
         pgService.deleteDraftGallery("testGallery");
@@ -1059,5 +1070,9 @@ public class PGServiceImplTest extends DBCleanTest {
         assertFalse(Files.exists(smallFile));
         assertFalse(Files.exists(x264MP4File));
         assertFalse(Files.exists(galleryDir));
+    }
+
+    private InputStream getResource(String name) {
+        return Objects.requireNonNull(this.getClass().getResourceAsStream((name)));
     }
 }

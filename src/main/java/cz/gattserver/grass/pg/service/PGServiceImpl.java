@@ -5,8 +5,11 @@ import cz.gattserver.common.util.ReferenceHolder;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.exception.UnauthorizedAccessException;
+import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.model.domain.ContentNode;
 import cz.gattserver.grass.core.model.repositories.ContentNodeContentTagRepository;
+import cz.gattserver.grass.core.services.SecurityService;
+import cz.gattserver.grass.core.ui.pages.factories.template.PageFactory;
 import cz.gattserver.grass.modules.PGModule;
 import cz.gattserver.grass.pg.events.*;
 import cz.gattserver.grass.pg.interfaces.*;
@@ -16,8 +19,9 @@ import cz.gattserver.grass.pg.util.DecodeAndCaptureFrames;
 import cz.gattserver.grass.pg.util.PGUtils;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.grass.core.services.FileSystemService;
+import jakarta.annotation.Nullable;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.Validate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
@@ -40,10 +44,14 @@ import java.util.stream.Stream;
 @Slf4j
 public class PGServiceImpl implements PGService {
 
+    @Resource(name = "pgViewerPageFactory")
+    private PageFactory pgViewerPageFactory;
+
     private final ContentNodeService contentNodeService;
     private final PhotogalleryRepository photogalleryRepository;
     private final ContentNodeContentTagRepository contentNodeContentTagRepository;
     private final FileSystemService fileSystemService;
+    private final SecurityService securityService;
     private final EventBus eventBus;
 
     @Value("${pg.root.path}")
@@ -60,11 +68,12 @@ public class PGServiceImpl implements PGService {
 
     public PGServiceImpl(ContentNodeService contentNodeService, PhotogalleryRepository photogalleryRepository,
                          ContentNodeContentTagRepository contentNodeContentTagRepository,
-                         FileSystemService fileSystemService, EventBus eventBus) {
+                         FileSystemService fileSystemService, SecurityService securityService, EventBus eventBus) {
         this.contentNodeService = contentNodeService;
         this.photogalleryRepository = photogalleryRepository;
         this.contentNodeContentTagRepository = contentNodeContentTagRepository;
         this.fileSystemService = fileSystemService;
+        this.securityService = securityService;
         this.eventBus = eventBus;
     }
 
@@ -308,9 +317,22 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public PhotogalleryTO findPhotogalleryForDetail(Long id, Long userId, boolean isAdmin) {
-        Validate.notNull(id, "Id galerie nesmí být null");
-        PhotogalleryTO to = photogalleryRepository.findForDetailById(id, userId, isAdmin);
+    public PhotogalleryTO findPhotogalleryForDetail(Long id) {
+        return findPhotogalleryForDetail(id, null);
+    }
+
+    private String getPGModuleName() {
+        return pgViewerPageFactory.getPageName();
+    }
+
+    @Override
+    public PhotogalleryTO findPhotogalleryForDetail(Long id, @Nullable String explicitAccessHash) {
+        Objects.requireNonNull(id);
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        boolean explicitAccess =
+                contentNodeService.createExplicitAccessHash(getPGModuleName(), id).equals(explicitAccessHash) ||
+                        userInfoTO.isAdmin();
+        PhotogalleryTO to = photogalleryRepository.findForDetailById(id, userInfoTO.getId(), explicitAccess);
         if (to == null) return null;
         to.getContentTags().addAll(contentNodeContentTagRepository.findByContendNodeIdAndMap(to.getContentNodeId()));
         return to;
@@ -371,25 +393,27 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public int countAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin) {
-        return photogalleryRepository.count(filter, userId, isAdmin);
+    public int countAllPhotogalleriesForREST(String filter) {
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        return photogalleryRepository.count(filter, userInfoTO.getId(), userInfoTO.isAdmin());
     }
 
     @Override
-    public List<PhotogalleryRESTOverviewTO> findAllPhotogalleriesForREST(String filter, Long userId, boolean isAdmin,
-                                                                         Pageable pageable) {
-        return photogalleryRepository.findForRestOverview(filter, userId, isAdmin, pageable);
+    public List<PhotogalleryRESTOverviewTO> findAllPhotogalleriesForREST(String filter, Pageable pageable) {
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        return photogalleryRepository.findForRestOverview(filter, userInfoTO.getId(), userInfoTO.isAdmin(), pageable);
     }
 
     @Override
-    public PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String galleryDir, Long userId, boolean isAdmin) {
-        return photogalleryRepository.findForRestByDirectory(galleryDir, userId, isAdmin);
+    public PhotogalleryRESTOverviewTO findPhotogalleryByDirectory(String galleryDir) {
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        return photogalleryRepository.findForRestByDirectory(galleryDir, userInfoTO.getId(), userInfoTO.isAdmin());
     }
 
     @Override
-    public PhotogalleryRESTTO findPhotogalleryForREST(Long id, Long userId, boolean isAdmin)
-            throws UnauthorizedAccessException {
-        PhotogalleryRESTTO to = photogalleryRepository.findForRestById(id, userId, isAdmin);
+    public PhotogalleryRESTTO findPhotogalleryForREST(Long id) throws UnauthorizedAccessException {
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        PhotogalleryRESTTO to = photogalleryRepository.findForRestById(id, userInfoTO.getId(), userInfoTO.isAdmin());
         if (to == null) throw new UnauthorizedAccessException();
 
         Path file = fileSystemService.getFileSystem().getPath(rootPathName, to.photogalleryPath());
@@ -407,9 +431,9 @@ public class PGServiceImpl implements PGService {
     }
 
     @Override
-    public Path findPhotoForREST(Long id, String fileName, PhotoVersion version, Long userId, boolean isAdmin)
-            throws UnauthorizedAccessException {
-        PhotogalleryRESTTO to = photogalleryRepository.findForRestById(id, userId, isAdmin);
+    public Path findPhotoForREST(Long id, String fileName, PhotoVersion version) throws UnauthorizedAccessException {
+        UserInfoTO userInfoTO = securityService.getCurrentUser();
+        PhotogalleryRESTTO to = photogalleryRepository.findForRestById(id, userInfoTO.getId(), userInfoTO.isAdmin());
         if (to == null) throw new UnauthorizedAccessException();
 
         Path rootPath = loadRoot();

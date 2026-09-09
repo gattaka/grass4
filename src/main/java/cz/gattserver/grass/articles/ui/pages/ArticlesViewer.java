@@ -47,9 +47,12 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(parameter);
         if (identifier == null) throw new GrassPageException(404);
 
+        // TODO identifier.hash()
         articleTO = articleService.getArticleForDetail(identifier.id(), securityService.getCurrentUser().getId(),
                 securityService.getCurrentUser().isAdmin());
         if (articleTO == null) throw new GrassPageException(404);
+
+        boolean explicitAccess = identifier.hash() != null;
 
         // RESCUE -- tohle by se normálně stát nemělo, ale umožňuje to aspoň
         // vyřešit stav, ve kterém existuje takovýto nezobrazitelný obsah
@@ -71,7 +74,7 @@ public class ArticlesViewer extends Div implements HasUrlParameter<String>, HasD
         removeAll();
         add(new ContentViewer(createHTMLDiv(), articleTO, e -> onDeleteOperation(), e -> UI.getCurrent()
                 .navigate(ArticlesEditorPage.class, DefaultContentOperations.EDIT.withParameter(parameter)),
-                new RouterLink(articleTO.getName(), ArticlesViewer.class, parameter)));
+                new RouterLink(articleTO.getName(), ArticlesViewer.class, parameter), explicitAccess));
 
         UIUtils.turnOffRouterAnchors();
     }

@@ -72,13 +72,9 @@ public class ContentNodeServiceImpl implements ContentNodeService {
         return contentNode.getId();
     }
 
-    private String createExplicitAccessValue(Long nodeId) {
-        return "CONTENT_NODE" + nodeId;
-    }
-
     @Override
-    public String createExplicitAccessHash(Long nodeId) {
-        return securityService.computeAccessHash(createExplicitAccessValue(nodeId));
+    public String createExplicitAccessHash(String pageName, Long nodeId) {
+        return securityService.computeAccessHash(pageName + nodeId);
     }
 
     @Override

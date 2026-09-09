@@ -159,8 +159,7 @@ public class PGEditorPage extends Div implements HasUrlParameter<String>, Before
             photogalleryNameField.setValue("");
         } else if (operationToken.equals(DefaultContentOperations.EDIT.toString())) {
             editMode = true;
-            existingPhotogalleryTO = pgService.findPhotogalleryForDetail(identifier.id(), currentUserInfoTO.getId(),
-                    currentUserInfoTO.isAdmin());
+            existingPhotogalleryTO = pgService.findPhotogalleryForDetail(identifier.id());
 
             if (existingPhotogalleryTO == null) throw new GrassPageException(404);
 
