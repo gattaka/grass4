@@ -56,7 +56,7 @@ public class SecurityServiceImpl implements SecurityService {
     }
 
     @Override
-    public String computeAccessHash(String value)  {
+    public String computeAccessHash(String value) {
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-256");
@@ -65,7 +65,8 @@ public class SecurityServiceImpl implements SecurityService {
         }
         md.update(explicitAccessSalt.getBytes(StandardCharsets.UTF_8));
         byte[] hash = md.digest(value.getBytes());
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(hash);
+        // Nesmí obsahovat '-', protože se používá na oddělení URL identifikátoru
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(hash).replace("-", "X");
     }
 
     @Override

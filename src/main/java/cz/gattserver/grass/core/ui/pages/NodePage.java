@@ -1,6 +1,7 @@
 package cz.gattserver.grass.core.ui.pages;
 
 import java.io.Serial;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -16,7 +17,6 @@ import cz.gattserver.common.vaadin.dialogs.WebDialog;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentNodeFilterTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
-import cz.gattserver.grass.core.modules.ContentModule;
 import cz.gattserver.grass.core.services.ContentNodeService;
 import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.grass.core.services.CoreACLService;
@@ -83,7 +83,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         nodeTO = nodeService.getNodeById(identifier.id(), identifier.hash());
         if (nodeTO == null) throw new GrassPageException(404);
 
-        explicitAccess = identifier.hash() != null;
+        explicitAccess = identifier.hash() != null &&identifier.hash().getBytes(StandardCharsets.UTF_8).length == 256;
 
         // Navigační breadcrumb
         createBreadcrumb(layout);

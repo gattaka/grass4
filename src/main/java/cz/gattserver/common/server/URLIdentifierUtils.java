@@ -81,7 +81,7 @@ public class URLIdentifierUtils {
         // http://forum.spring.io/forum/spring-projects/web/97212-url-encoded-in-pathvariable-value-causes-problems
         // Nově to Spring security už vůbec nepovoluje
         // https://stackoverflow.com/questions/48580584/stricthttpfirewall-in-spring-security-4-2-vs-spring-mvc-matrixvariable
-        return identifier.replaceAll("%2F", "").replaceAll("%3B", "");
+        return identifier.replace("%2F", "").replace("%3B", "");
     }
 
 
@@ -111,7 +111,11 @@ public class URLIdentifierUtils {
 
         // hash může obsahovat '-', takže parsování dle částí dál už nedává smysl
         String hash = null;
-        if (parts.length > 2) hash = identifier.substring(parts[0].length() + name.length() + 2);
+        if (parts.length > 2 && identifier.lastIndexOf("-") != identifier.length() - 1) {
+            String tryHash = identifier.substring(identifier.lastIndexOf("-") + 1);
+            // pokud text není 43 znaků dlouhý, není to určitě kontrolní hash
+            if (tryHash.length() == 43) hash = tryHash;
+        }
 
         return new URLIdentifier(id, name, hash);
     }
