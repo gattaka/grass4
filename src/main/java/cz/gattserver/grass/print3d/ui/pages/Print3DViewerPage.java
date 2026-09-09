@@ -269,8 +269,7 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
         });
 
         Upload upload = getUpload();
-        if (coreACLService.canModifyContent(print3dTO, securityService.getCurrentUser()))
-            layout.add(upload);
+        if (coreACLService.canModifyContent(print3dTO, securityService.getCurrentUser())) layout.add(upload);
 
         Div statusRow = new Div();
         statusRow.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
@@ -361,23 +360,19 @@ public class Print3DViewerPage extends Div implements HasUrlParameter<String>, H
     }
 
     protected void onDeleteOperation() {
-        ConfirmDialog confirmSubwindow = new ConfirmDialog("Opravdu si přejete smazat tento projekt ?", ev -> {
-            String urlIdentifier =
-                    URLIdentifierUtils.createURLIdentifier(print3dTO.getParentId(), print3dTO.getParentName());
+        String urlIdentifier =
+                URLIdentifierUtils.createURLIdentifier(print3dTO.getParentId(), print3dTO.getParentName());
 
-            // zdařilo se ? Pokud ano, otevři info okno a při
+        // zdařilo se ? Pokud ano, otevři info okno a při
+        // potvrzení jdi na kategorii
+        if (print3dService.deleteProject(print3dTO.getId())) {
+            UI.getCurrent().navigate(NodePage.class, urlIdentifier);
+        } else {
+            // Pokud ne, otevři warn okno a při
             // potvrzení jdi na kategorii
-            if (print3dService.deleteProject(print3dTO.getId())) {
-                UI.getCurrent().navigate(NodePage.class, urlIdentifier);
-            } else {
-                // Pokud ne, otevři warn okno a při
-                // potvrzení jdi na kategorii
-                WarnDialog warnSubwindow = new WarnDialog("Při mazání projektu se nezdařilo smazat některé soubory.");
-                warnSubwindow.addDialogCloseActionListener(
-                        e -> UI.getCurrent().navigate(NodePage.class, urlIdentifier));
-                warnSubwindow.open();
-            }
-        });
-        confirmSubwindow.open();
+            WarnDialog warnSubwindow = new WarnDialog("Při mazání projektu se nezdařilo smazat některé soubory.");
+            warnSubwindow.addDialogCloseActionListener(e -> UI.getCurrent().navigate(NodePage.class, urlIdentifier));
+            warnSubwindow.open();
+        }
     }
 }

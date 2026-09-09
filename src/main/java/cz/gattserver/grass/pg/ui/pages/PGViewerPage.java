@@ -475,24 +475,19 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
     }
 
     protected void onDeleteOperation() {
-        ConfirmDialog confirmSubwindow = new ConfirmDialog("Opravdu si přejete smazat tuto galerii ?", ev -> {
+        String urlIdentifier =
+                URLIdentifierUtils.createURLIdentifier(photogalleryTO.getParentId(), photogalleryTO.getParentName());
 
-            String urlIdentifier = URLIdentifierUtils.createURLIdentifier(photogalleryTO.getParentId(),
-                    photogalleryTO.getParentName());
-
-            // zdařilo se ? Pokud ano, otevři info okno a při
+        // zdařilo se ? Pokud ano, otevři info okno a při
+        // potvrzení jdi na kategorii
+        if (pgService.deletePhotogallery(photogalleryTO.getId())) {
+            UI.getCurrent().navigate(NodePage.class, urlIdentifier);
+        } else {
+            // Pokud ne, otevři warn okno a při
             // potvrzení jdi na kategorii
-            if (pgService.deletePhotogallery(photogalleryTO.getId())) {
-                UI.getCurrent().navigate(NodePage.class, urlIdentifier);
-            } else {
-                // Pokud ne, otevři warn okno a při
-                // potvrzení jdi na kategorii
-                WarnDialog warnSubwindow = new WarnDialog("Při mazání galerie se nezdařilo smazat některé soubory.");
-                warnSubwindow.addDialogCloseActionListener(
-                        e -> UI.getCurrent().navigate(NodePage.class, urlIdentifier));
-                warnSubwindow.open();
-            }
-        });
-        confirmSubwindow.open();
+            WarnDialog warnSubwindow = new WarnDialog("Při mazání galerie se nezdařilo smazat některé soubory.");
+            warnSubwindow.addDialogCloseActionListener(e -> UI.getCurrent().navigate(NodePage.class, urlIdentifier));
+            warnSubwindow.open();
+        }
     }
 }
