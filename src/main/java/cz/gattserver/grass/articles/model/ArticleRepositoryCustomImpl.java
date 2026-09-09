@@ -43,7 +43,7 @@ public class ArticleRepositoryCustomImpl extends QuerydslRepositorySupport imple
                 .join(u).on(c.authorId.eq(u.id))
                 // node
                 .join(n).on(c.parentId.eq(n.id)).where(a.id.eq(id))
-                .select(new QArticleTO(a.id, c.id, c.name, n.id, n.name, c.creationDate, c.lastModificationDate, u.id,
+                .select(new QArticleTO(a.id, c.contentReaderId, c.id, c.name, n.id, n.name, c.creationDate, c.lastModificationDate, u.id,
                         u.name, c.hidden, c.hiddenByParent, c.draft, c.draftSourceId, a.outputHTML, a.text,
                         a.searchableOutput, a.attachmentsDirId)).fetchFirst();
     }

@@ -15,6 +15,7 @@ import java.util.Set;
 public final class ArticleTO implements ContentNodeBaseTO {
 
     private final Long id;
+    private final String contentReaderId;
     private final Long contentNodeId;
     private final String name;
     private final Long parentId;
@@ -38,13 +39,13 @@ public final class ArticleTO implements ContentNodeBaseTO {
     private final Set<String> pluginJSCodes;
 
     @QueryProjection
-    public ArticleTO(Long id, Long contentNodeId, String name, Long parentId, String parentName,
+    public ArticleTO(Long id, String contentReaderId, Long contentNodeId, String name, Long parentId, String parentName,
                      LocalDateTime creationDate, LocalDateTime lastModificationDate, Long authorId, String authorName,
-                     boolean hidden, boolean hiddenByParent, boolean draft, Long draftSourceId,
-                     String outputHTML, String text, String searchableOutput, String attachmentsDirId) {
-        this(id, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate, authorId, authorName,
-                hidden, hiddenByParent, draft, draftSourceId, new LinkedHashSet<>(), outputHTML, text,
-                searchableOutput, attachmentsDirId, new LinkedHashSet<>(), new LinkedHashSet<>(),
+                     boolean hidden, boolean hiddenByParent, boolean draft, Long draftSourceId, String outputHTML,
+                     String text, String searchableOutput, String attachmentsDirId) {
+        this(id, contentReaderId, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate,
+                authorId, authorName, hidden, hiddenByParent, draft, draftSourceId, new LinkedHashSet<>(), outputHTML,
+                text, searchableOutput, attachmentsDirId, new LinkedHashSet<>(), new LinkedHashSet<>(),
                 new LinkedHashSet<>());
     }
 }

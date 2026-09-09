@@ -81,7 +81,7 @@ public class PhotogalleryRepositoryCustomImpl extends QuerydslRepositorySupport
     @Override
     public PhotogalleryTO findForDetailById(Long id, Long userId, boolean isAdmin) {
         return createDetailQuery(userId, isAdmin).where(p.id.eq(id))
-                .select(new QPhotogalleryTO(p.id, p.contentNodeId, c.name, n.id, n.name, c.creationDate,
+                .select(new QPhotogalleryTO(p.id,c.contentReaderId, p.contentNodeId, c.name, n.id, n.name, c.creationDate,
                         c.lastModificationDate, u.id, u.name, p.photogalleryDir, c.hidden, c.hiddenByParent,
                         c.draft, c.draftSourceId)).fetchFirst();
     }

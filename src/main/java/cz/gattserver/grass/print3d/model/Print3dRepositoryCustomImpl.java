@@ -1,20 +1,13 @@
 package cz.gattserver.grass.print3d.model;
 
 import com.querydsl.jpa.JPQLQuery;
-import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleDraftOverviewTO;
-import cz.gattserver.grass.articles.editor.parser.interfaces.ArticleTO;
-import cz.gattserver.grass.articles.editor.parser.interfaces.QArticleDraftOverviewTO;
-import cz.gattserver.grass.articles.editor.parser.interfaces.QArticleTO;
 import cz.gattserver.grass.articles.model.Article;
-import cz.gattserver.grass.articles.model.QArticle;
 import cz.gattserver.grass.core.model.domain.QContentNode;
 import cz.gattserver.grass.core.model.domain.QNode;
 import cz.gattserver.grass.core.model.domain.QUser;
 import cz.gattserver.grass.print3d.interfaces.Print3dTO;
 import cz.gattserver.grass.print3d.interfaces.QPrint3dTO;
 import org.springframework.data.jpa.repository.support.QuerydslRepositorySupport;
-
-import java.util.List;
 
 public class Print3dRepositoryCustomImpl extends QuerydslRepositorySupport implements Print3dRepositoryCustom {
 
@@ -47,8 +40,9 @@ public class Print3dRepositoryCustomImpl extends QuerydslRepositorySupport imple
                 .join(u).on(c.authorId.eq(u.id))
                 // node
                 .join(n).on(c.parentId.eq(n.id)).where(p.id.eq(id))
-                .select(new QPrint3dTO(p.id, c.id, c.name, n.id, n.name, c.creationDate, c.lastModificationDate, u.id,
-                        u.name, c.hidden, c.hiddenByParent, c.draft, c.draftSourceId, p.projectDir)).fetchFirst();
+                .select(new QPrint3dTO(p.id, c.contentReaderId, c.id, c.name, n.id, n.name, c.creationDate,
+                        c.lastModificationDate, u.id, u.name, c.hidden, c.hiddenByParent, c.draft, c.draftSourceId,
+                        p.projectDir)).fetchFirst();
     }
 
 }

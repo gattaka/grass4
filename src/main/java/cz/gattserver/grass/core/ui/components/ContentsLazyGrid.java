@@ -60,7 +60,7 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
                          CountCallback<ContentNodeOverviewTO, Void> countCallback) {
 
         PageFactory noServicePageFactory = (PageFactory) SpringContextHelper.getBean("noServicePageFactory");
-        ModuleRegister serviceHolder = SpringContextHelper.getContext().getBean(ModuleRegister.class);
+        ModuleRegister moduleRegister = SpringContextHelper.getContext().getBean(ModuleRegister.class);
 
         setDataProvider(DataProvider.fromCallbacks(fetchCallback, countCallback));
 
@@ -73,7 +73,7 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
         ContentNodeService contentNodeService = SpringContextHelper.getBean(ContentNodeService.class);
 
         addColumn(new IconRenderer<>(c -> {
-            ContentModule contentService = serviceHolder.getContentModulesByName(c.contentReaderId());
+            ContentModule contentService = moduleRegister.getContentModulesByName(c.contentReaderId());
             Image img =
                     contentService == null ? ImageIcon.WARNING_16_ICON.createImage() : contentService.getContentIcon();
             img.addClassName(UIUtils.GRID_ICON_CSS_CLASS);
@@ -83,7 +83,7 @@ public class ContentsLazyGrid extends Grid<ContentNodeOverviewTO> {
 
         addColumn(new ComponentRenderer<>(contentNode -> {
             Div div = new Div();
-            ContentModule contentModule = serviceHolder.getContentModulesByName(contentNode.contentReaderId());
+            ContentModule contentModule = moduleRegister.getContentModulesByName(contentNode.contentReaderId());
             if (activeLinks) {
                 String explicitAccessHash = explicitAccess ? contentNodeService.createExplicitAccessHash(
                         contentModule.getContentViewerPageFactory().getPageName(), contentNode.contentId()) : null;

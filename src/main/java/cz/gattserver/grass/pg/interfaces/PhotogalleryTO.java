@@ -15,6 +15,7 @@ import java.util.Set;
 public final class PhotogalleryTO implements ContentNodeBaseTO {
 
     private final Long id;
+    private final String contentReaderId;
     private final Long contentNodeId;
     private final String name;
     private final Long parentId;
@@ -31,11 +32,11 @@ public final class PhotogalleryTO implements ContentNodeBaseTO {
     private final Set<ContentTagTO> contentTags;
 
     @QueryProjection
-    public PhotogalleryTO(Long id, Long contentNodeId, String name, Long parentId, String parentName,
-                          LocalDateTime creationDate, LocalDateTime lastModificationDate, Long authorId,
-                          String authorName, String photogalleryPath, boolean hidden, boolean hiddenByParent,
-                          boolean draft, Long draftSourceId) {
-        this(id, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate, authorId, authorName,
-                photogalleryPath, hidden, hiddenByParent, draft, draftSourceId, new HashSet<>());
+    public PhotogalleryTO(Long id, String contentReaderId, Long contentNodeId, String name, Long parentId,
+                          String parentName, LocalDateTime creationDate, LocalDateTime lastModificationDate,
+                          Long authorId, String authorName, String photogalleryPath, boolean hidden,
+                          boolean hiddenByParent, boolean draft, Long draftSourceId) {
+        this(id, contentReaderId, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate,
+                authorId, authorName, photogalleryPath, hidden, hiddenByParent, draft, draftSourceId, new HashSet<>());
     }
 }

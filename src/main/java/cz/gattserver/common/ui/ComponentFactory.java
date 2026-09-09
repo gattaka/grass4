@@ -165,6 +165,12 @@ public class ComponentFactory {
         return createGridSingleButton(this::createEditButton, clickListener, grid);
     }
 
+    public Button createExplicitLinkButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
+        Button btn = new Button("Veřejný link", clickListener);
+        btn.setIcon(VaadinIcon.SHARE.create());
+        return btn;
+    }
+
     public Button createHideButton(ComponentEventListener<ClickEvent<Button>> clickListener) {
         Button btn = new Button("Skrýt", clickListener);
         btn.setIcon(VaadinIcon.EYE_SLASH.create());
@@ -507,6 +513,26 @@ public class ComponentFactory {
         return layout;
     }
 
+    public void createHiddenSymbols(Div div, boolean hidden, boolean hiddenByParent) {
+        if (hidden) {
+            div.add(" (");
+            Icon icon = VaadinIcon.EYE_SLASH.create();
+            icon.setColor("#7f7f7f");
+            div.add(icon);
+            div.add(")");
+        }
+        if (hiddenByParent) {
+            div.add(" (");
+            Icon icon = VaadinIcon.ANGLE_DOUBLE_DOWN.create();
+            icon.setColor("#7f7f7f");
+            div.add(icon);
+            icon = VaadinIcon.EYE_SLASH.create();
+            icon.setColor("#7f7f7f");
+            div.add(icon);
+            div.add(")");
+        }
+    }
+
     /*
      * Dialogy
      */
@@ -550,23 +576,4 @@ public class ComponentFactory {
         return Locale.forLanguageTag("cs-CZ");
     }
 
-    public void createHiddenSymbols(Div div, boolean hidden, boolean hiddenByParent) {
-        if (hidden) {
-            div.add(" (");
-            Icon icon = VaadinIcon.EYE_SLASH.create();
-            icon.setColor("#7f7f7f");
-            div.add(icon);
-            div.add(")");
-        }
-        if (hiddenByParent) {
-            div.add(" (");
-            Icon icon = VaadinIcon.ANGLE_DOUBLE_DOWN.create();
-            icon.setColor("#7f7f7f");
-            div.add(icon);
-            icon = VaadinIcon.EYE_SLASH.create();
-            icon.setColor("#7f7f7f");
-            div.add(icon);
-            div.add(")");
-        }
-    }
 }

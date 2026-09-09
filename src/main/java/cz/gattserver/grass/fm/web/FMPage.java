@@ -1,7 +1,6 @@
 package cz.gattserver.grass.fm.web;
 
 import com.vaadin.flow.component.UI;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.ColumnTextAlign;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.Grid.Column;
@@ -22,9 +21,9 @@ import com.vaadin.flow.server.streams.DownloadHandler;
 import com.vaadin.flow.server.streams.DownloadResponse;
 import com.vaadin.flow.server.streams.UploadHandler;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.ui.CopyTextDialog;
 import cz.gattserver.common.ui.NameDialog;
 import cz.gattserver.common.util.CZAmountFormatter;
-import cz.gattserver.common.vaadin.HtmlDiv;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.common.vaadin.dialogs.DownloadDialog;
 import cz.gattserver.common.vaadin.dialogs.WebDialog;
@@ -237,25 +236,8 @@ public class FMPage extends Div implements HasUrlParameter<String>, BeforeEnterO
                 .setFlexGrow(0).setSortProperty("size");
 
         grid.addColumn(new ComponentRenderer<>(to -> {
-            Div button = componentFactory.createInlineButton("URL", e -> {
-                Dialog ww = new Dialog();
-                String id = UUID.randomUUID().toString();
-                String checkId = "check-" + id;
-                HtmlDiv text = new HtmlDiv(
-                        "<input style=\"width: inherit\" id=\"" + id + "\" value=\"" + getDownloadLink(to) + "\"/>" +
-                                "<br/><span id=\"" + checkId + "\" onload=''></span>");
-                text.getStyle().set("width", "400px").set("text-align", "center").set("line-height", "30px")
-                        .set("color", "dodgerblue").set("font-weight", "bold");
-                ww.add(text);
-                ww.open();
-
-                // musí mít mírný timeout, jinak bude referencovat ještě
-                // nevykreslený element a dotaz podle ID bude null
-                UI.getCurrent().getPage().executeJs(
-                        "setTimeout(function(){" + "document.getElementById(\"" + id + "\").select(); " +
-                                "if (document.execCommand(\"copy\")) { " + "document.getElementById(\"" + checkId +
-                                "\").innerHTML = \"URL zkopírováno do schránky\";" + "}" + "},10)");
-            });
+            Div button =
+                    componentFactory.createInlineButton("URL", e -> new CopyTextDialog(getDownloadLink(to)).open());
             button.setVisible(!to.directory());
             return button;
         })).setHeader("URL").setTextAlign(ColumnTextAlign.CENTER).setWidth("50px").setFlexGrow(0);

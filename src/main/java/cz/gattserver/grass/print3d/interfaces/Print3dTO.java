@@ -15,6 +15,7 @@ import java.util.Set;
 public class Print3dTO implements ContentNodeBaseTO {
 
     private final Long id;
+    private final String contentReaderId;
     private final Long contentNodeId;
     private final String name;
     private final Long parentId;
@@ -32,10 +33,10 @@ public class Print3dTO implements ContentNodeBaseTO {
     private final String projectDir;
 
     @QueryProjection
-    public Print3dTO(Long id, Long contentNodeId, String name, Long parentId, String parentName,
+    public Print3dTO(Long id, String contentReaderId,Long contentNodeId, String name, Long parentId, String parentName,
                      LocalDateTime creationDate, LocalDateTime lastModificationDate, Long authorId, String authorName,
                      boolean hidden, boolean hiddenByParent, boolean draft, Long draftSourceId, String projectDir) {
-        this(id, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate, authorId, authorName,
+        this(id, contentReaderId, contentNodeId, name, parentId, parentName, creationDate, lastModificationDate, authorId, authorName,
                 hidden, hiddenByParent, draft, draftSourceId, new LinkedHashSet<>(), projectDir);
     }
 }

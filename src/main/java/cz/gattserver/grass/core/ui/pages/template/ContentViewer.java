@@ -12,9 +12,12 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.router.RouterLink;
 import cz.gattserver.common.spring.SpringContextHelper;
 import cz.gattserver.common.ui.ComponentFactory;
+import cz.gattserver.common.ui.CopyTextDialog;
 import cz.gattserver.common.vaadin.ImageIcon;
 import cz.gattserver.grass.core.interfaces.ContentNodeBaseTO;
 import cz.gattserver.grass.core.interfaces.NodeTO;
+import cz.gattserver.grass.core.modules.ContentModule;
+import cz.gattserver.grass.core.modules.register.ModuleRegister;
 import cz.gattserver.grass.core.services.*;
 import cz.gattserver.grass.core.ui.pages.NodePage;
 import cz.gattserver.grass.core.ui.pages.TagPage;
@@ -35,13 +38,20 @@ import cz.gattserver.common.server.URLIdentifierUtils;
 import cz.gattserver.common.vaadin.Strong;
 import cz.gattserver.common.vaadin.Breakline;
 import cz.gattserver.common.vaadin.HtmlSpan;
+import cz.gattserver.grass.core.ui.util.UIUtils;
+import lombok.Getter;
 
 public class ContentViewer extends Div {
+
+    @Serial
+    private static final long serialVersionUID = 284029288803927369L;
 
     private final UserService userService;
     private final SecurityService securityService;
     private final CoreACLService coreACLService;
     private final NodeService nodeService;
+    private final ModuleRegister moduleRegister;
+    private final ContentNodeService contentNodeService;
 
     private final ContentNodeBaseTO contentNodeTO;
     private final H2 contentNameLabel;
@@ -49,6 +59,7 @@ public class ContentViewer extends Div {
     private final Span contentCreationDateNameLabel;
     private final Span contentLastModificationDateLabel;
     private final Div tagsListLayout;
+    @Getter
     private final Div operationsListLayout;
 
     private Button removeFromFavouritesButton;
@@ -65,6 +76,8 @@ public class ContentViewer extends Div {
         this.userService = SpringContextHelper.getBean(UserService.class);
         this.coreACLService = SpringContextHelper.getBean(CoreACLService.class);
         this.nodeService = SpringContextHelper.getBean(NodeService.class);
+        this.moduleRegister = SpringContextHelper.getBean(ModuleRegister.class);
+        this.contentNodeService = SpringContextHelper.getBean(ContentNodeService.class);
 
         this.contentLink = contentLink;
         this.contentNodeTO = contentNodeTO;
@@ -125,8 +138,21 @@ public class ContentViewer extends Div {
                                            Consumer<ClickEvent<Button>> onDeleteOperation) {
         ComponentFactory componentFactory = new ComponentFactory();
 
-        // Upravit
+        // Vystavení explicitního linku a Upravit
         if (coreACLService.canModifyContent(contentNodeTO, securityService.getCurrentUser())) {
+            Button linkBtn = componentFactory.createExplicitLinkButton(e -> {
+                ContentModule contentModule =
+                        moduleRegister.getContentModulesByName(contentNodeTO.getContentReaderId());
+                String explicitAccessHash = contentNodeService.createExplicitAccessHash(
+                        contentModule.getContentViewerPageFactory().getPageName(), contentNodeTO.getId());
+                // ano, předává se contentId (id v rámci služby obsahu) ne obecné id, protože součástí linku je id služby
+                String link = URLIdentifierUtils.createURLIdentifier(contentNodeTO.getId(), contentNodeTO.getName(),
+                        explicitAccessHash);
+                String url = UIUtils.getPageURL(contentModule.getContentViewerPageFactory(), link);
+                new CopyTextDialog(UIUtils.getURLBase() + url).open();
+            });
+            operationsListLayout.add(linkBtn);
+
             Button modBtn = componentFactory.createEditButton(onEditOperation::accept);
             operationsListLayout.add(modBtn);
         }
@@ -184,10 +210,6 @@ public class ContentViewer extends Div {
             Button delBtn = componentFactory.createDeleteButton(onDeleteOperation::accept);
             operationsListLayout.add(delBtn);
         }
-    }
-
-    public Div getOperationsListLayout() {
-        return operationsListLayout;
     }
 
     private void createLeftColumnContent(Div leftContentLayout) {
@@ -252,19 +274,12 @@ public class ContentViewer extends Div {
 
 
     private void updateBreadcrumb(ContentNodeBaseTO content) {
-
         // pokud zjistím, že cesta neodpovídá, vyhodím 302 (přesměrování) na
         // aktuální polohu cílové kategorie
         List<Breadcrumb.BreadcrumbElement> breadcrumbElements = new ArrayList<>();
 
-        /**
-         * obsah
-         */
         breadcrumbElements.add(new Breadcrumb.BreadcrumbElement(contentLink));
 
-        /**
-         * kategorie
-         */
         NodeTO parent = nodeService.getNodeById(content.getParentId());
         while (true) {
 

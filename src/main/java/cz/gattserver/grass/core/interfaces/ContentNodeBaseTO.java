@@ -5,6 +5,12 @@ import java.util.Collection;
 
 public interface ContentNodeBaseTO {
 
+    Long getId();
+
+    Long getContentNodeId();
+
+    String getContentReaderId();
+
     String getName();
 
     Long getParentId();
@@ -26,8 +32,6 @@ public interface ContentNodeBaseTO {
     boolean isDraft();
 
     Long getDraftSourceId();
-
-    Long getContentNodeId();
 
     Collection<ContentTagTO> getContentTags();
 }
