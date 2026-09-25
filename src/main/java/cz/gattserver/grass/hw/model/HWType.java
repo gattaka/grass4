@@ -32,8 +32,4 @@ public class HWType {
 	 */
 	private String name;
 
-	public HWType(String name) {
-		this.name = name;
-	}
-
 }

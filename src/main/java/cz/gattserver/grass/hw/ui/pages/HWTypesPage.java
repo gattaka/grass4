@@ -3,6 +3,7 @@ package cz.gattserver.grass.hw.ui.pages;
 import com.querydsl.core.types.OrderSpecifier;
 import com.vaadin.flow.component.ClientCallable;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.Unit;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.HeaderRow;
@@ -34,172 +35,181 @@ import java.util.*;
 @Route(value = "hw-types", layout = MainView.class)
 public class HWTypesPage extends Div implements HasUrlParameter<String> {
 
-    @Serial
-    private static final long serialVersionUID = 3559290784942690680L;
+	@Serial
+	private static final long serialVersionUID = 3559290784942690680L;
 
-    private static final String ID_QUERY_TOKEN = "id";
-    private static final String NAME_QUERY_TOKEN = "name";
+	private static final String ID_QUERY_TOKEN = "id";
+	private static final String NAME_QUERY_TOKEN = "name";
 
-    private static final String NAME_BIND = "nameBind";
-    private static final String COUNT_BIND = "countBind";
+	private static final String NAME_BIND = "nameBind";
+	private static final String COUNT_BIND = "countBind";
 
-    private final HWService hwService;
+	private final HWService hwService;
 
-    private Grid<HWTypeTO> grid;
-    private HWTypeTO filterTO;
+	private Grid<HWTypeTO> grid;
+	private HWTypeTO filterTO;
 
-    private TextField nameField;
-    private final Map<Long, Integer> indexMap = new HashMap<>();
+	private TextField nameField;
+	private final Map<Long, Integer> indexMap = new HashMap<>();
 
-    public HWTypesPage(HWService hwService, SecurityService securityService) {
-        this.hwService = hwService;
+	public HWTypesPage(HWService hwService, SecurityService securityService) {
+		this.hwService = hwService;
 
-        if (!securityService.getCurrentUser().isAdmin()) throw new GrassPageException(403);
-    }
+		if (!securityService.getCurrentUser().isAdmin())
+			throw new GrassPageException(403);
+	}
 
-    @Override
-    public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
-        removeAll();
-        ComponentFactory componentFactory = new ComponentFactory();
+	@Override
+	public void setParameter(BeforeEvent event, @OptionalParameter String parameter) {
+		removeAll();
+		ComponentFactory componentFactory = new ComponentFactory();
 
-        Div layout = componentFactory.createOneColumnLayout();
-        add(layout);
+		Div layout = componentFactory.createOneColumnLayout();
+		add(layout);
 
-        layout.add(HWUIUtils.createNavigationLayout());
+		layout.add(HWUIUtils.createNavigationLayout());
 
-        filterTO = new HWTypeTO();
+		filterTO = new HWTypeTO();
 
-        // Tabulka HW
-        grid = new Grid<>() {
-            @Serial
-            private static final long serialVersionUID = -5922981806556552421L;
+		// Tabulka HW
+		grid = new Grid<>() {
+			@Serial
+			private static final long serialVersionUID = -5922981806556552421L;
 
-            @AllowInert
-            @ClientCallable
-            private void scrollToId(Long id) {
-                onGridScrollToId(id);
-            }
-        };
-        grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
-        UIUtils.applyGrassDefaultStyle(grid);
+			@AllowInert
+			@ClientCallable
+			private void scrollToId(Long id) {
+				onGridScrollToId(id);
+			}
+		};
+		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
+		UIUtils.applyGrassDefaultStyle(grid);
 
-        grid.addColumn(HWTypeTO::getCount).setHeader("Počet").setSortable(true).setKey(COUNT_BIND).setWidth("100px")
-                .setFlexGrow(0);
-        Grid.Column<HWTypeTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
-            HWFilterTO filter = new HWFilterTO();
-            Set<String> types = new LinkedHashSet<>();
-            types.add(to.getName());
-            filter.setTypes(types);
-            Map<String, String> params = HWItemsGrid.processFilterToQuery(filter);
-            QueryParameters queryParams = QueryParameters.simple(params);
-            return componentFactory.createAnchor(to.getName(), e -> {
-                Map<String, String> replaceParams = new HashMap<>();
-                replaceParams.put(ID_QUERY_TOKEN, to.getId().toString());
-                if (nameField.getValue() != null) replaceParams.put(NAME_QUERY_TOKEN, nameField.getValue());
-                String replaceURL = RouteConfiguration.forSessionScope().getUrl(HWTypesPage.class);
-                UI.getCurrent().getPage().getHistory()
-                        .replaceState(null, replaceURL + "?" + QueryParameters.simple(replaceParams).getQueryString());
-                UI.getCurrent().navigate(HWItemsPage.class, queryParams);
-            }, e -> {
-                String query = queryParams.getQueryString();
-                String url = RouteConfiguration.forSessionScope().getUrl(HWItemsPage.class) + "?" + query;
-                UI.getCurrent().getPage().open(url, "_blank");
-            });
-        })).setHeader("Název").setSortable(true).setKey(NAME_BIND).setFlexGrow(1);
-        grid.setWidthFull();
-        grid.setHeight("500px");
-        grid.setSelectionMode(Grid.SelectionMode.SINGLE);
+		grid.addColumn(HWTypeTO::getId).setHeader("Id").setSortable(true).setWidth("100px")
+				.setFlexGrow(0);
+		grid.addColumn(HWTypeTO::getCount).setHeader("Počet").setSortable(true).setKey(COUNT_BIND).setWidth("100px")
+				.setFlexGrow(0);
+		Grid.Column<HWTypeTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
+			HWFilterTO filter = new HWFilterTO();
+			Set<String> types = new LinkedHashSet<>();
+			types.add(to.getName());
+			filter.setTypes(types);
+			Map<String, String> params = HWItemsGrid.processFilterToQuery(filter);
+			QueryParameters queryParams = QueryParameters.simple(params);
+			return componentFactory.createAnchor(to.getName(), e -> {
+				Map<String, String> replaceParams = new HashMap<>();
+				replaceParams.put(ID_QUERY_TOKEN, to.getId().toString());
+				if (nameField.getValue() != null)
+					replaceParams.put(NAME_QUERY_TOKEN, nameField.getValue());
+				String replaceURL = RouteConfiguration.forSessionScope().getUrl(HWTypesPage.class);
+				UI.getCurrent().getPage().getHistory()
+						.replaceState(null, replaceURL + "?" + QueryParameters.simple(replaceParams).getQueryString());
+				UI.getCurrent().navigate(HWItemsPage.class, queryParams);
+			}, e -> {
+				String query = queryParams.getQueryString();
+				String url = RouteConfiguration.forSessionScope().getUrl(HWItemsPage.class) + "?" + query;
+				UI.getCurrent().getPage().open(url, "_blank");
+			});
+		})).setHeader("Název").setSortable(true).setKey(NAME_BIND).setFlexGrow(1);
+		grid.setWidthFull();
+		grid.setHeight(500, Unit.PIXELS);
+		grid.setSelectionMode(Grid.SelectionMode.SINGLE);
 
-        HeaderRow filteringHeader = grid.appendHeaderRow();
+		grid.addItemDoubleClickListener(e -> openEditDialog(e.getItem().getId()));
 
-        // Název
-        nameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
-            filterTO.setName(e.getValue());
-            populate();
-        });
+		HeaderRow filteringHeader = grid.appendHeaderRow();
 
-        layout.add(grid);
+		// Název
+		nameField = UIUtils.addHeaderTextField(filteringHeader.getCell(nameColumn), e -> {
+			filterTO.setName(e.getValue());
+			populate();
+		});
 
-        Div buttonLayout = componentFactory.createButtonLayout();
-        layout.add(buttonLayout);
+		layout.add(grid);
 
-        Button newTypeBtn = componentFactory.createCreateButton(e -> openCreateDialog());
-        buttonLayout.add(newTypeBtn);
-        buttonLayout.add(componentFactory.createEditGridButton(item -> openEditDialog(item.getId()), grid));
-        buttonLayout.add(componentFactory.createDeleteGridButton(item -> {
-            try {
-                hwService.deleteHWType(item.getId());
-                populate();
-            } catch (Exception ex) {
-                new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
-            }
-        }, grid));
+		Div buttonLayout = componentFactory.createButtonLayout();
+		layout.add(buttonLayout);
 
-        QueryParameters params = event.getLocation().getQueryParameters();
-        Map<String, List<String>> parametersMap = params.getParameters();
-        HWFilterTO filterTO = new HWFilterTO();
-        if (parametersMap.containsKey(ID_QUERY_TOKEN))
-            filterTO.setId(Long.parseLong(parametersMap.get(ID_QUERY_TOKEN).getFirst()));
-        if (parametersMap.containsKey(NAME_QUERY_TOKEN))
-            filterTO.setName(parametersMap.get(NAME_QUERY_TOKEN).getFirst());
-        setFilterTO(filterTO);
+		Button newTypeBtn = componentFactory.createCreateButton(e -> openCreateDialog());
+		buttonLayout.add(newTypeBtn);
+		buttonLayout.add(componentFactory.createEditGridButton(item -> openEditDialog(item.getId()), grid));
+		buttonLayout.add(componentFactory.createDeleteGridButton(item -> {
+			try {
+				hwService.deleteHWType(item.getId());
+				populate();
+			} catch (Exception ex) {
+				new ErrorDialog("Nezdařilo se smazat vybranou položku").open();
+			}
+		}, grid));
 
-        populate();
+		QueryParameters params = event.getLocation().getQueryParameters();
+		Map<String, List<String>> parametersMap = params.getParameters();
+		HWFilterTO filterTO = new HWFilterTO();
+		if (parametersMap.containsKey(ID_QUERY_TOKEN))
+			filterTO.setId(Long.parseLong(parametersMap.get(ID_QUERY_TOKEN).getFirst()));
+		if (parametersMap.containsKey(NAME_QUERY_TOKEN))
+			filterTO.setName(parametersMap.get(NAME_QUERY_TOKEN).getFirst());
+		setFilterTO(filterTO);
 
-        if (filterTO.getId() != null) selectAndScroll(filterTO.getId());
-    }
+		populate();
 
-    public void setFilterTO(HWFilterTO filterTO) {
-        if (filterTO.getName() != null) nameField.setValue(filterTO.getName());
-    }
+		if (filterTO.getId() != null)
+			selectAndScroll(filterTO.getId());
+	}
 
-    private void onGridScrollToId(Long id) {
-        Integer index = indexMap.get(id);
-        if (index != null) grid.scrollToIndex(index);
-    }
+	public void setFilterTO(HWFilterTO filterTO) {
+		if (filterTO.getName() != null)
+			nameField.setValue(filterTO.getName());
+	}
 
-    public void selectAndScroll(Long id) {
-        grid.select(new HWTypeTO(id));
-        grid.getElement().callJsFunction("$server.scrollToId", id.toString());
-    }
+	private void onGridScrollToId(Long id) {
+		Integer index = indexMap.get(id);
+		if (index != null)
+			grid.scrollToIndex(index);
+	}
 
-    private void populate() {
-        CallbackDataProvider.FetchCallback<HWTypeTO, HWTypeTO> fetchCallback = q -> {
-            OrderSpecifier<?>[] order = QuerydslUtil.transformOrdering(q.getSortOrders(), column -> switch (column) {
-                case NAME_BIND -> "name";
-                case COUNT_BIND -> "count";
-                default -> column;
-            });
-            if (order.length == 0) {
-                order = new OrderSpecifier[1];
-                order[0] = QuerydslUtil.transformOrder(true, "name");
-            }
+	public void selectAndScroll(Long id) {
+		grid.select(new HWTypeTO(id));
+		grid.getElement().callJsFunction("$server.scrollToId", id.toString());
+	}
 
-            // potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
-            // jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
-            List<Long> ids = hwService.findHWTypeIds(filterTO, order);
-            int index = 0;
-            for (Long id : ids)
-                indexMap.put(id, index++);
-            return hwService.findHWTypes(filterTO, q.getOffset(), q.getLimit(), order).stream();
-        };
-        CallbackDataProvider.CountCallback<HWTypeTO, HWTypeTO> countCallback = q -> hwService.countHWTypes(filterTO);
-        grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
-    }
+	private void populate() {
+		CallbackDataProvider.FetchCallback<HWTypeTO, HWTypeTO> fetchCallback = q -> {
+			OrderSpecifier<?>[] order = QuerydslUtil.transformOrdering(q.getSortOrders(), column -> switch (column) {
+				case NAME_BIND -> "name";
+				case COUNT_BIND -> "count";
+				default -> column;
+			});
+			if (order.length == 0) {
+				order = new OrderSpecifier[1];
+				order[0] = QuerydslUtil.transformOrder(true, "name");
+			}
 
-    private void openCreateDialog() {
-        HWTypeEditDialog.create(to -> {
-            hwService.saveHWType(to);
-            grid.getDataProvider().refreshItem(to);
-            populate();
-        }).open();
-    }
+			// potřebuju všechny Id, aby šlo poslepu volat scroll i tam, kde jsem ještě nebyl,
+			// jinak bude scroll házet na indexMap NPE, protože jeho id ještě nemusí být naindexované
+			List<Long> ids = hwService.findHWTypeIds(filterTO, order);
+			int index = 0;
+			for (Long id : ids)
+				indexMap.put(id, index++);
+			return hwService.findHWTypes(filterTO, q.getOffset(), q.getLimit(), order).stream();
+		};
+		CallbackDataProvider.CountCallback<HWTypeTO, HWTypeTO> countCallback = q -> hwService.countHWTypes(filterTO);
+		grid.setDataProvider(DataProvider.fromFilteringCallbacks(fetchCallback, countCallback));
+	}
 
-    private void openEditDialog(Long id) {
-        HWTypeEditDialog.edit(hwService.findHWType(id), to -> {
-            hwService.saveHWType(to);
-            grid.getDataProvider().refreshItem(to);
-            populate();
-        }).open();
-    }
+	private void openCreateDialog() {
+		HWTypeEditDialog.create(to -> {
+			hwService.saveHWType(to);
+			grid.getDataProvider().refreshItem(to);
+			populate();
+		}).open();
+	}
+
+	private void openEditDialog(Long id) {
+		HWTypeEditDialog.edit(hwService.findHWType(id), to -> {
+			hwService.saveHWType(to);
+			grid.getDataProvider().refreshItem(to);
+			populate();
+		}).open();
+	}
 }
