@@ -16,12 +16,12 @@ public class HWTypeTokenTO {
 	/**
 	 * Identifikátor hw
 	 */
-    @EqualsAndHashCode.Include
 	private Long id;
 
 	/**
 	 * Název
 	 */
+	@EqualsAndHashCode.Include
 	private String name;
 
 	public HWTypeTokenTO(String name) {
