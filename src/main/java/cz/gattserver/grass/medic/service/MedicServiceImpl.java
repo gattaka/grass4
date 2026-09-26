@@ -153,6 +153,11 @@ public class MedicServiceImpl implements MedicService {
         return to;
     }
 
+    @Override
+    public Long getInstitutionLastRecordId(Long institutionId) {
+        return medicalRecordRepository.findInstitutionLastRecordId(institutionId);
+    }
+
     // Medikamenty
 
     @Override

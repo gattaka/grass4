@@ -69,4 +69,9 @@ public class MedicalRecordRepositoryCustomImpl extends QuerydslRepositorySupport
                 // select
                 .select(m.id).fetch());
     }
+
+    @Override
+    public Long findInstitutionLastRecordId(Long institutionId) {
+        return from(r).where(r.institutionId.eq(institutionId)).select(r.id).orderBy(r.id.desc()).fetchFirst();
+    }
 }

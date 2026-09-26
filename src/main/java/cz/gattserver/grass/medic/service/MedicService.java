@@ -43,6 +43,8 @@ public interface MedicService {
 
 	MedicalRecordTO getMedicalRecordById(Long id);
 
+	Long getInstitutionLastRecordId(Long institutionId);
+
 	// Medikamenty
 
 	void deleteMedicament(Long id);

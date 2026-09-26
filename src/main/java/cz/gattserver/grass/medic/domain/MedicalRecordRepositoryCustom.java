@@ -15,4 +15,6 @@ public interface MedicalRecordRepositoryCustom {
     MedicalRecordTO findAndMapById(Long id);
 
     Set<Long> findMedicamentsByRecordId(Long id);
+
+	Long findInstitutionLastRecordId(Long institutionId);
 }
