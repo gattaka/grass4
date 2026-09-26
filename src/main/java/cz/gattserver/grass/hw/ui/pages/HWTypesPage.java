@@ -85,8 +85,6 @@ public class HWTypesPage extends Div implements HasUrlParameter<String> {
 		grid.addClassName(UIUtils.TOP_MARGIN_CSS_CLASS);
 		UIUtils.applyGrassDefaultStyle(grid);
 
-		grid.addColumn(HWTypeTO::getId).setHeader("Id").setSortable(true).setWidth("100px")
-				.setFlexGrow(0);
 		grid.addColumn(HWTypeTO::getCount).setHeader("Počet").setSortable(true).setKey(COUNT_BIND).setWidth("100px")
 				.setFlexGrow(0);
 		Grid.Column<HWTypeTO> nameColumn = grid.addColumn(new ComponentRenderer<>(to -> {
