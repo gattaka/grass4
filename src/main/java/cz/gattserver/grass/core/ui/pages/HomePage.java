@@ -69,8 +69,6 @@ public class HomePage extends Div {
         this.contentTagService = contentTagService;
         this.nodeService = nodeService;
 
-        VaadinSession.getCurrent().setErrorHandler(new ApplicationErrorHandler());
-
         ComponentFactory componentFactory = new ComponentFactory();
         Div layout = componentFactory.createOneColumnLayout();
         add(layout);
