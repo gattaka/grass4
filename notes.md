@@ -1,2 +1,2 @@
-- pro sonarqube je potřeba v maven settings.xml mít: <code><pluginGroup>
-  org.sonarsource.scanner.maven</pluginGroup></code>
+- pro sonarqube je potřeba v maven settings.xml mít: <code><pluginGroup>org.sonarsource.scanner.maven</pluginGroup></code>
+- vaadin odmítá místy aktualizovat frontend CSS při prod build, je potřeba vynutit <code>mvn clean package -Pprod -Dvaadin.force.production.build=true</code>
