@@ -452,12 +452,16 @@
                 <version>0.8.14</version>
                 <executions>
                     <execution>
-                        <goals><goal>prepare-agent</goal></goals>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
                     </execution>
                     <execution>
                         <id>report</id>
                         <phase>test</phase>
-                        <goals><goal>report</goal></goals>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -516,6 +520,10 @@
                                 <goals>
                                     <goal>build-frontend</goal>
                                 </goals>
+                                <configuration>
+                                    <!-- Je potřeba, protože občas se nazapracuje @import CSS-->
+                                    <forceProductionBuild>true</forceProductionBuild>
+                                </configuration>
                                 <phase>compile</phase>
                             </execution>
                         </executions>
