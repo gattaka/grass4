@@ -83,7 +83,7 @@ public class NodePage extends Div implements HasUrlParameter<String>, HasDynamic
         nodeTO = nodeService.getNodeById(identifier.id(), identifier.hash());
         if (nodeTO == null) throw new GrassPageException(404);
 
-        explicitAccess = identifier.hash() != null &&identifier.hash().getBytes(StandardCharsets.UTF_8).length == 256;
+        explicitAccess = identifier.hash() != null;
 
         // Navigační breadcrumb
         createBreadcrumb(layout);
