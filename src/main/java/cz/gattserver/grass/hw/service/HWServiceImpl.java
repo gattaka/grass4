@@ -82,7 +82,6 @@ public class HWServiceImpl implements HWService {
 	 * Získá {@link Path} dle jména adresáře HW položky
 	 *
 	 * @param id id HW položky
-	 * @return {@link Path} adresář galerie
 	 * @throws IllegalStateException    pokud neexistuje kořenový adresář HW -- chyba nastavení modulu HW
 	 * @throws IllegalArgumentException pokud předaný adresář podtéká kořen modulu HW
 	 */
