@@ -3,6 +3,7 @@ package cz.gattserver.grass.medic.interfaces;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.querydsl.core.annotations.QueryProjection;
@@ -10,7 +11,11 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import cz.gattserver.common.Identifiable;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class MedicalRecordTO implements Identifiable<Long> {
 
     private Long id;
@@ -47,11 +52,12 @@ public class MedicalRecordTO implements Identifiable<Long> {
      */
     private Set<Long> medicaments = new HashSet<>();
 
-    public MedicalRecordTO() {
-    }
+    /**
+     * Zprávy
+     */
+    private Set<ReportFileTO> files = new HashSet<>();
 
-    public MedicalRecordTO(Long id) {
-        this.id = id;
+    public MedicalRecordTO() {
     }
 
     @QueryProjection
@@ -76,62 +82,6 @@ public class MedicalRecordTO implements Identifiable<Long> {
         this.id = id;
     }
 
-    public Long getInstitutionId() {
-        return institutionId;
-    }
-
-    public void setInstitutionId(Long institutionId) {
-        this.institutionId = institutionId;
-    }
-
-    public Long getPhysicianId() {
-        return physicianId;
-    }
-
-    public void setPhysicianId(Long physicianId) {
-        this.physicianId = physicianId;
-    }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public String getRecord() {
-        return record;
-    }
-
-    public void setRecord(String record) {
-        this.record = record;
-    }
-
-    public Set<Long> getMedicaments() {
-        return medicaments;
-    }
-
-    public void setMedicaments(Set<Long> medicaments) {
-        this.medicaments = medicaments;
-    }
-
-    public String getInstitutionName() {
-        return institutionName;
-    }
-
-    public void setInstitutionName(String institutionName) {
-        this.institutionName = institutionName;
-    }
-
-    public String getPhysicianName() {
-        return physicianName;
-    }
-
-    public void setPhysicianName(String physicianName) {
-        this.physicianName = physicianName;
-    }
-
     @Override
     public String toString() {
         return dateTime.format(DateTimeFormatter.ofPattern("d. M. yyyy HH:mm")) + " " + getPhysicianName();
@@ -139,10 +89,9 @@ public class MedicalRecordTO implements Identifiable<Long> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof MedicalRecordTO) {
-            MedicalRecordTO dto = (MedicalRecordTO) obj;
-            if (dto.getId() == null) return id == null;
-            else return dto.getId().equals(id);
+        if (obj instanceof MedicalRecordTO to) {
+			if (to.getId() == null) return id == null;
+            else return to.getId().equals(id);
         }
         return false;
     }
@@ -157,7 +106,7 @@ public class MedicalRecordTO implements Identifiable<Long> {
                 new MedicalRecordTO(id, institutionId, institutionName, physicianId, physicianName, dateTime, record);
         to.medicaments = new HashSet<>();
         if (medicaments != null) to.medicaments.addAll(medicaments);
+        if (files != null) to.files.addAll(files);
         return to;
     }
-
 }

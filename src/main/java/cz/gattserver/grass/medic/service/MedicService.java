@@ -1,5 +1,8 @@
 package cz.gattserver.grass.medic.service;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Set;
 
@@ -45,6 +48,8 @@ public interface MedicService {
 
 	Long getInstitutionLastRecordId(Long institutionId);
 
+	Set<ReportFileTO> getMedicalRecordReports(Long recordId);
+
 	// Medikamenty
 
 	void deleteMedicament(Long id);
@@ -57,7 +62,7 @@ public interface MedicService {
 
 	MedicamentTO getMedicamentById(Long id);
 
-    boolean isMedicamentUsed(Long id);
+	boolean isMedicamentUsed(Long id);
 
 	// Doktoři
 
@@ -65,7 +70,7 @@ public interface MedicService {
 
 	List<PhysicianTO> getPhysicians(PhysicianTO filterTO);
 
-    List<PhysicianTO> getPhysicians();
+	List<PhysicianTO> getPhysicians();
 
 	void savePhysician(PhysicianTO to);
 
