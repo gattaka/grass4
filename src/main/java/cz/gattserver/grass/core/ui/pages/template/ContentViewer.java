@@ -140,6 +140,9 @@ public class ContentViewer extends Div {
 
         // Vystavení explicitního linku a Upravit
         if (coreACLService.canModifyContent(contentNodeTO, securityService.getCurrentUser())) {
+            Button modBtn = componentFactory.createEditButton(onEditOperation::accept);
+            operationsListLayout.add(modBtn);
+
             Button linkBtn = componentFactory.createExplicitLinkButton(e -> {
                 ContentModule contentModule =
                         moduleRegister.getContentModulesByName(contentNodeTO.getContentReaderId());
@@ -152,9 +155,6 @@ public class ContentViewer extends Div {
                 new CopyTextDialog(UIUtils.getURLBase() + url).open();
             });
             operationsListLayout.add(linkBtn);
-
-            Button modBtn = componentFactory.createEditButton(onEditOperation::accept);
-            operationsListLayout.add(modBtn);
         }
 
         // Oblíbené
