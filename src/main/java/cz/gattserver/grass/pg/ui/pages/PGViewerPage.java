@@ -26,7 +26,6 @@ import cz.gattserver.common.vaadin.dialogs.WarnDialog;
 import cz.gattserver.grass.core.events.EventBus;
 import cz.gattserver.grass.core.exception.GrassPageException;
 import cz.gattserver.grass.core.interfaces.ContentTagTO;
-import cz.gattserver.grass.core.interfaces.UserInfoTO;
 import cz.gattserver.grass.core.services.CoreACLService;
 import cz.gattserver.grass.core.services.SecurityService;
 import cz.gattserver.grass.core.ui.components.DefaultContentOperations;
@@ -41,6 +40,7 @@ import cz.gattserver.grass.core.ui.dialogs.ProgressDialog;
 import cz.gattserver.grass.core.ui.pages.template.ContentViewer;
 import cz.gattserver.grass.core.ui.util.UIUtils;
 import cz.gattserver.grass.pg.util.PGUtils;
+import cz.gattserver.grass.songs.ui.SongsPage;
 import net.engio.mbassy.listener.Handler;
 import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
@@ -75,6 +75,7 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
 
     private ProgressDialog progressDialog;
 
+    private URLIdentifierUtils.URLIdentifier urlIdentifier;
     private PhotogalleryTO photogalleryTO;
 
     private int imageCount;
@@ -104,26 +105,28 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
     public void setParameter(BeforeEvent beforeEvent, @WildcardParameter String parameter) {
         String[] chunks = parameter.split("/");
         String identifierToken = null;
-        String pageToken = null;
         if (chunks.length > 0) identifierToken = chunks[0];
-        if (chunks.length > 1) pageToken = chunks[1];
 
-        URLIdentifierUtils.URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
-        if (identifier == null) throw new GrassPageException(404);
+        urlIdentifier = URLIdentifierUtils.parseURLIdentifier(identifierToken);
+        if (urlIdentifier == null) throw new GrassPageException(404);
 
-        photogalleryTO = pgService.findPhotogalleryForDetail(identifier.id(), identifier.hash());
+        photogalleryTO = pgService.findPhotogalleryForDetail(urlIdentifier.id(), urlIdentifier.hash());
         if (photogalleryTO == null) throw new GrassPageException(404);
 
-        boolean explicitAccess = identifier.hash() != null;
+        boolean explicitAccess = urlIdentifier.hash() != null;
 
         galleryDir = photogalleryTO.getPhotogalleryPath();
 
-        if (pageToken != null) {
+        QueryParameters queryParameters = beforeEvent.getLocation().getQueryParameters();
+        Optional<String> pageTokenOpt = queryParameters.getSingleParameter("p");
+        if (pageTokenOpt.isPresent()) {
             try {
-                currentPage = Integer.parseInt(pageToken) - 1;
+                currentPage = Integer.parseInt(pageTokenOpt.get()) - 1;
             } catch (NumberFormatException e) {
                 // nic, neřešit
             }
+        } else {
+            currentPage = 0;
         }
 
         removeAll();
@@ -148,11 +151,6 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
     @Override
     public String getPageTitle() {
         return photogalleryTO.getName();
-    }
-
-    private boolean isAdminOrAuthor() {
-        return securityService.getCurrentUser().isAdmin() ||
-                photogalleryTO.getAuthorId().equals(securityService.getCurrentUser().getId());
     }
 
     protected Div createContent() {
@@ -442,16 +440,16 @@ public class PGViewerPage extends Div implements HasUrlParameter<String>, HasDyn
         if (page == currentPage) return;
         currentPage = page;
         refreshGrid();
+        String url = RouteConfiguration.forSessionScope().getUrl(PGViewerPage.class);
+        UI.getCurrent().getPage().getHistory()
+                .pushState(null, url + "/" + urlIdentifier.toString() + "?p=" + (page + 1));
     }
 
     private void showItem(final int index) {
         Consumer<Integer> pageUpdateListener = currentIndex -> {
             // zajisti posuv přehledu
             int newPage = currentIndex / PAGE_SIZE;
-            if (newPage != currentPage) {
-                currentPage = newPage;
-                refreshGrid();
-            }
+            setPage(newPage);
         };
 
         Function<Integer, PhotogalleryViewItemTO> itemByIndexProvider = i -> currentPageItems.get(i - startIndex);
