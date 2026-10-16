@@ -9,6 +9,8 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class URLIdentifierUtilsTest {
 
+    // Create
+
 	@Test
 	public void testCreateURLIdentifier_basic() {
 		String identifier = URLIdentifierUtils.createURLIdentifier(45L, "test");
@@ -28,19 +30,39 @@ public class URLIdentifierUtilsTest {
 		assertEquals("45-o-prekontne-test-ceskych-dabelskych-mekkych-znacku-a-zlutouckych-ziraf-n-", identifier);
 	}
 
+    // Parse
+
 	@Test
 	public void testParseURLIdentifier_basic() {
 		URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier("45-test");
 		assertEquals(Long.valueOf(45L), identifier.id());
 		assertEquals("test", identifier.name());
+        assertNull(identifier.hash());
 	}
+
+    @Test
+    public void testParseURLIdentifier_basic_dash() {
+        URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier("45-test-");
+        assertEquals(Long.valueOf(45L), identifier.id());
+        assertEquals("test-", identifier.name());
+        assertNull(identifier.hash());
+    }
 
 	@Test
 	public void testParseURLIdentifier_special() {
 		URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier("45-test+WTF%252Fmin");
 		assertEquals(Long.valueOf(45L), identifier.id());
 		assertEquals("test WTF%2Fmin", identifier.name());
+        assertNull(identifier.hash());
 	}
+
+    @Test
+    public void testParseURLIdentifier_multiple() {
+        URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier("1193-cerven-2026-cyklopvyprava-cesky-raj");
+        assertEquals(Long.valueOf(1193L), identifier.id());
+        assertEquals("cerven-2026-cyklopvyprava-cesky-raj", identifier.name());
+        assertNull(identifier.hash());
+    }
 
 	@Test
 	public void testParseURLIdentifier_unicode() {
@@ -48,7 +70,45 @@ public class URLIdentifierUtilsTest {
 				"45-test+%C4%8Desk%C3%BDch+zn%C3%A1%C4%8Dk%C5%AF+a+%C5%BElu%C5%A5ou%C4%8Dk%C3%BDch+%C5%BEiraf+%C5%87%21");
 		assertEquals(Long.valueOf(45L), identifier.id());
 		assertEquals("test českých znáčků a žluťoučkých žiraf Ň!", identifier.name());
+        assertNull(identifier.hash());
 	}
+
+    // Parse + hash
+
+    @Test
+    public void testParseURLIdentifier_basic_hash() {
+        URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier("45-test-5OuCh71SY5LM_1fCt08UZ9shqgsjohVbOaR4ZjdwECs");
+        assertEquals(Long.valueOf(45L), identifier.id());
+        assertEquals("test", identifier.name());
+        assertEquals("5OuCh71SY5LM_1fCt08UZ9shqgsjohVbOaR4ZjdwECs", identifier.hash());
+    }
+
+    @Test
+    public void testParseURLIdentifier_special_hash() {
+        URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier("45-test+WTF%252Fmin-5OuCh71SY5LM_1fCt08UZ9shqgsjohVbOaR4ZjdwECs");
+        assertEquals(Long.valueOf(45L), identifier.id());
+        assertEquals("test WTF%2Fmin", identifier.name());
+        assertEquals("5OuCh71SY5LM_1fCt08UZ9shqgsjohVbOaR4ZjdwECs", identifier.hash());
+    }
+
+    @Test
+    public void testParseURLIdentifier_multiple_hash() {
+        URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier("1193-cerven-2026-cyklopvyprava-cesky-raj-5OuCh71SY5LM_1fCt08UZ9shqgsjohVbOaR4ZjdwECs");
+        assertEquals(Long.valueOf(1193L), identifier.id());
+        assertEquals("cerven-2026-cyklopvyprava-cesky-raj", identifier.name());
+        assertEquals("5OuCh71SY5LM_1fCt08UZ9shqgsjohVbOaR4ZjdwECs", identifier.hash());
+    }
+
+    @Test
+    public void testParseURLIdentifier_unicode_hash() {
+        URLIdentifier identifier = URLIdentifierUtils.parseURLIdentifier(
+                "45-test+%C4%8Desk%C3%BDch+zn%C3%A1%C4%8Dk%C5%AF+a+%C5%BElu%C5%A5ou%C4%8Dk%C3%BDch+%C5%BEiraf+%C5%87%21-5OuCh71SY5LM_1fCt08UZ9shqgsjohVbOaR4ZjdwECs");
+        assertEquals(Long.valueOf(45L), identifier.id());
+        assertEquals("test českých znáčků a žluťoučkých žiraf Ň!", identifier.name());
+        assertEquals("5OuCh71SY5LM_1fCt08UZ9shqgsjohVbOaR4ZjdwECs", identifier.hash());
+    }
+
+    // Parse null result
 
 	@Test
 	public void testParseURLIdentifier_null() {

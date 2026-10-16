@@ -1,6 +1,7 @@
 package cz.gattserver.common.server;
 
 import jakarta.annotation.Nullable;
+import org.jspecify.annotations.NonNull;
 
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -8,10 +9,17 @@ import java.nio.charset.StandardCharsets;
 
 public class URLIdentifierUtils {
 
+    private static final String SEPARATOR = "-";
+
     private URLIdentifierUtils() {
     }
 
     public record URLIdentifier(Long id, String name, String hash) {
+
+        @Override
+        public @NonNull String toString() {
+            return URLIdentifierUtils.createURLIdentifier(id, name, hash);
+        }
     }
 
     private static char transformChars(char c) {
@@ -68,10 +76,10 @@ public class URLIdentifierUtils {
             char c = transformChars(name.charAt(i));
             if (c != 0) sb.append(c);
         }
-        name = sb.toString().replaceAll("[-]+", "-");
+        name = sb.toString().replaceAll("[" + SEPARATOR + "]+", SEPARATOR);
 
-        String value = id + "-" + name;
-        if (explicitAccessHash != null) value = value + "-" + explicitAccessHash;
+        String value = id + SEPARATOR + name;
+        if (explicitAccessHash != null) value = value + SEPARATOR + explicitAccessHash;
 
         String identifier = URLEncoder.encode(value, StandardCharsets.UTF_8);
         // Tomcat má default nastavené ignorovat adresy ve kterých je %2F
@@ -95,8 +103,11 @@ public class URLIdentifierUtils {
         if (identifier == null) return null;
 
         // získej ID
-        String[] parts = identifier.split("-");
+        String[] parts = identifier.split(SEPARATOR);
         if (parts.length <= 1) return null;
+
+        int firstSeparatorIndex = parts[0].length();
+        int lastSeparatorIndex = identifier.lastIndexOf(SEPARATOR);
 
         long id;
         try {
@@ -105,15 +116,17 @@ public class URLIdentifierUtils {
             return null;
         }
 
-        String name = URLDecoder.decode(parts[1], StandardCharsets.UTF_8);
-
         // hash může obsahovat '-', takže parsování dle částí dál už nedává smysl
         String hash = null;
-        if (parts.length > 2 && identifier.lastIndexOf("-") != identifier.length() - 1) {
-            String tryHash = identifier.substring(identifier.lastIndexOf("-") + 1);
+        if (parts.length > 2 && lastSeparatorIndex != identifier.length() - 1) {
+            String tryHash = identifier.substring(lastSeparatorIndex + 1);
             // pokud text není 43 znaků dlouhý, není to určitě kontrolní hash
             if (tryHash.length() == 43) hash = tryHash;
         }
+
+        String name = identifier.substring(firstSeparatorIndex + 1);
+        if (hash != null) name = name.substring(0, name.lastIndexOf(SEPARATOR));
+        name = URLDecoder.decode(name, StandardCharsets.UTF_8);
 
         return new URLIdentifier(id, name, hash);
     }
