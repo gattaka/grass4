@@ -181,7 +181,7 @@ public class SongPage extends Div implements HasUrlParameter<Long> {
     private Path createReportPath(SongTO choosenSong, boolean twoColumn) {
         SongTO s =
                 new SongTO(choosenSong.getId(), choosenSong.getName(), choosenSong.getAuthor(), choosenSong.getYear(),
-                        choosenSong.getText().replaceAll("<br/>", "\n"), choosenSong.getPublicated(),
+                        choosenSong.getText().replace("<br/>", "\n"), choosenSong.getPublicated(),
                         choosenSong.getEmbedded());
         return songsService.print(s, twoColumn);
     }
